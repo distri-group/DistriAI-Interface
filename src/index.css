@@ -1,0 +1,18 @@
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+.ant-btn-primary{
+  background-color: #92d5e1 !important;
+  color:#000!important;
+}
+.ant-btn-primary:hover{
+  background-color: #bae5ee !important;
+}

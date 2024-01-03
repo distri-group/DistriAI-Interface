@@ -1,0 +1,203 @@
+{
+  "version": "0.1.0",
+  "name": "matrix_ai",
+  "instructions": [
+    {
+      "name": "addMachine",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "uuid", "type": { "array": ["u8", 16] } },
+        { "name": "metadata", "type": "string" }
+      ]
+    },
+    {
+      "name": "removeMachine",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "makeOffer",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true }
+      ],
+      "args": [
+        { "name": "price", "type": "u64" },
+        { "name": "maxDuration", "type": "u32" },
+        { "name": "disk", "type": "u32" }
+      ]
+    },
+    {
+      "name": "cancelOffer",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "placeOrder",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "buyer", "isMut": true, "isSigner": true },
+        { "name": "buyerAta", "isMut": true, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "orderId", "type": { "array": ["u8", 16] } },
+        { "name": "duration", "type": "u32" },
+        { "name": "metadata", "type": "string" }
+      ]
+    },
+    {
+      "name": "renewOrder",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "buyer", "isMut": true, "isSigner": true },
+        { "name": "buyerAta", "isMut": true, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "duration", "type": "u32" }]
+    },
+    {
+      "name": "orderCompleted",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "seller", "isMut": true, "isSigner": true },
+        { "name": "sellerAta", "isMut": true, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "metadata", "type": "string" },
+        { "name": "score", "type": "u8" }
+      ]
+    },
+    {
+      "name": "orderFailed",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "seller", "isMut": true, "isSigner": true },
+        { "name": "buyerAta", "isMut": true, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "metadata", "type": "string" }]
+    },
+    {
+      "name": "removeOrder",
+      "accounts": [
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "buyer", "isMut": true, "isSigner": true }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Machine",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "owner", "type": "publicKey" },
+          { "name": "uuid", "type": { "array": ["u8", 16] } },
+          { "name": "metadata", "type": "string" },
+          { "name": "status", "type": { "defined": "MachineStatus" } },
+          { "name": "price", "type": "u64" },
+          { "name": "maxDuration", "type": "u32" },
+          { "name": "disk", "type": "u32" },
+          { "name": "completedCount", "type": "u32" },
+          { "name": "failedCount", "type": "u32" },
+          { "name": "score", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "Order",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "orderId", "type": { "array": ["u8", 16] } },
+          { "name": "buyer", "type": "publicKey" },
+          { "name": "seller", "type": "publicKey" },
+          { "name": "machineId", "type": { "array": ["u8", 16] } },
+          { "name": "price", "type": "u64" },
+          { "name": "duration", "type": "u32" },
+          { "name": "total", "type": "u64" },
+          { "name": "metadata", "type": "string" },
+          { "name": "status", "type": { "defined": "OrderStatus" } }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "MachineStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "Idle" },
+          { "name": "ForRent" },
+          { "name": "Renting" }
+        ]
+      }
+    },
+    {
+      "name": "OrderStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "Training" },
+          { "name": "Completed" },
+          { "name": "Failed" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "MachineEvent",
+      "fields": [
+        { "name": "owner", "type": "publicKey", "index": false },
+        { "name": "uuid", "type": { "array": ["u8", 16] }, "index": false }
+      ]
+    },
+    {
+      "name": "OrderEvent",
+      "fields": [
+        { "name": "orderId", "type": { "array": ["u8", 16] }, "index": false },
+        { "name": "buyer", "type": "publicKey", "index": false },
+        { "name": "seller", "type": "publicKey", "index": false },
+        { "name": "machineId", "type": { "array": ["u8", 16] }, "index": false }
+      ]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "StringTooLong" },
+    { "code": 6001, "name": "IncorrectStatus" },
+    { "code": 6002, "name": "DurationTooMuch" }
+  ]
+}
