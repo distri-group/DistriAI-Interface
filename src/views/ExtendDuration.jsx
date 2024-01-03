@@ -137,7 +137,7 @@ function Home({ className }) {
               <div className="line">
                 <div className="f">
                   <span>Price(per hour)</span>
-                  <span>{deviceDetail.Price} SOL</span>
+                  <span>{deviceDetail.Price} DIST</span>
                 </div>
               </div>
             </div>
@@ -158,13 +158,13 @@ function Home({ className }) {
             />
           </div>
 
-          <div className="right-txt">Balance: {balance} SOL</div>
+          <div className="right-txt">Balance: {balance} DIST</div>
 
           <div className="color-box">
             <div className="row-txt">Total</div>
             <div className="drow">
               <span className="num">{amount}</span>
-              <label>SOL</label>
+              <label>DIST</label>
             </div>
           </div>
           <div className="form-row btn-row">

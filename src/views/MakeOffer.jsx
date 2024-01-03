@@ -131,7 +131,7 @@ function Home({ className }) {
               min={0}
               max={99999}
             />
-            <span className="uni">SOL</span>
+            <span className="uni">DIST</span>
           </div>
           <div className="form-row">
             <div className="row-txt">Max duration</div>
@@ -160,13 +160,25 @@ function Home({ className }) {
           </div>
           <div className="form-row">
             <div className="row-txt drow">
-              <img src="/img/dot.png" style={{ width: "25px" }} />
+              <span
+                style={{
+                  margin: 0,
+                  borderRadius: "100%",
+                  backgroundColor: "white",
+                  backgroundImage: "url('/img/token.png')",
+                  backgroundSize: "70%",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  width: "24px",
+                  height: "24px",
+                }}
+              />
               <span className="num" style={{ fontSize: 28 }}>
                 {inputValues.price}
               </span>
               <label
                 style={{ fontSize: 13, color: "#bbb", fontWeight: "normal" }}>
-                SOL
+                DIST
               </label>
             </div>
           </div>
