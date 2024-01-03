@@ -122,7 +122,6 @@ function Home(props, ref) {
       walletAn.publicKey,
       mint
     );
-    console.log(`Associated Token Account: ${associatedTokenAccount}`);
   };
   // 根据钱包地址和代币地址获取 ata
   const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {
