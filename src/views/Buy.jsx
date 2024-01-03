@@ -4,7 +4,7 @@ import { Input, Button, Progress } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
-import { getLiberyList, getModelList } from "../services/order";
+import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
 import { PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
@@ -12,16 +12,7 @@ import { getPublicKey } from "../services/solana";
 
 let formData = {
   taskName: "",
-  libery: "",
-  model: "",
-  dataUrl: "",
-  iters: "",
-  batchsize: "",
-  rate: "",
   duration: 0,
-  imageName: "",
-  imageTag: "",
-  libType: "lib",
   buyTime: "",
   orderTime: "",
 };
@@ -35,8 +26,7 @@ function Home({ className }) {
   const [balance, setBalance] = useState(0);
   const [popuStatus, setPopuStatus] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
-  const [libType, setLibType] = useState("lib");
-
+  const [index, setIndex] = useState(0);
   const childRef = useRef();
   // 获取余额
   const getTokenBalance = async (mint, address) => {
@@ -78,6 +68,8 @@ function Home({ className }) {
       let addr = await getPublicKey();
       let account = new PublicKey(addr);
       let amount = await getTokenBalance(mint, account);
+      let res = await getOrderList(1, []);
+      setIndex(res.total + 1);
       setBalance(amount / 1000000000);
     };
     getBalance();
@@ -86,42 +78,11 @@ function Home({ className }) {
   // 格式验证
   const valit = () => {
     if (!formData.taskName) {
-      return "Task name is required.";
+      formData.taskName = `Computing Task - ${index}`;
     }
     if (!formData.duration) {
       return "Duration is required.";
     }
-    // if (!formData.dataUrl) {
-    //   return "DATA uploading link is required.";
-    // }
-    // if (amount == 0) {
-    //   return "Payment token greater than 0.";
-    // }
-    // if (libType === "lib") {
-    //   if (!formData.libery) {
-    //     return "Libery is required.";
-    //   }
-    //   if (!formData.model) {
-    //     return "Model is required.";
-    //   }
-    //   if (!formData.iters) {
-    //     return "Iters is required.";
-    //   }
-    //   if (!formData.batchsize) {
-    //     return "Batchsize is required.";
-    //   }
-    //   if (!formData.rate) {
-    //     return "Learning Rate  is required.";
-    //   }
-    // } else {
-    //   if (!formData.imageName) {
-    //     return "ImageName  is required.";
-    //   }
-    //   if (!formData.imageTag) {
-    //     return "ImageTag  is required.";
-    //   }
-    // }
-    // formData.libType = libType;
     return null;
   };
   const onSubmit = async () => {
@@ -149,13 +110,10 @@ function Home({ className }) {
       deviceDetail.Uuid,
       orderId,
       formData.duration,
-      { formData, MachineInfo: {} }
+      { formData }
     );
     return result;
   }
-  // const onChangeLib = (type) => {
-  //   setLibType(type);
-  // };
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
@@ -164,7 +122,7 @@ function Home({ className }) {
         <div className="close-btn" onClick={() => setPopuStatus(2)}></div>
         <div className="title">Estimate the time</div>
         <div className="desc">
-          The AI Traning time is related to the size of the dataset. Estimating
+          The AI Training time is related to the size of the dataset. Estimating
           the calculation time may take a few minutes.
         </div>
         <div className="progress">
@@ -183,184 +141,6 @@ function Home({ className }) {
       </div>
       <div className="con">
         <h1 className="title">Edit model</h1>
-        {/* Tab 选择栏 */}
-        {/* <div className="tab-bar">
-          {tab === 1 ? (
-            <div className="bar bar1">
-              <span
-                className="l"
-                onClick={() => {
-                  setTab(1);
-                }}>
-                1 Estimate the computing time
-              </span>
-              <span
-                className="r"
-                onClick={() => {
-                  setTab(2);
-                }}>
-                2 Confirm the order
-              </span>
-            </div>
-          ) : (
-            // 进入第二步后,第一步显示已完成
-            <div className="bar bar2">
-              <span
-                className="l"
-                onClick={() => {
-                  setTab(1);
-                }}>
-                <i className="fa fa-check-circle"></i>&nbsp;&nbsp;Estimate the
-                computing time
-              </span>
-              <span
-                className="r"
-                onClick={() => {
-                  setTab(2);
-                }}>
-                2 Confirm the order
-              </span>
-            </div>
-          )}
-        </div> */}
-        {/* 购买第一步界面 */}
-        {/* <div
-          className="myform"
-          style={{ display: tab === 1 ? "block" : "none" }}>
-          <div className="form-row">
-            <div className="row-txt">Task Name </div>
-            <Input
-              className="my-input"
-              data-name="taskName"
-              onChange={onInput}
-              onKeyUp={onInput}
-              placeholder="Must be 4--45 characters"
-            />
-          </div>
-          <div className="form-row">
-            <div className="sel-out">
-              <div
-                className={
-                  libType === "lib" ? "sel-box lib-curr curr" : "sel-box lib"
-                }
-                onClick={() => onChangeLib("lib")}>
-                Use Built-in Libery
-              </div>
-              <div
-                className={
-                  libType === "docker"
-                    ? "sel-box docker-curr curr"
-                    : "sel-box docker"
-                }
-                onClick={() => onChangeLib("docker")}>
-                Use Image From Dockerhub
-              </div>
-            </div>
-          </div>
-          <div className={libType === "docker" ? "form-row" : "form-row none"}>
-            <div className="row-txt">Image Name </div>
-            <Input
-              onChange={onInput}
-              className="my-input"
-              data-name="imageName"
-            />
-          </div>
-          <div className={libType === "docker" ? "form-row" : "form-row none"}>
-            <div className="row-txt">Image Tag </div>
-            <Input
-              onChange={onInput}
-              className="my-input"
-              data-name="imageTag"
-            />
-          </div>
-          <div className={libType === "lib" ? "form-row" : "form-row none"}>
-            <div className="row-txt">Libery </div>
-            <select className="my-select" data-name="libery" onChange={onInput}>
-              <option value="">-select Libery-</option>
-              {liberys.map((t, i) => {
-                return (
-                  <option value={t.value} key={i}>
-                    {t.label}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div className={libType === "lib" ? "form-row" : "form-row none"}>
-            <div className="row-txt">Model </div>
-            <select className="my-select" data-name="model" onChange={onInput}>
-              <option value="">-select Model-</option>
-              {models.map((t, i) => {
-                return (
-                  <option value={t.value} key={i}>
-                    {t.label}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div className="form-row">
-            <div className="row-txt">
-              DATASET Uploading Link <br />
-            </div>
-            <Input
-              onChange={onInput}
-              data-name="dataUrl"
-              onKeyUp={onInput}
-              className="my-input"
-              placeholder="Basic usage"
-            />
-            <div className="more">
-              Recommond using AMAZON S3, Google Drive, Dropbox, IPFS to upload
-              the dataset, then get the data sharing URL.
-            </div>
-          </div>
-          <div className={libType === "lib" ? "row-line" : "row-line none"}>
-            <div className="form-row">
-              <div className="row-txt">Epochs </div>
-              <Input
-                type="number"
-                className="my-input"
-                data-name="iters"
-                onChange={onInput}
-                style={{ width: "90%" }}
-                placeholder="Enter an integer"
-              />
-            </div>
-            <div className="form-row">
-              <div className="row-txt">Batch Size </div>
-              <Input
-                type="number"
-                className="my-input"
-                data-name="batchsize"
-                onChange={onInput}
-                style={{ width: "100%" }}
-                placeholder="Enter an integer"
-              />
-            </div>
-          </div>
-          <div className={libType === "lib" ? "form-row" : "form-row none"}>
-            <div className="row-txt">Learning Rate </div>
-            <Input onChange={onInput} className="my-input" data-name="rate" />
-          </div>
-          <div className="form-row btn-row">
-            <Button
-              loading={loading}
-              disabled={loading}
-              className="sub-btn cbtn2"
-              style={{ width: 154, marginTop: 33 }}
-              type="primary"
-              onClick={() => {
-                setTab(2);
-                if (popuStatus === 0) {
-                  setPopuStatus(1);
-                }
-              }}>
-              Next
-            </Button>
-          </div>
-        </div> */}
-        {/* 购买第二步,确认配置信息,设置训练时长 */}
         <div className="myform">
           {/* 配置信息 starts */}
           <div className="info-box">
@@ -474,7 +254,6 @@ function Home({ className }) {
               onClick={onSubmit}>
               Confirm
             </Button>
-            {/* <span className="my-btn sub-btn"></span> */}
           </div>
         </div>
       </div>

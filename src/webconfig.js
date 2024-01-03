@@ -3,10 +3,8 @@ import store from "./utils/store";
 
 let defaultConfig = {
   videoApiUrl: "/cmps", // 首页视频地址
-  contractAddress: "BvYJnEj64dAT5jrUvgrTJuvPhXRDwJ7SjjPuteycJxAQ", // 合约地址
   nodeURL: "https://api.devnet.solana.com",
-  // Distri 合约（还需修改对应idl.json）
-  // contractAddress:"HF4aT6sho2zTySB8nEeN5ThMvDGtGVRrH3jeBvxFNxit"
+  contractAddress: "HF4aT6sho2zTySB8nEeN5ThMvDGtGVRrH3jeBvxFNxit",
 };
 
 export default {
