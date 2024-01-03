@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "name": "matrix_ai",
+  "name": "distri_ai",
   "instructions": [
     {
       "name": "addMachine",
@@ -148,7 +148,8 @@
           { "name": "duration", "type": "u32" },
           { "name": "total", "type": "u64" },
           { "name": "metadata", "type": "string" },
-          { "name": "status", "type": { "defined": "OrderStatus" } }
+          { "name": "status", "type": { "defined": "OrderStatus" } },
+          { "name": "orderTime", "type": "i64" }
         ]
       }
     }

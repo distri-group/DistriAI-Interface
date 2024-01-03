@@ -97,7 +97,11 @@ function formatOrder(item) {
       item.RemainingTime = "--";
     }
     item.StatusName =
-      item.Status === 0 ? "Traning" : item.Status == 1 ? "Completed" : "Failed";
+      item.Status === 0
+        ? "Training"
+        : item.Status == 1
+        ? "Completed"
+        : "Failed";
   } catch (e) {}
 }
 export async function getFilterData() {

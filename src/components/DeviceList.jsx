@@ -117,7 +117,19 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
         }
         return (
           <div className="price">
-            <img src="/img/dot.png" alt="dot" />
+            <span
+              style={{
+                margin: 0,
+                borderRadius: "100%",
+                backgroundColor: "white",
+                backgroundImage: "url('/img/token.png')",
+                backgroundSize: "70%",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                width: "24px",
+                height: "24px",
+              }}
+            />
             <span>{record.Price}</span>
           </div>
         );
@@ -320,7 +332,7 @@ export default styled(Header)`
     flex-direction: row;
     align-items: center;
     img {
-      width: 20px;
+      width: 24px;
     }
     span {
       font-size: 20px;

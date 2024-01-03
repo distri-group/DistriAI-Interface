@@ -33,11 +33,9 @@ export async function initProgram(conn, wallet) {
     } catch {
       provider = new anchor.AnchorProvider(connection, walletAn, {});
     }
-    console.log("provider", provider);
     if (!provider) provider = window.phantom?.solana;
     anchor.setProvider(provider);
     program = new anchor.Program(idl, PROGRAM_ID); // 智能合约连接
-    console.log("program", program);
     setTimeout(() => {
       let addr = walletAn?.publicKey;
       if (addr) {

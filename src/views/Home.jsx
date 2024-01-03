@@ -90,7 +90,7 @@ function Home({ className }) {
                 <font>Fast</font>
                 <label>
                   DistriAI users can instantly buy computing power with crypto
-                  and uses the algorithm to start traning the AI model in
+                  and uses the algorithm to start training the AI model in
                   minutes
                 </label>
               </span>

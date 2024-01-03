@@ -40,25 +40,25 @@ function Header({ className, list, loading }) {
       },
     },
     {
-      title: "Libery/Docker",
-      width: "10%",
-      key: "Libery",
-      render: (text, record, index) => {
-        return record.Metadata?.formData?.imageName
-          ? record.Metadata?.formData?.imageName +
-              ":" +
-              record.Metadata?.formData?.imageTag
-          : record.Metadata?.formData?.libery;
-      },
-    },
-    {
       title: "Price (h)",
       width: "12%",
       key: "Price",
       render: (text, record, index) => {
         return (
           <div className="price">
-            <img src="/img/dot.png" alt="dot" />
+            <span
+              style={{
+                margin: 0,
+                borderRadius: "100%",
+                backgroundColor: "white",
+                backgroundImage: "url('/img/token.png')",
+                backgroundSize: "70%",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                width: "24px",
+                height: "24px",
+              }}
+            />
             <span>{record.Price}</span>
           </div>
         );
@@ -95,13 +95,8 @@ function Header({ className, list, loading }) {
     },
     {
       title: "",
-      width: "18%",
+      width: "14%",
       key: "Uuid",
-      // showType: "btn",
-      // btnLabel: "Details",
-      // fun: (text, record, index) => {
-      //   navigate("/order-detail/" + text + "/" + record.Uuid);
-      // },
       render: (text, record, index) => (
         <div className="btns">
           <span
