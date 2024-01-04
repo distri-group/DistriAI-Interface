@@ -39,14 +39,9 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
         return (
           <div className="provider">
             <div style={{ display: "flex" }}>
-              {record.Status && (
-                <div className={"status status" + record.Status}>
-                  {record.Status === 1 ? "Listing" : "Rented"}
-                </div>
-              )}
               <span
                 style={{
-                  marginLeft: "8px",
+                  marginBottom: "5px",
                   borderRadius: "5px",
                   lineHeight: "20px",
                   height: "20px",
