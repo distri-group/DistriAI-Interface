@@ -46,10 +46,10 @@ export default styled(Menu)`
   width: 100%;
   height: 56px;
   line-height: 56px;
-  background-color: #05040d;
+  background-color: transparent;
   display: block;
   .wallet-adapter-button-trigger {
-    background-color: #05040d !important;
+    background-color: transparent !important;
     margin-top: 8px !important;
   }
   .user-header {
@@ -60,7 +60,7 @@ export default styled(Menu)`
   }
   .con {
     width: 1200px;
-    background-color: #05040d;
+    background-color: transparent;
     display: flex;
     justify-content: space-between;
     align-items: center;
