@@ -1,34 +1,19 @@
 import styled from "styled-components";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
-import { Modal } from "antd";
-
-import * as solana from "../services/solana";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-window.showLoginBox = console.log;
+import ConnectModal from "./ConnectModal";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useState } from "react";
+import { useEffect } from "react";
 
 function Menu({ className }) {
   let navigate = useNavigate();
-  const [isModalOpen, setModalOpen] = useState(false);
-
+  const [noWallet, setNoWallet] = useState(false);
+  const wallet = useAnchorWallet();
   useEffect(() => {
-    window.showLoginBox = function () {
-      setModalOpen(true);
-    };
-    window.freshBalance = function () {
-      solana.freshAccountBalance();
-    };
-  }, []);
-
-  const onShowLoginBox = () => {
-    setModalOpen(true);
-  };
-  window.onShowLoginBox = onShowLoginBox;
-  const onLogin = async () => {
-    solana.getPublicKey();
-  };
-
+    setNoWallet(!wallet?.publicKey);
+  }, [wallet]);
   return (
     <div className={className}>
       <div className="con">
@@ -52,33 +37,7 @@ function Menu({ className }) {
           <WalletMultiButton />
         </div>
       </div>
-      {/* 登录提示框 */}
-      <Modal
-        className="login-modal"
-        width={1000}
-        style={{ backgroundColor: "#000" }}
-        open={isModalOpen}
-        onOk={() => setModalOpen(false)}
-        onCancel={() => {
-          setModalOpen(false);
-          if (!localStorage.getItem("addr")) {
-            navigate("/market/");
-          }
-        }}
-        footer={null}>
-        <div className="login-box">
-          <p className="big-title">Connect Your Wallet</p>
-          <p className="con-title">
-            If you don't have a wallet yet, you can select a provider and create
-            one now
-          </p>
-          <p></p>
-          <div className="login-line" onClick={onLogin}>
-            <img src="/img/phantom.svg" alt="" />
-            <label>Phantom</label>
-          </div>
-        </div>
-      </Modal>
+      <ConnectModal open={noWallet} />
     </div>
   );
 }
