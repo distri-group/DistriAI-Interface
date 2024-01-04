@@ -107,7 +107,9 @@ function Header({ className, list, loading }) {
           <span
             onClick={() => setSelectedItem(record)}
             className={`mini-btn key ${
-              record.StatusName === "Completed" && "disabled"
+              (record.StatusName === "Completed" ||
+                record.Seller === formatAddress(addr)) &&
+              "disabled"
             }`}
           />
           <span
@@ -117,7 +119,9 @@ function Header({ className, list, loading }) {
               )
             }
             className={`mini-btn ${
-              record.StatusName === "Completed" && "disabled"
+              (record.StatusName === "Completed" ||
+                record.Seller === formatAddress(addr)) &&
+              "disabled"
             }`}>
             Console
           </span>
@@ -127,9 +131,7 @@ function Header({ className, list, loading }) {
                 "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
               )
             }
-            className={`mini-btn gray ${
-              record.StatusName === "Completed" && "disabled"
-            }`}>
+            className="mini-btn">
             Detail
           </span>
         </div>

@@ -164,10 +164,13 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       render: (text, record, index) => {
         return (
           <Button
+            disabled={!isMyDevice && record.Status !== 1}
             className={
               isMyDevice
                 ? "mini-btn mini-btn" + record.Status
-                : "mini-btn mini-btn0"
+                : record.Status === 1
+                ? "mini-btn mini-btn0"
+                : "mini-btn mini-btn2"
             }
             onClick={() => {
               if (!isMyDevice) {
@@ -181,11 +184,6 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               }
               return util.alert("Is training status.");
             }}>
-            {/* {!isMyDevice
-              ? "Select"
-              : record.Status === 0
-              ? "Make Offer"
-              : "Unlist"} */}
             {isMyDevice
               ? record.Status === 0
                 ? "Make Offer"
