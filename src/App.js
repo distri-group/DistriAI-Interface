@@ -34,7 +34,7 @@ function App() {
       if (tmp !== isHome) {
         setIsHome(tmp);
       }
-    }, 1000);
+    }, 100);
     return () => {
       clearInterval(tout);
     };
@@ -48,12 +48,7 @@ function App() {
               theme={{
                 algorithm: theme.darkAlgorithm,
               }}>
-              {isHome ? (
-                <Header className="page-header" />
-              ) : (
-                <Menu className="page-header" />
-              )}
-              {/* 路由 */}
+              {!isHome && <Menu className="page-header" />}
               <Routes>
                 <Route path="/makeoffer/:id" element={<MakeOffer />} />
                 <Route path="/" element={<Home />} />

@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { message, Input } from "antd";
 import React, { useState } from "react";
 import { subscribe } from "../services/mailbox";
+import Header from "../components/Header";
 
 function Home({ className }) {
   document.title = "DistriAI Home";
@@ -30,7 +31,11 @@ function Home({ className }) {
   return (
     <div className={className}>
       <div className="content">
+        <video autoPlay loop muted className="bg-video">
+          <source src="/video/bg.mp4" type="video/mp4" />
+        </video>
         <div className="box1">
+          <Header className="page-header" />
           <h1>Decentralized AI Computing Power Network</h1>
           <a
             className="play-btn"
@@ -167,7 +172,6 @@ export default styled(Home)`
     min-width: 1200px;
     display: block;
     overflow: hidden;
-    background-color: #05040d;
   }
   .con {
     max-width: 1200px;
@@ -190,7 +194,6 @@ export default styled(Home)`
     background-color: rgb(0, 0, 0);
   }
   .box1 {
-    background-image: url(/img/home/bg.png);
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -202,10 +205,10 @@ export default styled(Home)`
       width: 100%;
       line-height: 100px;
       text-align: center;
-      color: #000;
+      color: white;
       font-weight: bold;
       font-size: 48px;
-      margin-top: 220px;
+      margin-top: 140px;
     }
     .play-btn {
       background-image: url(/img/home/play.svg);
@@ -520,5 +523,12 @@ export default styled(Home)`
         }
       }
     }
+  }
+  .bg-video {
+    position: absolute;
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+    z-index: -1;
   }
 `;

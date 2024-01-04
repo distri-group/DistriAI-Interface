@@ -4,6 +4,10 @@
 
 body {
   background-color: #05040d;
+  background-image: url("../public/img/background.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
   font-family: 'Montserrat', sans-serif;
 }
 
