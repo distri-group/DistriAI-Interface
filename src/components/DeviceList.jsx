@@ -4,15 +4,16 @@ import { Spin, Empty, Button, Modal } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import * as util from "../utils";
 import SolanaAction from "../components/SolanaAction";
-import { formatDataSource } from "../utils/format-show-type";
+import { formatDataSource } from "../utils/format";
 
 function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   let navigate = useNavigate();
   const [columns, setColumns] = useState([]);
   const [deviceToCancel, setDeviceToCancel] = useState(null);
+  const [btnLoading, setBtnLoading] = useState(false);
   const childRef = useRef();
-  // 取消请求
   const cancelOffer = async (row) => {
+    setBtnLoading(true);
     let id = row.Uuid;
     if (!id) {
       return util.showError("id not found");
@@ -20,13 +21,12 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
     let ret = await childRef.current.cancelOffer(id);
     console.log(ret);
     if (ret.msg !== "ok") {
-      row.loading = false;
       setList([...list]);
       return util.showError(ret.msg);
     }
     if (reloadFunc) {
       reloadFunc(id);
-      row.loading = false;
+      setBtnLoading(false);
     }
   };
   // 表格内容
@@ -38,11 +38,33 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       render: (text, record, index) => {
         return (
           <div className="provider">
-            {isMyDevice && record.Status && (
-              <div className={"status status" + record.Status}>
-                {record.Status === 1 ? "Listing" : "Training"}
-              </div>
-            )}
+            <div style={{ display: "flex" }}>
+              {record.Status && (
+                <div className={"status status" + record.Status}>
+                  {record.Status === 1 ? "Listing" : "Rented"}
+                </div>
+              )}
+              <span
+                style={{
+                  marginLeft: "8px",
+                  borderRadius: "5px",
+                  lineHeight: "20px",
+                  height: "20px",
+                  fontSize: "12px",
+                  padding: "0 15px",
+                  color: "rgb(51, 51, 51)",
+                  backgroundColor:
+                    record?.SecurityLevel === 0
+                      ? "#f89898"
+                      : record.SecurityLevel === 1
+                      ? "#eebe77"
+                      : record.SecurityLevel === 2
+                      ? "#95d475"
+                      : "#79bbff",
+                }}>
+                level {record?.SecurityLevel}
+              </span>
+            </div>
             <div className="addr">{record.Addr}</div>
             <div className="id"># {record.UuidShort}</div>
             <div className="reliability">
@@ -142,18 +164,12 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       render: (text, record, index) => {
         return (
           <Button
-            loading={record.loading}
-            disabled={record.loading}
             className={
               isMyDevice
                 ? "mini-btn mini-btn" + record.Status
                 : "mini-btn mini-btn0"
             }
             onClick={() => {
-              let addr = localStorage.getItem("addr");
-              if (!addr && window.onShowLoginBox) {
-                return window.onShowLoginBox();
-              }
               if (!isMyDevice) {
                 return navigate("/buy/" + record.Uuid);
               }
@@ -165,11 +181,18 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               }
               return util.alert("Is training status.");
             }}>
-            {!isMyDevice
+            {/* {!isMyDevice
               ? "Select"
               : record.Status === 0
               ? "Make Offer"
-              : "Unlist"}
+              : "Unlist"} */}
+            {isMyDevice
+              ? record.Status === 0
+                ? "Make Offer"
+                : "Unlist"
+              : record.Status === 1
+              ? "Select"
+              : "Rented"}
           </Button>
         );
       },
@@ -262,6 +285,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
           <Button
             style={{ margin: "0 auto", display: "block", marginTop: "150px" }}
             className="cbtn"
+            loading={btnLoading}
             onClick={() => {
               cancelOffer(deviceToCancel);
             }}>

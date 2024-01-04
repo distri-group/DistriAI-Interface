@@ -3,8 +3,10 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { Spin, Empty, Button, Modal, message } from "antd";
 import React, { useState, useEffect } from "react";
-import { formatDataSource } from "../utils/format-show-type";
+import { formatDataSource } from "../utils/format";
 import copy from "copy-to-clipboard";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { formatAddress } from "../utils/format";
 
 function Header({ className, list, loading }) {
   let navigate = useNavigate();
@@ -12,11 +14,12 @@ function Header({ className, list, loading }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(loading);
   const [decrypted, setDecrypted] = useState(false);
-  let addr = localStorage.getItem("addr");
+  const wallet = useAnchorWallet();
+  let addr = wallet?.publicKey.toString();
   let columnsS = [
     {
       title: "Time",
-      width: "12%",
+      width: "10%",
       key: "BuyTime",
       render: (text, record, index) => {
         return (
@@ -33,7 +36,7 @@ function Header({ className, list, loading }) {
     },
     {
       title: "Task Name",
-      width: "10%",
+      width: "14%",
       key: "TaskName",
       render: (text, record, index) => {
         return record.Metadata?.formData?.taskName || "--";
@@ -41,7 +44,7 @@ function Header({ className, list, loading }) {
     },
     {
       title: "Price (h)",
-      width: "12%",
+      width: "10%",
       key: "Price",
       render: (text, record, index) => {
         return (
@@ -80,7 +83,9 @@ function Header({ className, list, loading }) {
         return (
           <div className="total">
             <label>{text}</label>
-            <span>{record.Seller === addr ? "sell" : "buy"}</span>
+            <span>
+              {record.Seller === formatAddress(addr) ? "sell" : "buy"}
+            </span>
           </div>
         );
       },
@@ -102,24 +107,28 @@ function Header({ className, list, loading }) {
           <span
             onClick={() => setSelectedItem(record)}
             className={`mini-btn key ${
-              record.StatusName !== "Completed" && "disabled"
+              record.StatusName === "Completed" && "disabled"
             }`}
           />
           <span
             onClick={() =>
-              navigate("/order-detail/" + text + "/" + record.Uuid)
+              navigate(
+                "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
+              )
             }
             className={`mini-btn ${
-              record.StatusName !== "Completed" && "disabled"
+              record.StatusName === "Completed" && "disabled"
             }`}>
             Console
           </span>
           <span
             onClick={() =>
-              navigate("/order-detail/" + text + "/" + record.Uuid)
+              navigate(
+                "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
+              )
             }
             className={`mini-btn gray ${
-              record.StatusName !== "Completed" && "disabled"
+              record.StatusName === "Completed" && "disabled"
             }`}>
             Detail
           </span>
@@ -129,6 +138,7 @@ function Header({ className, list, loading }) {
   ];
   useEffect(() => {
     formatDataSource(columnsS, list);
+    console.log(list);
     setColumns(columnsS);
   }, [list]);
   useEffect(() => {
