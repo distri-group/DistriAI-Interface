@@ -56,20 +56,18 @@ function Home(props, ref) {
     setLoading(false);
     return result;
   };
-  // 机器持有者交换
   const renewOrder = async (machinePublicKey, orderPublicKey, duration) => {
-    console.log("===========renewOrder==========");
     console.log({ machinePublicKey, orderPublicKey, duration });
     setLoading(true);
-    solanaProgram.initProgram(connection, walletAn);
-    let result = await solanaProgram.renewOrder(
-      machinePublicKey,
-      orderPublicKey,
-      duration
-    );
-    console.log(result);
-    setLoading(false);
-    return result;
+    solanaProgram.initProgram(connection, walletAn).then(async () => {
+      let result = await solanaProgram.renewOrder(
+        machinePublicKey,
+        orderPublicKey,
+        duration
+      );
+      setLoading(false);
+      return result;
+    });
   };
   // 取消订单
   const cancelOffer = async (machinePublicKey) => {

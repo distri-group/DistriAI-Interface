@@ -1,18 +1,9 @@
-import {
-  Connection,
-  sendAndConfirmTransaction,
-  Transaction,
-  PublicKey,
-  LAMPORTS_PER_SOL,
-  SystemProgram,
-} from "@solana/web3.js";
-import store from "../utils/store";
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as util from "../utils";
 
-import idl from "./idl.json";
 import webconfig from "../webconfig";
 
-const rpcUrl = webconfig.wsnode.nodeURL;
+const rpcUrl = "https://api.devnet.solana.com";
 
 let connection = null;
 let provider = null;
@@ -32,10 +23,10 @@ export async function connectToSolana() {
 export async function getBalance(accountId) {
   try {
     const publicKey = new PublicKey(accountId);
-    await connectToSolana();
+    const connection = await connectToSolana();
     let balance = await connection.getBalance(publicKey);
     if (balance > 0) {
-      balance = balance / 1000000000;
+      balance = balance / LAMPORTS_PER_SOL;
     }
     return balance;
   } catch (error) {
@@ -51,7 +42,6 @@ export async function faucet(accountId) {
       LAMPORTS_PER_SOL
     );
     let ret = await connection.confirmTransaction(signature);
-    console.log({ ret });
     getBalance(accountId);
     return { msg: "ok", data: ret };
   } catch (error) {
@@ -63,14 +53,6 @@ export async function faucet(accountId) {
     return { msg };
   }
 }
-export async function freshAccountBalance() {
-  try {
-    let account = await getAccountInfoFromStore();
-    await setPublicKey(account.address);
-  } catch (error) {
-    console.error("link to Solana error:", error);
-  }
-}
 
 //for wallet
 export function getProvider() {
@@ -78,30 +60,18 @@ export function getProvider() {
     if (provider) {
       return provider;
     }
-    console.log("Provider not exist!");
     provider = window.phantom?.solana;
     if (provider?.isPhantom) {
       provider.on("accountChanged", (publicKey) => {
-        console.log("accountChanged");
         if (publicKey) {
-          // Set new public key and continue as usual
-          console.log(`Switched to account ${publicKey.toBase58()}`);
-          window.freshBalance();
-          setPublicKey(publicKey);
+          console.log("Switched to account", publicKey.toString());
         } else {
-          // Attempt to reconnect to Phantom
-          provider.connect().catch((error) => {
-            // Handle connection failure
-          });
+          provider.connect().catch((error) => {});
         }
       });
       return provider;
     }
   }
-  util.alert("No wallet plugin detected, please install it first", () => {
-    // window.open("https://phantom.app/", "_blank");
-    return;
-  });
   return null;
 }
 export function checkWallet() {
@@ -111,26 +81,11 @@ export function checkWallet() {
 export async function getPublicKey() {
   try {
     getProvider();
-    const resp = await provider.connect();
-    let acc = resp.publicKey.toString();
-    await setPublicKey(acc);
-    return acc;
+    const res = await provider.connect();
+    let account = res.publicKey.toString();
+    return account;
   } catch (error) {
     console.error("link Solana error:", error);
     return null;
   }
-}
-export async function setPublicKey(publicKey) {
-  localStorage.setItem("addr", publicKey);
-  let balance = await getBalance(publicKey);
-  let account = {
-    address: publicKey,
-    balance,
-    balance_str: balance + " SOL",
-  };
-  store.set("account", account);
-  store.set("accounts", [account]);
-}
-export function getAccountInfoFromStore() {
-  return store.get("account");
 }

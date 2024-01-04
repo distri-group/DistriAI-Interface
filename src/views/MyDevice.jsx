@@ -3,25 +3,18 @@ import React, { useState, useEffect } from "react";
 import * as util from "../utils";
 import { getMachineList } from "../services/machine";
 import DeviceList from "../components/DeviceList";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 function Home({ className }) {
   document.title = "Market";
+  const wallet = useAnchorWallet();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 监听登录状态
-  useEffect(() => {
-    let addr = localStorage.getItem("addr");
-    if (!addr) {
-      window.showLoginBox();
-    }
-  }, []);
-  // 加载列表数据
   const loadList = async () => {
     setLoading(true);
     try {
-      let res = await getMachineList(true, 1);
-      console.log("Device List", res);
+      let res = await getMachineList(true, 1, [], wallet.publicKey.toString());
       res.list.map((item) => (item.loading = false));
       setList(res.list);
     } catch (e) {
@@ -29,12 +22,8 @@ function Home({ className }) {
     }
     setLoading(false);
   };
-  useEffect(() => {
-    loadList();
-  }, []);
-  // 轮询刷新列表
+
   const reloadList = async (id) => {
-    setLoading(true);
     let res = await getMachineList(true, 1);
     let list_refresh = res.list;
     let uid = id;
@@ -52,10 +41,12 @@ function Home({ className }) {
     } else {
       util.showOK("Cancel offer success!");
       setList(list_refresh);
-      setLoading(false);
       return;
     }
   };
+  useEffect(() => {
+    loadList();
+  }, []);
   return (
     <div className={className}>
       <div className="hold"></div>

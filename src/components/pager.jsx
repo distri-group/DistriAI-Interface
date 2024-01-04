@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Pagination from "rc-pagination";
-import localeInfo from "../../node_modules/rc-pagination/es/locale/en_US";
 
 function Header({ className, current, total, pageSize, onChange }) {
   const [curr, setCurr] = useState(current);
@@ -16,7 +15,6 @@ function Header({ className, current, total, pageSize, onChange }) {
   return (
     <div className={className}>
       <Pagination
-        locale={localeInfo}
         current={curr}
         total={total}
         pageSize={pageSize}

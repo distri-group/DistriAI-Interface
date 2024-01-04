@@ -6,7 +6,7 @@ import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
 import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { getPublicKey } from "../services/solana";
 
@@ -28,18 +28,16 @@ function Home({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [index, setIndex] = useState(0);
   const childRef = useRef();
-  // 获取余额
+
   const getTokenBalance = async (mint, address) => {
     let res = await childRef.current.getTokenAccountBalance(mint, address);
     return res;
   };
 
-  // 统一处理 input 逻辑
   const onInput = (e) => {
     let value = e.target.value;
     let name = e.target.dataset.name;
     formData[name] = value;
-    // 总价处理
     if (name === "duration" && value && !isNaN(value)) {
       value = parseInt(value);
       if (value <= 0) {
@@ -54,14 +52,12 @@ function Home({ className }) {
       setAmount(value * deviceDetail.Price);
     }
   };
-  // 信息初始化
   const init = async () => {
     let detail = await getMachineDetailByUuid(id);
     if (detail) {
       setDeviceDetail(detail);
     }
   };
-  // 登录状态监控
   useEffect(() => {
     const mint = new PublicKey(webconfig.mintAddress);
     const getBalance = async () => {
@@ -70,12 +66,11 @@ function Home({ className }) {
       let amount = await getTokenBalance(mint, account);
       let res = await getOrderList(1, []);
       setIndex(res.total + 1);
-      setBalance(amount / 1000000000);
+      setBalance(amount / LAMPORTS_PER_SOL);
     };
     getBalance();
     init();
   }, [id]);
-  // 格式验证
   const valit = () => {
     if (!formData.taskName) {
       formData.taskName = `Computing Task - ${index}`;
@@ -94,18 +89,15 @@ function Home({ className }) {
     formData.buyTime = new Date();
     formData.orderTime = new Date();
     setLoading(true);
-    console.log({ formData });
     let ret = await placeOrderStart(deviceDetail, formData, amount);
     setLoading(false);
     if (ret.msg !== "ok") {
       return util.alert(ret.msg);
     }
     navigate("/myorder");
-    window.freshBalance();
   };
   async function placeOrderStart(deviceDetail, formData) {
     let orderId = new Date().valueOf().toString();
-    console.log({ deviceDetail, formData });
     let result = await childRef.current.placeOrder(
       deviceDetail.Uuid,
       orderId,
@@ -142,41 +134,34 @@ function Home({ className }) {
       <div className="con">
         <h1 className="title">Edit model</h1>
         <div className="myform">
-          {/* 配置信息 starts */}
           <div className="info-box">
             <div className="info-box-title">Configuration</div>
             <div className="info-box-body">
               <div className="line">
                 <div className="f">
-                  {/* 使用GPU */}
                   <span style={{ fontSize: 18, fontWeight: "bold" }}>
                     {deviceDetail.GpuCount + "x " + deviceDetail.Gpu}
                   </span>
-                  {/* 计算次数 */}
                   <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
                 </div>
               </div>
               <div className="line">
-                {/* RAM */}
                 <div className="l">
                   <span>RAM</span>
                   <span>{deviceDetail.RAM}</span>
                 </div>
-                {/* 可用存储空间 */}
                 <div className="r">
                   <span>Avail Disk Storage</span>
                   <span>{deviceDetail.Disk} GB</span>
                 </div>
               </div>
               <div className="line">
-                {/* CPU */}
                 <div className="f">
                   <span>CPU</span>
                   <span>{deviceDetail.Cpu}</span>
                 </div>
               </div>
               <div className="line">
-                {/* 最大持续时间 */}
                 <div className="f">
                   <span>Max Duration</span>
                   <span>{deviceDetail.MaxDuration}h</span>
@@ -184,20 +169,16 @@ function Home({ className }) {
               </div>
             </div>
           </div>
-          {/* 配置信息 ends */}
-          {/* 订单信息 starts */}
           <div className="info-box">
             <div className="info-box-title">Order Info</div>
             <div className="info-box-body">
               <div className="line">
-                {/* 资料集大小 */}
                 <div className="f">
                   <span>Dataset Size</span>
                   <span>485 MB</span>
                 </div>
               </div>
               <div className="line">
-                {/* 训练价格 */}
                 <div className="f">
                   <span>Price(per hour)</span>
                   <span>{deviceDetail.Price} DIST</span>
@@ -205,8 +186,6 @@ function Home({ className }) {
               </div>
             </div>
           </div>
-          {/* 订单信息 ends */}
-          {/* 估计训练所需时长 */}
           <div className="b-box">
             <div className="row">
               <b>1</b> h
@@ -214,7 +193,6 @@ function Home({ className }) {
             <div className="row">Estimate the computing time</div>
           </div>
           <div className="form-row">
-            {/* 需购买时长 */}
             <div className="row-txt">Duration </div>
             <Input
               className="my-input"
@@ -243,7 +221,6 @@ function Home({ className }) {
               <label>DIST</label>
             </div>
           </div>
-          {/* 确认 */}
           <div className="form-row btn-row">
             <Button
               loading={loading}

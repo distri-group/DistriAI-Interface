@@ -6,8 +6,11 @@ import React, { useState, useEffect, useRef } from "react";
 import * as util from "../utils";
 import { getDetailByUuid } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
-import store from "../utils/store";
-
+import webconfig from "../webconfig";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { getPublicKey } from "../services/solana";
+import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import * as anchor from "@project-serum/anchor";
 let formData = {};
 
 function Home({ className }) {
@@ -20,48 +23,52 @@ function Home({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
   const childRef = useRef();
+  const wallet = useAnchorWallet();
 
   const onInput = (e) => {
-    let v = e.target.value;
+    let value = e.target.value;
     let n = e.target.dataset.name;
-    formData[n] = v;
-    if (n == "duration" && v) {
-      v = parseInt(v);
-      if (v <= 0) {
+    formData[n] = value;
+    if (n == "duration" && value) {
+      value = parseInt(value);
+      if (value <= 0) {
         setAmount(0);
         return util.showError("The duration must be an integer greater than 0");
       }
-      formData[n] = v;
-      setAmount(v * deviceDetail.Price);
+      formData[n] = value;
+      setAmount(value * deviceDetail.Price);
     }
   };
+  const getTokenBalance = async (mint, address) => {
+    let res = await childRef.current.getTokenAccountBalance(mint, address);
+    return res;
+  };
   const init = async () => {
-    let detail = await getDetailByUuid(id);
-    console.log("----------getOrderDetailById--------------");
-    console.log(detail);
+    let detail = await getDetailByUuid(id, wallet.publicKey.toString());
     if (detail) {
       setOrderDetail(detail);
       if (detail.Metadata?.machineInfo) {
         setDeviceDetail(detail.Metadata.machineInfo);
       }
     }
+    const mint = new PublicKey(webconfig.mintAddress);
+    const getBalance = async () => {
+      let addr = await getPublicKey();
+      let account = new PublicKey(addr);
+      let amount = await getTokenBalance(mint, account);
+      setBalance(amount / LAMPORTS_PER_SOL);
+    };
+    getBalance();
   };
   useEffect(() => {
-    let addr = localStorage.getItem("addr");
-    if (!addr) {
-      window.showLoginBox();
+    if (wallet?.publicKey) {
+      init();
     }
-    let account = store.get("account");
-    setBalance(account.balance);
-    init();
-  }, []);
+  }, [wallet]);
   const valit = () => {
     if (amount == 0) {
       return "Payment token greater than 0.";
     }
-    // if (amount / 1000000000000 > balance) {
-    //   return "Payment token greater than balance.";
-    // }
     return null;
   };
   const onSubmit = async () => {
@@ -73,15 +80,32 @@ function Home({ className }) {
     console.log({ formData, orderDetail });
     let ret = await childRef.current.renewOrder(
       orderDetail.Metadata.machineInfo.Uuid,
-      id,
+      stringToPublicKey(id).toString(),
       formData.duration
     );
     setLoading(false);
-    if (ret.msg != "ok") {
-      return util.alert(ret.msg);
+    return null;
+  };
+
+  const stringToPublicKey = (str) => {
+    if (str.startsWith("0x")) {
+      let hexString = str.slice(2);
+      let uint8Array = new Uint8Array(hexString.length / 2);
+      for (let i = 0; i < hexString.length; i += 2) {
+        uint8Array[i / 2] = parseInt(hexString.substr(i, 2), 16);
+      }
+      let orderId = uint8Array;
+      let counterSeed = anchor.utils.bytes.utf8.encode("order");
+      let seeds = [counterSeed, wallet.publicKey.toBytes(), orderId];
+      let [publicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+        seeds,
+        new PublicKey(webconfig.contractAddress)
+      );
+      return publicKey;
+    } else {
+      let publicKey = new PublicKey(str);
+      return publicKey;
     }
-    navigate("/myorder");
-    window.freshBalance();
   };
 
   return (
@@ -189,7 +213,6 @@ export default styled(Home)`
   display: block;
   overflow: hidden;
   width: 100%;
-  background-color: #000;
   color: #fff;
   .mini-btn {
     border: 1px solid #fff;

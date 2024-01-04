@@ -18,17 +18,12 @@ function Home({ className }) {
   const { id } = useParams();
   let navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [deviceDetail, setDeviceDetail] = useState({});
   const [maxStorage, setMaxStorage] = useState(0);
 
   const childRef = useRef();
-  /**
-   * 获取机器信息
-   */
   const init = async () => {
     let detail = await getMachineDetailByUuid(id);
     if (detail) {
-      setDeviceDetail(detail);
       setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
     }
     console.log("***********device detail*****************");
@@ -36,10 +31,6 @@ function Home({ className }) {
   };
   useEffect(() => {
     document.title = "Make Offer";
-    let addr = localStorage.getItem("addr");
-    if (!addr) {
-      window.showLoginBox();
-    }
     init();
   }, [id]);
   const onInput = (e, n) => {

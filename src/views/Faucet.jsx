@@ -4,29 +4,20 @@ import { Input, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import * as solana from "../services/solana";
 import * as util from "../utils";
-let timeout = null;
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 function Home({ className }) {
   document.title = "Faucet";
   const [loading, setLoading] = useState(false);
   const [newAddr, setNewAddr] = useState();
+  const wallet = useAnchorWallet();
+  useEffect(() => {
+    setNewAddr(wallet?.publicKey.toString());
+  }, [wallet]);
   const onInput = (e) => {
     let v = e.target.value;
     setNewAddr(v);
   };
-  useEffect(() => {
-    timeout = setInterval(function () {
-      let addr = localStorage.getItem("addr");
-      if (addr) {
-        setNewAddr(addr);
-      } else {
-        console.log("walletAn is null");
-      }
-    }, 500);
-    return () => {
-      clearInterval(timeout);
-    };
-  }, []);
   const onSubmit = async () => {
     if (!newAddr) {
       return util.alert("Please Enter Your Wallet Address.");

@@ -31,7 +31,6 @@ const request = {
             console.log(error);
             util.showError("Network Error.Please refresh page later.");
           }, 500);
-          // resolve({ code: 503, msg: "网络错误！" });
           reject(error);
         });
     });
@@ -56,8 +55,7 @@ const request = {
       headers: { "Content-Type": "application/json" },
       ...options,
     };
-    const queryParams = new URLSearchParams(options.params); // 将参数对象转换为 URLSearchParams
-    // 如果有参数存在，则将参数附加到 URL 中
+    const queryParams = new URLSearchParams(options.params);
     if (Object.keys(options.params).length > 0) {
       url = `${url}?${queryParams.toString()}`;
     }

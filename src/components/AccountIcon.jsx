@@ -1,12 +1,3 @@
-/*
- * @Description:
- * @Autor: fage
- * @Date: 2022-08-01 17:24:18
- * @LastEditors: chenbinfa
- * @LastEditTime: 2022-08-03 09:39:07
- * @description: 描述信息
- * @author: chenbinfa
- */
 export default function AccountIcon({ hash, title, onClick }) {
   if (!hash || hash.length < 3) {
     hash = "cXa";

@@ -1,10 +1,10 @@
 // Solana 功能
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { formatBalance } from "../utils/formatter";
+import { formatBalance } from "../utils/format";
 import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
 import idl from "./idl.json";
@@ -16,12 +16,6 @@ let walletAn = null;
 const mint = new PublicKey(webconfig.mintAddress);
 let vault = null;
 let associatedTokenAccount = null;
-/**
- * 钱包初始化
- * @param {*} conn
- * @param {*} wallet
- * @returns
- */
 export async function initProgram(conn, wallet) {
   try {
     if (program && walletAn?.publicKey) return program;
@@ -35,14 +29,7 @@ export async function initProgram(conn, wallet) {
     }
     if (!provider) provider = window.phantom?.solana;
     anchor.setProvider(provider);
-    program = new anchor.Program(idl, PROGRAM_ID); // 智能合约连接
-    setTimeout(() => {
-      let addr = walletAn?.publicKey;
-      if (addr) {
-        addr = addr.toString();
-        localStorage.setItem("addr", addr);
-      }
-    }, 2000);
+    program = new anchor.Program(idl, PROGRAM_ID);
     associatedTokenAccount = findAssociatedTokenAddress(
       walletAn.publicKey,
       mint
@@ -53,16 +40,6 @@ export async function initProgram(conn, wallet) {
     console.error(error);
   }
 }
-/**
- * 机器上架
- * @param {*} connection
- * @param {*} walletAn
- * @param {*} machinePublicKey
- * @param {*} price
- * @param {*} maxDuration
- * @param {*} disk
- * @returns
- */
 export async function makeOffer(
   connection,
   walletAn,
@@ -78,19 +55,18 @@ export async function makeOffer(
     if (typeof price == "string") {
       price = parseFloat(price);
     }
-    price = price * 1000000000;
+    price = price * LAMPORTS_PER_SOL;
     price = new anchor.BN(price);
     maxDuration = new anchor.BN(maxDuration);
     disk = new anchor.BN(disk);
     if (!walletAn || !walletAn.publicKey) {
       return { msg: "walletAn is null,Please run initProgram first." };
     }
-    // console.log('在这2');return;
     const transaction = await program.methods
       .makeOffer(price, maxDuration, disk)
       .accounts({
         machine: new PublicKey(machinePublicKey),
-        owner: walletAn.publicKey, //new PublicKey(ownerPublickKey), //walletAn?.publicKey||
+        owner: walletAn.publicKey,
       })
       .rpc();
     console.log("transaction", transaction);
@@ -100,11 +76,6 @@ export async function makeOffer(
     return { msg: e.message };
   }
 }
-/**
- * 机器下架
- * @param {*} machinePublicKey
- * @returns
- */
 export async function cancelOffer(machinePublicKey) {
   try {
     if (!program) {
@@ -124,8 +95,6 @@ export async function cancelOffer(machinePublicKey) {
   }
 }
 export function getPublicKeyFromStr(name, ownerPublicKeyStr, str) {
-  console.log({ name, ownerPublicKeyStr, str });
-  // anchor.utils.bytes.hex.encode(str);
   let orderId = anchor.utils.bytes.hex.encode("0x" + str);
   var myUint8Array = new Uint8Array(16);
   myUint8Array.set(orderId);
@@ -165,7 +134,7 @@ export async function placeOrder(
       seeds,
       new PublicKey(PROGRAM_ID)
     );
-    console.log({ orderPublicKey: publick.toString() });
+    console.log("OrderPublicKey", publick.toString());
     if (!walletAn || !walletAn.publicKey) {
       return { msg: "error", error: "walletAn is null" };
     }
@@ -320,8 +289,8 @@ function formatOrderList(list) {
       }
       t.account.status = Object.keys(t.account.status)[0];
       t.account.metadata = JSON.parse(t.account.metadata);
-      t.Price = parseInt(t.account.price.toString(10)) / 1000000000;
-      t.Total = parseInt(t.account.total.toString(10)) / 1000000000;
+      t.Price = parseInt(t.account.price.toString(10)) / LAMPORTS_PER_SOL;
+      t.Total = parseInt(t.account.total.toString(10)) / LAMPORTS_PER_SOL;
       t.StatusName = t.account.status;
       t.Uuid = t.publicKey.toString();
     } catch (e) {
@@ -345,7 +314,6 @@ const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {
     ASSOCIATED_TOKEN_PROGRAM_ID
   )[0];
 };
-// from seed获取 vault
 export const getVault = async () => {
   let counterSeed = anchor.utils.bytes.utf8.encode("vault");
   let seeds = [counterSeed, mint.toBytes()];

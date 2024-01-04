@@ -2,11 +2,10 @@ import styled from "styled-components";
 import { Select } from "antd";
 import React, { useState, useEffect } from "react";
 import OrderList from "../components/OrderList";
-// import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
-
 import { getOrderList, getFilterData } from "../services/order";
 
 import Pager from "../components/pager";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 let filter = {};
 
@@ -18,15 +17,11 @@ function Home({ className }) {
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
   const [filterValue, setFilterValue] = useState({});
-
-  /**
-   * 获取订单列表
-   * @param {number} curr
-   */
+  const wallet = useAnchorWallet();
   const loadList = async (curr) => {
     setLoading(true);
     try {
-      let res = await getOrderList(curr, filter);
+      let res = await getOrderList(curr, filter, wallet.publicKey.toString());
       console.log("Order List", res);
       if (res.total) {
         setTotal(res.total);
@@ -34,14 +29,11 @@ function Home({ className }) {
       if (res.list) {
         setList(res.list);
       }
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     setLoading(false);
   };
   const loadFilterData = async () => {
     let res = await getFilterData();
-    // console.log("FilterData", res);
     setFilterData(res);
     res.forEach((t) => {
       filter[t.name] = "all";
@@ -50,17 +42,14 @@ function Home({ className }) {
   };
 
   useEffect(() => {
-    let addr = localStorage.getItem("addr");
-    if (!addr) {
-      window.showLoginBox();
-    }
     loadFilterData();
-    loadList(1);
-  }, []);
+    if (wallet?.publicKey) {
+      loadList(1);
+    }
+  }, [wallet]);
 
   const onFilter = (v, n) => {
     filter[n] = v;
-    console.log({ filter });
     setFilterValue(filter);
     setCurrent(1);
     loadList(1);

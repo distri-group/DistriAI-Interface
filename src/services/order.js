@@ -1,23 +1,13 @@
 import cache from "../utils/store";
 import * as util from "../utils";
 import moment from "moment";
-import webconfig from "../webconfig";
-import { formatAddress, formatBalance } from "../utils/formatter";
+import { formatAddress, formatBalance } from "../utils/format";
 import { getTimeDiff } from "time-difference-js";
 import { getMachineList } from "./machine";
+import request from "../utils/request";
 
-/**
- * 获取订单列表
- * @param {number} pageIndex
- * @param {Array} filter
- * @returns
- */
-export async function getOrderList(pageIndex, filter) {
+export async function getOrderList(pageIndex, filter, publicKey) {
   try {
-    let obj = cache.get("order-list");
-    if (webconfig.isDebug && obj) {
-      return obj;
-    }
     let apiUrl = "/api/order/mine";
     let options = {
       data: {
@@ -34,13 +24,13 @@ export async function getOrderList(pageIndex, filter) {
         }
       }
     }
-    let Account = localStorage.getItem("addr");
+    let Account = publicKey;
     if (Account) {
       options.headers = {
         Account,
       };
     }
-    let ret = await util.request.post(apiUrl, options);
+    let ret = await request.post(apiUrl, options);
     if (ret.Msg !== "success") {
       util.alert(ret.msg);
       return null;
@@ -51,7 +41,7 @@ export async function getOrderList(pageIndex, filter) {
       formatOrder(item);
     }
     let machinList = await getMachineList(true, 1);
-    console.log({ machinList });
+    console.log("Machine List", machinList);
     machinList = machinList.list;
     for (let item of list) {
       if (!item.MachineUuid) continue;
@@ -62,9 +52,8 @@ export async function getOrderList(pageIndex, filter) {
         item.Metadata.machineInfo = tmp;
       }
     }
-    console.log("*******************************");
     console.log(list);
-    obj = { list, total };
+    let obj = { list, total };
     cache.set("order-list", obj);
     return obj;
   } catch (e) {
@@ -76,9 +65,6 @@ function formatOrder(item) {
   try {
     if (item.Metadata) {
       item.Metadata = JSON.parse(item.Metadata);
-      if (item.Metadata?.machinePublicKey) {
-        item.Uuid = item.Metadata?.machinePublicKey;
-      }
     }
     item.Buyer = formatAddress(item.Buyer);
     item.Seller = formatAddress(item.Seller);
@@ -86,10 +72,8 @@ function formatOrder(item) {
     item.Total = formatBalance(item.Total);
 
     if (item.Status === 0) {
-      // console.log('orderTime',item.Metadata.formData.orderTime);
-      // console.log('duration',item.Metadata.formData.duration);
       let endTime = moment(item.Metadata.formData.orderTime)
-        .add(item.Metadata.formData.duration, "hours")
+        .add(item.Metadata.Duration, "hours")
         .toDate();
       let result = getTimeDiff(new Date(), endTime);
       item.RemainingTime = result.value + " " + result.suffix;
@@ -125,9 +109,8 @@ export async function getFilterData() {
   });
   return list;
 }
-export async function getDetailByUuid(uuid) {
-  let obj = await getOrderList(1);
-  // let obj = cache.get("order-list");
+export async function getDetailByUuid(uuid, publicKey) {
+  let obj = await getOrderList(1, [], publicKey);
   if (!obj) {
     util.showError("Order list not found.");
     return null;
@@ -150,22 +133,9 @@ export async function getModelList() {
     { label: "word_language_model", value: "word_language_model" },
   ];
 }
-/**
- * 学习log
- * @param {string} orderUuid
- * @param {number} pageIndex
- * @param {number} pageSize
- * @returns
- */
+
 export async function getLogList(orderUuid, pageIndex, pageSize) {
   try {
-    // orderUuid='0xb711ebf34e474f4db43198e23a59d433';
-    // orderUuid=orderUuid.slice(2);
-
-    let obj = cache.get("log-list");
-    if (webconfig.isDebug && obj) {
-      return obj;
-    }
     let apiUrl = "/api/log/list";
     let options = {
       data: {
@@ -174,21 +144,18 @@ export async function getLogList(orderUuid, pageIndex, pageSize) {
         PageSize: pageSize || 20,
       },
     };
-    let ret = await util.request.post(apiUrl, options);
+    let ret = await request.post(apiUrl, options);
     if (ret.Msg !== "success") {
       util.alert(ret.msg);
       return null;
     }
     let total = ret.Data.Total;
     let list = ret.Data.List;
-    // let arr = [];
     for (let item of list) {
       item.CreatedAtStr = moment(item.CreatedAt).format("MM-DD HH:mm:ss");
       item.ContentArr = item.Content.split("\r").join("\n").split("\n");
     }
-    console.log(list);
-    obj = { list, total };
-    cache.set("log-list", obj);
+    let obj = { list, total };
     return obj;
   } catch (e) {
     console.log(e);

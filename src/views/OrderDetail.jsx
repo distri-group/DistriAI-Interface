@@ -6,6 +6,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { getDetailByUuid, getLogList } from "../services/order";
 import { XTerm } from "xterm-for-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 const showLogType = "xterm";
 
 function Home({ className }) {
@@ -18,15 +19,12 @@ function Home({ className }) {
   const [showLogs, setShowLogs] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingLog, setLoadingLog] = useState(false);
+  const wallet = useAnchorWallet();
 
-  /**
-   * 加载交易详情
-   */
   const loadDetail = async () => {
     setLoading(true);
     try {
-      let res = await getDetailByUuid(id);
-      console.log("----------getOrderDetailById--------------");
+      let res = await getDetailByUuid(uuid, wallet.publicKey.toString());
       setRecord(res);
       console.log(record);
     } catch (e) {
@@ -39,7 +37,6 @@ function Home({ className }) {
     setLoadingLog(true);
     try {
       let res = await getLogList(uuid, 1, 100);
-      console.log("----------getOrderDetailById log--------------");
       console.log(res);
       setLogs(res.list);
       if (showLogType === "xterm") {
@@ -47,15 +44,15 @@ function Home({ className }) {
           initTerm(res.list);
         }, 1000);
       }
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     setLoadingLog(false);
   };
 
   useEffect(() => {
-    loadDetail();
-  }, [id]);
+    if (wallet?.publicKey) {
+      loadDetail();
+    }
+  }, [id, wallet]);
 
   const initTerm = (list) => {
     list.forEach((t) => {
@@ -279,17 +276,6 @@ function Home({ className }) {
           <div className="log-list">
             {logs.length === 0 ? <div className="log-item">No Data</div> : ""}
             <XTerm ref={xtermRef} />
-            {/* {showLogType != "xterm" &&
-              logs.map((l,i) => {
-                return (
-                  <div className="log-item" key={i}>
-                    <span>{l.CreatedAtStr}</span>
-                    {l.ContentArr.map((t,j) => {
-                      return <label key={j}>{t}</label>;
-                    })}
-                  </div>
-                );
-              })} */}
           </div>
         </div>
       </div>

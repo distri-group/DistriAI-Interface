@@ -1,14 +1,9 @@
-// 机器相关接口
 import cache from "../utils/store";
 import * as utils from "../utils";
+import request from "../utils/request";
 import webconfig from "../webconfig";
-import { formatAddress, formatBalance } from "../utils/formatter";
+import { formatAddress, formatBalance } from "../utils/format";
 
-/**
- * 根据 id 获取机器详情
- * @param {string} id
- * @returns
- */
 export async function getMachineDetailById(id) {
   let obj = cache.get("all-machine-list");
   if (!obj) {
@@ -16,11 +11,7 @@ export async function getMachineDetailById(id) {
   }
   return obj.find((t) => t.id === id);
 }
-/**
- * 根据 uuid 获取机器详情
- * @param {*} uuid
- * @returns
- */
+
 export async function getMachineDetailByUuid(uuid) {
   let obj = cache.get("all-machine-list");
   if (!obj) {
@@ -28,18 +19,10 @@ export async function getMachineDetailByUuid(uuid) {
   }
   return obj.find((t) => t.Uuid === uuid);
 }
-/**
- * 获取过滤信息
- * @returns
- */
+
 export async function getFilterData() {
-  let obj = cache.get("filter-list");
-  if (webconfig.isDebug && obj) {
-    return obj;
-  }
   let apiUrl = "/api/machine/filter";
-  // let apiUrl = "/machine/filter";
-  let ret = await utils.request.post(apiUrl);
+  let ret = await request.post(apiUrl);
   if (ret.Msg !== "success") {
     utils.alert(ret.msg);
     return null;
@@ -75,19 +58,9 @@ export async function getFilterData() {
   cache.set("filter-list", list);
   return list;
 }
-/**
- * 获取机器列表:分为我的机器和所有机器
- * @param {boolean} isMine
- * @param {number} pageIndex
- * @param {*} filter
- * @returns
- */
-export async function getMachineList(isMine, pageIndex, filter) {
+
+export async function getMachineList(isMine, pageIndex, filter, publicKey) {
   try {
-    let obj = cache.get("curr-machine-list");
-    if (webconfig.isDebug && obj) {
-      return obj;
-    }
     let apiUrl = isMine ? "/api/machine/mine" : "/api/machine/market";
     let options = {
       data: {
@@ -104,15 +77,14 @@ export async function getMachineList(isMine, pageIndex, filter) {
       }
     }
     if (isMine) {
-      let Account = localStorage.getItem("addr");
+      let Account = publicKey;
       if (Account) {
         options.headers = {
           Account,
         };
       }
     }
-    let ret = await utils.request.post(apiUrl, options);
-    console.log({ ret });
+    let ret = await request.post(apiUrl, options);
     if (ret.Msg !== "success") {
       utils.alert(ret.msg);
       return null;
@@ -123,8 +95,8 @@ export async function getMachineList(isMine, pageIndex, filter) {
     for (let item of list) {
       formatMachine(item);
     }
-    console.log(list);
-    obj = { list, total };
+    let obj = { list, total };
+    console.log("Machine List", list);
     cache.set("curr-machine-list", obj);
     let allList = cache.get("all-machine-list") || [];
     list.forEach((t) => {
@@ -142,18 +114,12 @@ export async function getMachineList(isMine, pageIndex, filter) {
     return null;
   }
 }
-/**
- * 处理数据
- * @param {Object} item
- */
+
 function formatMachine(item) {
   try {
     if (item.Metadata && typeof item.Metadata == "string") {
       item.Metadata = JSON.parse(item.Metadata);
     }
-    // let tmp= getPublicKeyFromStr("machine", item.Owner, item.Metadata.MachineUUID);
-    // console.log(tmp);
-    // item.Uuid = "DrZDdZQV19r6Evpn2UHFkvRD73UnwpshPhC2KNVUFPQF";
     item.Uuid = item.Metadata.MachineAccounts;
 
     item.Addr = formatAddress(item.Owner);
@@ -175,6 +141,7 @@ function formatMachine(item) {
         ) + "%";
     }
     item.TFLOPS = item.Tflops;
+    item.SecurityLevel = parseInt(item.Metadata?.SecurityLevel);
   } catch (e) {
     console.log(e);
   }
