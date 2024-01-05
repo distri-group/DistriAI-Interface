@@ -24,6 +24,7 @@ function Home({ className }) {
   };
 
   const reloadList = async (id) => {
+    setLoading(true);
     let res = await getMachineList(true, 1);
     let list_refresh = res.list;
     let uid = id;
@@ -41,7 +42,8 @@ function Home({ className }) {
     } else {
       util.showOK("Cancel offer success!");
       setList(list_refresh);
-      return;
+      setLoading(false);
+      return true;
     }
   };
   useEffect(() => {
