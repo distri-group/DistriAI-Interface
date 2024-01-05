@@ -8,19 +8,18 @@ import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import webconfig from "../webconfig";
-import { getPublicKey } from "../services/solana";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 let formData = {
   taskName: "",
   duration: 0,
-  buyTime: "",
-  orderTime: "",
 };
 
 function Home({ className }) {
   const { id } = useParams();
   document.title = "Edit model";
   let navigate = useNavigate();
+  const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -61,16 +60,28 @@ function Home({ className }) {
   useEffect(() => {
     const mint = new PublicKey(webconfig.mintAddress);
     const getBalance = async () => {
-      let addr = await getPublicKey();
-      let account = new PublicKey(addr);
-      let amount = await getTokenBalance(mint, account);
-      let res = await getOrderList(1, []);
+      setLoading(true);
+      let amount = await getTokenBalance(mint, wallet.publicKey);
+      let res = await getOrderList(1, [], wallet.publicKey.toString());
       setIndex(res.total + 1);
       setBalance(amount / LAMPORTS_PER_SOL);
+      setLoading(false);
     };
-    getBalance();
+    if (wallet?.publicKey) {
+      getBalance();
+    }
     init();
-  }, [id]);
+  }, [id, wallet]);
+  const reloadOrder = async () => {
+    let res = await getOrderList(1, [], wallet.publicKey.toString());
+    if (index === res.total) {
+      return;
+    } else {
+      setTimeout(() => {
+        reloadOrder();
+      });
+    }
+  };
   const valit = () => {
     if (!formData.taskName) {
       formData.taskName = `Computing Task - ${index}`;
@@ -85,15 +96,14 @@ function Home({ className }) {
     if (vmsg) {
       return util.alert(vmsg);
     }
-    formData.amount = amount;
-    formData.buyTime = new Date();
-    formData.orderTime = new Date();
     setLoading(true);
     let ret = await placeOrderStart(deviceDetail, formData, amount);
-    setLoading(false);
     if (ret.msg !== "ok") {
       return util.alert(ret.msg);
     }
+    reloadOrder();
+    setLoading(false);
+    util.showOK("Purchase Successfully");
     navigate("/myorder");
   };
   async function placeOrderStart(deviceDetail, formData) {
@@ -106,6 +116,7 @@ function Home({ className }) {
     );
     return result;
   }
+
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
@@ -197,6 +208,7 @@ function Home({ className }) {
             <Input
               className="my-input"
               data-name="duration"
+              disabled={loading}
               placeholder="Hour"
               onChange={onInput}
             />

@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import _ from "lodash";
 import { useNavigate, useParams } from "react-router-dom";
 import { Input, Button } from "antd";
 import React, { useState, useEffect, useRef } from "react";
@@ -8,7 +7,6 @@ import { getDetailByUuid } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { getPublicKey } from "../services/solana";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
 let formData = {};
@@ -29,21 +27,23 @@ function Home({ className }) {
     let value = e.target.value;
     let n = e.target.dataset.name;
     formData[n] = value;
-    if (n == "duration" && value) {
+    if (n === "duration" && value) {
       value = parseInt(value);
       if (value <= 0) {
         setAmount(0);
         return util.showError("The duration must be an integer greater than 0");
       }
       formData[n] = value;
-      setAmount(value * deviceDetail.Price);
+      setAmount(value * (deviceDetail.Price || 0));
     }
   };
   const getTokenBalance = async (mint, address) => {
     let res = await childRef.current.getTokenAccountBalance(mint, address);
+    setBalance(res / LAMPORTS_PER_SOL);
     return res;
   };
   const init = async () => {
+    setLoading(true);
     let detail = await getDetailByUuid(id, wallet.publicKey.toString());
     if (detail) {
       setOrderDetail(detail);
@@ -52,13 +52,8 @@ function Home({ className }) {
       }
     }
     const mint = new PublicKey(webconfig.mintAddress);
-    const getBalance = async () => {
-      let addr = await getPublicKey();
-      let account = new PublicKey(addr);
-      let amount = await getTokenBalance(mint, account);
-      setBalance(amount / LAMPORTS_PER_SOL);
-    };
-    getBalance();
+    getTokenBalance(mint, wallet.publicKey);
+    setLoading(false);
   };
   useEffect(() => {
     if (wallet?.publicKey) {
@@ -66,10 +61,18 @@ function Home({ className }) {
     }
   }, [wallet]);
   const valit = () => {
-    if (amount == 0) {
+    if (amount === 0) {
       return "Payment token greater than 0.";
     }
     return null;
+  };
+  const reloadOrder = async () => {
+    let res = await getDetailByUuid(id, wallet.publicKey.toString());
+    if (orderDetail.Duration === res.Duration - formData.duration) {
+      return;
+    } else {
+      reloadOrder();
+    }
   };
   const onSubmit = async () => {
     let vmsg = valit();
@@ -78,12 +81,14 @@ function Home({ className }) {
     }
     setLoading(true);
     console.log({ formData, orderDetail });
-    let ret = await childRef.current.renewOrder(
+    await childRef.current.renewOrder(
       orderDetail.Metadata.machineInfo.Uuid,
       stringToPublicKey(id).toString(),
       formData.duration
     );
+    reloadOrder();
     setLoading(false);
+    navigate("/myorder");
     return null;
   };
 
@@ -176,6 +181,7 @@ function Home({ className }) {
             <div className="row-txt">Duration </div>
             <Input
               className="my-input"
+              disabled={loading}
               data-name="duration"
               placeholder="Hour"
               onChange={onInput}
@@ -201,7 +207,6 @@ function Home({ className }) {
               onClick={onSubmit}>
               Confirm
             </Button>
-            {/* <span className="my-btn sub-btn"></span> */}
           </div>
         </div>
       </div>
@@ -214,73 +219,6 @@ export default styled(Home)`
   overflow: hidden;
   width: 100%;
   color: #fff;
-  .mini-btn {
-    border: 1px solid #fff;
-  }
-  .pross-box {
-    display: none;
-  }
-  .pross-box1 {
-    position: fixed;
-    left: calc(50% - 500px);
-    top: 100px;
-    width: 1000px;
-    height: 530px;
-    background-color: rgba(0, 0, 0, 1);
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgba(64, 64, 64, 1);
-    border-radius: 5px;
-    padding: 90px 0px;
-    display: flex;
-    flex-direction: column;
-    z-index: 999;
-    .close-btn {
-      width: 35px;
-      height: 35px;
-      display: block;
-      overflow: hidden;
-      position: absolute;
-      top: 4px;
-      right: 8px;
-      cursor: pointer;
-      background-image: url(/img/market/close.svg);
-      background-repeat: no-repeat;
-      background-size: 16px;
-      background-position: center;
-    }
-    .title {
-      font-weight: 700;
-      font-size: 72px;
-      color: #ffffff;
-      text-align: center;
-    }
-    .desc {
-      font-size: 16px;
-      color: #ffffff;
-      text-align: left;
-      line-height: 20px;
-      padding: 21px 282px;
-    }
-    .progress {
-      width: 60%;
-      display: block;
-      margin: 50px auto;
-    }
-    .skip {
-      font-size: 16px;
-      text-decoration: underline;
-      color: #797979;
-      text-align: center;
-      line-height: 48px;
-      cursor: pointer;
-    }
-    .recommond {
-      font-size: 14px;
-      color: #515151;
-      text-align: center;
-    }
-  }
   .con {
     width: 1160px;
     padding: 0 20px;
@@ -295,44 +233,6 @@ export default styled(Home)`
       color: #ffffff;
       margin-top: 25px;
       line-height: 70px;
-    }
-    .tab-bar {
-      width: 50%;
-      padding: 20px 0;
-      .bar {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        span {
-          text-align: center;
-          width: 50%;
-          display: block;
-          overflow: hidden;
-          font-size: 14px;
-          line-height: 48px;
-          cursor: pointer;
-          color: #94d6e2;
-          .fa-check-circle {
-            font-size: 22px;
-          }
-        }
-      }
-      .bar1 {
-        .l {
-          border-bottom: 3px solid rgba(148, 214, 226, 1);
-        }
-        .r {
-          color: #797979;
-        }
-      }
-      .bar2 {
-        .l {
-          color: #94e2b8;
-        }
-        .r {
-          border-bottom: 3px solid rgba(148, 214, 226, 1);
-        }
-      }
     }
     .info-box {
       display: block;
@@ -423,57 +323,6 @@ export default styled(Home)`
     .btn-row {
       display: block;
       margin: 30px 0;
-    }
-  }
-  .block {
-    display: block;
-    overflow: hidden;
-  }
-  .mini-btn {
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 4px;
-    padding: 0 10px;
-    height: 30px;
-    line-height: 30px;
-    cursor: pointer;
-  }
-  .mytable {
-    display: table;
-    border: 1px solid #fff;
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    .link {
-      color: #fff;
-      cursor: pointer;
-    }
-    .btn-link {
-      color: #fff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    th {
-      background-color: #92d5e1;
-      color: #000;
-      height: 40px;
-      line-height: 40px;
-      text-align: left;
-      padding: 0 10px;
-    }
-    tr td {
-      border-bottom: 1px solid #fff;
-      border-collapse: collapse;
-      height: 40px;
-      line-height: 40px;
-      padding: 0 10px;
-    }
-    tr:last-children {
-      td {
-        border-bottom: none;
-      }
     }
   }
 `;
