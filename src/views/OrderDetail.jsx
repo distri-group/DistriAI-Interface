@@ -80,6 +80,16 @@ function Home({ className }) {
                   </div>
                   <div className="line">
                     <div className="l">
+                      <span>Provider</span>
+                      <span>{record.Metadata.machineInfo.Owner}</span>
+                    </div>
+                    <div className="r">
+                      <span>Region</span>
+                      <span>{record.Metadata.machineInfo.Region}</span>
+                    </div>
+                  </div>
+                  <div className="line">
+                    <div className="l">
                       <span>
                         {record.Metadata.machineInfo.GpuCount +
                           "x " +
@@ -90,18 +100,8 @@ function Home({ className }) {
                       </span>
                     </div>
                     <div className="r">
-                      <span>Region</span>
-                      <span>{record.Metadata.machineInfo.Region}</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
                       <span>RAM</span>
                       <span>{record.Metadata.machineInfo.RAM}</span>
-                    </div>
-                    <div className="r">
-                      <span>Reliability</span>
-                      <span>{record.Metadata.machineInfo.Reliability}</span>
                     </div>
                   </div>
                   <div className="line">
@@ -110,12 +110,12 @@ function Home({ className }) {
                       <span>{record.Metadata.machineInfo.Cpu}</span>
                     </div>
                     <div className="r">
-                      <span>CPS</span>
-                      <span>{record.Metadata.machineInfo.Score}</span>
+                      <span>Reliability</span>
+                      <span>{record.Metadata.machineInfo.Reliability}</span>
                     </div>
                   </div>
                   <div className="line">
-                    <div className="f">
+                    <div className="l">
                       <span>Internet Seed</span>
                       <span>
                         <img
@@ -129,6 +129,10 @@ function Home({ className }) {
                         {record.Metadata.machineInfo.DownloadSpeed || "--"}
                       </span>
                     </div>
+                    <div className="r">
+                      <span>CPS</span>
+                      <span>{record.Metadata.machineInfo.Score}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,7 +145,7 @@ function Home({ className }) {
                   <div className="line">
                     <div className="l">
                       <span>Start Time</span>
-                      <span>{record.Metadata.formData.buyTime}</span>
+                      <span>{new Date(record.OrderTime).toLocaleString()}</span>
                     </div>
                     <div className="r">
                       <span>Remaining Time</span>
@@ -150,42 +154,8 @@ function Home({ className }) {
                   </div>
                   <div className="line">
                     <div className="l">
-                      <span>Estimate the computing time</span>
-                      <span>{record.Duration}h</span>
-                    </div>
-                    <div className="r">
                       <span>Duration</span>
                       <span>{record.Duration}h</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Provider</span>
-                      <span>{record.Seller}</span>
-                    </div>
-                    {record.Metadata.formData.imageName ? (
-                      <div className="r">
-                        <span>Docker Image</span>
-                        <span>
-                          {record.Metadata.formData.imageName} :{" "}
-                          {record.Metadata.formData.imageTag}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="r">
-                        <span>Libery</span>
-                        <span>{record.Metadata.formData.libery}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Dataset Size</span>
-                      <span>{record.Metadata.formData.batchsize}MB</span>
-                    </div>
-                    <div className="r">
-                      <span>Dataset URL</span>
-                      <span>{record.Metadata.formData.dataUrl}</span>
                     </div>
                   </div>
                   <div className="line">
@@ -227,9 +197,6 @@ function Home({ className }) {
                   <label>{record.StatusName}</label>
                 </div>
                 <div className="r">
-                  <span className="pointer" onClick={() => setShowLogs(true)}>
-                    LOG
-                  </span>
                   {record.Status === 0 ? (
                     <label
                       className="pointer"
@@ -512,10 +479,8 @@ export default styled(Home)`
         background-color: #f7dfd8;
       }
       .pointer {
-        background-color: #92d5e1;
-      }
-      .pointer:hover {
-        background-color: #bae5ee !important;
+        color: white !important;
+        background-image: linear-gradient(to right, #20ae98, #0aab50);
       }
       .disable {
         cursor: not-allowed;
