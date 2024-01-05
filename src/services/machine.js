@@ -1,7 +1,6 @@
 import cache from "../utils/store";
 import * as utils from "../utils";
 import request from "../utils/request";
-import webconfig from "../webconfig";
 import { formatAddress, formatBalance } from "../utils/format";
 
 export async function getMachineDetailById(id) {
@@ -142,6 +141,7 @@ function formatMachine(item) {
     }
     item.TFLOPS = item.Tflops;
     item.SecurityLevel = parseInt(item.Metadata?.SecurityLevel);
+    item.IP = item.Metadata.Ip.ip;
   } catch (e) {
     console.log(e);
   }

@@ -7,7 +7,7 @@ body {
   background-image: url("../public/img/background.jpg");
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 100%;
+  background-size: cover;
   font-family: 'Montserrat', sans-serif;
 }
 
@@ -22,17 +22,7 @@ body {
 .cbtn{
   height: 50px;
   line-height: 40px;
-  background-color: #0aab50 !important;
-}
-.cbtn:hover{
-  background-color: #0cd161 !important;
-}
-.cbtn2{
-  background-color: #0aab50 !important;
-  color:white!important;
-}
-.cbtn2:hover{
-  background-color: #0cd161 !important;
+  background-image: linear-gradient(to right, #20ae98, #0aab50);
   color:white!important;
 }
 @keyframes rotate {
