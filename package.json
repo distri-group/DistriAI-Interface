@@ -41,8 +41,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "start-proxy": "cd D:\\code\\nnws\\ && node start.js"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [

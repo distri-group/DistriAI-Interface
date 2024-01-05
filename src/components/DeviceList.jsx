@@ -1,14 +1,12 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { Spin, Empty, Button, Modal } from "antd";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import * as util from "../utils";
 import SolanaAction from "../components/SolanaAction";
-import { formatDataSource } from "../utils/format";
 
 function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   let navigate = useNavigate();
-  const [columns, setColumns] = useState([]);
   const [deviceToCancel, setDeviceToCancel] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
   const childRef = useRef();
@@ -19,18 +17,17 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       return util.showError("id not found");
     }
     let ret = await childRef.current.cancelOffer(id);
-    console.log(ret);
     if (ret.msg !== "ok") {
       setList([...list]);
       return util.showError(ret.msg);
     }
     if (reloadFunc) {
-      reloadFunc(id);
+      await reloadFunc(id);
       setBtnLoading(false);
+      setDeviceToCancel(null);
     }
   };
-  // 表格内容
-  let columnsS = [
+  let columns = [
     {
       title: isMyDevice ? "Device" : "Provider",
       width: "14%",
@@ -191,10 +188,6 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       },
     },
   ];
-  useEffect(() => {
-    formatDataSource(columnsS, list);
-    setColumns(columnsS);
-  }, [list]);
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
@@ -279,6 +272,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
             style={{ margin: "0 auto", display: "block", marginTop: "150px" }}
             className="cbtn"
             loading={btnLoading}
+            disabled={btnLoading}
             onClick={() => {
               cancelOffer(deviceToCancel);
             }}>
@@ -309,7 +303,6 @@ export default styled(Header)`
     border-radius: 4px;
     border: none;
     height: 31px;
-    /* line-height: 31px; */
     font-size: 14px;
     display: block;
     text-align: center;
@@ -323,12 +316,11 @@ export default styled(Header)`
     color: black;
   }
   .mini-btn0 {
-    background-color: #0aab50;
+    background-image: linear-gradient(to right, #20ae98, #0aab50);
     color: white;
-    :hover {
-      background-color: #0cd161;
-      color: white !important;
-    }
+  }
+  .mini-btn0:hover {
+    color: white !important;
   }
   .mini-btn1 {
     background-color: rgba(255, 185, 185, 1);

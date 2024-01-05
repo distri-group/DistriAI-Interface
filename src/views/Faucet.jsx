@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import _ from "lodash";
 import { Input, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import * as solana from "../services/solana";
@@ -25,7 +24,7 @@ function Home({ className }) {
     setLoading(true);
     let t = await solana.faucet(newAddr);
     setLoading(false);
-    if (t.msg == "ok") {
+    if (t.msg === "ok") {
       util.alert("Submitted successfully!");
     } else {
       util.alert(t.msg);
@@ -42,7 +41,7 @@ function Home({ className }) {
           <div className="form-row">
             <div className="tip1">
               1. Install the phantom extension from the{" "}
-              <a href="https://phantom.app/" target="_blank">
+              <a href="https://phantom.app/" target="_blank" rel="noreferrer">
                 Phantom.app
               </a>
             </div>
@@ -130,9 +129,6 @@ export default styled(Home)`
       }
     }
   }
-  .mini-btn {
-    border: 1px solid #fff;
-  }
   .con {
     width: 1210px;
     margin: 10px auto;
@@ -160,56 +156,9 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
   }
-  .mini-btn {
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 4px;
-    padding: 0 10px;
-    height: 30px;
-    line-height: 30px;
-    cursor: pointer;
-  }
   .ant-btn-primary {
     color: #000;
     height: 50px;
     line-height: 40px;
-  }
-  .mytable {
-    display: table;
-    border: 1px solid #fff;
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    .link {
-      color: #fff;
-      cursor: pointer;
-    }
-    .btn-link {
-      color: #fff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    th {
-      background-color: #92d5e1;
-      color: #000;
-      height: 40px;
-      line-height: 40px;
-      text-align: left;
-      padding: 0 10px;
-    }
-    tr td {
-      border-bottom: 1px solid #fff;
-      border-collapse: collapse;
-      height: 40px;
-      line-height: 40px;
-      padding: 0 10px;
-    }
-    tr:last-children {
-      td {
-        border-bottom: none;
-      }
-    }
   }
 `;

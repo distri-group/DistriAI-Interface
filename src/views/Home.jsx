@@ -41,7 +41,8 @@ function Home({ className }) {
             className="play-btn"
             href="https://www.youtube.com/watch?v=nOn8aBgtXiM"
             title="https://www.youtube.com/"
-            target="_blank">
+            target="_blank"
+            rel="noreferrer">
             {" "}
             Play Video
           </a>
@@ -53,15 +54,21 @@ function Home({ className }) {
             <div className="line-box2"></div>
             <div className="mini-boxs">
               <div className="img-box">
-                <img src="/img/home/box2-1.png" />
+                <img
+                  src="/img/home/box2-1.png"
+                  alt="Create an account on phantom"
+                />
                 <span>Create an account on phantom</span>
               </div>
               <div className="img-box">
-                <img src="/img/home/box2-2.png" />
+                <img
+                  src="/img/home/box2-2.png"
+                  alt="Select a provider of computing power"
+                />
                 <span>Select a provider of computing power</span>
               </div>
               <div className="img-box">
-                <img src="/img/home/box2-3.png" />
+                <img src="/img/home/box2-3.png" alt="Buy the computing power" />
                 <span>Buy the computing power</span>
               </div>
             </div>
@@ -120,9 +127,9 @@ function Home({ className }) {
           <div className="con">
             <div className="t1">Backer</div>
             <div className="pater">
-              <a className="l1"></a>
-              <a className="l3"></a>
-              <a className="l4"></a>
+              <span className="l1" />
+              <span className="l3" />
+              <span className="l4" />
             </div>
           </div>
         </div>
@@ -435,7 +442,7 @@ export default styled(Home)`
         flex-direction: row;
         width: 100%;
         height: 200px;
-        a {
+        span {
           width: 25%;
           background-repeat: no-repeat;
           background-position: center;
@@ -447,10 +454,6 @@ export default styled(Home)`
         }
         .l1 {
           background-image: url(/img/home/box5-1.png);
-        }
-        .l2 {
-          background-size: 80%;
-          background-image: url(/img/home/box5-2.png);
         }
         .l3 {
           background-size: 25%;

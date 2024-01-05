@@ -41,7 +41,6 @@ export async function getOrderList(pageIndex, filter, publicKey) {
       formatOrder(item);
     }
     let machinList = await getMachineList(true, 1);
-    console.log("Machine List", machinList);
     machinList = machinList.list;
     for (let item of list) {
       if (!item.MachineUuid) continue;
@@ -52,7 +51,6 @@ export async function getOrderList(pageIndex, filter, publicKey) {
         item.Metadata.machineInfo = tmp;
       }
     }
-    console.log(list);
     let obj = { list, total };
     cache.set("order-list", obj);
     return obj;
@@ -72,9 +70,7 @@ function formatOrder(item) {
     item.Total = formatBalance(item.Total);
 
     if (item.Status === 0) {
-      let endTime = moment(item.Metadata.formData.orderTime)
-        .add(item.Metadata.Duration, "hours")
-        .toDate();
+      let endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
       let result = getTimeDiff(new Date(), endTime);
       item.RemainingTime = result.value + " " + result.suffix;
     } else {
@@ -83,7 +79,7 @@ function formatOrder(item) {
     item.StatusName =
       item.Status === 0
         ? "Training"
-        : item.Status == 1
+        : item.Status === 1
         ? "Completed"
         : "Failed";
   } catch (e) {}

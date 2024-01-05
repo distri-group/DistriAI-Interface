@@ -8,11 +8,6 @@ const baseUrl = webconfig.apiUrl;
 
 let timer = null;
 const request = {
-  /**
-   * @param url
-   * @param options
-   * @returns {Promise<unknown>}
-   */
   request: function (url, options = {}) {
     url = baseUrl + url;
     if (!options.method) options.method = "get";
@@ -25,7 +20,6 @@ const request = {
           resolve(data);
         })
         .catch((error) => {
-          // 防抖
           clearTimeout(timer);
           timer = setTimeout(() => {
             console.log(error);
@@ -35,11 +29,6 @@ const request = {
         });
     });
   },
-  /**
-   * @param url
-   * @param options
-   * @returns {Promise<void>}
-   */
   get: async function (
     url,
     options = {
@@ -64,11 +53,6 @@ const request = {
     }
     return this.request(url, options);
   },
-  /**
-   * @param url
-   * @param options
-   * @returns {Promise<void>}
-   */
   post: async function (url, options = { method: "post" }) {
     options.method = "post";
     if (!options.headers) {
@@ -85,11 +69,6 @@ const request = {
     }
     return this.request(url, options);
   },
-  /**
-   * @param url
-   * @param options
-   * @returns {Promise<void>}
-   */
   put: async function (url, options = { method: "put" }) {
     options.method = "put";
     if (!options.headers) {

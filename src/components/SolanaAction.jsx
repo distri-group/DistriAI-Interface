@@ -23,7 +23,6 @@ function Home(props, ref) {
     renewOrder,
     cancelOffer,
     machineList,
-    orderList,
     getToken,
     getTokenAccountBalance,
   }));
@@ -42,7 +41,6 @@ function Home(props, ref) {
     setLoading(false);
     return result;
   };
-  // 购买机器
   const placeOrder = async (machinePublicKey, orderId, duration, metadata) => {
     setLoading(true);
     await solanaProgram.initProgram(connection, walletAn);
@@ -69,7 +67,6 @@ function Home(props, ref) {
       return result;
     });
   };
-  // 取消订单
   const cancelOffer = async (machinePublicKey) => {
     setLoading(true);
     solanaProgram.initProgram(connection, walletAn);
@@ -78,7 +75,6 @@ function Home(props, ref) {
     setLoading(false);
     return result;
   };
-  // 机器列表
   const machineList = async () => {
     setLoading(true);
     solanaProgram.initProgram(connection, walletAn);
@@ -86,18 +82,7 @@ function Home(props, ref) {
     setLoading(false);
     return result;
   };
-  // 订单列表
-  const orderList = async () => {
-    setLoading(true);
-    solanaProgram.initProgram(connection, walletAn);
-    let result = await solanaProgram.orderList();
-    console.log(result);
-    setLoading(false);
-    return result;
-  };
-  // Token 相关
   const getToken = async () => {
-    // 账户持有所有token合集
     const tokenAccounts = await connection.getTokenAccountsByOwner(
       walletAn.publicKey,
       {
@@ -114,25 +99,7 @@ function Home(props, ref) {
         `
       );
     });
-
-    // associated token account
-    const associatedTokenAccount = findAssociatedTokenAddress(
-      walletAn.publicKey,
-      mint
-    );
   };
-  // 根据钱包地址和代币地址获取 ata
-  const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {
-    return PublicKey.findProgramAddressSync(
-      [
-        walletAddress.toBuffer(),
-        TOKEN_PROGRAM_ID.toBuffer(),
-        tokenMintAddress.toBuffer(),
-      ],
-      ASSOCIATED_TOKEN_PROGRAM_ID
-    )[0];
-  };
-  // 根据铸币厂地址和用户地址查询用户指定代币账户余额
   const getTokenAccountBalance = async (mint, address) => {
     const [tokenAddress] = PublicKey.findProgramAddressSync(
       [address.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],

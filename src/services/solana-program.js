@@ -209,27 +209,6 @@ export async function getMachineList() {
   return ret;
 }
 
-export async function orderList() {
-  try {
-    if (!program) {
-      return { msg: "Please run initProgram first." };
-    }
-    const counterAccount = await program.account.order.all();
-    // console.log({ counterAccount });
-    // console.log(JSON.stringify(counterAccount, null, 2));
-    formatOrderList(counterAccount);
-    console.log({ counterAccount });
-    return { msg: "ok", list: counterAccount };
-  } catch (e) {
-    return { msg: e.message };
-  }
-}
-export async function getOrderList() {
-  let ret = await orderList();
-  ret.total = ret.list?.length;
-  return ret;
-}
-
 function uint8ArrayToString(u8a) {
   return Array.prototype.map
     .call(new Uint8Array(u8a), (x) => ("00" + x.toString(16)).slice(-2))
@@ -278,32 +257,12 @@ function formatMachineList(list) {
     }
   });
 }
-function formatOrderList(list) {
-  list.forEach((t) => {
-    try {
-      if (t.account.orderId) {
-        t.account.orderId = uint8ArrayToString(t.account.orderId);
-      }
-      if (t.account.machineId && Array.isArray(t.account.machineId)) {
-        t.account.machineId = uint8ArrayToString(t.account.machineId);
-      }
-      t.account.status = Object.keys(t.account.status)[0];
-      t.account.metadata = JSON.parse(t.account.metadata);
-      t.Price = parseInt(t.account.price.toString(10)) / LAMPORTS_PER_SOL;
-      t.Total = parseInt(t.account.total.toString(10)) / LAMPORTS_PER_SOL;
-      t.StatusName = t.account.status;
-      t.Uuid = t.publicKey.toString();
-    } catch (e) {
-      console.log(e);
-    }
-  });
-}
 
 function formatMachineStatus(str) {
   str = str.toLocaleLowerCase();
   return str === "renting" ? 2 : str === "idle" ? 0 : 1;
 }
-// 根据钱包地址和代币地址获取 ata
+
 const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {
   return PublicKey.findProgramAddressSync(
     [

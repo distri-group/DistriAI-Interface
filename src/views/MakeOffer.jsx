@@ -26,7 +26,6 @@ function Home({ className }) {
     if (detail) {
       setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
     }
-    console.log("***********device detail*****************");
     console.log(detail);
   };
   useEffect(() => {
@@ -40,16 +39,10 @@ function Home({ className }) {
     }
     inputValues[n] = value;
   };
-  /**
-   * 发送上架请求
-   * @returns
-   */
   const onSubmit = async () => {
-    console.log("id", id);
     let tprice = parseFloat(inputValues.price);
     let maxDuration = inputValues.duration;
     let disk = inputValues.disk;
-    // 输入验证
     if (tprice <= 0) {
       return util.showError("The price must be an integer greater than 0");
     }
@@ -84,7 +77,6 @@ function Home({ className }) {
       util.alert(e.message);
     }
   };
-  // 轮询查询状态是否改变
   const reloadList = async (id) => {
     setLoading(true);
     let res = await getMachineList(true, 1);
@@ -92,13 +84,11 @@ function Home({ className }) {
     let item_refresh = list.find((item) => item.Uuid === id);
     console.log("item_refresh", item_refresh);
     if (item_refresh.Status === 1) {
-      console.log("reload done!");
       util.showOK("Make offer success!");
       setLoading(false);
       util.loading(false);
       navigate("/mydevice/");
     } else {
-      console.log("reload");
       setTimeout(() => {
         reloadList(id);
       }, 1000);
@@ -250,8 +240,8 @@ export default styled(Home)`
     cursor: pointer;
   }
   .ant-btn-primary {
-    background-color: rgba(148, 214, 226, 1) !important;
-    color: #000;
+    background-image: linear-gradient(to right, #20ae98, #0aab50);
+    color: white;
     height: 50px;
     line-height: 40px;
     width: 130px;

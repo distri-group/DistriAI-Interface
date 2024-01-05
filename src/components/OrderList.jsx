@@ -3,20 +3,18 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { Spin, Empty, Button, Modal, message } from "antd";
 import React, { useState, useEffect } from "react";
-import { formatDataSource } from "../utils/format";
 import copy from "copy-to-clipboard";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { formatAddress } from "../utils/format";
 
 function Header({ className, list, loading }) {
   let navigate = useNavigate();
-  const [columns, setColumns] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(loading);
   const [decrypted, setDecrypted] = useState(false);
   const wallet = useAnchorWallet();
   let addr = wallet?.publicKey.toString();
-  let columnsS = [
+  let columns = [
     {
       title: "Time",
       width: "10%",
@@ -106,17 +104,19 @@ function Header({ className, list, loading }) {
         <div className="btns">
           <span
             onClick={() => setSelectedItem(record)}
-            className={`mini-btn key ${
+            className={`mini-btn ${
               (record.StatusName === "Completed" ||
                 record.Seller === formatAddress(addr)) &&
               "disabled"
-            }`}
-          />
+            }`}>
+            <span className="key" />
+          </span>
           <span
             onClick={() =>
-              navigate(
-                "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
-              )
+              // navigate(
+              //   "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
+              // )
+              window.open("172.16.2.70:8080")
             }
             className={`mini-btn ${
               (record.StatusName === "Completed" ||
@@ -138,11 +138,6 @@ function Header({ className, list, loading }) {
       ),
     },
   ];
-  useEffect(() => {
-    formatDataSource(columnsS, list);
-    console.log(list);
-    setColumns(columnsS);
-  }, [list]);
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
@@ -273,14 +268,15 @@ export default styled(Header)`
     line-height: 31px;
     cursor: pointer;
     font-size: 14px;
-    background-color: #0cd161;
+    /* background-color: #0cd161; */
+    background-image: linear-gradient(to right, #20ae98, #0aab50);
     display: inline-block;
     text-align: center;
     overflow: hidden;
   }
-  .mini-btn:hover {
+  /* .mini-btn:hover {
     background-color: #0cd161 !important;
-  }
+  } */
   .spin-box {
     width: 100%;
     height: 50px;
@@ -385,6 +381,7 @@ export default styled(Header)`
     background-repeat: no-repeat;
   }
   .disabled {
+    background-image: none;
     background-color: #4a4a4a;
     opacity: 0.5;
     pointer-events: none;

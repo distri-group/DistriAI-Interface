@@ -32,7 +32,6 @@ function Home({ className }) {
     setLoading(true);
     try {
       let res = await getFilterData();
-      console.log("FilterData", res);
       setFilterData(res);
       res.forEach((t) => {
         filter[t.name] = "all";
