@@ -5,7 +5,6 @@ import { Buffer } from "buffer";
 import { PublicKey } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
-  AccountLayout,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 window.Buffer = Buffer;
@@ -19,8 +18,6 @@ function Home(props, ref) {
     placeOrder,
     renewOrder,
     cancelOffer,
-    machineList,
-    getToken,
     getTokenAccountBalance,
   }));
   const makeOffer = async (machinePublicKey, price, duration, disk) => {
@@ -59,20 +56,6 @@ function Home(props, ref) {
       );
       return result;
     });
-  };
-
-  const machineList = async () => {
-    solanaProgram.initProgram(connection, walletAn);
-    let result = await solanaProgram.machineList();
-    return result;
-  };
-  const getToken = async () => {
-    const tokenAccounts = await connection.getTokenAccountsByOwner(
-      walletAn.publicKey,
-      {
-        programId: TOKEN_PROGRAM_ID,
-      }
-    );
   };
   const getTokenAccountBalance = async (mint, address) => {
     const [tokenAddress] = PublicKey.findProgramAddressSync(

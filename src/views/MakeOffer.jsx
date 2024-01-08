@@ -1,11 +1,9 @@
-// 确认上架机器
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import { Input, Button } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
-import { getMachineList } from "../services/machine";
 import SolanaAction from "../components/SolanaAction";
 
 let inputValues = {
@@ -76,20 +74,6 @@ function Home({ className }) {
       }
     } catch (e) {
       util.alert(e.message);
-    }
-  };
-  const reloadList = async (id) => {
-    setLoading(true);
-    let res = await getMachineList(true, 1);
-    let list = res.list;
-    let item_refresh = list.find((item) => item.Uuid === id);
-    console.log("item_refresh", item_refresh);
-    if (item_refresh.Status === 1) {
-      util.showOK("Make offer success!");
-    } else {
-      setTimeout(() => {
-        reloadList(id);
-      }, 1000);
     }
   };
 

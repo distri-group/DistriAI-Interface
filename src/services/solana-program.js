@@ -3,7 +3,6 @@ import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { formatBalance } from "../utils/format";
 import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
 import idl from "./idl.json";
@@ -133,7 +132,7 @@ export async function placeOrder(
       return { msg: "error", error: "walletAn is null" };
     }
     duration = new anchor.BN(duration);
-    metadata.machinePublicKey = publick.toString();
+    metadata.machinePublicKey = machinePublicKey;
     metadata = JSON.stringify(metadata);
     const transaction = await program.methods
       .placeOrder(orderId, duration, metadata)
@@ -187,75 +186,6 @@ export async function renewOrder(machinePublicKey, orderPublicKey, duration) {
     console.error(e);
     return { msg: e.message };
   }
-}
-export async function machineList() {
-  try {
-    if (!program) {
-      return { msg: "Please run initProgram first." };
-    }
-    const counterAccount = await program.account.machine.all();
-    formatMachineList(counterAccount);
-    console.log({ counterAccount });
-    return { msg: "ok", list: counterAccount };
-  } catch (e) {
-    return { msg: e.message };
-  }
-}
-export async function getMachineList() {
-  let ret = await machineList();
-  return ret;
-}
-
-function uint8ArrayToString(u8a) {
-  return Array.prototype.map
-    .call(new Uint8Array(u8a), (x) => ("00" + x.toString(16)).slice(-2))
-    .join("");
-}
-function formatMachineList(list) {
-  list.forEach((t) => {
-    try {
-      if (t.account.uuid && Array.isArray(t.account.uuid)) {
-        t.account.uuid = uint8ArrayToString(t.account.uuid);
-      }
-      t.publicKey = t.publicKey.toString();
-      t.Uuid = t.publicKey;
-      t.Status = formatMachineStatus(Object.keys(t.account.status)[0]);
-      t.Metadata = JSON.parse(t.account.metadata);
-      t.Addr = t.Metadata.Addr;
-
-      let item = t;
-
-      item.UuidShort = item.Metadata.MachineUUID.slice(-10);
-      item.Cpu = item.Metadata?.CPUInfo?.ModelName;
-      item.RAM = item.Metadata?.InfoMemory?.RAM.toFixed(0) + "GB";
-      item.AvailHardDrive =
-        item.Metadata?.DiskInfo?.TotalSpace.toFixed(0) + "GB";
-      item.UploadSpeed = item.Metadata?.SpeedInfo?.Upload;
-      item.DownloadSpeed = item.Metadata?.SpeedInfo?.Download;
-      item.Price = formatBalance(item.Price);
-      if (item.account.completedCount + item.account.failedCount <= 0) {
-        item.Reliability = "--";
-      } else {
-        item.Reliability =
-          parseInt(
-            (item.account.completedCount * 100) /
-              (item.account.completedCount + item.account.failedCount)
-          ) + "%";
-      }
-      item.Score = item.account.score;
-      item.TFLOPS = item.Tflops;
-      item.Region = item.Metadata.LocationInfo.Country;
-      item.GpuCount = item.Metadata.GPUInfo.Number;
-      item.Gpu = item.Metadata.GPUInfo.Model;
-    } catch (e) {
-      console.log(e);
-    }
-  });
-}
-
-function formatMachineStatus(str) {
-  str = str.toLocaleLowerCase();
-  return str === "renting" ? 2 : str === "idle" ? 0 : 1;
 }
 
 const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {

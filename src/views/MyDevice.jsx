@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from "react";
-import * as util from "../utils";
 import { getMachineList } from "../services/machine";
 import DeviceList from "../components/DeviceList";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -10,7 +9,6 @@ function Home({ className }) {
   const wallet = useAnchorWallet();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const loadList = async () => {
     setLoading(true);
     try {
@@ -24,6 +22,22 @@ function Home({ className }) {
   };
 
   useEffect(() => {
+    const loadList = async () => {
+      setLoading(true);
+      try {
+        let res = await getMachineList(
+          true,
+          1,
+          [],
+          wallet.publicKey.toString()
+        );
+        res.list.map((item) => (item.loading = false));
+        setList(res.list);
+      } catch (e) {
+        setList([]);
+      }
+      setLoading(false);
+    };
     loadList();
   }, [wallet?.publicKey]);
   return (
