@@ -8,7 +8,7 @@ import request from "../utils/request";
 
 export async function getOrderList(pageIndex, filter, publicKey) {
   try {
-    let apiUrl = "/api/order/mine";
+    let apiUrl = "/index-api/order/mine";
     let options = {
       data: {
         Page: pageIndex,
@@ -132,7 +132,7 @@ export async function getModelList() {
 
 export async function getLogList(orderUuid, pageIndex, pageSize) {
   try {
-    let apiUrl = "/api/log/list";
+    let apiUrl = "/index-api/log/list";
     let options = {
       data: {
         Page: pageIndex || 1,

@@ -20,7 +20,7 @@ export async function getMachineDetailByUuid(uuid) {
 }
 
 export async function getFilterData() {
-  let apiUrl = "/api/machine/filter";
+  let apiUrl = "/index-api/machine/filter";
   let ret = await request.post(apiUrl);
   if (ret.Msg !== "success") {
     utils.alert(ret.msg);
@@ -60,7 +60,9 @@ export async function getFilterData() {
 
 export async function getMachineList(isMine, pageIndex, filter, publicKey) {
   try {
-    let apiUrl = isMine ? "/api/machine/mine" : "/api/machine/market";
+    let apiUrl = isMine
+      ? "/index-api/machine/mine"
+      : "/index-api/machine/market";
     let options = {
       data: {
         Page: pageIndex,
