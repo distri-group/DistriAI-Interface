@@ -1,4 +1,4 @@
-import cache from "../utils/store";
+import * as store from "../utils/store";
 import * as util from "../utils";
 import moment from "moment";
 import { formatAddress, formatBalance } from "../utils/format";
@@ -52,7 +52,7 @@ export async function getOrderList(pageIndex, filter, publicKey) {
       }
     }
     let obj = { list, total };
-    cache.set("order-list", obj);
+    store.set("order-list", obj);
     return obj;
   } catch (e) {
     console.log(e);
@@ -111,13 +111,13 @@ export async function getDetailByUuid(uuid, publicKey) {
     util.showError("Order list not found.");
     return null;
   }
-  console.log("obj.list-----------------", obj.list);
   let orderDetail = obj.list.find((t) => t.Uuid === uuid);
   if (!orderDetail) {
     util.showError("Order detail of " + uuid + " not found.");
     console.log(obj.list);
     return null;
   }
+  console.log("Order Found", orderDetail);
   return orderDetail;
 }
 export async function getLiberyList() {

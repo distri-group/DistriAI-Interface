@@ -1,7 +1,5 @@
-import _ from "lodash";
 import * as util from "../utils";
 
-// const baseUrl = process.env.REACT_APP_BASE_API + "";
 import webconfig from "../webconfig";
 import { formdataify } from "../utils";
 const baseUrl = webconfig.apiUrl;

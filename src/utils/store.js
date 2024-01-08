@@ -1,6 +1,3 @@
-// 访问 localStorage
-export default { get, set, remove, clear };
-
 function get(key) {
   let str = localStorage.getItem(key);
   let json = null;
@@ -37,3 +34,5 @@ function remove(key) {
 function clear() {
   localStorage.clear();
 }
+
+export { get, set, remove, clear };

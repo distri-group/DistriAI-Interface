@@ -5,7 +5,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import Home from "./views/Home";
 import Buy from "./views/Buy";
-import "../node_modules/font-awesome/css/font-awesome.min.css";
 import Market from "./views/Market";
 import MakeOffer from "./views/MakeOffer";
 import OrderDetail from "./views/OrderDetail";
@@ -23,7 +22,6 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { ConfigProvider, theme } from "antd";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import Test from "./views/Test";
-import Ide from "./views/IDE";
 let tout = "";
 
 function App() {
@@ -66,7 +64,6 @@ function App() {
                 />
                 <Route path="/faucet/" element={<Faucet />} />
                 <Route path="/test/" element={<Test />} />
-                <Route path="/ide/:uuid" element={<Ide />} />
               </Routes>
               <Footer />
             </ConfigProvider>
