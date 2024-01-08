@@ -210,6 +210,10 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
                   <div className="spin-box">
                     <Spin size="large" />
                   </div>
+                ) : isMyDevice ? (
+                  <div className="empty-box">
+                    <span>Please add your machine in the client</span>
+                  </div>
                 ) : (
                   <Empty
                     description={"No item yet"}
@@ -551,6 +555,16 @@ export default styled(Header)`
           width: 11px;
         }
       }
+    }
+  }
+  .empty-box {
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    span {
+      color: #6e6e6e;
+      font-size: 14px;
     }
   }
 `;
