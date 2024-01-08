@@ -16,20 +16,20 @@ let inputValues = {
 
 function Home({ className }) {
   const { id } = useParams();
+  document.title = "Make Offer";
   let navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [maxStorage, setMaxStorage] = useState(0);
 
   const childRef = useRef();
-  const init = async () => {
-    let detail = await getMachineDetailByUuid(id);
-    if (detail) {
-      setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
-    }
-    console.log(detail);
-  };
   useEffect(() => {
-    document.title = "Make Offer";
+    const init = async () => {
+      let detail = await getMachineDetailByUuid(id);
+      if (detail) {
+        setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
+      }
+      console.log(detail);
+    };
     init();
   }, [id]);
   const onInput = (e, n) => {
@@ -64,10 +64,11 @@ function Home({ className }) {
         maxDuration,
         disk
       );
-
       if (result.msg === "ok") {
-        //ok
-        reloadList(id);
+        util.showOK("Make Offer Success.");
+        setLoading(false);
+        util.loading(false);
+        navigate("/mydevice/");
       } else {
         util.loading(false);
         setLoading(false);
@@ -85,9 +86,6 @@ function Home({ className }) {
     console.log("item_refresh", item_refresh);
     if (item_refresh.Status === 1) {
       util.showOK("Make offer success!");
-      setLoading(false);
-      util.loading(false);
-      navigate("/mydevice/");
     } else {
       setTimeout(() => {
         reloadList(id);

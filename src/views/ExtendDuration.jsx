@@ -42,37 +42,30 @@ function Home({ className }) {
     setBalance(res / LAMPORTS_PER_SOL);
     return res;
   };
-  const init = async () => {
-    setLoading(true);
-    let detail = await getDetailByUuid(id, wallet.publicKey.toString());
-    if (detail) {
-      setOrderDetail(detail);
-      if (detail.Metadata?.machineInfo) {
-        setDeviceDetail(detail.Metadata.machineInfo);
-      }
-    }
-    const mint = new PublicKey(webconfig.mintAddress);
-    getTokenBalance(mint, wallet.publicKey);
-    setLoading(false);
-  };
+
   useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      let detail = await getDetailByUuid(id, wallet.publicKey.toString());
+      if (detail) {
+        setOrderDetail(detail);
+        if (detail.Metadata?.machineInfo) {
+          setDeviceDetail(detail.Metadata.machineInfo);
+        }
+      }
+      const mint = new PublicKey(webconfig.mintAddress);
+      getTokenBalance(mint, wallet.publicKey);
+      setLoading(false);
+    };
     if (wallet?.publicKey) {
       init();
     }
-  }, [wallet]);
+  }, [wallet, id]);
   const valit = () => {
     if (amount === 0) {
       return "Payment token greater than 0.";
     }
     return null;
-  };
-  const reloadOrder = async () => {
-    let res = await getDetailByUuid(id, wallet.publicKey.toString());
-    if (orderDetail.Duration === res.Duration - formData.duration) {
-      return;
-    } else {
-      reloadOrder();
-    }
   };
   const onSubmit = async () => {
     let vmsg = valit();
@@ -80,16 +73,14 @@ function Home({ className }) {
       return util.alert(vmsg);
     }
     setLoading(true);
-    console.log({ formData, orderDetail });
+    console.log("OrderData", { formData, orderDetail });
     await childRef.current.renewOrder(
       orderDetail.Metadata.machineInfo.Uuid,
       stringToPublicKey(id).toString(),
       formData.duration
     );
-    reloadOrder();
     setLoading(false);
     navigate("/myorder");
-    return null;
   };
 
   const stringToPublicKey = (str) => {

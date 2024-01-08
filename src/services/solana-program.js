@@ -1,4 +1,3 @@
-// Solana 功能
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
@@ -40,14 +39,7 @@ export async function initProgram(conn, wallet) {
     console.error(error);
   }
 }
-export async function makeOffer(
-  connection,
-  walletAn,
-  machinePublicKey,
-  price,
-  maxDuration,
-  disk
-) {
+export async function makeOffer(machinePublicKey, price, maxDuration, disk) {
   try {
     if (!program) {
       return { msg: "Please run initProgram first." };
@@ -69,8 +61,10 @@ export async function makeOffer(
         owner: walletAn.publicKey,
       })
       .rpc();
-    console.log("transaction", transaction);
-    return { msg: "ok", data: transaction };
+    let res = await checkConfirmation(connection, transaction);
+    if (res) {
+      return { msg: "ok", data: transaction };
+    }
   } catch (e) {
     console.error(e);
     return { msg: e.message };
@@ -88,8 +82,10 @@ export async function cancelOffer(machinePublicKey) {
         owner: walletAn.publicKey,
       })
       .rpc();
-    console.log("transaction", transaction);
-    return { msg: "ok", data: transaction };
+    let res = await checkConfirmation(connection, transaction);
+    if (res) {
+      return { msg: "ok", data: transaction };
+    }
   } catch (e) {
     return { msg: e.message };
   }
@@ -114,7 +110,6 @@ export async function placeOrder(
   duration,
   metadata
 ) {
-  console.log({ machinePublicKey, orderId, duration, metadata });
   try {
     if (!program) {
       return { msg: "Please run initProgram first." };
@@ -134,11 +129,9 @@ export async function placeOrder(
       seeds,
       new PublicKey(PROGRAM_ID)
     );
-    console.log("OrderPublicKey", publick.toString());
     if (!walletAn || !walletAn.publicKey) {
       return { msg: "error", error: "walletAn is null" };
     }
-
     duration = new anchor.BN(duration);
     metadata.machinePublicKey = publick.toString();
     metadata = JSON.stringify(metadata);
@@ -155,7 +148,10 @@ export async function placeOrder(
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
       .rpc();
-    return { msg: "ok", data: transaction };
+    let res = await checkConfirmation(connection, transaction);
+    if (res) {
+      return { msg: "ok", data: transaction };
+    }
   } catch (e) {
     console.error(e);
     return { msg: e.message };
@@ -183,7 +179,10 @@ export async function renewOrder(machinePublicKey, orderPublicKey, duration) {
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
       .rpc();
-    return { msg: "ok", data: transaction };
+    let res = await checkConfirmation(connection, transaction);
+    if (res) {
+      return { msg: "ok", data: transaction };
+    }
   } catch (e) {
     console.error(e);
     return { msg: e.message };
@@ -195,8 +194,6 @@ export async function machineList() {
       return { msg: "Please run initProgram first." };
     }
     const counterAccount = await program.account.machine.all();
-    // console.log({ counterAccount });
-    // console.log(JSON.stringify(counterAccount, null, 2));
     formatMachineList(counterAccount);
     console.log({ counterAccount });
     return { msg: "ok", list: counterAccount };
@@ -248,8 +245,6 @@ function formatMachineList(list) {
       item.Score = item.account.score;
       item.TFLOPS = item.Tflops;
       item.Region = item.Metadata.LocationInfo.Country;
-
-      //col 2
       item.GpuCount = item.Metadata.GPUInfo.Number;
       item.Gpu = item.Metadata.GPUInfo.Model;
     } catch (e) {
@@ -281,4 +276,24 @@ export const getVault = async () => {
     new PublicKey(webconfig.contractAddress)
   );
   return publick;
+};
+
+const checkConfirmation = async (connection, tx) => {
+  return new Promise(async (resolve) => {
+    const latestBlockHash = connection.getLatestBlockhash();
+    const confirmation = await connection.confirmTransaction(tx, {
+      blockhash: latestBlockHash,
+      lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+      signature: tx,
+    });
+    const confirmed = confirmation.value.confirmationStatus === "finalized";
+    if (confirmed) {
+      resolve(true);
+    } else {
+      setTimeout(() => {
+        const res = checkConfirmation(connection, tx);
+        resolve(res);
+      }, 1000);
+    }
+  });
 };

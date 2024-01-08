@@ -1,10 +1,10 @@
-import cache from "../utils/store";
+import * as store from "../utils/store";
 import * as utils from "../utils";
 import request from "../utils/request";
 import { formatAddress, formatBalance } from "../utils/format";
 
 export async function getMachineDetailById(id) {
-  let obj = cache.get("all-machine-list");
+  let obj = store.get("all-machine-list");
   if (!obj) {
     return null;
   }
@@ -12,7 +12,7 @@ export async function getMachineDetailById(id) {
 }
 
 export async function getMachineDetailByUuid(uuid) {
-  let obj = cache.get("all-machine-list");
+  let obj = store.get("all-machine-list");
   if (!obj) {
     return null;
   }
@@ -54,7 +54,7 @@ export async function getFilterData() {
       { label: "Reliability", value: "reliability" },
     ],
   });
-  cache.set("filter-list", list);
+  store.set("filter-list", list);
   return list;
 }
 
@@ -96,8 +96,8 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
     }
     let obj = { list, total };
     console.log("Machine List", list);
-    cache.set("curr-machine-list", obj);
-    let allList = cache.get("all-machine-list") || [];
+    store.set("curr-machine-list", obj);
+    let allList = store.get("all-machine-list") || [];
     list.forEach((t) => {
       let index = allList.findIndex((a) => a.Uuid === t.Uuid);
       if (index === -1) {
@@ -106,7 +106,7 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
         allList[index] = t;
       }
     });
-    cache.set("all-machine-list", allList);
+    store.set("all-machine-list", allList);
     return obj;
   } catch (e) {
     console.log(e);
@@ -125,6 +125,7 @@ function formatMachine(item) {
     if (item.Metadata?.MachineUUID) {
       item.UuidShort = item.Metadata.MachineUUID.slice(-10);
     }
+    item.Score = item.Metadata?.Score?.toFixed(2) || 0;
     item.Cpu = item.Metadata?.CPUInfo?.ModelName;
     item.RAM = item.Metadata?.InfoMemory?.RAM.toFixed(0) + "GB";
     item.AvailHardDrive = item.Metadata?.DiskInfo?.TotalSpace.toFixed(0) + "GB";

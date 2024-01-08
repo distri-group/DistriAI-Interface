@@ -112,12 +112,13 @@ function Header({ className, list, loading }) {
             <span className="key" />
           </span>
           <span
-            onClick={() =>
-              // navigate(
-              //   "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
-              // )
-              window.open("172.16.2.70:8080")
-            }
+            onClick={() => {
+              if (record.Metadata.machineInfo.IP === "172.18.232.45") {
+                window.open("http://172.16.2.70:8080");
+              } else {
+                window.open(`http://${record.Metadata.machineInfo.IP}:8080`);
+              }
+            }}
             className={`mini-btn ${
               (record.StatusName === "Completed" ||
                 record.Seller === formatAddress(addr)) &&
@@ -268,15 +269,11 @@ export default styled(Header)`
     line-height: 31px;
     cursor: pointer;
     font-size: 14px;
-    /* background-color: #0cd161; */
     background-image: linear-gradient(to right, #20ae98, #0aab50);
     display: inline-block;
     text-align: center;
     overflow: hidden;
   }
-  /* .mini-btn:hover {
-    background-color: #0cd161 !important;
-  } */
   .spin-box {
     width: 100%;
     height: 50px;

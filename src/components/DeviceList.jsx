@@ -17,15 +17,14 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       return util.showError("id not found");
     }
     let ret = await childRef.current.cancelOffer(id);
-    if (ret.msg !== "ok") {
+    if (ret?.msg !== "ok") {
       setList([...list]);
       return util.showError(ret.msg);
     }
-    if (reloadFunc) {
-      await reloadFunc(id);
-      setBtnLoading(false);
-      setDeviceToCancel(null);
-    }
+    setBtnLoading(false);
+    setDeviceToCancel(null);
+    util.showOK("Cancel Offer Success.");
+    reloadFunc();
   };
   let columns = [
     {

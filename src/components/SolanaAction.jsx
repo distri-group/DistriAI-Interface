@@ -8,15 +8,12 @@ import {
   AccountLayout,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import webconfig from "../webconfig";
 window.Buffer = Buffer;
 window.global = window;
 
 function Home(props, ref) {
   const { connection } = useConnection();
   const walletAn = useAnchorWallet();
-  const setLoading = () => {};
-  const mint = new PublicKey(webconfig.mintAddress);
   useImperativeHandle(ref, () => ({
     makeOffer,
     placeOrder,
@@ -26,23 +23,22 @@ function Home(props, ref) {
     getToken,
     getTokenAccountBalance,
   }));
-  // 机器上架
   const makeOffer = async (machinePublicKey, price, duration, disk) => {
-    setLoading(true);
     solanaProgram.initProgram(connection, walletAn);
     let result = await solanaProgram.makeOffer(
-      connection,
-      walletAn,
       machinePublicKey,
       parseFloat(price),
       duration,
       disk
     );
-    setLoading(false);
+    return result;
+  };
+  const cancelOffer = async (machinePublicKey) => {
+    solanaProgram.initProgram(connection, walletAn);
+    let result = await solanaProgram.cancelOffer(machinePublicKey);
     return result;
   };
   const placeOrder = async (machinePublicKey, orderId, duration, metadata) => {
-    setLoading(true);
     await solanaProgram.initProgram(connection, walletAn);
     let result = await solanaProgram.placeOrder(
       machinePublicKey,
@@ -51,35 +47,23 @@ function Home(props, ref) {
       metadata
     );
     console.log(result);
-    setLoading(false);
     return result;
   };
   const renewOrder = async (machinePublicKey, orderPublicKey, duration) => {
     console.log({ machinePublicKey, orderPublicKey, duration });
-    setLoading(true);
     solanaProgram.initProgram(connection, walletAn).then(async () => {
       let result = await solanaProgram.renewOrder(
         machinePublicKey,
         orderPublicKey,
         duration
       );
-      setLoading(false);
       return result;
     });
   };
-  const cancelOffer = async (machinePublicKey) => {
-    setLoading(true);
-    solanaProgram.initProgram(connection, walletAn);
-    let result = await solanaProgram.cancelOffer(machinePublicKey);
-    console.log(result);
-    setLoading(false);
-    return result;
-  };
+
   const machineList = async () => {
-    setLoading(true);
     solanaProgram.initProgram(connection, walletAn);
     let result = await solanaProgram.machineList();
-    setLoading(false);
     return result;
   };
   const getToken = async () => {
@@ -89,16 +73,6 @@ function Home(props, ref) {
         programId: TOKEN_PROGRAM_ID,
       }
     );
-    console.log("Token List:");
-    tokenAccounts.value.forEach((tokenAccount) => {
-      const accountData = AccountLayout.decode(tokenAccount.account.data);
-      console.log(
-        `
-        ${new PublicKey(accountData.mint)}
-        ${accountData.amount}
-        `
-      );
-    });
   };
   const getTokenAccountBalance = async (mint, address) => {
     const [tokenAddress] = PublicKey.findProgramAddressSync(

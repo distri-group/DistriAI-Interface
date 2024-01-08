@@ -46,7 +46,7 @@ function Home({ className }) {
     if (wallet?.publicKey) {
       loadList(1);
     }
-  }, [wallet]);
+  }, [wallet?.publicKey]);
 
   const onFilter = (v, n) => {
     filter[n] = v;

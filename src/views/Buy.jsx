@@ -51,12 +51,7 @@ function Home({ className }) {
       setAmount(value * deviceDetail.Price);
     }
   };
-  const init = async () => {
-    let detail = await getMachineDetailByUuid(id);
-    if (detail) {
-      setDeviceDetail(detail);
-    }
-  };
+
   useEffect(() => {
     const mint = new PublicKey(webconfig.mintAddress);
     const getBalance = async () => {
@@ -70,18 +65,14 @@ function Home({ className }) {
     if (wallet?.publicKey) {
       getBalance();
     }
+    const init = async () => {
+      let detail = await getMachineDetailByUuid(id);
+      if (detail) {
+        setDeviceDetail(detail);
+      }
+    };
     init();
   }, [id, wallet]);
-  const reloadOrder = async () => {
-    let res = await getOrderList(1, [], wallet.publicKey.toString());
-    if (index === res.total) {
-      return;
-    } else {
-      setTimeout(() => {
-        reloadOrder();
-      });
-    }
-  };
   const valit = () => {
     if (!formData.taskName) {
       formData.taskName = `Computing Task - ${index}`;
@@ -101,9 +92,8 @@ function Home({ className }) {
     if (ret.msg !== "ok") {
       return util.alert(ret.msg);
     }
-    reloadOrder();
     setLoading(false);
-    util.showOK("Purchase Successfully");
+    util.showOK("Purchase Successfully.");
     navigate("/myorder");
   };
   async function placeOrderStart(deviceDetail, formData) {

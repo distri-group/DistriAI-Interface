@@ -23,32 +23,9 @@ function Home({ className }) {
     setLoading(false);
   };
 
-  const reloadList = async (id) => {
-    setLoading(true);
-    let res = await getMachineList(true, 1);
-    let list_refresh = res.list;
-    let uid = id;
-    console.log(
-      "status",
-      list_refresh[list_refresh.findIndex((item) => item.Uuid === uid)].Status
-    );
-    if (
-      list_refresh[list_refresh.findIndex((item) => item.Uuid === uid)]
-        .Status === 1
-    ) {
-      setTimeout(() => {
-        reloadList(id);
-      }, 1000);
-    } else {
-      util.showOK("Cancel offer success!");
-      setList(list_refresh);
-      setLoading(false);
-      return true;
-    }
-  };
   useEffect(() => {
     loadList();
-  }, []);
+  }, [wallet?.publicKey]);
   return (
     <div className={className}>
       <div className="hold"></div>
@@ -60,7 +37,7 @@ function Home({ className }) {
             setList={setList}
             isMyDevice={true}
             loading={loading}
-            reloadFunc={reloadList}
+            reloadFunc={loadList}
           />
         </div>
       </div>
