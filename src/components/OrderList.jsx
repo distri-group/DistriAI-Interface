@@ -357,11 +357,11 @@ export default styled(Header)`
       text-align: center;
     }
   }
-  .status-Training {
-    color: #faffa6;
+  .status-Available {
+    color: #bdff95;
   }
   .status-Completed {
-    color: #bdff95;
+    color: #878787;
   }
   .status-Failed {
     color: #ffb9b9;

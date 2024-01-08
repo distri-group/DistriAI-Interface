@@ -78,7 +78,7 @@ function formatOrder(item) {
     }
     item.StatusName =
       item.Status === 0
-        ? "Training"
+        ? "Available"
         : item.Status === 1
         ? "Completed"
         : "Failed";
@@ -98,7 +98,7 @@ export async function getFilterData() {
     name: "Status",
     arr: [
       { label: "All Status", value: "all" },
-      { label: "Training", value: "0" },
+      { label: "Available", value: "0" },
       { label: "Completed", value: "1" },
       { label: "Failed", value: "2" },
     ],
