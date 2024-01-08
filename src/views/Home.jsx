@@ -21,7 +21,7 @@ function Home({ className }) {
     subscribe(data).then((t) => {
       console.log(t);
       message.destroy();
-      message.success("Success.");
+      message.success("Email Subscribed.");
     });
   };
   const validateEmail = (email) => {
@@ -514,6 +514,7 @@ export default styled(Home)`
         .email-submit {
           border: none;
           border-radius: 25px;
+          cursor: pointer;
           background-image: linear-gradient(to right, #20ae98, #0aab50);
           span {
             display: block;

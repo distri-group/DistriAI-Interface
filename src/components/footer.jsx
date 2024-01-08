@@ -5,18 +5,30 @@ function Header({ className }) {
     <div className={className}>
       <div className="container">
         <div className="copyright">
-          Copyright © DistriAI 2023 All Rights Reserved
+          Copyright © DistriAI 2024 All Rights Reserved
         </div>
         <div className="pater">
           <a
             className="l1"
             target="_blank"
-            href="https://github.com/distri-group"></a>
+            rel="noreferrer"
+            href="https://github.com/distri-group">
+            {" "}
+          </a>
           <a
             className="l3"
             target="_blank"
-            href="https://twitter.com/MatrixAI_web3"></a>
-          <a className="l4" target="_blank" href="https://t.me/hanleeeeeee"></a>
+            rel="noreferrer"
+            href="https://twitter.com/DistriAI_web3">
+            {" "}
+          </a>
+          <a
+            className="l4"
+            target="_blank"
+            rel="noreferrer"
+            href="https://discord.gg/CgQZGcSb9V">
+            {" "}
+          </a>
         </div>
       </div>
     </div>
@@ -42,19 +54,19 @@ export default styled(Header)`
       width: 25%;
       background-repeat: no-repeat;
       background-position: center;
-      height: 20px;
+      height: 30px;
       display: block;
       overflow: hidden;
-      background-size: 29%;
+      background-size: 40%;
     }
     .l1 {
-      background-image: url(/img/home/mail.svg);
+      background-image: url(/img/home/github.svg);
     }
     .l3 {
       background-image: url(/img/home/twitter.svg);
     }
     .l4 {
-      background-image: url(/img/home/tg.svg);
+      background-image: url(/img/home/discord.svg);
     }
   }
   .copyright {
