@@ -127,11 +127,7 @@ function Header({ className, list, loading }) {
             Console
           </span>
           <span
-            onClick={() =>
-              navigate(
-                "/order-detail/" + record.Metadata.machinePublicKey + "/" + text
-              )
-            }
+            onClick={() => navigate("/order-detail/" + text)}
             className="mini-btn">
             Detail
           </span>

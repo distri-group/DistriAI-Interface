@@ -1,66 +1,35 @@
-// 订单详情页
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import { Spin } from "antd";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
-import { getDetailByUuid, getLogList } from "../services/order";
-import { XTerm } from "xterm-for-react";
+import { getDetailByUuid } from "../services/order";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-const showLogType = "xterm";
+import { formatAddress } from "../utils/format";
 
 function Home({ className }) {
-  const xtermRef = useRef(null);
-  const { id, uuid } = useParams();
+  const { uuid } = useParams();
   document.title = "Order detail";
   let navigate = useNavigate();
-  const [logs, setLogs] = useState([]);
   const [record, setRecord] = useState();
-  const [showLogs, setShowLogs] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingLog, setLoadingLog] = useState(false);
   const wallet = useAnchorWallet();
 
-  const loadDetail = async () => {
-    setLoading(true);
-    try {
-      let res = await getDetailByUuid(uuid, wallet.publicKey.toString());
-      setRecord(res);
-      console.log(record);
-    } catch (e) {
-      console.log(e);
-    }
-    setLoading(false);
-    loadLogs();
-  };
-  const loadLogs = async () => {
-    setLoadingLog(true);
-    try {
-      let res = await getLogList(uuid, 1, 100);
-      console.log(res);
-      setLogs(res.list);
-      if (showLogType === "xterm") {
-        setTimeout(function () {
-          initTerm(res.list);
-        }, 1000);
-      }
-    } catch (e) {}
-    setLoadingLog(false);
-  };
-
   useEffect(() => {
+    const loadDetail = async () => {
+      setLoading(true);
+      try {
+        let res = await getDetailByUuid(uuid, wallet.publicKey.toString());
+        setRecord(res);
+      } catch (e) {
+        console.log(e);
+      }
+      setLoading(false);
+    };
     if (wallet?.publicKey) {
       loadDetail();
     }
-  }, [id, wallet]);
-
-  const initTerm = (list) => {
-    list.forEach((t) => {
-      t.ContentArr.forEach((c) => {
-        xtermRef.current.terminal.writeln(c);
-      });
-    });
-  };
+  }, [uuid, wallet]);
 
   return (
     <div className={className}>
@@ -197,25 +166,19 @@ function Home({ className }) {
                   <label>{record.StatusName}</label>
                 </div>
                 <div className="r">
-                  {record.Status === 0 ? (
-                    <label
-                      className="pointer"
-                      onClick={() =>
-                        navigate("/extend-duration/" + record.Uuid)
-                      }>
-                      Extend Duration
-                    </label>
-                  ) : record.Status === 1 &&
-                    record.Metadata.formData.libType === "lib" ? (
-                    <label
-                      className="pointer"
-                      onClick={() =>
-                        window.open(record.Metadata.formData.modelUrl)
-                      }>
-                      Download Result
-                    </label>
-                  ) : (
-                    <label className="disable">Extend Duration</label>
+                  {record.Buyer ===
+                    formatAddress(wallet.publicKey.toString()) && (
+                    <>
+                      {record.Status === 0 && (
+                        <label
+                          className="pointer"
+                          onClick={() =>
+                            navigate("/extend-duration/" + record.Uuid)
+                          }>
+                          Extend Duration
+                        </label>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -223,27 +186,6 @@ function Home({ className }) {
           ) : (
             "No Data"
           )}
-        </div>
-      </div>
-      <div className={showLogs ? "log-box is-show" : "log-box"}>
-        <div className="log-header">
-          <div className="log-header-con">
-            Log
-            <div className="log-btn">
-              <span onClick={loadLogs} title="Refresh">
-                <i className={loadingLog ? "rotate" : ""}></i>
-              </span>
-              <label onClick={() => setShowLogs(false)} title="Close">
-                <i></i>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="log-body">
-          <div className="log-list">
-            {logs.length === 0 ? <div className="log-item">No Data</div> : ""}
-            <XTerm ref={xtermRef} />
-          </div>
         </div>
       </div>
     </div>
@@ -403,10 +345,10 @@ export default styled(Home)`
           font-size: 14px;
         }
         .l {
-          width: 50%;
+          width: 60%;
         }
         .r {
-          width: 50%;
+          width: 40%;
         }
       }
     }

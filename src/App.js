@@ -51,10 +51,7 @@ function App() {
                 <Route path="/makeoffer/:id" element={<MakeOffer />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/market/" element={<Market />} />
-                <Route
-                  path="/order-detail/:id/:uuid"
-                  element={<OrderDetail />}
-                />
+                <Route path="/order-detail/:uuid" element={<OrderDetail />} />
                 <Route path="/buy/:id" element={<Buy />} />
                 <Route path="/mydevice/" element={<MyDevice />} />
                 <Route path="/myorder/" element={<MyOrder />} />
