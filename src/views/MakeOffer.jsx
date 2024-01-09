@@ -1,15 +1,15 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input, Button } from "antd";
+import { Input, Button, InputNumber } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
 import SolanaAction from "../components/SolanaAction";
 
 let inputValues = {
-  price: 1,
-  duration: 1,
-  disk: 1,
+  price: 0,
+  duration: 0,
+  disk: 0,
 };
 
 function Home({ className }) {
@@ -17,6 +17,7 @@ function Home({ className }) {
   document.title = "Make Offer";
   let navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [price, setPrice] = useState(0);
   const [maxStorage, setMaxStorage] = useState(0);
 
   const childRef = useRef();
@@ -26,9 +27,15 @@ function Home({ className }) {
       if (detail) {
         setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
       }
-      console.log(detail);
     };
     init();
+    return () => {
+      inputValues = {
+        price: 0,
+        duration: 0,
+        disk: 0,
+      };
+    };
   }, [id]);
   const onInput = (e, n) => {
     let value = parseInt(e.target.value);
@@ -37,12 +44,16 @@ function Home({ className }) {
     }
     inputValues[n] = value;
   };
+  const onPriceChange = (value) => {
+    let price = parseFloat(value).toFixed(2);
+    setPrice(price);
+  };
   const onSubmit = async () => {
-    let tprice = parseFloat(inputValues.price);
+    let tprice = parseFloat(price);
     let maxDuration = inputValues.duration;
     let disk = inputValues.disk;
     if (tprice <= 0) {
-      return util.showError("The price must be an integer greater than 0");
+      return util.showError("The price must greater than 0");
     }
     if (maxDuration <= 0) {
       return util.showError(
@@ -86,11 +97,11 @@ function Home({ className }) {
         <div className="myform">
           <div className="form-row">
             <div className="row-txt">Price (per hour)</div>
-            <Input
-              onChange={(e) => onInput(e, "price")}
-              type="number"
+            <InputNumber
+              value={price}
+              onChange={onPriceChange}
               className="my-input"
-              placeholder="Enter an integer"
+              placeholder="Enter the price per hour"
               min={0}
               max={99999}
             />
@@ -136,8 +147,8 @@ function Home({ className }) {
                   height: "24px",
                 }}
               />
-              <span className="num" style={{ fontSize: 28 }}>
-                {inputValues.price}
+              <span className="num" style={{ fontSize: 28, margin: "0 10px" }}>
+                {price}
               </span>
               <label
                 style={{ fontSize: 13, color: "#bbb", fontWeight: "normal" }}>
@@ -167,6 +178,9 @@ export default styled(Home)`
   width: 100%;
   height: 100vh;
   color: #fff;
+  .my-input {
+    width: 100%;
+  }
   .mini-btn {
     border: 1px solid #fff;
   }
