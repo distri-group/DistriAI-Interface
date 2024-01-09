@@ -103,7 +103,7 @@ export default styled(Home)`
         color: #797979;
         line-height: 30px;
         a {
-          font-family: "Montserrat", sans-serif;
+          font-family: Montserrat, sans-serif;
           font-weight: 400;
           font-style: normal;
           font-size: 16px;
@@ -135,7 +135,7 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     .title {
-      font-family: "Montserrat Bold", "Montserrat", sans-serif;
+      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;
@@ -145,7 +145,7 @@ export default styled(Home)`
       text-align: center;
     }
     .title2 {
-      font-family: "Montserrat Bold", "Montserrat", sans-serif;
+      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-size: 16px;
       color: #797979;
       text-align: center;

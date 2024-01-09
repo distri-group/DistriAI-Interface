@@ -162,19 +162,8 @@ function Home({ className }) {
 
 export default styled(Home)`
   display: block;
-  font-family: "Montserrat", "Montserrat Bold", "Montserrat Regular", sans-serif;
-  @font-face {
-    font-family: "Montserrat Bold";
-    src: url("/font/Montserrat-Bold.ttf");
-  }
-  @font-face {
-    font-family: "Montserrat Regular";
-    src: url("/font/Montserrat-Regular.ttf");
-  }
-  @font-face {
-    font-family: "Montserrat";
-    src: url("/font/Montserrat.ttf");
-  }
+  font-family: Montserrat, Montserrat Bold, Montserrat, sans-serif;
+
   .content {
     min-width: 1200px;
     display: block;
@@ -230,7 +219,7 @@ export default styled(Home)`
       margin: 42px auto;
       background-color: rgba(0, 0, 0, 1);
       border-radius: 5px;
-      font-family: "Montserrat", sans-serif;
+      font-family: Montserrat, sans-serif;
       font-weight: 400;
       font-size: 14px;
       color: #ffffff;
@@ -301,7 +290,7 @@ export default styled(Home)`
           color: #fff;
           text-align: center;
           overflow: hidden;
-          font-family: "Montserrat", sans-serif;
+          font-family: Montserrat, sans-serif;
         }
       }
     }
@@ -320,8 +309,7 @@ export default styled(Home)`
       display: block;
       padding: 117px 0;
       h3 {
-        font-family: "Montserrat Bold", "Montserrat Regular", "Montserrat",
-          sans-serif;
+        font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
         font-weight: 700;
         font-style: normal;
         font-size: 40px;
@@ -342,8 +330,7 @@ export default styled(Home)`
           margin-top: 57px;
           font {
             width: 100%;
-            font-family: "Montserrat Bold", "Montserrat Regular", "Montserrat",
-              sans-serif;
+            font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
             font-weight: 700;
             font-style: normal;
             font-size: 18px;
@@ -353,7 +340,7 @@ export default styled(Home)`
             margin-top: 122px;
           }
           label {
-            font-family: "Montserrat", sans-serif;
+            font-family: Montserrat, sans-serif;
             font-weight: 400;
             font-style: normal;
             font-size: 14px;
@@ -386,15 +373,14 @@ export default styled(Home)`
         h2 {
           margin-top: 0;
           margin-bottom: 0.5em;
-          font-family: "Montserrat Bold", "Montserrat Regular", "Montserrat",
-            sans-serif;
+          font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
           font-weight: 700;
           font-style: normal;
           font-size: 40px;
           color: white;
         }
         span {
-          font-family: "Montserrat", sans-serif;
+          font-family: Montserrat, sans-serif;
           font-weight: 400;
           font-style: normal;
           font-size: 16px;
@@ -482,8 +468,7 @@ export default styled(Home)`
         font-size: 40px;
         color: #ffffff;
         text-align: center;
-        font-family: "Montserrat Bold", "Montserrat Regular", "Montserrat",
-          sans-serif;
+        font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
       }
       .t2 {
         width: 653px;
@@ -494,7 +479,7 @@ export default styled(Home)`
         display: block;
         line-height: 24px;
         margin: 20px auto;
-        font-family: "Montserrat", sans-serif;
+        font-family: Montserrat, sans-serif;
       }
       .sub-box {
         display: flex;

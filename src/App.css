@@ -8,7 +8,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  font-family: 'Montserrat', sans-serif;
+  font-family: Montserrat, sans-serif;
 }
 
 .pointer {
@@ -87,7 +87,7 @@ body {
   }
 }
 .big-title {
-  font-family: 'Montserrat Bold', 'Montserrat', sans-serif;
+  font-family: Montserrat Bold, Montserrat, sans-serif;
   font-weight: 700;
   font-style: normal;
   font-size: 72px;
@@ -96,7 +96,7 @@ body {
   margin-bottom: 0;
 }
 .con-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: Montserrat, sans-serif;
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
@@ -177,7 +177,7 @@ body {
   }
 
   .mymodal-title {
-    font-family: 'Montserrat Bold', 'Montserrat', sans-serif;
+    font-family: Montserrat Bold, Montserrat, sans-serif;
     font-weight: 700;
     font-style: normal;
     font-size: 72px;
@@ -260,7 +260,7 @@ body {
     left:0;
 
     .row-txt {
-      font-family: 'Montserrat', sans-serif;
+      font-family: Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 16px;
@@ -279,7 +279,7 @@ body {
     }
 
     .more {
-      font-family: 'Montserrat', sans-serif;
+      font-family: Montserrat, sans-serif;
       font-size: 14px;
       color: #7F7F7F;
       padding-top: 12px;

@@ -217,7 +217,7 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     .title {
-      font-family: "Montserrat Bold", "Montserrat", sans-serif;
+      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

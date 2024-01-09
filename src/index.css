@@ -1,10 +1,17 @@
 body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
+  font-family: Montserrat, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+@font-face {
+  font-family: Montserrat Bold;
+  src: url("../public/font/Montserrat\ Bold.ttf");
+}
+@font-face {
+  font-family: Montserrat;
+  src: url("../public/font/Montserrat\ Regular.ttf");
+}
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
