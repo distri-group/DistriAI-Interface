@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import * as solana from "../services/solana";
 import * as util from "../utils";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { faucet } from "../services/faucet";
 
 function Home({ className }) {
   document.title = "Faucet";
@@ -25,9 +26,22 @@ function Home({ className }) {
     let t = await solana.faucet(newAddr);
     setLoading(false);
     if (t.msg === "ok") {
-      util.alert("Submitted successfully!");
+      util.showOK("1 SOL have sent to your wallet");
     } else {
       util.alert(t.msg);
+    }
+  };
+  const onSendDIST = async () => {
+    if (!newAddr) {
+      return util.alert("Please Enter Your Wallet Address.");
+    }
+    setLoading(true);
+    try {
+      await faucet(newAddr);
+      setLoading(false);
+      return util.showOK("5 DIST have sent to your wallet");
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -35,8 +49,8 @@ function Home({ className }) {
     <div className={className}>
       <div className="hold"></div>
       <div className="con">
-        <h1 className="title">DistriAI Genesis SOL Faucet</h1>
-        <h2 className="title2">Testnet faucet drips 1 SOL per day</h2>
+        <h1 className="title">DistriAI Genesis Faucet</h1>
+        <h2 className="title2">Testnet faucet drips 1 SOL / 5 DIST per day</h2>
         <div className="myform">
           <div className="form-row">
             <div className="tip1">
@@ -59,7 +73,7 @@ function Home({ className }) {
               allowClear={true}
             />
           </div>
-          <div className="form-row">
+          <div className="form-col">
             <Button
               className="mybtn22 cbtn"
               loading={loading}
@@ -68,6 +82,15 @@ function Home({ className }) {
               type="primary"
               onClick={onSubmit}>
               Send Me SOL
+            </Button>
+            <Button
+              className="mybtn22 cbtn"
+              loading={loading}
+              disabled={loading}
+              style={{ width: 152 }}
+              type="primary"
+              onClick={onSendDIST}>
+              Send Me DIST
             </Button>
           </div>
         </div>
@@ -128,6 +151,10 @@ export default styled(Home)`
         color: white !important;
       }
     }
+  }
+  .form-col {
+    display: flex;
+    justify-content: space-around;
   }
   .con {
     width: 1210px;
