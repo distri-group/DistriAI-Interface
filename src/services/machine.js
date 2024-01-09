@@ -44,6 +44,16 @@ export async function getFilterData() {
     });
   }
   list.push({
+    name: "SecurityLevel",
+    arr: [
+      { label: "ANY Level", value: "all" },
+      { label: "Level 0", value: 0 },
+      { label: "Level 1", value: 1 },
+      { label: "Level 2", value: 2 },
+      { label: "Level 3", value: 3 },
+    ],
+  });
+  list.push({
     name: "OrderBy",
     arr: [
       { label: "Auto Sort", value: "all" },
@@ -92,11 +102,15 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
     }
     let total = ret.Data.Total;
     let list = ret.Data.List;
-
     for (let item of list) {
       formatMachine(item);
     }
-    let obj = { list, total };
+    let obj;
+    if (Number.isInteger(filter.SecurityLevel)) {
+      let level = filter.SecurityLevel;
+      list = list.filter((item) => item.SecurityLevel === level);
+    }
+    obj = { list, total };
     console.log("Machine List", list);
     store.set("curr-machine-list", obj);
     let allList = store.get("all-machine-list") || [];
