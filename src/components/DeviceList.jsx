@@ -1,13 +1,17 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { Spin, Empty, Button, Modal } from "antd";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import * as util from "../utils";
 import SolanaAction from "../components/SolanaAction";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   let navigate = useNavigate();
+  const wallet = useAnchorWallet();
   const [deviceToCancel, setDeviceToCancel] = useState(null);
+  const [connectModal, setConnectModal] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
   const childRef = useRef();
   const cancelOffer = async (row) => {
@@ -26,6 +30,11 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
     util.showOK("Cancel Offer Success.");
     reloadFunc();
   };
+  useEffect(() => {
+    if (wallet?.publicKey) {
+      setConnectModal(false);
+    }
+  }, [wallet?.publicKey]);
   let columns = [
     {
       title: isMyDevice ? "Device" : "Provider",
@@ -164,6 +173,9 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
                 : "mini-btn mini-btn2"
             }
             onClick={() => {
+              if (!window.solana || !window.phantom || !wallet?.publicKey) {
+                return setConnectModal(true);
+              }
               if (!isMyDevice) {
                 return navigate("/buy/" + record.Uuid);
               }
@@ -283,6 +295,24 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
           </Button>
         </Modal>
       )}
+      <Modal
+        className="login-modal"
+        width={1000}
+        style={{ backgroundColor: "#000" }}
+        open={connectModal}
+        onCancel={() => setConnectModal(false)}
+        footer={null}>
+        <div className="login-box">
+          <p className="big-title">Connect Your Wallet</p>
+          <p className="con-title">
+            If you don't have a wallet yet, you can select a provider and create
+            one now
+          </p>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <WalletMultiButton />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,18 +1,9 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import ConnectModal from "./ConnectModal";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useState } from "react";
-import { useEffect } from "react";
 
 function Menu({ className }) {
   let navigate = useNavigate();
-  const [noWallet, setNoWallet] = useState(false);
-  const wallet = useAnchorWallet();
-  useEffect(() => {
-    setNoWallet(!wallet?.publicKey || !window.solana);
-  }, [wallet]);
   return (
     <div className={className}>
       <div className="con">
@@ -35,7 +26,6 @@ function Menu({ className }) {
           <WalletMultiButton />
         </div>
       </div>
-      <ConnectModal open={noWallet} />
     </div>
   );
 }
