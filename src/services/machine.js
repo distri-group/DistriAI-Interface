@@ -106,7 +106,7 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
       formatMachine(item);
     }
     let obj;
-    if (Number.isInteger(filter.SecurityLevel)) {
+    if (Number.isInteger(filter?.SecurityLevel)) {
       let level = filter.SecurityLevel;
       list = list.filter((item) => item.SecurityLevel === level);
     }
