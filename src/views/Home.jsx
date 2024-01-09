@@ -76,7 +76,7 @@ function Home({ className }) {
         </div>
         <div className="box-intro">
           <div className="mini-boxs-2">
-            <div className="left">
+            <div className="text">
               <h2>What is DistriAI</h2>
               <span>
                 DistriAI is a user-friendly, efficient AI computing power
@@ -87,42 +87,89 @@ function Home({ className }) {
                 training your AI model.
               </span>
             </div>
-            <div className="right" />
           </div>
         </div>
-        <div className="box3">
-          <div className="con">
-            <h3>Why buy computing power with DistriAI</h3>
-            <div>
-              <span
-                style={{
-                  backgroundImage: "url(/img/home/box3-1.png)",
-                  backgroundSize: 64,
-                }}>
-                <font>Fast</font>
-                <label>
-                  DistriAI users can instantly buy computing power with crypto
-                  and uses the algorithm to start training the AI model in
-                  minutes
-                </label>
-              </span>
-              <span style={{ backgroundImage: "url(/img/home/box3-2.png)" }}>
-                <font>Low Cost</font>
-                <label>
-                  DistriAI uses idle resources to support user training AI
-                  models
-                </label>
-              </span>
-              <span style={{ backgroundImage: "url(/img/home/box3-3.png)" }}>
-                <font>Proof of Calculation</font>
-                <label>
-                  DistriAI will provide a dynamic proof of calculation to ensure
-                  that the provider's machine is truthful working
-                </label>
-              </span>
+        <div className="round-bg">
+          <div className="box3">
+            <div className="con">
+              <h3>Let your idle resources regain value</h3>
+              <div>
+                <span
+                  style={{
+                    backgroundImage: "url(/img/home/icon_jb.png)",
+                    backgroundSize: 100,
+                  }}>
+                  <font>Easy</font>
+                  <label>
+                    Just a few clicks to list your devices on the market, then
+                    sit back and wait for automatic transactions
+                  </label>
+                </span>
+                <span
+                  style={{
+                    backgroundImage: "url(/img/home/icon_cs.png)",
+                    backgroundSize: 100,
+                  }}>
+                  <font>Earn</font>
+                  <label>
+                    Every minute your GPU is idle can bring you earnings{" "}
+                  </label>
+                </span>
+                <span
+                  style={{
+                    backgroundImage: "url(/img/home/icon_ai.png)",
+                    backgroundSize: 100,
+                  }}>
+                  <font>Witness the AI era for All</font>
+                  <label>
+                    Utilize your computing resources to lower the barrier to AI
+                    research, embracing the era of AI for everyone
+                  </label>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="box4">
+            <div className="container">
+              <h2>Effortlessly Attain GPU Resources</h2>
+              <div className="icons">
+                <span
+                  style={{
+                    backgroundImage: "url(/img/home/icon_aq.png)",
+                    backgroundSize: 100,
+                  }}>
+                  <font>Secure</font>
+                  <label>
+                    Equipped with a PPML framework ensuring data/model privacy
+                    and security, offering a three-tier security model
+                  </label>
+                </span>
+                <span
+                  style={{
+                    backgroundImage: "url(/img/home/icon_py.png)",
+                    backgroundSize: 100,
+                  }}>
+                  <font>Affordable</font>
+                  <label>
+                    Eliminate 70% of costs for your AI model training endeavors
+                  </label>
+                </span>
+                <span
+                  style={{
+                    backgroundImage: "url(/img/home/icon_stws.png)",
+                    backgroundSize: 100,
+                  }}>
+                  <font>Comprehensive Ecosystem</font>
+                  <label>
+                    Access computing power, data, and algorithmic model
+                    resources directly. All you need to prepare is your idea
+                  </label>
+                </span>
+              </div>
             </div>
           </div>
         </div>
+
         <div className="box5">
           <div className="con">
             <div className="t1">Backer</div>
@@ -231,13 +278,9 @@ export default styled(Home)`
   }
   .box2 {
     text-align: center;
-    background-color: #05040d;
+    background-color: #00000b;
     padding: 100px 0;
     color: #fff;
-    background-image: url("/img/home/round1.png");
-    background-position-y: -160px;
-    background-size: 45%;
-    background-repeat: no-repeat;
     .con {
       position: relative;
       top: 0;
@@ -295,26 +338,28 @@ export default styled(Home)`
       }
     }
   }
-  .box3 {
-    background-color: #05040d;
-    background-image: url("/img/home/round2.png");
-    background-position-x: -16%;
-    background-position-y: -60px;
-    background-size: 30%;
+  .round-bg {
+    background-image: url("/img/home/round4.png");
     background-repeat: no-repeat;
+    background-position-x: -360px;
+    background-position-y: -80px;
+  }
+  .box3 {
     height: 600px;
     display: block;
     overflow: hidden;
     .con {
+      width: 90%;
+      margin: 0 auto;
       display: block;
       padding: 117px 0;
       h3 {
-        font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
-        font-weight: 700;
-        font-style: normal;
         font-size: 40px;
-        color: white;
-        text-align: center;
+        font-weight: 500;
+        color: #ffffff;
+        line-height: 55px;
+        margin: 0;
+        padding-bottom: 70px;
       }
       div {
         display: flex;
@@ -331,79 +376,112 @@ export default styled(Home)`
           font {
             width: 100%;
             font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
-            font-weight: 700;
+            font-weight: 500;
             font-style: normal;
-            font-size: 18px;
+            font-size: 24px;
             color: white;
             text-align: center;
-            line-height: 50px;
+            line-height: 33px;
             margin-top: 122px;
           }
           label {
-            font-family: Montserrat, sans-serif;
-            font-weight: 400;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            line-height: 22px;
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+  .box4 {
+    color: white;
+    padding: 100px 0;
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      h2 {
+        margin: 0;
+        padding-bottom: 70px;
+        font-size: 40px;
+        font-weight: 500;
+        color: #ffffff;
+        line-height: 55px;
+      }
+      .icons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        span {
+          width: 27.33%;
+          margin: 0 3%;
+          display: flex;
+          flex-direction: column;
+          background-repeat: no-repeat;
+          background-position: top;
+          background-size: 84px;
+          margin-top: 57px;
+          font {
+            width: 100%;
+            font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
+            font-weight: 500;
             font-style: normal;
-            font-size: 14px;
+            font-size: 24px;
             color: white;
             text-align: center;
-            line-height: 23px;
+            line-height: 33px;
+            margin-top: 122px;
+          }
+          label {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            line-height: 22px;
+            text-align: center;
           }
         }
       }
     }
   }
   .box-intro {
-    background-image: url("/img/home/round3.png");
-    background-position-x: 80%;
-    background-position-y: -60px;
-    background-size: 30%;
+    padding-bottom: 90px;
+    background-image: url("/img/home/bg_sjys.png");
+    background-size: 100%;
     background-repeat: no-repeat;
-    padding: 90px 0;
+    background-position: center;
     .mini-boxs-2 {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
-      width: 80%;
+      justify-content: right;
+      width: 90%;
+      height: 900px;
       margin: 0 auto;
-      padding: 69px 0px 20px;
-      .left {
-        width: 50%;
-        text-align: left;
-        padding-top: 100px;
+
+      .text {
+        width: 40%;
+        color: #fff;
         h2 {
-          margin-top: 0;
-          margin-bottom: 0.5em;
-          font-family: Montserrat Bold, Montserrat, Montserrat, sans-serif;
-          font-weight: 700;
-          font-style: normal;
+          margin: 0;
+          padding-top: 180px;
+          padding-bottom: 80px;
           font-size: 40px;
-          color: white;
+          font-weight: 500;
+          line-height: 55px;
         }
         span {
-          font-family: Montserrat, sans-serif;
-          font-weight: 400;
-          font-style: normal;
-          font-size: 16px;
-          color: #ffffff;
-          line-height: 24px;
-          max-width: 550px;
-          overflow: hidden;
-          display: block;
+          font-size: 24px;
+          font-weight: 500;
+          line-height: 33px;
         }
-      }
-      .right {
-        width: 455px;
-        height: 455px;
-        background-image: url(/img/home/box-2-4.png);
-        background-repeat: no-repeat;
-        background-size: 100%;
-        background-position: right;
-        height: 451px;
       }
     }
   }
   .box5 {
-    background-color: #05040d;
+    background-color: #00000b;
     background-image: url("/img/home/round4.png");
     background-position-x: 120%;
     background-position-y: -80px;
@@ -452,8 +530,8 @@ export default styled(Home)`
     }
   }
   .box6 {
-    background-color: #05040d;
-    background-color: #05040d;
+    background-color: #00000b;
+    background-color: #00000b;
     background-image: url("/img/home/round5.png");
     background-position-y: 30%;
     background-position-x: 30%;
