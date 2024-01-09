@@ -459,6 +459,9 @@ export default styled(Home)`
       justify-content: right;
       width: 90%;
       height: 900px;
+      justify-content: right;
+      width: 90%;
+      height: 900px;
       margin: 0 auto;
 
       .text {
@@ -471,8 +474,13 @@ export default styled(Home)`
           font-size: 40px;
           font-weight: 500;
           line-height: 55px;
+          font-weight: 500;
+          line-height: 55px;
         }
         span {
+          font-size: 24px;
+          font-weight: 500;
+          line-height: 33px;
           font-size: 24px;
           font-weight: 500;
           line-height: 33px;
@@ -481,6 +489,7 @@ export default styled(Home)`
     }
   }
   .box5 {
+    background-color: #00000b;
     background-color: #00000b;
     background-image: url("/img/home/round4.png");
     background-position-x: 120%;
