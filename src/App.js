@@ -1,4 +1,3 @@
-// 全局配置
 import "./App.css";
 import Menu from "./components/Menu";
 import { BrowserRouter, Routes, Route } from "react-router-dom";

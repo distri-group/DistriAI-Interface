@@ -491,6 +491,10 @@ export default styled(Home)`
       .drow {
         display: flex;
         flex-direction: column;
+        .num {
+          padding: 0 10px;
+          font-size: 30px;
+        }
         span {
           width: 100%;
           font-size: 28px;

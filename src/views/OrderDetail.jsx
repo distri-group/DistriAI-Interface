@@ -171,7 +171,7 @@ function Home({ className }) {
                     <>
                       {record.Status === 0 && (
                         <label
-                          className="pointer"
+                          style={{ cursor: "pointer" }}
                           onClick={() =>
                             navigate("/extend-duration/" + record.Uuid)
                           }>
@@ -195,108 +195,6 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   color: #fff;
-  .is-show {
-    bottom: 0 !important;
-  }
-  .log-box {
-    position: fixed;
-    left: 0;
-    bottom: -2000px;
-    display: block;
-    overflow: hidden;
-    z-index: 999;
-    background-color: #0f0f0f;
-    width: 100%;
-    transition: bottom 0.5s;
-    .log-header {
-      width: 100%;
-      height: 40px;
-      line-height: 40px;
-      background-color: #282828;
-      .log-header-con {
-        width: 1160px;
-        padding: 0 20px;
-        margin: 0 auto;
-        position: relative;
-        left: 0;
-        text-align: center;
-        font-size: 16px;
-        color: #fff;
-        font-weight: bold;
-        .log-btn {
-          position: absolute;
-          right: 0;
-          top: 3px;
-          display: flex;
-          width: 88px;
-          span,
-          label {
-            width: 36px;
-            height: 18px;
-            background-color: #373737;
-            display: block;
-            margin: 8px 4px;
-            cursor: pointer;
-            i {
-              background-repeat: no-repeat;
-              background-size: 11px;
-              background-position: center;
-              width: 18px;
-              height: 18px;
-              margin: 0 auto;
-              display: block;
-              overflow: hidden;
-              transition: all 0.5s;
-            }
-          }
-          span i {
-            background-image: url(/img/market/reback.svg);
-          }
-          label i {
-            background-image: url(/img/market/close.svg);
-          }
-          span:hover,
-          label:hover {
-            /* transform: rotate(360deg); */
-            background-color: rgba(91, 91, 91, 1);
-          }
-        }
-      }
-    }
-    .log-body {
-      width: 100%;
-      display: block;
-      .log-list {
-        width: 1160px;
-        padding: 20px;
-        background-color: #000;
-        margin: 50px auto;
-        height: 400px;
-        display: block;
-        overflow: hidden;
-        border-radius: 5px;
-        .log-item {
-          display: block;
-          overflow: hidden;
-          word-wrap: break-word;
-          clear: both;
-          font-size: 14px;
-
-          line-height: 24px;
-          span {
-            padding-right: 10px;
-            color: #797979;
-          }
-          label {
-            color: #fff;
-            display: block;
-            overflow: hidden;
-            clear: both;
-          }
-        }
-      }
-    }
-  }
   .con {
     width: 1160px;
     margin: 10px auto;
