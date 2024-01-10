@@ -86,6 +86,7 @@ export async function cancelOffer(machinePublicKey) {
       return { msg: "ok", data: transaction };
     }
   } catch (e) {
+    console.log(e);
     return { msg: e.message };
   }
 }
@@ -209,21 +210,14 @@ export const getVault = async () => {
 };
 
 const checkConfirmation = async (connection, tx) => {
-  return new Promise(async (resolve) => {
-    const latestBlockHash = connection.getLatestBlockhash();
-    const confirmation = await connection.confirmTransaction(tx, {
+  const latestBlockHash = await connection.getLatestBlockhash();
+  const confirmation = await connection.confirmTransaction(
+    {
       blockhash: latestBlockHash,
       lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
       signature: tx,
-    });
-    const confirmed = confirmation.value.confirmationStatus === "finalized";
-    if (confirmed) {
-      resolve(true);
-    } else {
-      setTimeout(() => {
-        const res = checkConfirmation(connection, tx);
-        resolve(res);
-      }, 1000);
-    }
-  });
+    },
+    "finalized"
+  );
+  return confirmation;
 };
