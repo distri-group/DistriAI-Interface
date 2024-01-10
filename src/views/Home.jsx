@@ -78,14 +78,17 @@ function Home({ className }) {
           <div className="mini-boxs-2">
             <div className="text">
               <h2>What is DistriAI</h2>
-              <span>
-                DistriAI is a user-friendly, efficient AI computing power
-                network. With the protocol of the calculation proof, we aim to
-                provide a secure and simple trading experience. On DistriAI, it
-                connects idle machines in global, and only takes you a few
-                minutes to buy computing power from anywhere at any time, then
-                training your AI model.
-              </span>
+              <p>
+                Distri.AI is committed to establishing a globally leading
+                distributed artificial intelligence secure computing platform.
+                It boasts robust capabilities in integrating and scheduling
+                computational resources.
+              </p>
+              <p>
+                Distri.AI stands out as the first system with privacy and
+                security protection for data/models and the pioneering platform
+                with large-scale distributed training capabilities.
+              </p>
             </div>
           </div>
         </div>
@@ -469,18 +472,13 @@ export default styled(Home)`
         color: #fff;
         h2 {
           margin: 0;
-          padding-top: 180px;
+          padding-top: 140px;
           padding-bottom: 80px;
           font-size: 40px;
           font-weight: 500;
           line-height: 55px;
-          font-weight: 500;
-          line-height: 55px;
         }
-        span {
-          font-size: 24px;
-          font-weight: 500;
-          line-height: 33px;
+        p {
           font-size: 24px;
           font-weight: 500;
           line-height: 33px;
