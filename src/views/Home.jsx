@@ -39,7 +39,7 @@ function Home({ className }) {
           <h1>Decentralized AI Computing Power Network</h1>
           <a
             className="play-btn"
-            href="https://www.youtube.com/watch?v=nOn8aBgtXiM"
+            href="https://youtu.be/SKa_HxFgHp8"
             title="https://www.youtube.com/"
             target="_blank"
             rel="noreferrer">
