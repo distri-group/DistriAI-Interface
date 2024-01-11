@@ -90,20 +90,6 @@ export async function cancelOffer(machinePublicKey) {
     return { msg: e.message };
   }
 }
-export function getPublicKeyFromStr(name, ownerPublicKeyStr, str) {
-  let orderId = anchor.utils.bytes.hex.encode("0x" + str);
-  var myUint8Array = new Uint8Array(16);
-  myUint8Array.set(orderId);
-  orderId = myUint8Array;
-  let counterSeed = anchor.utils.bytes.utf8.encode(name);
-  let puk = new PublicKey(ownerPublicKeyStr);
-  let seeds = [counterSeed, puk.publicKey.toBytes(), orderId];
-  let [publick] = anchor.web3.PublicKey.findProgramAddressSync(
-    seeds,
-    new PublicKey(PROGRAM_ID)
-  );
-  return publick;
-}
 export async function placeOrder(
   machinePublicKey,
   orderId,
@@ -208,7 +194,20 @@ export const getVault = async () => {
   );
   return publick;
 };
-
+export function getPublicKeyFromStr(name, ownerPublicKeyStr, str) {
+  let orderId = anchor.utils.bytes.hex.encode("0x" + str);
+  var myUint8Array = new Uint8Array(16);
+  myUint8Array.set(orderId);
+  orderId = myUint8Array;
+  let counterSeed = anchor.utils.bytes.utf8.encode(name);
+  let puk = new PublicKey(ownerPublicKeyStr);
+  let seeds = [counterSeed, puk.publicKey.toBytes(), orderId];
+  let [publick] = anchor.web3.PublicKey.findProgramAddressSync(
+    seeds,
+    new PublicKey(PROGRAM_ID)
+  );
+  return publick;
+}
 const checkConfirmation = async (connection, tx) => {
   const latestBlockHash = await connection.getLatestBlockhash();
   const confirmation = await connection.confirmTransaction(
@@ -219,7 +218,5 @@ const checkConfirmation = async (connection, tx) => {
     },
     "finalized"
   );
-  setTimeout(() => {
-    return confirmation;
-  }, 300);
+  return confirmation;
 };

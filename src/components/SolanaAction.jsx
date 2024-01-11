@@ -43,19 +43,17 @@ function Home(props, ref) {
       duration,
       metadata
     );
-    console.log(result);
     return result;
   };
   const renewOrder = async (machinePublicKey, orderPublicKey, duration) => {
     console.log({ machinePublicKey, orderPublicKey, duration });
-    solanaProgram.initProgram(connection, walletAn).then(async () => {
-      let result = await solanaProgram.renewOrder(
-        machinePublicKey,
-        orderPublicKey,
-        duration
-      );
-      return result;
-    });
+    await solanaProgram.initProgram(connection, walletAn);
+    let result = await solanaProgram.renewOrder(
+      machinePublicKey,
+      orderPublicKey,
+      duration
+    );
+    return result;
   };
   const getTokenAccountBalance = async (mint, address) => {
     const [tokenAddress] = PublicKey.findProgramAddressSync(

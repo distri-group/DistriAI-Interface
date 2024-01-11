@@ -20,15 +20,17 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
     if (!id) {
       return util.showError("id not found");
     }
-    let ret = await childRef.current.cancelOffer(id);
-    if (ret?.msg !== "ok") {
+    let res = await childRef.current.cancelOffer(id);
+    if (res?.msg !== "ok") {
       setList([...list]);
-      return util.showError(ret.msg);
+      return util.showError(res?.msg);
     }
-    setBtnLoading(false);
-    setDeviceToCancel(null);
     util.showOK("Cancel Offer Success.");
-    reloadFunc();
+    setTimeout(() => {
+      setBtnLoading(false);
+      setDeviceToCancel(null);
+      reloadFunc();
+    }, 300);
   };
   useEffect(() => {
     if (wallet?.publicKey) {

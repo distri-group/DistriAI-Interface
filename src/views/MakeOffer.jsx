@@ -73,17 +73,20 @@ function Home({ className }) {
         maxDuration,
         disk
       );
-      if (result.msg === "ok") {
+      if (result?.msg === "ok") {
         util.showOK("Make Offer Success.");
         setLoading(false);
         util.loading(false);
-        navigate("/mydevice/");
+        setTimeout(() => {
+          navigate("/mydevice/");
+        }, 300);
       } else {
         util.loading(false);
         setLoading(false);
-        util.showError(result.msg);
+        util.showError(result?.msg);
       }
     } catch (e) {
+      console.log(e);
       util.alert(e.message);
     }
   };

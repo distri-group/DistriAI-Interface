@@ -92,9 +92,11 @@ function Home({ className }) {
     if (ret.msg !== "ok") {
       return util.alert(ret.msg);
     }
-    setLoading(false);
     util.showOK("Purchase Successfully.");
-    navigate("/myorder");
+    setTimeout(() => {
+      setLoading(false);
+      navigate("/myorder");
+    }, 300);
   };
   async function placeOrderStart(deviceDetail, formData) {
     let orderId = new Date().valueOf().toString();

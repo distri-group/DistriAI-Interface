@@ -74,13 +74,18 @@ function Home({ className }) {
     }
     setLoading(true);
     console.log("OrderData", { formData, orderDetail });
-    await childRef.current.renewOrder(
+    let res = await childRef.current.renewOrder(
       orderDetail.Metadata.machineInfo.Uuid,
       stringToPublicKey(id).toString(),
       formData.duration
     );
-    setLoading(false);
-    navigate("/myorder");
+    setTimeout(() => {
+      if (res?.msg) {
+        util.showOK(`Order extended ${formData.duration} h.`);
+        setLoading(false);
+        navigate("/myorder");
+      }
+    }, 300);
   };
 
   const stringToPublicKey = (str) => {

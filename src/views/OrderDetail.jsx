@@ -165,7 +165,7 @@ function Home({ className }) {
                   <span>Status</span>
                   <label>{record.StatusName}</label>
                 </div>
-                <div className="r">
+                <div className="r pointer">
                   {record.Buyer ===
                     formatAddress(wallet.publicKey.toString()) && (
                     <>
@@ -296,11 +296,16 @@ export default styled(Home)`
         line-height: 25px;
       }
     }
+    .pointer {
+      color: white !important;
+      background-image: linear-gradient(to right, #20ae98, #0aab50);
+      border-radius: 8px;
+      padding: 0 10px;
+    }
     .r {
       display: flex;
       flex-direction: row;
       align-items: center;
-      span,
       .pointer,
       .disable {
         width: 150px;
@@ -311,16 +316,6 @@ export default styled(Home)`
         text-align: center;
         margin: 0 5px;
         border-radius: 4px;
-      }
-      span {
-        background-color: #e0c5bd;
-      }
-      span:hover {
-        background-color: #f7dfd8;
-      }
-      .pointer {
-        color: white !important;
-        background-image: linear-gradient(to right, #20ae98, #0aab50);
       }
       .disable {
         cursor: not-allowed;
