@@ -105,9 +105,10 @@ function Header({ className, list, loading }) {
           <span
             onClick={() => setSelectedItem(record)}
             className={`mini-btn ${
-              (record.StatusName === "Completed" ||
-                record.Seller === formatAddress(addr)) &&
-              "disabled"
+              record.StatusName !== "Completed" &&
+              record.StatusName !== "Training"
+                ? ""
+                : "disabled"
             }`}>
             <span className="key" />
           </span>
@@ -116,13 +117,16 @@ function Header({ className, list, loading }) {
               if (record.Metadata.machineInfo.IP === "172.18.232.45") {
                 window.open("http://172.16.2.70:8080");
               } else {
-                window.open(`http://${record.Metadata.machineInfo.IP}:8080`);
+                window.open(
+                  `http://${record.Metadata.machineInfo.IP}:${record.Metadata.machineInfo.Port}`
+                );
               }
             }}
             className={`mini-btn ${
-              (record.StatusName === "Completed" ||
-                record.Seller === formatAddress(addr)) &&
-              "disabled"
+              record.StatusName !== "Completed" &&
+              record.StatusName !== "Training"
+                ? ""
+                : "disabled"
             }`}>
             Console
           </span>
@@ -352,6 +356,9 @@ export default styled(Header)`
       width: 31px;
       text-align: center;
     }
+  }
+  .status-Training {
+    color: #faf177;
   }
   .status-Available {
     color: #bdff95;

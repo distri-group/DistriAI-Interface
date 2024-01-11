@@ -2,10 +2,8 @@ import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import { Spin } from "antd";
 import React, { useState, useEffect } from "react";
-
-import { getDetailByUuid } from "../services/order";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { formatAddress } from "../utils/format";
+import { getDetailByUuid } from "../services/order";
 
 function Home({ className }) {
   const { uuid } = useParams();
@@ -93,8 +91,11 @@ function Home({ className }) {
                           alt=""
                         />{" "}
                         {record.Metadata.machineInfo.UploadSpeed || "--"}{" "}
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <img src="/img/market/download.svg" alt="" />{" "}
+                        <img
+                          src="/img/market/download.svg"
+                          alt=""
+                          style={{ marginLeft: "40px" }}
+                        />{" "}
                         {record.Metadata.machineInfo.DownloadSpeed || "--"}
                       </span>
                     </div>
@@ -165,22 +166,19 @@ function Home({ className }) {
                   <span>Status</span>
                   <label>{record.StatusName}</label>
                 </div>
-                <div className="r pointer">
-                  {record.Buyer ===
-                    formatAddress(wallet.publicKey.toString()) && (
-                    <>
-                      {record.Status === 0 && (
-                        <label
-                          style={{ cursor: "pointer" }}
-                          onClick={() =>
-                            navigate("/extend-duration/" + record.Uuid)
-                          }>
-                          Extend Duration
-                        </label>
-                      )}
-                    </>
-                  )}
-                </div>
+                {record.StatusName === "Available" && (
+                  <div className="r pointer">
+                    {record.Status === 0 && (
+                      <label
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          navigate("/extend-duration/" + record.Uuid)
+                        }>
+                        Extend Duration
+                      </label>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ) : (

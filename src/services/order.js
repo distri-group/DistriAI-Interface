@@ -38,7 +38,7 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     let total = ret.Data.Total;
     let list = ret.Data.List;
     for (let item of list) {
-      formatOrder(item);
+      formatOrder(item, publicKey);
     }
     let machinList = await getMachineList(true, 1);
     machinList = machinList.list;
@@ -59,7 +59,7 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     return null;
   }
 }
-function formatOrder(item) {
+function formatOrder(item, publicKey) {
   try {
     if (item.Metadata) {
       item.Metadata = JSON.parse(item.Metadata);
@@ -68,7 +68,6 @@ function formatOrder(item) {
     item.Seller = formatAddress(item.Seller);
     item.Price = formatBalance(item.Price);
     item.Total = formatBalance(item.Total);
-
     if (item.Status === 0) {
       let endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
       let result = getTimeDiff(new Date(), endTime);
@@ -78,7 +77,9 @@ function formatOrder(item) {
     }
     item.StatusName =
       item.Status === 0
-        ? "Available"
+        ? item.Seller === formatAddress(publicKey)
+          ? "Training"
+          : item.Buyer === formatAddress(publicKey) && "Available"
         : item.Status === 1
         ? "Completed"
         : "Failed";
