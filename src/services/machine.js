@@ -2,7 +2,7 @@ import * as store from "../utils/store";
 import * as utils from "../utils";
 import request from "../utils/request";
 import { formatAddress, formatBalance } from "../utils/format";
-
+// Retrieve the detailed information of the machine from the storage based on the provided id.
 export async function getMachineDetailById(id) {
   let obj = store.get("all-machine-list");
   if (!obj) {
