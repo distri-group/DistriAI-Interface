@@ -132,21 +132,7 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
 
 function formatMachine(item) {
   try {
-    if (item.Metadata && typeof item.Metadata == "string") {
-      item.Metadata = JSON.parse(item.Metadata);
-    }
-    item.Uuid = item.Metadata.MachineAccounts;
-
     item.Addr = formatAddress(item.Owner);
-    if (item.Metadata?.MachineUUID) {
-      item.UuidShort = item.Metadata.MachineUUID.slice(-10);
-    }
-    item.Score = item.Metadata?.Score?.toFixed(2) || 0;
-    item.Cpu = item.Metadata?.CPUInfo?.ModelName;
-    item.RAM = item.Metadata?.InfoMemory?.RAM.toFixed(0) + "GB";
-    item.AvailHardDrive = item.Metadata?.DiskInfo?.TotalSpace.toFixed(0) + "GB";
-    item.UploadSpeed = item.Metadata?.SpeedInfo?.Upload;
-    item.DownloadSpeed = item.Metadata?.SpeedInfo?.Download;
     item.Price = formatBalance(item.Price);
     if (item.CompletedCount + item.FailedCount <= 0) {
       item.Reliability = "--";
@@ -157,8 +143,19 @@ function formatMachine(item) {
         ) + "%";
     }
     item.TFLOPS = item.Tflops;
-    item.SecurityLevel = parseInt(item.Metadata?.SecurityLevel);
-    item.IP = item.Metadata.Ip.ip;
+    if (item.Metadata && typeof item.Metadata == "string") {
+      item.Metadata = JSON.parse(item.Metadata);
+      item.Uuid = item.Metadata.MachineAccounts || "";
+      item.UuidShort = item.Metadata.MachineUUID?.slice(-10);
+      item.Score = item.Metadata.Score?.toFixed(2) || 0;
+      item.Cpu = item.Metadata.CPUInfo?.ModelName || "";
+      item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0) + "GB";
+      item.UploadSpeed = item.Metadata.SpeedInfo?.Upload;
+      item.DownloadSpeed = item.Metadata.SpeedInfo?.Download;
+      item.IP = item.Metadata.Ip?.ip || "127.0.0.1";
+      item.Port = item.Metadata.Ip?.port || "8080";
+      item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);
+    }
   } catch (e) {
     console.log(e);
   }
