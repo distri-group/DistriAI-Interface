@@ -43,12 +43,14 @@ export default styled(Header)`
     display: flex;
     justify-content: space-between;
     width: 80%;
+    max-width: 1200px;
     padding: 20px 0;
     margin: 0 auto;
   }
   .pater {
     display: flex;
     flex-direction: row;
+    justify-content: right;
     width: 300px;
     a {
       width: 25%;
