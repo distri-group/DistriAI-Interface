@@ -28,7 +28,10 @@ export async function faucet(accountId) {
     console.error("link to Solana error:", error);
     let msg = error.message;
     if (msg.indexOf("429") !== -1) {
-      msg = "Please Wait 24 hours for a refill.";
+      msg =
+        "You have requested too many airdrops. Please wait 24 hours for a refill.";
+    } else {
+      msg = "Failed to claim airdrop.Try again later.";
     }
     return { msg };
   }

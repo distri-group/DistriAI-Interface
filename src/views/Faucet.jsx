@@ -37,11 +37,15 @@ function Home({ className }) {
     }
     setLoading(true);
     try {
-      await faucet(newAddr);
+      let res = await faucet(newAddr);
       setLoading(false);
+      if (res?.Msg?.includes("too many airdrops")) {
+        return util.alert(res.Msg);
+      }
       return util.showOK("5 DIST have sent to your wallet");
     } catch (e) {
       console.log(e);
+      return util.alert("Failed to claim airdrop. Please try again later");
     }
   };
 
