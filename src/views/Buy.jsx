@@ -73,7 +73,7 @@ function Home({ className }) {
     };
     init();
   }, [id, wallet]);
-  const valit = () => {
+  const valid = () => {
     if (!formData.taskName) {
       formData.taskName = `Computing Task - ${index}`;
     }
@@ -83,7 +83,7 @@ function Home({ className }) {
     return null;
   };
   const onSubmit = async () => {
-    let vmsg = valit();
+    let vmsg = valid();
     if (vmsg) {
       return util.alert(vmsg);
     }
@@ -189,12 +189,6 @@ function Home({ className }) {
               </div>
             </div>
           </div>
-          <div className="b-box">
-            <div className="row">
-              <b>1</b> h
-            </div>
-            <div className="row">Estimate the computing time</div>
-          </div>
           <div className="form-row">
             <div className="row-txt">Duration </div>
             <Input
@@ -211,8 +205,7 @@ function Home({ className }) {
               className="my-input"
               data-name="taskName"
               onChange={onInput}
-              onKeyUp={onInput}
-              placeholder="Must be 4--45 characters"
+              placeholder="Must be 4-45 characters"
             />
           </div>
           <div className="right-txt">
