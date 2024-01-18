@@ -18,11 +18,7 @@ function Header({ className }) {
     },
     {
       label: (
-<<<<<<< HEAD
         <span style={{ fontSize: "16px", cursor: "default" }}>Whitepaper</span>
-=======
-        <span style={{ fontSize: "16px", cursor: "default" }}>Whitebook</span>
->>>>>>> 72c59b7d092e690862846fc364d9dc31acb6a21a
       ),
       disabled: true,
     },
