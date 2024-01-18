@@ -14,25 +14,6 @@ npm install
 yarn install
 ```
 
-## Edit config file
-
-The config file path
-
-```bash
-./src/webconfig.js
-```
-
-The content is:
-
-```javascript
-const defaultConfig = {
-  apiUrl:'https://matrixai.cloud',//backend api url
-  contractAddress: "BvYJnEj64dAT5jrUvgrTJuvPhXRDwJ7SjjPuteycJxAQ",// solana program id
-  tokenAddress:"B9pg2pG2vSZWVhe2WEngiCApFCUhwakfnPzpyR3GBKKQ"
-  nodeURL:"https://api.devnet.solana.com"//rpc url
-};
-```
-
 ### `npm start`
 
 Runs the app in the development mode.\
