@@ -16,15 +16,15 @@ function Header({ className, list, loading }) {
   const [connecting, setConnecting] = useState(false);
   const wallet = useAnchorWallet();
   let addr = wallet?.publicKey.toString();
-  const urlAvailable = async (url) => {
-    return fetch(url, { method: "HEAD" })
-      .then((res) => {
-        return res.ok;
-      })
-      .catch((e) => {
-        return false;
-      });
-  };
+  // const urlAvailable = async (url) => {
+  //   return fetch(url, { method: "HEAD" })
+  //     .then((res) => {
+  //       return res.ok;
+  //     })
+  //     .catch((e) => {
+  //       return false;
+  //     });
+  // };
   useEffect(() => {
     for (let item of list) {
       item.Loading = false;
@@ -131,15 +131,16 @@ function Header({ className, list, loading }) {
           <span
             onClick={async () => {
               const url = `http://${record.Metadata.machineInfo.IP}:${record.Metadata.machineInfo.Port}`;
-              setConnecting(true);
-              let res = await urlAvailable(url);
-              if (res) window.open(url);
-              else {
-                util.alert(
-                  "Console not available now. Please try again later."
-                );
-              }
-              setConnecting(false);
+              // setConnecting(true);
+              // let res = await urlAvailable(url);
+              // if (res)
+              window.open(url);
+              // else {
+              //   util.alert(
+              //     "Console not available now. Please try again later."
+              //   );
+              // }
+              // setConnecting(false);
             }}
             className={`mini-btn ${
               record.StatusName !== "Completed" &&
