@@ -9,19 +9,21 @@ import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
+import { useSnackbar } from "notistack";
 let formData = {};
 
 function Home({ className }) {
   const { id } = useParams();
   document.title = "Edit model";
-  let navigate = useNavigate();
+  const navigate = useNavigate();
+  const childRef = useRef();
+  const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
-  const childRef = useRef();
-  const wallet = useAnchorWallet();
 
   const onInput = (e) => {
     let value = e.target.value;
@@ -81,7 +83,9 @@ function Home({ className }) {
     );
     setTimeout(() => {
       if (res?.msg) {
-        util.showOK(`Order extended ${formData.duration} h.`);
+        enqueueSnackbar(`Order extended ${formData.duration} h.`, {
+          variant: "success",
+        });
         setLoading(false);
         navigate("/myorder");
       }

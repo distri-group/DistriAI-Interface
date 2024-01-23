@@ -1,18 +1,11 @@
-import { Modal, message, notification } from "antd";
+import { Modal, message } from "antd";
 
-export { alert, showOK, showError, loading, formdataify };
+export { alert, showError, loading, formdataify };
 
 function alert(msg, cb) {
   Modal.info({
     title: msg,
     onOk: cb,
-  });
-}
-
-function showOK(content) {
-  notification.success({
-    description: content,
-    placement: "bottomRight",
   });
 }
 

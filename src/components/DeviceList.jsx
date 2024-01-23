@@ -6,10 +6,12 @@ import * as util from "../utils";
 import SolanaAction from "../components/SolanaAction";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useSnackbar } from "notistack";
 
 function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const [deviceToCancel, setDeviceToCancel] = useState(null);
   const [connectModal, setConnectModal] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
@@ -25,7 +27,9 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       setList([...list]);
       return util.showError(res?.msg);
     }
-    util.showOK("Cancel Offer Success.");
+    enqueueSnackbar("Cancel Offer Success.", {
+      variant: "success",
+    });
     setTimeout(() => {
       setBtnLoading(false);
       setDeviceToCancel(null);

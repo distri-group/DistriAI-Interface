@@ -5,12 +5,14 @@ import * as solana from "../services/solana";
 import * as util from "../utils";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { faucet } from "../services/faucet";
+import { useSnackbar } from "notistack";
 
 function Home({ className }) {
   document.title = "Faucet";
   const [loading, setLoading] = useState(false);
   const [newAddr, setNewAddr] = useState();
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     setNewAddr(wallet?.publicKey.toString());
   }, [wallet]);
@@ -26,7 +28,7 @@ function Home({ className }) {
     let t = await solana.faucet(newAddr);
     setLoading(false);
     if (t.msg === "ok") {
-      util.showOK("1 SOL have sent to your wallet");
+      enqueueSnackbar("1 SOL has sent to your wallet", { variant: "success" });
     } else {
       util.alert(t.msg);
     }
@@ -42,7 +44,9 @@ function Home({ className }) {
       if (res?.Msg?.includes("too many airdrops")) {
         return util.alert(res.Msg);
       }
-      return util.showOK("5 DIST have sent to your wallet");
+      return enqueueSnackbar("5 DIST have sent to your wallet", {
+        variant: "success",
+      });
     } catch (e) {
       console.log(e);
       return util.alert("Failed to claim airdrop. Please try again later");
