@@ -1,30 +1,25 @@
-# The frontend UI project
+# DistriAI-Interface
 
-This project was bootstrapped with [Create React App]
+## Features
 
-## Available Scripts
+- Buy computing power easily and quickly;
+- Earning from sharing your computing power;
+- Security ensured by blockchain technology.
 
-In the project directory, you can run:
+## Install
 
-### Install
+node:v21.1.0
 
 ```
-npm install
-// or
-yarn install
+yarn
 ```
 
-### `npm start`
+## Run
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+yarn start
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## License
 
-### `npm run build`
-
-- `Test`:`yarn build-test`;
-- `Production`:`yarn build`;
-
-This will build `build` folder based on the selected environment.
+[MIT License](#LICENSE) Copyright (c) 2024 distri.ai
