@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from "react";
 import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
 import SolanaAction from "../components/SolanaAction";
+import { useSnackbar } from "notistack";
 
 let inputValues = {
   price: 0,
@@ -15,7 +16,8 @@ let inputValues = {
 function Home({ className }) {
   const { id } = useParams();
   document.title = "Make Offer";
-  let navigate = useNavigate();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [price, setPrice] = useState(0);
   const [maxStorage, setMaxStorage] = useState(0);
@@ -74,7 +76,7 @@ function Home({ className }) {
         disk
       );
       if (result?.msg === "ok") {
-        util.showOK("Make Offer Success.");
+        enqueueSnackbar("Make Offer Success.", { variant: "success" });
         setLoading(false);
         util.loading(false);
         setTimeout(() => {

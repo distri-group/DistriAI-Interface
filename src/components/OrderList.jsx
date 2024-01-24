@@ -6,25 +6,14 @@ import React, { useState, useEffect } from "react";
 import copy from "copy-to-clipboard";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { formatAddress } from "../utils/format";
-import * as util from "../utils";
 
 function Header({ className, list, loading }) {
   let navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(loading);
   const [decrypted, setDecrypted] = useState(false);
-  const [connecting, setConnecting] = useState(false);
   const wallet = useAnchorWallet();
   let addr = wallet?.publicKey.toString();
-  // const urlAvailable = async (url) => {
-  //   return fetch(url, { method: "HEAD" })
-  //     .then((res) => {
-  //       return res.ok;
-  //     })
-  //     .catch((e) => {
-  //       return false;
-  //     });
-  // };
   useEffect(() => {
     for (let item of list) {
       item.Loading = false;
@@ -129,18 +118,10 @@ function Header({ className, list, loading }) {
             <span className="key" />
           </span>
           <span
-            onClick={async () => {
-              const url = `http://${record.Metadata.machineInfo.IP}:${record.Metadata.machineInfo.Port}`;
-              // setConnecting(true);
-              // let res = await urlAvailable(url);
-              // if (res)
-              window.open(url);
-              // else {
-              //   util.alert(
-              //     "Console not available now. Please try again later."
-              //   );
-              // }
-              // setConnecting(false);
+            onClick={() => {
+              window.open(
+                `http://${record.Metadata.machineInfo.IP}:${record.Metadata.machineInfo.Port}`
+              );
             }}
             className={`mini-btn ${
               record.StatusName !== "Completed" &&
@@ -164,64 +145,61 @@ function Header({ className, list, loading }) {
   }, [loading]);
   return (
     <div className={className}>
-      <Spin spinning={connecting}>
-        <table className="mytable">
-          <thead className="table-thead">
+      <table className="mytable">
+        <thead className="table-thead">
+          <tr>
+            {columns.map((c) => {
+              return (
+                <th key={c.title} style={{ width: c.width }}>
+                  {c.title}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        {list.length === 0 || isLoading ? (
+          <tbody>
             <tr>
-              {columns.map((c) => {
-                return (
-                  <th key={c.title} style={{ width: c.width }}>
-                    {c.title}
-                  </th>
-                );
-              })}
+              <td colSpan={columns.length} style={{ textAlign: "center" }}>
+                {isLoading ? (
+                  <div className="spin-box">
+                    <Spin size="large" />
+                  </div>
+                ) : (
+                  <Empty
+                    description={"No item yet"}
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                )}
+              </td>
             </tr>
-          </thead>
-          {list.length === 0 || isLoading ? (
-            <tbody>
-              <tr>
-                <td colSpan={columns.length} style={{ textAlign: "center" }}>
-                  {isLoading ? (
-                    <div className="spin-box">
-                      <Spin size="large" />
-                    </div>
-                  ) : (
-                    <Empty
-                      description={"No item yet"}
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {list.map((d, index) => {
-                return (
-                  <tr key={index}>
-                    {columns.map((c, i) => {
-                      if (c.render) {
-                        return (
-                          <td style={{ width: c.width }} key={i}>
-                            {c.render(d[c.key], d, i)}
-                          </td>
-                        );
-                      } else {
-                        return (
-                          <td key={i} style={{ width: c.width }}>
-                            {d[c.key]}
-                          </td>
-                        );
-                      }
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          )}
-        </table>
-      </Spin>
-
+          </tbody>
+        ) : (
+          <tbody>
+            {list.map((d, index) => {
+              return (
+                <tr key={index}>
+                  {columns.map((c, i) => {
+                    if (c.render) {
+                      return (
+                        <td style={{ width: c.width }} key={i}>
+                          {c.render(d[c.key], d, i)}
+                        </td>
+                      );
+                    } else {
+                      return (
+                        <td key={i} style={{ width: c.width }}>
+                          {d[c.key]}
+                        </td>
+                      );
+                    }
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        )}
+      </table>
       <Modal
         open={selectedItem}
         width={1000}
@@ -284,19 +262,6 @@ function Header({ className, list, loading }) {
 }
 
 export default styled(Header)`
-  .mini-btn {
-    color: white;
-    border-radius: 4px;
-    padding: 0 11px;
-    height: 31px;
-    line-height: 31px;
-    cursor: pointer;
-    font-size: 14px;
-    background-image: linear-gradient(to right, #20ae98, #0aab50);
-    display: inline-block;
-    text-align: center;
-    overflow: hidden;
-  }
   .spin-box {
     width: 100%;
     height: 50px;

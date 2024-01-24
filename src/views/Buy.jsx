@@ -9,6 +9,7 @@ import SolanaAction from "../components/SolanaAction";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useSnackbar } from "notistack";
 
 let formData = {
   taskName: "",
@@ -18,8 +19,9 @@ let formData = {
 function Home({ className }) {
   const { id } = useParams();
   document.title = "Edit model";
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -41,10 +43,10 @@ function Home({ className }) {
       value = parseInt(value);
       if (value <= 0) {
         setAmount(0);
+        e.target.value = 0;
         return util.showError("The duration must be an integer greater than 0");
       }
       formData[name] = value;
-      console.log({ deviceDetail });
       if (!deviceDetail.Price) {
         deviceDetail.Price = 1;
       }
@@ -92,7 +94,7 @@ function Home({ className }) {
     if (ret.msg !== "ok") {
       return util.alert(ret.msg);
     }
-    util.showOK("Purchase Successfully.");
+    enqueueSnackbar("Purchase Successfully.", { variant: "success" });
     setTimeout(() => {
       setLoading(false);
       navigate("/myorder");

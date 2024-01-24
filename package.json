@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@depay/solana-web3.js": "^1.25.1",
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "@project-serum/anchor": "^0.26.0",
     "@solana/spl-token": "^0.3.9",
     "@solana/wallet-adapter-base": "^0.9.23",
@@ -21,18 +22,22 @@
     "craco-less": "^2.0.0",
     "dotenv-cli": "^7.3.0",
     "moment": "^2.29.4",
+    "notistack": "^3.0.1",
     "rc-pagination": "^3.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.3",
     "react-scripts": "5.0.1",
-    "styled-components": "^5.3.6",
+    "styled-components": "^6.1.8",
     "time-difference-js": "^1.0.1",
     "web-vitals": "^2.1.4",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0",
     "xterm-addon-web-links": "^0.9.0",
     "xterm-for-react": "^1.0.4"
+  },
+  "resolutions": {
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   },
   "scripts": {
     "start": "react-scripts start",

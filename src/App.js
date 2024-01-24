@@ -21,6 +21,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { ConfigProvider, theme } from "antd";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import Test from "./views/Test";
+import { SnackbarProvider } from "notistack";
 let tout = "";
 
 function App() {
@@ -45,23 +46,26 @@ function App() {
               theme={{
                 algorithm: theme.darkAlgorithm,
               }}>
-              {!isHome && <Menu className="page-header" />}
-              <Routes>
-                <Route path="/makeoffer/:id" element={<MakeOffer />} />
-                <Route path="/" element={<Home />} />
-                <Route path="/market/" element={<Market />} />
-                <Route path="/order-detail/:uuid" element={<OrderDetail />} />
-                <Route path="/buy/:id" element={<Buy />} />
-                <Route path="/mydevice/" element={<MyDevice />} />
-                <Route path="/myorder/" element={<MyOrder />} />
-                <Route
-                  path="/extend-duration/:id"
-                  element={<ExtendDuration />}
-                />
-                <Route path="/faucet/" element={<Faucet />} />
-                <Route path="/test/" element={<Test />} />
-              </Routes>
-              <Footer />
+              <SnackbarProvider
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+                {!isHome && <Menu className="page-header" />}
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/market" element={<Market />} />
+                  <Route path="/mydevice" element={<MyDevice />} />
+                  <Route path="/myorder" element={<MyOrder />} />
+                  <Route path="/order-detail/:uuid" element={<OrderDetail />} />
+                  <Route path="/buy/:id" element={<Buy />} />
+                  <Route path="/makeoffer/:id" element={<MakeOffer />} />
+                  <Route
+                    path="/extend-duration/:id"
+                    element={<ExtendDuration />}
+                  />
+                  <Route path="/faucet" element={<Faucet />} />
+                  <Route path="/test" element={<Test />} />
+                </Routes>
+                <Footer />
+              </SnackbarProvider>
             </ConfigProvider>
           </BrowserRouter>
         </WalletModalProvider>
