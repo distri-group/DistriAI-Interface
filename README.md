@@ -20,6 +20,8 @@ yarn
 yarn start
 ```
 
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser
+
 ## License
 
 [MIT License](#LICENSE) Copyright (c) 2024 distri.ai
