@@ -1,8 +1,7 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input, Button, Progress } from "antd";
+import { LoadingButton } from "@mui/lab";
 import React, { useState, useEffect, useRef } from "react";
-import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
 import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
@@ -10,6 +9,7 @@ import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
+import { TextField } from "@mui/material";
 
 let formData = {
   taskName: "",
@@ -25,7 +25,6 @@ function Home({ className }) {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
-  const [popuStatus, setPopuStatus] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [index, setIndex] = useState(0);
   const childRef = useRef();
@@ -44,7 +43,10 @@ function Home({ className }) {
       if (value <= 0) {
         setAmount(0);
         e.target.value = 0;
-        return util.showError("The duration must be an integer greater than 0");
+        return enqueueSnackbar(
+          "The duration must be an integer greater than 0",
+          { variant: "error" }
+        );
       }
       formData[name] = value;
       if (!deviceDetail.Price) {
@@ -87,17 +89,17 @@ function Home({ className }) {
   const onSubmit = async () => {
     let vmsg = valid();
     if (vmsg) {
-      return util.alert(vmsg);
+      return enqueueSnackbar(vmsg, { variant: "warning" });
     }
     setLoading(true);
     let ret = await placeOrderStart(deviceDetail, formData, amount);
     if (ret.msg !== "ok") {
-      return util.alert(ret.msg);
+      return enqueueSnackbar(ret.msg, { variant: "error" });
     }
     enqueueSnackbar("Purchase Successfully.", { variant: "success" });
     setTimeout(() => {
       setLoading(false);
-      navigate("/myorder");
+      navigate("/order");
     }, 300);
   };
   async function placeOrderStart(deviceDetail, formData) {
@@ -115,27 +117,6 @@ function Home({ className }) {
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
       <div className="hold"></div>
-      <div className={"pross-box pross-box" + popuStatus}>
-        <div className="close-btn" onClick={() => setPopuStatus(2)}></div>
-        <div className="title">Estimate the time</div>
-        <div className="desc">
-          The AI Training time is related to the size of the dataset. Estimating
-          the calculation time may take a few minutes.
-        </div>
-        <div className="progress">
-          <Progress
-            percent={99.9}
-            strokeColor={{
-              "0%": "#108ee9",
-              "100%": "#87d068",
-            }}
-          />
-        </div>
-        <div className="skip" onClick={() => setPopuStatus(2)}>
-          Skip
-        </div>
-        <div className="recommond">No recommond</div>
-      </div>
       <div className="con">
         <h1 className="title">Edit model</h1>
         <div className="myform">
@@ -179,12 +160,6 @@ function Home({ className }) {
             <div className="info-box-body">
               <div className="line">
                 <div className="f">
-                  <span>Dataset Size</span>
-                  <span>485 MB</span>
-                </div>
-              </div>
-              <div className="line">
-                <div className="f">
                   <span>Price(per hour)</span>
                   <span>{deviceDetail.Price} DIST</span>
                 </div>
@@ -193,9 +168,11 @@ function Home({ className }) {
           </div>
           <div className="form-row">
             <div className="row-txt">Duration </div>
-            <Input
-              className="my-input"
+            <TextField
+              color="success"
+              inputProps={{ style: { color: "white" } }}
               data-name="duration"
+              fullWidth
               disabled={loading}
               placeholder="Hour"
               onChange={onInput}
@@ -203,9 +180,11 @@ function Home({ className }) {
           </div>
           <div className="form-row">
             <div className="row-txt">Task Name </div>
-            <Input
-              className="my-input"
+            <TextField
+              color="success"
+              inputProps={{ style: { color: "white" } }}
               data-name="taskName"
+              fullWidth
               onChange={onInput}
               placeholder="Must be 4-45 characters"
             />
@@ -221,15 +200,14 @@ function Home({ className }) {
             </div>
           </div>
           <div className="form-row btn-row">
-            <Button
+            <LoadingButton
               loading={loading}
-              disabled={loading}
               style={{ width: 154 }}
               type="primary"
               className="cbtn"
               onClick={onSubmit}>
-              Confirm
-            </Button>
+              {loading ? "" : "Confirm"}
+            </LoadingButton>
           </div>
         </div>
       </div>
@@ -244,9 +222,6 @@ export default styled(Home)`
   color: #fff;
   .mini-btn {
     border: 1px solid #fff;
-  }
-  .pross-box {
-    display: none;
   }
   .none {
     display: none !important;
@@ -299,67 +274,6 @@ export default styled(Home)`
       border-color: rgba(186, 229, 238, 1);
       background-image: url(/img/market/docker-curr.svg);
       box-shadow: 0px 0px 20px rgba(186, 229, 238, 0.5137254901960784);
-    }
-  }
-  .pross-box1 {
-    position: fixed;
-    left: calc(50% - 500px);
-    top: 100px;
-    width: 1000px;
-    height: 530px;
-    background-color: rgba(0, 0, 0, 1);
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgba(64, 64, 64, 1);
-    border-radius: 5px;
-    padding: 90px 0px;
-    display: flex;
-    flex-direction: column;
-    z-index: 999;
-    .close-btn {
-      width: 35px;
-      height: 35px;
-      display: block;
-      overflow: hidden;
-      position: absolute;
-      top: 4px;
-      right: 8px;
-      cursor: pointer;
-      background-image: url(/img/market/close.svg);
-      background-repeat: no-repeat;
-      background-size: 16px;
-      background-position: center;
-    }
-    .title {
-      font-weight: 700;
-      font-size: 72px;
-      color: #ffffff;
-      text-align: center;
-    }
-    .desc {
-      font-size: 16px;
-      color: #ffffff;
-      text-align: left;
-      line-height: 20px;
-      padding: 21px 282px;
-    }
-    .progress {
-      width: 60%;
-      display: block;
-      margin: 50px auto;
-    }
-    .skip {
-      font-size: 16px;
-      text-decoration: underline;
-      color: #797979;
-      text-align: center;
-      line-height: 48px;
-      cursor: pointer;
-    }
-    .recommond {
-      font-size: 14px;
-      color: #515151;
-      text-align: center;
     }
   }
   .con {
@@ -489,7 +403,6 @@ export default styled(Home)`
         display: flex;
         flex-direction: column;
         .num {
-          padding: 0 10px;
           font-size: 30px;
         }
         span {

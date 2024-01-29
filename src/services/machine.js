@@ -1,7 +1,6 @@
 import * as store from "../utils/store";
-import * as utils from "../utils";
 import request from "../utils/request";
-import { formatAddress, formatBalance } from "../utils/format";
+import { formatAddress, formatBalance } from "../utils";
 // Retrieve the detailed information of the machine from the storage based on the provided id.
 export async function getMachineDetailById(id) {
   let obj = store.get("all-machine-list");
@@ -23,8 +22,7 @@ export async function getFilterData() {
   let apiUrl = "/index-api/machine/filter";
   let ret = await request.post(apiUrl);
   if (ret.Msg !== "success") {
-    utils.alert(ret.msg);
-    return null;
+    return ret;
   }
   let list = [];
   for (let k in ret.Data) {
@@ -97,7 +95,6 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
     }
     let ret = await request.post(apiUrl, options);
     if (ret.Msg !== "success") {
-      utils.alert(ret.msg);
       return null;
     }
     let total = ret.Data.Total;

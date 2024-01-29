@@ -1,12 +1,13 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { Spin, Empty, Button, Modal } from "antd";
 import { useState, useRef, useEffect } from "react";
-import * as util from "../utils";
 import SolanaAction from "../components/SolanaAction";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useSnackbar } from "notistack";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Box, Button, Modal } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
 function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   const navigate = useNavigate();
@@ -20,12 +21,12 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
     setBtnLoading(true);
     let id = row.Uuid;
     if (!id) {
-      return util.showError("id not found");
+      return enqueueSnackbar("Id Not Found", { variant: "error" });
     }
     let res = await childRef.current.cancelOffer(id);
     if (res?.msg !== "ok") {
       setList([...list]);
-      return util.showError(res?.msg);
+      return enqueueSnackbar(res?.msg, { variant: "error" });
     }
     enqueueSnackbar("Cancel Offer Success.", {
       variant: "success",
@@ -170,7 +171,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       render: (text, record, index) => {
         return (
           <Button
-            disabled={!isMyDevice && record.Status !== 1}
+            disabled={record.Status === 2}
             className={
               isMyDevice
                 ? "mini-btn mini-btn" + record.Status
@@ -191,7 +192,6 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               if (record.Status === 1) {
                 return setDeviceToCancel(record);
               }
-              return util.alert("Is training status.");
             }}>
             {isMyDevice
               ? record.Status === 0
@@ -226,17 +226,14 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               <td colSpan={columns.length} style={{ textAlign: "center" }}>
                 {loading ? (
                   <div className="spin-box">
-                    <Spin size="large" />
+                    <CircularProgress />
                   </div>
                 ) : isMyDevice ? (
                   <div className="empty-box">
                     <span>Please add your machine in the client</span>
                   </div>
                 ) : (
-                  <Empty
-                    description={"No item yet"}
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
+                  <span>No item yet</span>
                 )}
               </td>
             </tr>
@@ -271,53 +268,73 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       {deviceToCancel && (
         <Modal
           open={deviceToCancel}
-          onCancel={() => {
-            setDeviceToCancel(null);
-          }}
-          className="cancel"
-          width={1000}
-          footer={null}>
-          <h1 style={{ fontSize: "72px", textAlign: "center" }}>
-            Unlist The Offer
-          </h1>
-          <div style={{ fontSize: "16px", textAlign: "center" }}>
-            <p style={{ margin: 0, lineHeight: "19px" }}>
-              This will cancel your listing.
-            </p>
-            <p style={{ margin: 0, lineHeight: "19px" }}>
-              You will also be asked to confirm this cancelation from your
-              wallet.
-            </p>
-          </div>
-          <Button
-            style={{ margin: "0 auto", display: "block", marginTop: "150px" }}
-            className="cbtn"
-            loading={btnLoading}
-            disabled={btnLoading}
-            onClick={() => {
-              cancelOffer(deviceToCancel);
+          onClose={() => setDeviceToCancel(null)}
+          className="cancel">
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 1000,
+              bgcolor: "#00000b",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: "8px",
             }}>
-            <span style={{ padding: "0 40px" }}>Confirm</span>
-          </Button>
+            <h1 style={{ fontSize: "72px", textAlign: "center" }}>
+              Unlist The Offer
+            </h1>
+            <div style={{ fontSize: "16px", textAlign: "center" }}>
+              <p style={{ margin: 0, lineHeight: "19px" }}>
+                This will cancel your listing.
+              </p>
+              <p style={{ margin: 0, lineHeight: "19px" }}>
+                You will also be asked to confirm this cancelation from your
+                wallet.
+              </p>
+            </div>
+            <LoadingButton
+              style={{ margin: "0 auto", display: "block", marginTop: "150px" }}
+              className="cbtn"
+              loading={btnLoading}
+              onClick={() => {
+                cancelOffer(deviceToCancel);
+              }}>
+              <span style={{ padding: "0 40px" }}>
+                {btnLoading ? "" : "Confirm"}
+              </span>
+            </LoadingButton>
+          </Box>
         </Modal>
       )}
       <Modal
-        className="login-modal"
-        width={1000}
-        style={{ backgroundColor: "#000" }}
         open={connectModal}
-        onCancel={() => setConnectModal(false)}
-        footer={null}>
-        <div className="login-box">
-          <p className="big-title">Connect Your Wallet</p>
-          <p className="con-title">
-            If you don't have a wallet yet, you can select a provider and create
-            one now
-          </p>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <WalletMultiButton />
+        onClose={() => setConnectModal(false)}
+        slotProps={{ root: { style: { zIndex: "300" } } }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 1000,
+            bgcolor: "#00000b",
+            p: 4,
+            zIndex: 300,
+            borderRadius: "8px",
+          }}>
+          <div className="login-box">
+            <p className="big-title">Connect Your Wallet</p>
+            <p className="con-title">
+              If you don't have a wallet yet, you can select a provider and
+              create one now
+            </p>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <WalletMultiButton />
+            </div>
           </div>
-        </div>
+        </Box>
       </Modal>
     </div>
   );
@@ -326,10 +343,9 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
 export default styled(Header)`
   .spin-box {
     width: 100%;
-    height: 50px;
-    padding: 100px 0;
+    height: 150px;
+    padding-top: 50px;
     display: block;
-    overflow: hidden;
     text-align: center;
   }
   .no-price {
@@ -348,6 +364,7 @@ export default styled(Header)`
     overflow: hidden;
     margin-right: 10px;
     width: 102px;
+    line-height: 20px;
     float: right;
     :hover {
       border: none;

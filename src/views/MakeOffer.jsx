@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input, Button, InputNumber } from "antd";
 import React, { useState, useEffect, useRef } from "react";
-import * as util from "../utils";
 import { getMachineDetailByUuid } from "../services/machine";
 import SolanaAction from "../components/SolanaAction";
 import { useSnackbar } from "notistack";
+import { TextField } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
 let inputValues = {
   price: 0,
@@ -55,18 +55,21 @@ function Home({ className }) {
     let maxDuration = inputValues.duration;
     let disk = inputValues.disk;
     if (tprice <= 0) {
-      return util.showError("The price must greater than 0");
+      return enqueueSnackbar("The price must greater than 0", {
+        variant: "error",
+      });
     }
     if (maxDuration <= 0) {
-      return util.showError(
-        "The max duration must be an integer greater than 0"
+      return enqueueSnackbar(
+        "The max duration must be an integer greater than 0",
+        { variant: "error" }
       );
     }
     if (disk <= 0) {
-      return util.showError("The disk must be an integer greater than 0");
+      return enqueueSnackbar("The disk must be an integer greater than 0", {
+        variant: "error",
+      });
     }
-
-    util.loading(true);
     setLoading(true);
     try {
       let result = await childRef.current.makeOffer(
@@ -75,21 +78,18 @@ function Home({ className }) {
         maxDuration,
         disk
       );
+      setLoading(false);
       if (result?.msg === "ok") {
         enqueueSnackbar("Make Offer Success.", { variant: "success" });
-        setLoading(false);
-        util.loading(false);
         setTimeout(() => {
-          navigate("/mydevice/");
+          navigate("/device/");
         }, 300);
       } else {
-        util.loading(false);
-        setLoading(false);
-        util.showError(result?.msg);
+        enqueueSnackbar(result?.msg, { variant: "error" });
       }
     } catch (e) {
       console.log(e);
-      util.alert(e.message);
+      enqueueSnackbar(e.message, { variant: "error" });
     }
   };
 
@@ -102,10 +102,12 @@ function Home({ className }) {
         <div className="myform">
           <div className="form-row">
             <div className="row-txt">Price (per hour)</div>
-            <InputNumber
+            <TextField
+              fullWidth
+              inputProps={{ style: { color: "white" } }}
+              color="success"
               value={price}
               onChange={onPriceChange}
-              className="my-input"
               placeholder="Enter the price per hour"
               min={0}
               max={99999}
@@ -114,10 +116,12 @@ function Home({ className }) {
           </div>
           <div className="form-row">
             <div className="row-txt">Max duration</div>
-            <Input
+            <TextField
+              fullWidth
+              inputProps={{ style: { color: "white" } }}
+              color="success"
               onChange={(e) => onInput(e, "duration")}
               type="number"
-              className="my-input"
               placeholder="Enter an integer"
               min={0}
               max={99999}
@@ -127,10 +131,12 @@ function Home({ className }) {
           <div className="form-row">
             <div className="row-txt">Max disk storage</div>
             <div className="row-title2">Avail Disk Storage: {maxStorage}GB</div>
-            <Input
+            <TextField
+              fullWidth
+              inputProps={{ style: { color: "white" } }}
+              color="success"
               onChange={(e) => onInput(e, "disk")}
               type="number"
-              className="my-input"
               placeholder="Enter an integer"
               min={0}
               max={maxStorage}
@@ -162,15 +168,14 @@ function Home({ className }) {
             </div>
           </div>
           <div className="form-row">
-            <Button
+            <LoadingButton
               loading={loading}
               disabled={loading}
-              type="primary"
               style={{ marginTop: 30 }}
               onClick={onSubmit}
               className="cbtn">
               {loading ? "Confirming" : "Confirm"}
-            </Button>
+            </LoadingButton>
           </div>
         </div>
       </div>

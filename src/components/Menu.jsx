@@ -18,8 +18,8 @@ function Menu({ className }) {
         />
         <div className="content-nav">
           <span onClick={() => navigate("/market")}>Market</span>
-          <span onClick={() => navigate("/mydevice")}>Share Device</span>
-          <span onClick={() => navigate("/myorder")}>My Orders</span>
+          <span onClick={() => navigate("/device")}>Share Device</span>
+          <span onClick={() => navigate("/order")}>My Orders</span>
           <span onClick={() => navigate("/faucet")}>Faucet</span>
         </div>
         <div className="right-btn">

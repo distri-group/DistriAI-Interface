@@ -1,11 +1,11 @@
 import styled from "styled-components";
-import { Input, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import * as solana from "../services/solana";
-import * as util from "../utils";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { faucet } from "../services/faucet";
 import { useSnackbar } from "notistack";
+import { TextField } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
 function Home({ className }) {
   document.title = "Faucet";
@@ -22,7 +22,9 @@ function Home({ className }) {
   };
   const onSubmit = async () => {
     if (!newAddr) {
-      return util.alert("Please Enter Your Wallet Address.");
+      return enqueueSnackbar("Please Enter Your Wallet Address.", {
+        variant: "info",
+      });
     }
     setLoading(true);
     let t = await solana.faucet(newAddr);
@@ -30,26 +32,31 @@ function Home({ className }) {
     if (t.msg === "ok") {
       enqueueSnackbar("1 SOL has sent to your wallet", { variant: "success" });
     } else {
-      util.alert(t.msg);
+      enqueueSnackbar(t.msg, { variant: "error" });
     }
   };
   const onSendDIST = async () => {
     if (!newAddr) {
-      return util.alert("Please Enter Your Wallet Address.");
+      return enqueueSnackbar("Please Enter Your Wallet Address.", {
+        variant: "info",
+      });
     }
     setLoading(true);
     try {
       let res = await faucet(newAddr);
       setLoading(false);
       if (res?.Msg?.includes("too many airdrops")) {
-        return util.alert(res.Msg);
+        return enqueueSnackbar(res.Msg, { variant: "info" });
       }
       return enqueueSnackbar("5 DIST have sent to your wallet", {
         variant: "success",
       });
     } catch (e) {
       console.log(e);
-      return util.alert("Failed to claim airdrop. Please try again later");
+      return enqueueSnackbar(
+        "Failed to claim airdrop. Please try again later",
+        { variant: "error" }
+      );
     }
   };
 
@@ -70,36 +77,35 @@ function Home({ className }) {
             <div className="tip1">
               2. Create a new wallet OR import an existing wallet.
             </div>
-            <Input
-              className="my-input"
+            <TextField
+              fullWidth
+              color="success"
+              inputProps={{ style: { color: "white" } }}
               data-name="taskName"
               onChange={onInput}
               onKeyUp={onInput}
               disabled={loading}
               value={newAddr}
               placeholder="Enter Your Wallet Address"
-              allowClear={true}
             />
           </div>
           <div className="form-col">
-            <Button
-              className="mybtn22 cbtn"
+            <LoadingButton
+              className="cbtn"
               loading={loading}
-              disabled={loading}
               style={{ width: 152 }}
               type="primary"
               onClick={onSubmit}>
-              Send Me SOL
-            </Button>
-            <Button
-              className="mybtn22 cbtn"
+              {loading ? "" : "Send Me SOL"}
+            </LoadingButton>
+            <LoadingButton
+              className="cbtn"
               loading={loading}
-              disabled={loading}
               style={{ width: 152 }}
               type="primary"
               onClick={onSendDIST}>
-              Send Me DIST
-            </Button>
+              {loading ? "" : "Send Me DIST"}
+            </LoadingButton>
           </div>
         </div>
       </div>
@@ -111,7 +117,7 @@ export default styled(Home)`
   display: block;
   overflow: hidden;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 130px);
   color: #fff;
   .hold {
     display: block;
@@ -150,13 +156,6 @@ export default styled(Home)`
       }
       input {
         background-color: #222;
-      }
-      .mybtn22 {
-        height: 50px;
-        line-height: 40px;
-        margin: 20px auto;
-        display: block;
-        color: white !important;
       }
     }
   }

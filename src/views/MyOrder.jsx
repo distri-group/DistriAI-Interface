@@ -1,11 +1,12 @@
 import styled from "styled-components";
-import { Select } from "antd";
 import React, { useState, useEffect } from "react";
 import OrderList from "../components/OrderList";
 import { getOrderList, getFilterData } from "../services/order";
 
 import Pager from "../components/pager";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useSnackbar } from "notistack";
+import { MenuItem, Select } from "@mui/material";
 
 let filter = {};
 
@@ -18,17 +19,17 @@ function Home({ className }) {
   const [total, setTotal] = useState(0);
   const [filterValue, setFilterValue] = useState({});
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const loadList = async (curr) => {
     setLoading(true);
     try {
       let res = await getOrderList(curr, filter, wallet.publicKey.toString());
       console.log("Order List", res);
-      if (res.total) {
-        setTotal(res.total);
+      if (!res) {
+        return enqueueSnackbar("Order List Not Found", { variant: "error" });
       }
-      if (res.list) {
-        setList(res.list);
-      }
+      setTotal(res.total);
+      setList(res.list);
     } catch (e) {}
     setLoading(false);
   };
@@ -44,12 +45,13 @@ function Home({ className }) {
   useEffect(() => {
     loadFilterData();
     if (wallet?.publicKey) {
+      setTotal(0);
       loadList(1);
     }
   }, [wallet?.publicKey]);
 
-  const onFilter = (v, n) => {
-    filter[n] = v;
+  const onFilter = (value, name) => {
+    filter[name] = value;
     setFilterValue(filter);
     setCurrent(1);
     loadList(1);
@@ -72,19 +74,23 @@ function Home({ className }) {
     <div className={className}>
       <div className="con">
         <h1 className="title">My Orders</h1>
+
         <div className="filter">
           <span className="txt">Filter</span>
           {filterData.map((t) => {
             return (
               <span className="sel" key={t.name}>
                 <Select
+                  className="select"
                   defaultValue="all"
                   value={filterValue[t.name]}
-                  style={{ width: 160 }}
-                  data-name={t.name}
-                  onChange={(e) => onFilter(e, t.name)}
-                  options={t.arr}
-                />
+                  onChange={(e) => onFilter(e.target.value, t.name)}>
+                  {t.arr.map((item) => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </Select>
               </span>
             );
           })}

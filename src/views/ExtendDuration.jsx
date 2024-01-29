@@ -1,8 +1,6 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input, Button } from "antd";
 import React, { useState, useEffect, useRef } from "react";
-import * as util from "../utils";
 import { getDetailByUuid } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
 import webconfig from "../webconfig";
@@ -10,6 +8,8 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
+import { TextField } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 let formData = {};
 
 function Home({ className }) {
@@ -33,7 +33,10 @@ function Home({ className }) {
       value = parseInt(value);
       if (value <= 0) {
         setAmount(0);
-        return util.showError("The duration must be an integer greater than 0");
+        return enqueueSnackbar(
+          "The duration must be an integer greater than 0",
+          { variant: "error" }
+        );
       }
       formData[n] = value;
       setAmount(value * (deviceDetail.Price || 0));
@@ -48,12 +51,14 @@ function Home({ className }) {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      let detail = await getDetailByUuid(id, wallet.publicKey.toString());
-      if (detail) {
-        setOrderDetail(detail);
-        if (detail.Metadata?.machineInfo) {
-          setDeviceDetail(detail.Metadata.machineInfo);
+      let res = await getDetailByUuid(id, wallet.publicKey.toString());
+      if (res.Status === 1) {
+        setOrderDetail(res.Detail);
+        if (res.Detail.Metadata?.machineInfo) {
+          setDeviceDetail(res.Detail.Metadata.machineInfo);
         }
+      } else {
+        return enqueueSnackbar(res.Msg, { variant: "error" });
       }
       const mint = new PublicKey(webconfig.mintAddress);
       getTokenBalance(mint, wallet.publicKey);
@@ -63,16 +68,16 @@ function Home({ className }) {
       init();
     }
   }, [wallet, id]);
-  const valit = () => {
+  const valid = () => {
     if (amount === 0) {
       return "Payment token greater than 0.";
     }
     return null;
   };
   const onSubmit = async () => {
-    let vmsg = valit();
+    let vmsg = valid();
     if (vmsg) {
-      return util.alert(vmsg);
+      return enqueueSnackbar(vmsg, { variant: "warning" });
     }
     setLoading(true);
     console.log("OrderData", { formData, orderDetail });
@@ -87,7 +92,7 @@ function Home({ className }) {
           variant: "success",
         });
         setLoading(false);
-        navigate("/myorder");
+        navigate("/order");
       }
     }, 300);
   };
@@ -179,8 +184,9 @@ function Home({ className }) {
           </div>
           <div className="form-row">
             <div className="row-txt">Duration </div>
-            <Input
-              className="my-input"
+            <TextField
+              fullWidth
+              inputProps={{ style: { color: "white" } }}
               disabled={loading}
               data-name="duration"
               placeholder="Hour"
@@ -198,15 +204,13 @@ function Home({ className }) {
             </div>
           </div>
           <div className="form-row btn-row">
-            <Button
+            <LoadingButton
               loading={loading}
-              disabled={loading}
               style={{ width: 154 }}
-              type="primary"
               className="cbtn"
               onClick={onSubmit}>
-              Confirm
-            </Button>
+              {loading ? "" : "Confirm"}
+            </LoadingButton>
           </div>
         </div>
       </div>

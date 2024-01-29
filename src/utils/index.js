@@ -1,31 +1,7 @@
-import { Modal, message } from "antd";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-export { alert, showError, loading, formdataify };
+export { formdataify, formatBalance, formatAddress };
 
-function alert(msg, cb) {
-  Modal.info({
-    title: msg,
-    onOk: cb,
-  });
-}
-
-function showError(content) {
-  message.open({
-    type: "error",
-    content,
-  });
-}
-
-function loading(show, txt) {
-  if (!show) {
-    return message.destroy();
-  }
-  message.loading({
-    content: txt || "loading...",
-    duration: 0,
-    style: { marginTop: "200px" },
-  });
-}
 function formdataify(params) {
   const formData = new FormData();
   Object.keys(params).forEach((key) => {
@@ -36,4 +12,25 @@ function formdataify(params) {
     }
   });
   return formData;
+}
+
+function formatBalance(balance) {
+  if (!balance) {
+    return "";
+  }
+  if (typeof balance == "string") {
+    balance = parseInt(balance.split(",").join(""));
+  }
+  if (typeof balance == "object" && balance.free) {
+    balance = parseInt(balance.free.toString());
+  }
+  if (isNaN(balance)) {
+    return balance;
+  }
+  return Math.floor((balance / LAMPORTS_PER_SOL) * 100) / 100;
+}
+function formatAddress(addr) {
+  if (!addr) return "";
+  if (addr.length < 10) return addr;
+  return addr.slice(0, 5) + "..." + addr.slice(-5);
 }
