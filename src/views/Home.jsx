@@ -3,12 +3,13 @@ import React, { useState } from "react";
 import { subscribe } from "../services/mailbox";
 import Header from "../components/Header";
 import { useSnackbar } from "notistack";
-import { InputAdornment, OutlinedInput } from "@mui/material";
+import { Box, InputAdornment, Modal, OutlinedInput } from "@mui/material";
 
 function Home({ className }) {
   document.title = "DistriAI Home";
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const [email, setEmail] = useState();
+  const [videoModal, setVideoModal] = useState(false);
   const onInputEmail = (e) => {
     setEmail(e.target.value);
   };
@@ -37,15 +38,9 @@ function Home({ className }) {
         <div className="box1">
           <Header className="page-header" />
           <h1>Decentralized AI Computing Power Network</h1>
-          <a
-            className="play-btn"
-            href="https://youtu.be/SKa_HxFgHp8"
-            title="https://www.youtube.com/"
-            target="_blank"
-            rel="noreferrer">
-            {" "}
+          <span className="play-btn" onClick={() => setVideoModal(true)}>
             Play Video
-          </a>
+          </span>
         </div>
         <div className="box2">
           <div className="con">
@@ -172,7 +167,6 @@ function Home({ className }) {
             </div>
           </div>
         </div>
-
         <div className="box5">
           <div className="con">
             <div className="t1">Backer</div>
@@ -211,6 +205,18 @@ function Home({ className }) {
           </div>
         </div>
       </div>
+      <Modal open={videoModal} onClose={() => setVideoModal(false)}>
+        <Box sx={{ position: "absolute", top: "10%", left: "20%" }}>
+          <iframe
+            width="1236"
+            height="695"
+            src="https://www.youtube.com/embed/SKa_HxFgHp8"
+            title="Distri.AI Video of User Guide"
+            frameBorder={0}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen></iframe>
+        </Box>
+      </Modal>
     </div>
   );
 }
@@ -218,7 +224,9 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   font-family: Montserrat, Montserrat Bold, Montserrat, sans-serif;
-
+  iframe {
+    border: none;
+  }
   .content {
     min-width: 1200px;
     display: block;
@@ -279,6 +287,7 @@ export default styled(Home)`
       font-size: 14px;
       color: #ffffff;
       text-decoration: none;
+      cursor: pointer;
     }
     .play-btn:hover {
       background-color: rgb(49 49 49);
