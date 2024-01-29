@@ -67,6 +67,7 @@ function Home({ className }) {
     if (wallet?.publicKey) {
       init();
     }
+    // eslint-disable-next-line
   }, [wallet, id]);
   const valid = () => {
     if (amount === 0) {

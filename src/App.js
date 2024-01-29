@@ -19,7 +19,6 @@ import {
 } from "@solana/wallet-adapter-react";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import Test from "./views/Test";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 let tout = "";
@@ -77,7 +76,6 @@ function App() {
                     element={<ExtendDuration />}
                   />
                   <Route path="/faucet" element={<Faucet />} />
-                  <Route path="/test" element={<Test />} />
                 </Routes>
                 <Footer />
               </SnackbarProvider>

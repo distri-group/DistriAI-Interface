@@ -48,6 +48,7 @@ function Home({ className }) {
       setTotal(0);
       loadList(1);
     }
+    // eslint-disable-next-line
   }, [wallet?.publicKey]);
 
   const onFilter = (value, name) => {
