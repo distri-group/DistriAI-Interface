@@ -1,10 +1,7 @@
-import * as util from "../utils";
-
 import webconfig from "../webconfig";
 import { formdataify } from "../utils";
 const baseUrl = webconfig.apiUrl;
 
-let timer = null;
 const request = {
   request: function (url, options = {}) {
     url = baseUrl + url;
@@ -18,11 +15,6 @@ const request = {
           resolve(data);
         })
         .catch((error) => {
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            console.log(error);
-            util.showError("Network Error.Please refresh page later.");
-          }, 500);
           reject(error);
         });
     });

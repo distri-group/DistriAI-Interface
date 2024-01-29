@@ -1,14 +1,16 @@
 import styled from "styled-components";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import { Spin, Empty, Button, Modal, message } from "antd";
 import React, { useState, useEffect } from "react";
 import copy from "copy-to-clipboard";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { formatAddress } from "../utils/format";
+import { formatAddress } from "../utils";
+import { useSnackbar } from "notistack";
+import { CircularProgress, Button, Modal, Box } from "@mui/material";
 
 function Header({ className, list, loading }) {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(loading);
   const [decrypted, setDecrypted] = useState(false);
@@ -131,9 +133,7 @@ function Header({ className, list, loading }) {
             }`}>
             Console
           </span>
-          <span
-            onClick={() => navigate("/order-detail/" + text)}
-            className="mini-btn">
+          <span onClick={() => navigate("/order/" + text)} className="mini-btn">
             Detail
           </span>
         </div>
@@ -163,13 +163,10 @@ function Header({ className, list, loading }) {
               <td colSpan={columns.length} style={{ textAlign: "center" }}>
                 {isLoading ? (
                   <div className="spin-box">
-                    <Spin size="large" />
+                    <CircularProgress />
                   </div>
                 ) : (
-                  <Empty
-                    description={"No item yet"}
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
+                  <span>No item yet</span>
                 )}
               </td>
             </tr>
@@ -202,60 +199,73 @@ function Header({ className, list, loading }) {
       </table>
       <Modal
         open={selectedItem}
-        width={1000}
-        footer={[]}
-        onCancel={() => {
+        onClose={() => {
           setSelectedItem(null);
           setDecrypted(false);
         }}>
-        <h1 className="big-title">Decrypted SSH Key</h1>
-        <div className="desc">
-          <p>SSH Key was crypted by your public key.</p>
-          <p>It can be decrypted and obtained with the wallet signature.</p>
-        </div>
-        <div>
-          <h2
-            className="con-title"
-            style={{
-              marginTop: "20px",
-              marginBottom: "10px",
-              fontWeight: "700",
-            }}>
-            SSH Key
-          </h2>
-          <div className={`crypted ${decrypted}`}>
-            <span>
-              {decrypted
-                ? selectedItem.Uuid
-                : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
-            </span>
-            <div
-              className={`hint ${decrypted}`}
-              style={{ display: decrypted && "none" }}>
-              Please decryted to show the SSH Key
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 1000,
+            bgcolor: "#00000b",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: "8px",
+          }}>
+          <h1 className="big-title">Decrypted SSH Key</h1>
+          <div className="desc">
+            <p>SSH Key was crypted by your public key.</p>
+            <p>It can be decrypted and obtained with the wallet signature.</p>
+          </div>
+          <div>
+            <h2
+              className="con-title"
+              style={{
+                marginTop: "20px",
+                marginBottom: "10px",
+                fontWeight: "700",
+              }}>
+              SSH Key
+            </h2>
+            <div className={`crypted ${decrypted}`}>
+              <span>
+                {decrypted
+                  ? selectedItem.Uuid
+                  : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
+              </span>
+              <div
+                className={`hint ${decrypted}`}
+                style={{ display: decrypted && "none" }}>
+                Please decryted to show the SSH Key
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "20px",
-          }}>
-          <Button
-            onClick={() => {
-              if (!decrypted) {
-                setDecrypted(true);
-                message.success("Decrypted");
-              } else {
-                copy(selectedItem.Uuid);
-                message.success("Copied to clipboard");
-              }
-            }}
-            className="cbtn">
-            {decrypted ? "Copy" : "Decrypted"}
-          </Button>
-        </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "20px",
+            }}>
+            <Button
+              onClick={() => {
+                if (!decrypted) {
+                  setDecrypted(true);
+                  enqueueSnackbar("Decrypted", { variant: "success" });
+                } else {
+                  copy(selectedItem.Uuid);
+                  enqueueSnackbar("Copied to clipboard", {
+                    variant: "success",
+                  });
+                }
+              }}
+              className="cbtn">
+              {decrypted ? "Copy" : "Decrypted"}
+            </Button>
+          </div>
+        </Box>
       </Modal>
     </div>
   );
@@ -377,5 +387,24 @@ export default styled(Header)`
   .disabled:hover {
     background-color: #4a4a4a !important;
     opacity: 0.5 !important;
+  }
+  .mini-btn {
+    border-radius: 4px;
+    border: none;
+    height: 31px;
+    line-height: 31px;
+    padding: 0 10px;
+    font-size: 14px;
+    display: block;
+    text-align: center;
+    overflow: hidden;
+    margin-right: 10px;
+    float: right;
+    :hover {
+      border: none;
+    }
+    background-image: linear-gradient(to right, #20ae98, #0aab50);
+    color: white;
+    cursor: pointer;
   }
 `;

@@ -18,14 +18,31 @@ import {
   ConnectionProvider,
 } from "@solana/wallet-adapter-react";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import { ConfigProvider, theme } from "antd";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import Test from "./views/Test";
 import { SnackbarProvider } from "notistack";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 let tout = "";
 
 function App() {
   const [isHome, setIsHome] = useState(true);
+  const Mtheme = createTheme({
+    typography: {
+      fontFamily: "Montserrat, sans-serif",
+    },
+    components: {
+      MuiMenu: {
+        styleOverrides: {
+          list: {
+            '&[role="menu"]': {
+              backgroundColor: "#0aab50",
+              color: "white",
+            },
+          },
+        },
+      },
+    },
+  });
   useEffect(() => {
     tout = setInterval(function () {
       let tmp = window.location.pathname === "/";
@@ -42,19 +59,17 @@ function App() {
       <WalletProvider wallets={[new PhantomWalletAdapter()]} autoConnect={true}>
         <WalletModalProvider>
           <BrowserRouter>
-            <ConfigProvider
-              theme={{
-                algorithm: theme.darkAlgorithm,
-              }}>
+            <ThemeProvider theme={Mtheme}>
               <SnackbarProvider
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                autoHideDuration={3000}>
                 {!isHome && <Menu className="page-header" />}
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/market" element={<Market />} />
-                  <Route path="/mydevice" element={<MyDevice />} />
-                  <Route path="/myorder" element={<MyOrder />} />
-                  <Route path="/order-detail/:uuid" element={<OrderDetail />} />
+                  <Route path="/device" element={<MyDevice />} />
+                  <Route path="/order" element={<MyOrder />} />
+                  <Route path="/order/:uuid" element={<OrderDetail />} />
                   <Route path="/buy/:id" element={<Buy />} />
                   <Route path="/makeoffer/:id" element={<MakeOffer />} />
                   <Route
@@ -66,7 +81,7 @@ function App() {
                 </Routes>
                 <Footer />
               </SnackbarProvider>
-            </ConfigProvider>
+            </ThemeProvider>
           </BrowserRouter>
         </WalletModalProvider>
       </WalletProvider>

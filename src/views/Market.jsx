@@ -1,9 +1,10 @@
 import styled from "styled-components";
-import { Select } from "antd";
 import React, { useState, useEffect } from "react";
 import DeviceList from "../components/DeviceList";
 import Pager from "../components/pager";
 import { getMachineList, getFilterData } from "../services/machine";
+import { useSnackbar } from "notistack";
+import { MenuItem, Select } from "@mui/material";
 
 let filter = {};
 
@@ -12,10 +13,10 @@ function Home({ className }) {
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
-
   const [loading, setLoading] = useState(false);
   const [filterData, setFilterData] = useState([]);
   const [filterValue, setFilterValue] = useState({});
+  const { enqueueSnackbar } = useSnackbar();
 
   const loadList = async (curr) => {
     setLoading(true);
@@ -32,6 +33,9 @@ function Home({ className }) {
     setLoading(true);
     try {
       let res = await getFilterData();
+      if (res.Msg) {
+        return enqueueSnackbar(res.Msg, { variant: "error" });
+      }
       setFilterData(res);
       res.forEach((t) => {
         filter[t.name] = "all";
@@ -47,9 +51,8 @@ function Home({ className }) {
     loadList();
   }, []);
 
-  const onFilter = (v, n) => {
-    filter[n] = v;
-    console.log({ filter });
+  const onFilter = (value, name) => {
+    filter[name] = value;
     setFilterValue(filter);
     setCurrent(1);
     loadList(1);
@@ -77,14 +80,25 @@ function Home({ className }) {
           {filterData.map((t) => {
             return (
               <span className="sel" key={t.name}>
-                <Select
+                {/* <Select
                   defaultValue="all"
                   value={filterValue[t.name]}
                   style={{ width: 160 }}
                   data-name={t.name}
                   onChange={(e) => onFilter(e, t.name)}
                   options={t.arr}
-                />
+                /> */}
+                <Select
+                  className="select"
+                  defaultValue="all"
+                  value={filterValue[t.name]}
+                  onChange={(e) => onFilter(e.target.value, t.name)}>
+                  {t.arr.map((item) => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </Select>
               </span>
             );
           })}

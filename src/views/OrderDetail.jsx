@@ -1,28 +1,30 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import { Spin } from "antd";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { getDetailByUuid } from "../services/order";
+import { useSnackbar } from "notistack";
+import { CircularProgress } from "@mui/material";
 
 function Home({ className }) {
   const { uuid } = useParams();
   document.title = "Order detail";
-  let navigate = useNavigate();
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(false);
   const wallet = useAnchorWallet();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const loadDetail = async () => {
       setLoading(true);
-      try {
-        let res = await getDetailByUuid(uuid, wallet.publicKey.toString());
-        setRecord(res);
-      } catch (e) {
-        console.log(e);
-      }
+      let res = await getDetailByUuid(uuid, wallet.publicKey.toString());
       setLoading(false);
+      if (res.Status === 1) {
+        setRecord(res.Detail);
+      } else {
+        return enqueueSnackbar(res.Msg, { variant: "error" });
+      }
     };
     if (wallet?.publicKey) {
       loadDetail();
@@ -36,7 +38,7 @@ function Home({ className }) {
         <h1 className="title">Details</h1>
         <div className="d" style={{ width: "70%" }}>
           {loading ? (
-            <Spin />
+            <CircularProgress />
           ) : record && record.Metadata.machineInfo ? (
             <div className="detail">
               <div className="info-box">

@@ -1,39 +1,12 @@
-import { Dropdown } from "antd";
+import { Button, Menu, MenuItem } from "@mui/material";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 function Header({ className }) {
   let navigate = useNavigate();
-  const items = [
-    {
-      label: (
-        <a
-          href="https://github.com/distri-group"
-          style={{ fontSize: "16px" }}
-          target="_blank"
-          rel="noreferrer">
-          Github
-        </a>
-      ),
-    },
-    {
-      label: (
-        <span style={{ fontSize: "16px", cursor: "default" }}>Whitepaper</span>
-      ),
-      disabled: true,
-    },
-    {
-      label: (
-        <a
-          href="https://medium.com/@Distri.AI"
-          style={{ fontSize: "16px" }}
-          target="_blank"
-          rel="noreferrer">
-          Blog
-        </a>
-      ),
-    },
-  ];
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
   return (
     <div className={className}>
       <div className="con">
@@ -52,12 +25,40 @@ function Header({ className }) {
             width: "400px",
             justifyContent: "space-between",
           }}>
-          <Dropdown
-            menu={{ items }}
-            placement="bottom"
-            overlayClassName="dropdown">
-            <span style={{ color: "white" }}>Resources</span>
-          </Dropdown>
+          <Button
+            disableRipple
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            style={{
+              textTransform: "none",
+              color: "white",
+              fontSize: "16px",
+            }}>
+            Resources
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            disableScrollLock
+            onClose={() => setAnchorEl(null)}>
+            <MenuItem
+              onClick={() => {
+                window.open("https://github.com/distri-group");
+                setAnchorEl(null);
+              }}>
+              Github
+            </MenuItem>
+            <MenuItem disabled>Whitepaper</MenuItem>
+            <MenuItem
+              onClick={() => {
+                window.open("https://medium.com/@Distri.AI");
+                setAnchorEl(null);
+              }}>
+              Blog
+            </MenuItem>
+          </Menu>
           <a
             href="https://docs.distri.ai/core/"
             target="_blank"

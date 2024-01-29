@@ -1,7 +1,6 @@
 import * as store from "../utils/store";
-import * as util from "../utils";
 import moment from "moment";
-import { formatAddress, formatBalance } from "../utils/format";
+import { formatAddress, formatBalance } from "../utils";
 import { getTimeDiff } from "time-difference-js";
 import { getMachineList } from "./machine";
 import request from "../utils/request";
@@ -32,7 +31,6 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     }
     let ret = await request.post(apiUrl, options);
     if (ret.Msg !== "success") {
-      util.alert(ret.msg);
       return null;
     }
     let total = ret.Data.Total;
@@ -109,15 +107,12 @@ export async function getFilterData() {
 export async function getDetailByUuid(uuid, publicKey) {
   let obj = await getOrderList(1, [], publicKey);
   if (!obj) {
-    util.showError("Order list not found.");
-    return null;
+    return { Status: 0, Msg: "Order list not found" };
   }
   let orderDetail = obj.list.find((t) => t.Uuid === uuid);
   if (!orderDetail) {
-    util.showError("Order detail of " + uuid + " not found.");
-    console.log(obj.list);
-    return null;
+    return { Status: 0, Msg: "Order detail of " + uuid + " not found." };
   }
   console.log("Order Found", orderDetail);
-  return orderDetail;
+  return { Status: 1, Detail: orderDetail };
 }

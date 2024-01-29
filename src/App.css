@@ -15,14 +15,6 @@ body {
   background-image: linear-gradient(to right, #20ae98, #0aab50);
   color:white!important;
 }
-.login-modal{
-  background-color: #000;
-  border:1px solid rgba(64, 64, 64, 1);
-  border-radius: 5px;
-  .ant-modal-content{
-    background-color: #000!important;
-  }
-}
 .big-title {
   font-family: Montserrat Bold, Montserrat, sans-serif;
   font-weight: 700;
@@ -87,6 +79,7 @@ body {
   }
 }
 .desc p{
+  color: white;
   text-align: center;
   font-size: 16px;
   line-height: 20px;
@@ -120,4 +113,14 @@ body {
 }
 .ant-dropdown-menu-item-disabled:hover{
   background-color: transparent!important;
+}
+.select {
+  height: 32px;
+  width: 160px;
+  color: white!important;
+  padding: 0;
+  border: 1px solid #606060;
+}
+.MuiOutlinedInput-notchedOutline{
+  border-color: #797979!important;
 }

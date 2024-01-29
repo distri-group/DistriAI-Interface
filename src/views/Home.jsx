@@ -1,27 +1,27 @@
 import styled from "styled-components";
-import { message, Input } from "antd";
 import React, { useState } from "react";
 import { subscribe } from "../services/mailbox";
 import Header from "../components/Header";
+import { useSnackbar } from "notistack";
+import { InputAdornment, OutlinedInput } from "@mui/material";
 
 function Home({ className }) {
   document.title = "DistriAI Home";
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const [email, setEmail] = useState();
   const onInputEmail = (e) => {
-    let v = e.target.value;
-    console.log(v);
-    setEmail(v);
+    setEmail(e.target.value);
   };
   const onSubmitEmail = () => {
     if (!validateEmail(email)) {
-      return message.error("Email error.");
+      return enqueueSnackbar("Email error", { variant: "error" });
     }
-    message.loading("loading...");
+    enqueueSnackbar("Loading...", { variant: "info" });
     let data = { mailbox: email };
     subscribe(data).then((t) => {
       console.log(t);
-      message.destroy();
-      message.success("Email Subscribed.");
+      closeSnackbar();
+      enqueueSnackbar("Email Subscribed", { variant: "success" });
     });
   };
   const validateEmail = (email) => {
@@ -191,16 +191,21 @@ function Home({ className }) {
               project updates in real time.
             </div>
             <div className="sub-box">
-              <Input
+              <OutlinedInput
                 onChange={onInputEmail}
                 onKeyUp={onInputEmail}
                 placeholder="email@your.domain"
-                suffix={
-                  <button className="email-submit" onClick={onSubmitEmail}>
-                    <span>Subscribe</span>
-                  </button>
-                }
                 className="email-input"
+                type="email"
+                inputProps={{}}
+                fullWidth
+                endAdornment={
+                  <InputAdornment position="end">
+                    <button className="email-submit" onClick={onSubmitEmail}>
+                      <span>Subscribe</span>
+                    </button>
+                  </InputAdornment>
+                }
               />
             </div>
           </div>
@@ -573,13 +578,10 @@ export default styled(Home)`
         overflow: hidden;
         margin: 50px auto;
         .email-input {
+          color: white;
           height: 72px;
           border-radius: 50px;
           background-color: transparent;
-          .ant-input {
-            border-radius: 50px;
-            background-color: transparent;
-          }
         }
         .email-submit {
           border: none;
@@ -588,6 +590,7 @@ export default styled(Home)`
           background-image: linear-gradient(to right, #20ae98, #0aab50);
           span {
             display: block;
+            color: white;
             font-size: 14px;
             padding: 5px 20px;
           }
