@@ -5,9 +5,10 @@ import SolanaAction from "../components/SolanaAction";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useSnackbar } from "notistack";
-import CircularProgress from "@mui/material/CircularProgress";
 import { Box, Button, Modal } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { formatAddress } from "../utils";
+import Table from "./Table";
 
 function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
                 level {record?.SecurityLevel}
               </span>
             </div>
-            <div className="addr">{record.Addr}</div>
+            <div className="addr">{formatAddress(record.Owner)}</div>
             <div className="id"># {record.UuidShort}</div>
             <div className="reliability">
               <span className="l">
@@ -208,66 +209,31 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
-      <table className="mytable">
-        <thead className="table-thead">
-          <tr>
-            {columns.map((c) => {
-              return (
-                <th key={c.title} style={{ width: c.width }}>
-                  {c.title}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        {(list && list.length === 0) || loading ? (
-          <tbody>
-            <tr>
-              <td colSpan={columns.length} style={{ textAlign: "center" }}>
-                {loading ? (
-                  <div className="spin-box">
-                    <CircularProgress />
-                  </div>
-                ) : isMyDevice ? (
-                  <div className="empty-box">
-                    <span>Please add your machine in the client</span>
-                  </div>
-                ) : (
-                  <span>No item yet</span>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {list &&
-              list.map((d, index) => {
-                return (
-                  <tr key={index}>
-                    {columns.map((c, i) => {
-                      if (c.render) {
-                        return (
-                          <td style={{ width: c.width }} key={i}>
-                            {c.render(d[c.key], d, i)}
-                          </td>
-                        );
-                      } else {
-                        return (
-                          <td key={i} style={{ width: c.width }}>
-                            {d[c.key]}
-                          </td>
-                        );
-                      }
-                    })}
-                  </tr>
-                );
-              })}
-          </tbody>
-        )}
-      </table>
+      <Table
+        columns={columns}
+        list={list}
+        loading={loading}
+        empty={
+          isMyDevice ? (
+            <span>
+              Please{" "}
+              <a
+                className="add-machine"
+                href="https://docs.distri.ai/core/getting-started/compute-node"
+                target="_blank"
+                rel="noreffer">
+                Add Your Machine
+              </a>{" "}
+              in the client
+            </span>
+          ) : (
+            <span>No item yet</span>
+          )
+        }
+      />
       {deviceToCancel && (
         <Modal
-          open={deviceToCancel}
+          open={Boolean(deviceToCancel)}
           onClose={() => setDeviceToCancel(null)}
           className="cancel">
           <Box
@@ -281,6 +247,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               boxShadow: 24,
               p: 4,
               borderRadius: "8px",
+              color: "white",
             }}>
             <h1 style={{ fontSize: "72px", textAlign: "center" }}>
               Unlist The Offer
@@ -405,44 +372,6 @@ export default styled(Header)`
       line-height: 20px;
       margin-left: 5px;
       font-weight: bold;
-    }
-  }
-  .mytable {
-    display: table;
-    background-color: #222;
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    .link {
-      color: #fff;
-      cursor: pointer;
-    }
-    .btn-link {
-      color: #fff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    th {
-      background-color: #151515;
-      color: #fff;
-      height: 40px;
-      line-height: 40px;
-      text-align: left;
-      padding: 0 10px;
-      font-weight: normal;
-    }
-    tr td {
-      border-bottom: 1px solid #1a1a1a;
-      border-collapse: collapse;
-      padding: 0 10px;
-      overflow: hidden;
-    }
-    tr:last-children {
-      td {
-        border-bottom: none;
-      }
     }
   }
   .provider {
@@ -618,6 +547,10 @@ export default styled(Header)`
     span {
       color: #6e6e6e;
       font-size: 14px;
+    }
+    .add-machine {
+      text-decoration: none;
+      color: #0aab50;
     }
   }
 `;
