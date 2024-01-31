@@ -7,13 +7,17 @@ import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import Pager from "../components/pager";
 
 function Earning({ className }) {
+  document.title = "My Earnings";
   let filter = { Direction: "sell" };
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [current, setCurrent] = useState(1);
   const [filterData, setFilterData] = useState([]);
   const [filterValue, setFilterValue] = useState();
   const [loading, setLoading] = useState(false);
@@ -26,10 +30,29 @@ function Earning({ className }) {
         return enqueueSnackbar("Order List Not Found", { variant: "error" });
       }
       setList(res.list);
+      setTotal(res.total);
     } catch (e) {
       console.log(e);
     }
     setLoading(false);
+  };
+  const onFilter = (value) => {
+    filter.Status = value;
+    setFilterValue(filter);
+    setCurrent(1);
+    loadList(1);
+  };
+  const onResetFilter = () => {
+    filterData.forEach((t) => {
+      filter[t.name] = "all";
+    });
+    setFilterValue(filter);
+    setCurrent(1);
+    loadList(1);
+  };
+  const onPageChange = (curr) => {
+    setCurrent(curr);
+    loadList(curr);
   };
   const columns = [
     {
@@ -106,24 +129,11 @@ function Earning({ className }) {
   return (
     <div className={className}>
       <h1>My Order Earnings</h1>
-      <div className="box">
-        <div>
-          <p className="describe">
-            All order earnings you can currently claim.
-          </p>
-          <div className="volume">
-            <span className="number">300.8</span>
-            <span>DIST</span>
-            <p>Claimable</p>
-          </div>
-        </div>
-        <Button className="claim">Claim Earning</Button>
-      </div>
       <div className="container">
         <div className="box">
           <div>
             <p className="describe">
-              All order earnings you have already claimed.
+              All order earnings you have already received.
             </p>
             <div className="volume">
               <span className="number Completed">1230.25</span>
@@ -135,7 +145,8 @@ function Earning({ className }) {
         <div className="box">
           <div>
             <p className="describe">
-              All order earnings you can claim after orders are completed.
+              All order earnings you can expect to receive after orders are
+              completed.
             </p>
             <div className="volume">
               <span className="number Completed">488.3</span>
@@ -145,16 +156,28 @@ function Earning({ className }) {
           </div>
         </div>
       </div>
-      <div>
+      <div className="filter">
         <span>Filter</span>
-        {/* <Select defaultValue="all">
-          {filterData.map((item) => (
-            <MenuItem key={item.value} value={item.value}>
-              {item.label}
-            </MenuItem>
-          ))}
-        </Select> */}
-        <span className="btn-txt">reset</span>
+        {filterData.map((t) => {
+          return (
+            <span className="sel" key={t.name}>
+              <Select
+                className="select"
+                defaultValue="all"
+                value={filterValue[t.name]}
+                onChange={(e) => onFilter(e.target.value, t.name)}>
+                {t.arr.map((item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </span>
+          );
+        })}
+        <span className="btn-txt" onClick={onResetFilter}>
+          reset
+        </span>
       </div>
       <Table
         className="earning-list"
@@ -163,6 +186,14 @@ function Earning({ className }) {
         empty={<span>No Item yet</span>}
         loading={loading}
       />
+      {total > 10 && (
+        <Pager
+          current={current}
+          total={total}
+          pageSize={10}
+          onChange={onPageChange}
+        />
+      )}
     </div>
   );
 }
@@ -170,6 +201,7 @@ function Earning({ className }) {
 export default styled(Earning)`
   color: white;
   width: 1200px;
+  min-height: calc(100vh - 162px);
   margin: 10px auto;
   padding: 0 20px;
   h1 {
@@ -210,7 +242,7 @@ export default styled(Earning)`
         padding: 0 8px;
       }
       p {
-        width: 40%;
+        width: 100px;
         text-align: center;
       }
     }
@@ -246,5 +278,18 @@ export default styled(Earning)`
     background-repeat: no-repeat;
     width: 24px;
     height: 24px;
+  }
+  .filter {
+    padding: 10px 0;
+    .sel {
+      margin: 0 12px;
+    }
+    .btn-txt {
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: underline;
+      color: #ffffff;
+      cursor: pointer;
+    }
   }
 `;

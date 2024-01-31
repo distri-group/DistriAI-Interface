@@ -7,15 +7,17 @@ import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import Pager from "../components/pager";
 
-function Earning({ className }) {
+function Rewards({ className }) {
   let filter = { Direction: "sell" };
+  document.title = "My Rewards";
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
-  const [filterData, setFilterData] = useState([]);
-  const [filterValue, setFilterValue] = useState();
+  const [total, setTotal] = useState(0);
+  const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
   const loadList = async (curr) => {
     setLoading(true);
@@ -26,73 +28,63 @@ function Earning({ className }) {
         return enqueueSnackbar("Order List Not Found", { variant: "error" });
       }
       setList(res.list);
+      setTotal(res.total);
     } catch (e) {
       console.log(e);
     }
     setLoading(false);
   };
+  const onPageChange = (curr) => {
+    setCurrent(curr);
+    loadList(curr);
+  };
   const columns = [
     {
-      title: "Time",
+      title: "Period",
       width: "10%",
-      key: "OrderTime",
-      render: (text) => (
-        <div className="time-box">
-          <div>{moment(text).format("YYYY.MM.DD")}</div>
-          <div className="Completed">{moment(text).format("HH:mm:ss")}</div>
-        </div>
-      ),
+      key: "Period",
+      render: (text) => <span>{text}</span>,
     },
     {
-      title: "Price",
+      title: "Start",
       width: "10%",
-      key: "Price",
-      render: (text) => (
-        <div className="price">
-          <span className="coin" />
-          <span>{text.toFixed(2)}</span>
-        </div>
-      ),
+      key: "StartTime",
+    },
+    {
+      title: "End",
+      width: "10%",
+      key: "EndTime",
     },
     {
       title: "Duration",
       width: "10%",
       key: "Duration",
-      render: (text) => <span>{text} h</span>,
     },
     {
-      title: "Earnings",
+      title: "Reward pool",
       width: "10%",
-      key: "Uuid",
-      render: (text, record, index) => (
-        <span>
-          <b>{record.Duration * record.Price}</b>
-        </span>
+      key: "Pool",
+      render: (text) => (
+        <div>
+          <span className="coin" />
+          <span>{text}</span>
+        </div>
       ),
     },
     {
-      title: "Status",
+      title: "Rewards",
       width: "10%",
-      key: "StatusName",
-      render: (text) => <span className={text}>{text}</span>,
+      key: "Rewards",
+      render: (text) => <span>{text.toFixed(2)}</span>,
     },
     {
       title: "",
       width: "10%",
-      key: "id",
-      render: (text, record, index) => <span className="cbtn">Details</span>,
+      key: "ID",
+      render: (text) => <span className="cbtn">Details</span>,
     },
   ];
   useEffect(() => {
-    const loadFilterData = () => {
-      const res = getFilterData();
-      setFilterData(res);
-      res.forEach((t) => {
-        filter[t.name] = "all";
-      });
-      setFilterValue(filter);
-    };
-    loadFilterData();
     if (wallet?.publicKey) {
       loadList(1);
     }
@@ -121,7 +113,7 @@ function Earning({ className }) {
             </div>
           </div>
         </div>
-        <Button className="claim">Claim Earning</Button>
+        <Button className="claim">Claim Rewards</Button>
       </div>
       <div className="box">
         <div style={{ width: "400px" }}>
@@ -145,21 +137,30 @@ function Earning({ className }) {
           </div>
         </div>
       </div>
-      {/* <Table
-        className="earning-list"
+      <Table
+        className="reward-list"
         columns={columns}
-        list={list}
+        list={[]}
         empty={<span>No Item yet</span>}
         loading={loading}
-      /> */}
+      />
+      {total > 10 && (
+        <Pager
+          current={current}
+          total={total}
+          pageSize={10}
+          onChange={onPageChange}
+        />
+      )}
     </div>
   );
 }
 
-export default styled(Earning)`
+export default styled(Rewards)`
   color: white;
   width: 1200px;
   margin: 10px auto;
+  min-height: calc(100vh - 162px);
   padding: 0 20px;
   h1 {
     font-family: Montserrat Bold, Montserrat, sans-serif;
@@ -225,7 +226,8 @@ export default styled(Earning)`
     color: black;
     margin-top: 48px;
   }
-  .earning-list {
+  .reward-list {
+    margin-top: 20px;
     tr td {
       padding: 10px !important;
     }
