@@ -1,13 +1,12 @@
-import * as store from "../utils/store";
 import moment from "moment";
-import { formatAddress, formatBalance } from "../utils";
+import { formatBalance } from "../utils";
 import { getTimeDiff } from "time-difference-js";
 import { getMachineList } from "./machine";
 import request from "../utils/request";
 
 export async function getOrderList(pageIndex, filter, publicKey) {
   try {
-    let apiUrl = "/index-api/order/mine";
+    const apiUrl = "/index-api/order/mine";
     let options = {
       data: {
         Page: pageIndex,
@@ -23,76 +22,58 @@ export async function getOrderList(pageIndex, filter, publicKey) {
         }
       }
     }
-    let Account = publicKey;
-    if (Account) {
+    if (publicKey) {
       options.headers = {
-        Account,
+        Account: publicKey,
       };
     }
-    let ret = await request.post(apiUrl, options);
+    const ret = await request.post(apiUrl, options);
     if (ret.Msg !== "success") {
       return null;
     }
-    let total = ret.Data.Total;
+    const total = ret.Data.Total;
     let list = ret.Data.List;
     for (let item of list) {
       formatOrder(item, publicKey);
     }
-    let machinList = await getMachineList(true, 1);
-    machinList = machinList.list;
-    for (let item of list) {
-      if (!item.MachineUuid) continue;
-      let tmp = machinList.find(
-        (t) => t.Metadata?.MachineUUID === item.MachineUuid.replace("0x", "")
+    let res = await getMachineList(1);
+    let machineList = res.list;
+    list.map((item, index) => {
+      let machine = machineList.find(
+        (machine) => machine.Uuid === item.MachineUuid.slice(2)
       );
-      if (tmp && item.Metadata && typeof item.Metadata == "object") {
-        item.Metadata.machineInfo = tmp;
+      if (machine) {
+        list[index].Metadata.MachineInfo = machine;
       }
-    }
-    let obj = { list, total };
-    store.set("order-list", obj);
-    return obj;
+    });
+    return { list, total };
   } catch (e) {
     console.log(e);
     return null;
   }
 }
-function formatOrder(item, publicKey) {
-  try {
-    if (item.Metadata) {
-      item.Metadata = JSON.parse(item.Metadata);
-    }
-    item.Buyer = formatAddress(item.Buyer);
-    item.Seller = formatAddress(item.Seller);
-    item.Price = formatBalance(item.Price);
-    item.Total = formatBalance(item.Total);
-    if (item.Status === 0) {
-      let endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
-      let result = getTimeDiff(new Date(), endTime);
-      item.RemainingTime = result.value + " " + result.suffix;
-    } else {
-      item.RemainingTime = "--";
-    }
-    item.StatusName =
-      item.Status === 0
-        ? item.Seller === formatAddress(publicKey)
-          ? "Training"
-          : item.Buyer === formatAddress(publicKey) && "Available"
-        : item.Status === 1
-        ? "Completed"
-        : "Failed";
-  } catch (e) {}
+function formatOrder(item) {
+  if (item.Metadata) {
+    item.Metadata = JSON.parse(item.Metadata);
+  }
+  item.Price = formatBalance(item.Price);
+  item.Total = formatBalance(item.Total);
+  if (item.Status === 0) {
+    const endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
+    const result = getTimeDiff(new Date(), endTime);
+    item.RemainingTime = result.value + " " + result.suffix;
+  } else {
+    item.RemainingTime = "--";
+  }
+  item.StatusName =
+    item.Status === 0
+      ? "Available"
+      : item.Status === 1
+      ? "Completed"
+      : "Refunded";
 }
-export async function getFilterData() {
+export function getFilterData() {
   let list = [];
-  list.push({
-    name: "Direction",
-    arr: [
-      { label: "All Orders", value: "all" },
-      { label: "Buy", value: "buy" },
-      { label: "Sell", value: "sell" },
-    ],
-  });
   list.push({
     name: "Status",
     arr: [

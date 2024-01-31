@@ -1,21 +1,10 @@
-import * as store from "../utils/store";
 import request from "../utils/request";
-import { formatAddress, formatBalance } from "../utils";
+import { formatBalance } from "../utils";
 // Retrieve the detailed information of the machine from the storage based on the provided id.
-export async function getMachineDetailById(id) {
-  let obj = store.get("all-machine-list");
-  if (!obj) {
-    return null;
-  }
-  return obj.find((t) => t.id === id);
-}
 
 export async function getMachineDetailByUuid(uuid) {
-  let obj = store.get("all-machine-list");
-  if (!obj) {
-    return null;
-  }
-  return obj.find((t) => t.Uuid === uuid);
+  const res = await getMachineList(1, []);
+  console.log(res);
 }
 
 export async function getFilterData() {
@@ -62,13 +51,12 @@ export async function getFilterData() {
       { label: "Reliability", value: "reliability" },
     ],
   });
-  store.set("filter-list", list);
   return list;
 }
 
-export async function getMachineList(isMine, pageIndex, filter, publicKey) {
+export async function getMachineList(pageIndex, filter, publicKey) {
   try {
-    let apiUrl = isMine
+    let apiUrl = publicKey
       ? "/index-api/machine/mine"
       : "/index-api/machine/market";
     let options = {
@@ -85,7 +73,7 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
         }
       }
     }
-    if (isMine) {
+    if (publicKey) {
       let Account = publicKey;
       if (Account) {
         options.headers = {
@@ -109,17 +97,6 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
     }
     obj = { list, total };
     console.log("Machine List", list);
-    store.set("curr-machine-list", obj);
-    let allList = store.get("all-machine-list") || [];
-    list.forEach((t) => {
-      let index = allList.findIndex((a) => a.Uuid === t.Uuid);
-      if (index === -1) {
-        allList.push(t);
-      } else {
-        allList[index] = t;
-      }
-    });
-    store.set("all-machine-list", allList);
     return obj;
   } catch (e) {
     console.log(e);
@@ -127,9 +104,9 @@ export async function getMachineList(isMine, pageIndex, filter, publicKey) {
   }
 }
 
+// Format Machine's Info
 function formatMachine(item) {
   try {
-    item.Addr = formatAddress(item.Owner);
     item.Price = formatBalance(item.Price);
     if (item.CompletedCount + item.FailedCount <= 0) {
       item.Reliability = "--";
@@ -142,15 +119,15 @@ function formatMachine(item) {
     item.TFLOPS = item.Tflops;
     if (item.Metadata && typeof item.Metadata == "string") {
       item.Metadata = JSON.parse(item.Metadata);
-      item.Uuid = item.Metadata.MachineAccounts || "";
+      item.Uuid = item.Metadata.MachineUUID || "";
       item.UuidShort = item.Metadata.MachineUUID?.slice(-10);
       item.Score = item.Metadata.Score?.toFixed(2) || 0;
       item.Cpu = item.Metadata.CPUInfo?.ModelName || "";
       item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0) + "GB";
       item.UploadSpeed = item.Metadata.SpeedInfo?.Upload;
       item.DownloadSpeed = item.Metadata.SpeedInfo?.Download;
-      item.IP = item.Metadata.Ip?.ip || "127.0.0.1";
-      item.Port = item.Metadata.Ip?.port || "8080";
+      item.IP = item.Metadata.Ip?.ip;
+      item.Port = item.Metadata.Ip?.port;
       item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);
     }
   } catch (e) {
