@@ -1,5 +1,4 @@
 import "./App.css";
-import Menu from "./components/Menu";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import Home from "./views/Home";
@@ -12,7 +11,6 @@ import MyOrder from "./views/MyOrder";
 import Faucet from "./views/Faucet";
 import Footer from "./components/footer";
 import ExtendDuration from "./views/ExtendDuration";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import {
   WalletProvider,
   ConnectionProvider,
@@ -21,29 +19,95 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-let tout = "";
+import { Buffer } from "buffer";
+import NavBar from "./components/NavBar";
+import Rewards from "./views/Rewards";
+import EndDuration from "./views/EndDuration";
+import Earning from "./views/Earning";
+import EarningDetail from "./views/EarningDetail";
 
 function App() {
+  window.Buffer = Buffer;
   const [isHome, setIsHome] = useState(true);
   const Mtheme = createTheme({
     typography: {
       fontFamily: "Montserrat, sans-serif",
     },
+    palette: {
+      white: {
+        main: "#fff",
+        light: "#fff",
+        dark: "#fff",
+        contrastText: "#000",
+      },
+    },
     components: {
+      MuiTextField: {
+        defaultProps: {
+          fullWidth: true,
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            color: "white",
+          },
+        },
+      },
       MuiMenu: {
         styleOverrides: {
           list: {
             '&[role="menu"]': {
-              backgroundColor: "#0aab50",
+              backgroundImage: "linear-gradient(to right, #20ae98, #0aab50)",
               color: "white",
             },
+          },
+          paper: {
+            backgroundColor: "#222",
+            color: "white",
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          select: {
+            padding: "4px",
+            color: "white",
+            paddingLeft: "12px",
+          },
+          icon: {
+            color: "white",
+          },
+        },
+      },
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            "&.Mui-selected": {
+              backgroundColor: "white",
+              borderColor: "black",
+              color: "black",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "black",
+              },
+            },
+            color: "white",
+            borderColor: "white",
           },
         },
       },
     },
   });
   useEffect(() => {
-    tout = setInterval(function () {
+    const tout = setInterval(function () {
       let tmp = window.location.pathname === "/";
       if (tmp !== isHome) {
         setIsHome(tmp);
@@ -55,27 +119,31 @@ function App() {
   });
   return (
     <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
-      <WalletProvider wallets={[new PhantomWalletAdapter()]} autoConnect={true}>
+      <WalletProvider wallets={[]} autoConnect={true}>
         <WalletModalProvider>
           <BrowserRouter>
             <ThemeProvider theme={Mtheme}>
               <SnackbarProvider
                 anchorOrigin={{ vertical: "top", horizontal: "center" }}
                 autoHideDuration={3000}>
-                {!isHome && <Menu className="page-header" />}
+                {!isHome && <NavBar className="page-header" />}
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/market" element={<Market />} />
                   <Route path="/device" element={<MyDevice />} />
                   <Route path="/order" element={<MyOrder />} />
-                  <Route path="/order/:uuid" element={<OrderDetail />} />
+                  <Route path="/order/:id" element={<OrderDetail />} />
                   <Route path="/buy/:id" element={<Buy />} />
                   <Route path="/makeoffer/:id" element={<MakeOffer />} />
                   <Route
                     path="/extend-duration/:id"
                     element={<ExtendDuration />}
                   />
+                  <Route path="/end-duration/:id" element={<EndDuration />} />
                   <Route path="/faucet" element={<Faucet />} />
+                  <Route path="/reward" element={<Rewards />} />
+                  <Route path="/earning" element={<Earning />} />
+                  <Route path="/earning/:id" element={<EarningDetail />} />
                 </Routes>
                 <Footer />
               </SnackbarProvider>
