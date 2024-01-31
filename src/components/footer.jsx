@@ -16,14 +16,14 @@ function Header({ className }) {
             {" "}
           </a>
           <a
-            className="l3"
+            className="l2"
             target="_blank"
             rel="noreferrer"
             href="https://twitter.com/DistriAI_web3">
             {" "}
           </a>
           <a
-            className="l4"
+            className="l3"
             target="_blank"
             rel="noreferrer"
             href="https://discord.gg/CgQZGcSb9V">
@@ -64,10 +64,10 @@ export default styled(Header)`
     .l1 {
       background-image: url(/img/home/github.svg);
     }
-    .l3 {
+    .l2 {
       background-image: url(/img/home/twitter.svg);
     }
-    .l4 {
+    .l3 {
       background-image: url(/img/home/discord.svg);
     }
   }

@@ -21,7 +21,7 @@ function Home({ className }) {
   const loadList = async (curr) => {
     setLoading(true);
     try {
-      let res = await getMachineList(false, curr, filter);
+      let res = await getMachineList(curr, filter);
       setTotal(res.total);
       setList(res.list);
     } catch (e) {
@@ -29,26 +29,28 @@ function Home({ className }) {
     }
     setLoading(false);
   };
-  const loadFilterData = async () => {
-    setLoading(true);
-    try {
-      let res = await getFilterData();
-      if (res.Msg) {
-        return enqueueSnackbar(res.Msg, { variant: "error" });
-      }
-      setFilterData(res);
-      res.forEach((t) => {
-        filter[t.name] = "all";
-      });
-      setFilterValue(filter);
-    } catch (e) {
-      console.log(e);
-    }
-    setLoading(false);
-  };
+
   useEffect(() => {
+    const loadFilterData = async () => {
+      setLoading(true);
+      try {
+        let res = await getFilterData();
+        if (res.Msg) {
+          return enqueueSnackbar(res.Msg, { variant: "error" });
+        }
+        setFilterData(res);
+        res.forEach((t) => {
+          filter[t.name] = "all";
+        });
+        setFilterValue(filter);
+      } catch (e) {
+        console.log(e);
+      }
+      setLoading(false);
+    };
     loadFilterData();
     loadList();
+    // eslint-disable-next-line
   }, []);
 
   const onFilter = (value, name) => {
@@ -80,16 +82,7 @@ function Home({ className }) {
           {filterData.map((t) => {
             return (
               <span className="sel" key={t.name}>
-                {/* <Select
-                  defaultValue="all"
-                  value={filterValue[t.name]}
-                  style={{ width: 160 }}
-                  data-name={t.name}
-                  onChange={(e) => onFilter(e, t.name)}
-                  options={t.arr}
-                /> */}
                 <Select
-                  className="select"
                   defaultValue="all"
                   value={filterValue[t.name]}
                   onChange={(e) => onFilter(e.target.value, t.name)}>
@@ -133,6 +126,7 @@ export default styled(Home)`
   display: block;
   width: 100%;
   color: #fff;
+  min-height: calc(100vh - 150px);
   .hold {
     display: block;
     overflow: hidden;
@@ -171,6 +165,7 @@ export default styled(Home)`
       }
       .sel {
         padding: 0px 7px;
+        color: white;
       }
       .btn-txt {
         font-weight: 700;
@@ -180,12 +175,5 @@ export default styled(Home)`
         cursor: pointer;
       }
     }
-  }
-  .block {
-    display: block;
-    overflow: hidden;
-  }
-  .pager {
-    display: flex;
   }
 `;

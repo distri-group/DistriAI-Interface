@@ -37,9 +37,8 @@ body {
   padding: 60px 30px;
   background-color: #00000b;
 }
-
 .myform {
-  width: 50%;
+  width: 64%;
   .form-row {
     margin: 10px 0;
     position: relative;
@@ -51,40 +50,11 @@ body {
       font-size: 16px;
       color: #FFFFFF;
       line-height: 20px;
-      padding: 14px 0;
-    }
-    .my-input {
-      height: 50px;
-      line-height: 50px;
-      border: 1px solid #797979;
-      background-color: transparent;
-      color: #fff;
-    }
-    .my-select {
-      height: 50px;
-      line-height: 50px;
-      border: 1px solid #797979;
-      background-color: #000;
-      border-radius: 6px;
-      width: 300px;
-      color: #797979;
-      padding: 0 10px;
-    }
-
-    .right-link {
-      float: right;
-      margin-right: 10%;
-      color: #fff;
+      padding: 10px 0;
     }
   }
 }
-.desc p{
-  color: white;
-  text-align: center;
-  font-size: 16px;
-  line-height: 20px;
-  margin: 0;
-}
+
 .crypted{
   position: relative;
   height: 50px;
@@ -103,24 +73,15 @@ body {
   position: absolute;
   color: #fff;
 }
-.dropdown ul{
-  background-color: #0bab53!important;
-  box-shadow: none!important;
-}
-.ant-dropdown-menu-item-disabled{
-  color:rgba(255, 255, 255, 0.85)!important;
-  cursor:default!important;
-}
-.ant-dropdown-menu-item-disabled:hover{
-  background-color: transparent!important;
-}
-.select {
-  height: 32px;
-  width: 160px;
-  color: white!important;
-  padding: 0;
-  border: 1px solid #606060;
-}
 .MuiOutlinedInput-notchedOutline{
   border-color: #797979!important;
+}
+.Available {
+  color: #bdff95;
+}
+.Completed {
+  color: #878787;
+}
+.Refunded {
+  color: #ffb9b9;
 }

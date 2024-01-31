@@ -62,7 +62,6 @@ function Home({ className }) {
 
   return (
     <div className={className}>
-      <div className="hold"></div>
       <div className="con">
         <h1 className="title">DistriAI Genesis Faucet</h1>
         <h2 className="title2">Testnet faucet drips 1 SOL / 5 DIST per day</h2>
@@ -78,12 +77,8 @@ function Home({ className }) {
               2. Create a new wallet OR import an existing wallet.
             </div>
             <TextField
-              fullWidth
-              color="success"
-              inputProps={{ style: { color: "white" } }}
               data-name="taskName"
               onChange={onInput}
-              onKeyUp={onInput}
               disabled={loading}
               value={newAddr}
               placeholder="Enter Your Wallet Address"
@@ -117,15 +112,8 @@ export default styled(Home)`
   display: block;
   overflow: hidden;
   width: 100%;
-  height: calc(100vh - 130px);
+  height: calc(100vh - 140px);
   color: #fff;
-  .hold {
-    display: block;
-    overflow: hidden;
-    width: 100%;
-    height: 56px;
-    clear: both;
-  }
   .myform {
     width: 800px;
     background-color: #222;
@@ -149,11 +137,6 @@ export default styled(Home)`
           text-decoration: none;
         }
       }
-      .my-input {
-        border: 1px solid #797979;
-        margin: 24px 0;
-        background-color: #222;
-      }
       input {
         background-color: #222;
       }
@@ -165,7 +148,7 @@ export default styled(Home)`
   }
   .con {
     width: 1210px;
-    margin: 10px auto;
+    margin: 66px auto 10px auto;
     display: block;
     overflow: hidden;
     .title {
@@ -189,10 +172,5 @@ export default styled(Home)`
   .block {
     display: block;
     overflow: hidden;
-  }
-  .ant-btn-primary {
-    color: #000;
-    height: 50px;
-    line-height: 40px;
   }
 `;

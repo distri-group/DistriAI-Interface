@@ -8,7 +8,9 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { MenuItem, Select } from "@mui/material";
 
-let filter = {};
+let filter = {
+  Direction: "buy",
+};
 
 function Home({ className }) {
   document.title = "My Order";
@@ -23,7 +25,7 @@ function Home({ className }) {
   const loadList = async (curr) => {
     setLoading(true);
     try {
-      let res = await getOrderList(curr, filter, wallet.publicKey.toString());
+      const res = await getOrderList(curr, filter, wallet.publicKey.toString());
       console.log("Order List", res);
       if (!res) {
         return enqueueSnackbar("Order List Not Found", { variant: "error" });
@@ -33,21 +35,22 @@ function Home({ className }) {
     } catch (e) {}
     setLoading(false);
   };
-  const loadFilterData = async () => {
-    let res = await getFilterData();
-    setFilterData(res);
-    res.forEach((t) => {
-      filter[t.name] = "all";
-    });
-    setFilterValue(filter);
-  };
 
   useEffect(() => {
+    const loadFilterData = () => {
+      let res = getFilterData();
+      setFilterData(res);
+      res.forEach((t) => {
+        filter[t.name] = "all";
+      });
+      setFilterValue(filter);
+    };
     loadFilterData();
     if (wallet?.publicKey) {
       setTotal(0);
       loadList(1);
     }
+    // eslint-disable-next-line
   }, [wallet?.publicKey]);
 
   const onFilter = (value, name) => {
@@ -74,7 +77,6 @@ function Home({ className }) {
     <div className={className}>
       <div className="con">
         <h1 className="title">My Orders</h1>
-
         <div className="filter">
           <span className="txt">Filter</span>
           {filterData.map((t) => {
@@ -120,11 +122,8 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   width: 100%;
+  min-height: calc(100vh - 160px);
   color: #fff;
-  .pager {
-    margin: 0 auto;
-    width: 400px;
-  }
   .filter {
     padding: 11px 0;
     display: flex;

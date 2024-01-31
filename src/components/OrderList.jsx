@@ -3,10 +3,9 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import copy from "copy-to-clipboard";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { formatAddress } from "../utils";
 import { useSnackbar } from "notistack";
-import { CircularProgress, Button, Modal, Box } from "@mui/material";
+import { Button, Modal, Box } from "@mui/material";
+import Table from "./Table";
 
 function Header({ className, list, loading }) {
   const navigate = useNavigate();
@@ -14,8 +13,6 @@ function Header({ className, list, loading }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(loading);
   const [decrypted, setDecrypted] = useState(false);
-  const wallet = useAnchorWallet();
-  let addr = wallet?.publicKey.toString();
   useEffect(() => {
     for (let item of list) {
       item.Loading = false;
@@ -74,7 +71,7 @@ function Header({ className, list, loading }) {
     },
     {
       title: "Remaining Time",
-      width: "10%",
+      width: "14%",
       key: "RemainingTime",
       render: (text, record, index) => {
         return <div>{record.RemainingTime}</div>;
@@ -88,9 +85,6 @@ function Header({ className, list, loading }) {
         return (
           <div className="total">
             <label>{text}</label>
-            <span>
-              {record.Seller === formatAddress(addr) ? "sell" : "buy"}
-            </span>
           </div>
         );
       },
@@ -105,7 +99,7 @@ function Header({ className, list, loading }) {
     },
     {
       title: "",
-      width: "14%",
+      width: "10%",
       key: "Uuid",
       render: (text, record, index) => (
         <div className="btns">
@@ -122,7 +116,7 @@ function Header({ className, list, loading }) {
           <span
             onClick={() => {
               window.open(
-                `http://${record.Metadata.machineInfo.IP}:${record.Metadata.machineInfo.Port}`
+                `http://${record.Metadata.MachineInfo.IP}:${record.Metadata.MachineInfo.Port}`
               );
             }}
             className={`mini-btn ${
@@ -145,60 +139,15 @@ function Header({ className, list, loading }) {
   }, [loading]);
   return (
     <div className={className}>
-      <table className="mytable">
-        <thead className="table-thead">
-          <tr>
-            {columns.map((c) => {
-              return (
-                <th key={c.title} style={{ width: c.width }}>
-                  {c.title}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        {list.length === 0 || isLoading ? (
-          <tbody>
-            <tr>
-              <td colSpan={columns.length} style={{ textAlign: "center" }}>
-                {isLoading ? (
-                  <div className="spin-box">
-                    <CircularProgress />
-                  </div>
-                ) : (
-                  <span>No item yet</span>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {list.map((d, index) => {
-              return (
-                <tr key={index}>
-                  {columns.map((c, i) => {
-                    if (c.render) {
-                      return (
-                        <td style={{ width: c.width }} key={i}>
-                          {c.render(d[c.key], d, i)}
-                        </td>
-                      );
-                    } else {
-                      return (
-                        <td key={i} style={{ width: c.width }}>
-                          {d[c.key]}
-                        </td>
-                      );
-                    }
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        )}
-      </table>
+      <Table
+        className="order-table"
+        columns={columns}
+        list={list}
+        empty={<span>No item yet</span>}
+        loading={isLoading}
+      />
       <Modal
-        open={selectedItem}
+        open={Boolean(selectedItem)}
         onClose={() => {
           setSelectedItem(null);
           setDecrypted(false);
@@ -216,7 +165,7 @@ function Header({ className, list, loading }) {
             borderRadius: "8px",
           }}>
           <h1 className="big-title">Decrypted SSH Key</h1>
-          <div className="desc">
+          <div className="con-title">
             <p>SSH Key was crypted by your public key.</p>
             <p>It can be decrypted and obtained with the wallet signature.</p>
           </div>
@@ -272,6 +221,11 @@ function Header({ className, list, loading }) {
 }
 
 export default styled(Header)`
+  .order-table {
+    tr td {
+      padding: 20px 10px !important;
+    }
+  }
   .spin-box {
     width: 100%;
     height: 50px;
@@ -295,46 +249,6 @@ export default styled(Header)`
       margin-left: 5px;
     }
   }
-  .mytable {
-    display: table;
-    background-color: #222;
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    font-size: 14px;
-    line-height: 20px;
-    .link {
-      color: #fff;
-      cursor: pointer;
-    }
-    .btn-link {
-      color: #fff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    th {
-      background-color: #151515;
-      color: #fff;
-      height: 37px;
-      line-height: 18px;
-      text-align: left;
-      padding: 8px 10px;
-      font-weight: normal;
-    }
-    tr td {
-      border-bottom: 1px solid #1a1a1a;
-      border-collapse: collapse;
-      padding: 20px 10px;
-      overflow: hidden;
-    }
-    tr:last-children {
-      td {
-        border-bottom: none;
-      }
-    }
-  }
   .total {
     display: flex;
     flex-direction: column;
@@ -355,16 +269,13 @@ export default styled(Header)`
       text-align: center;
     }
   }
-  .status-Training {
-    color: #faf177;
-  }
   .status-Available {
     color: #bdff95;
   }
   .status-Completed {
     color: #878787;
   }
-  .status-Failed {
+  .status-Refunded {
     color: #ffb9b9;
   }
   .btns {

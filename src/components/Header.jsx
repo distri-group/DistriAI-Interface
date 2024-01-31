@@ -4,21 +4,13 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 function Header({ className }) {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   return (
     <div className={className}>
       <div className="con">
-        <img
-          src="/img/logo.png"
-          style={{
-            width: "120px",
-            height: "28px",
-            marginTop: "14px",
-          }}
-          alt=""
-        />
+        <img src="/img/logo.png" style={{}} alt="" />
         <div
           style={{
             display: "flex",
@@ -31,11 +23,7 @@ function Header({ className }) {
             aria-controls={open ? "basic-menu" : undefined}
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
-            style={{
-              textTransform: "none",
-              color: "white",
-              fontSize: "16px",
-            }}>
+            className="dropdown">
             Resources
           </Button>
           <Menu
@@ -65,8 +53,11 @@ function Header({ className }) {
             rel="noreferrer">
             Docs
           </a>
-          <span className="launch" onClick={() => navigate("/market/")}>
-            Launch APP
+          <span className="launch" onClick={() => navigate("/market")}>
+            Buy CPU
+          </span>
+          <span className="launch" onClick={() => navigate("/device")}>
+            Sell CPU
           </span>
         </div>
       </div>
@@ -93,10 +84,12 @@ export default styled(Header)`
     height: 56px;
     img {
       margin-left: 20px;
+      width: 120px;
+      height: 28px;
+      margin-top: 14px;
       cursor: pointer;
     }
     .launch {
-      margin-right: 20px;
       margin-top: 9px;
       color: white;
       line-height: 38px;
@@ -106,8 +99,13 @@ export default styled(Header)`
       overflow: hidden;
       border-radius: 20px;
       background-image: linear-gradient(to right, #20ae98, #0aab50);
-      padding: 0px 39px;
+      padding: 0px 14px;
       cursor: pointer;
     }
+  }
+  .dropdown {
+    text-transform: none;
+    color: white;
+    font-size: 16px;
   }
 `;

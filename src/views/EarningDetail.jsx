@@ -9,7 +9,7 @@ import ProgressWithLabel from "../components/ProgressWithLabel";
 
 function Home({ className }) {
   const { id } = useParams();
-  document.title = "Order detail";
+  document.title = "Earning Detail";
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
   const wallet = useAnchorWallet();
@@ -37,42 +37,17 @@ function Home({ className }) {
           <CircularProgress />
         ) : (
           <>
-            <h1>{record.Metadata.formData.taskName}</h1>
+            <p>
+              <b>For: </b>
+              {record.Buyer}
+            </p>
             <h2 className={record.StatusName}>{record.StatusName}</h2>
             {record.Metadata.MachineInfo ? (
               <div style={{ width: "64%" }}>
                 <div className="detail">
                   <div className="info-box">
                     <div className="info-box-title">
-                      <span>Task Info</span>
-                      <div>
-                        <Button
-                          className="extend-duration"
-                          sx={{
-                            backgroundColor: "#94d6e2",
-                            color: "black",
-                            "&:hover": {
-                              backgroundColor: "#94d6e2",
-                              color: "black",
-                            },
-                          }}
-                          onClick={() => navigate(`/extend-duration/${id}`)}>
-                          Extend Duration
-                        </Button>
-                        <Button
-                          className="end-duration"
-                          sx={{
-                            backgroundColor: "#fff",
-                            color: "black",
-                            "&:hover": {
-                              backgroundColor: "#fff",
-                              color: "black",
-                            },
-                          }}
-                          onClick={() => navigate(`/end-duration/${id}`)}>
-                          End Duration
-                        </Button>
-                      </div>
+                      <span>Order Info</span>
                     </div>
                     <div className="info-box-body">
                       <div className="time">
@@ -98,7 +73,7 @@ function Home({ className }) {
                           <span>{record.Duration}h</span>
                         </div>
                         <div className="price-box">
-                          <label>Total Price</label>
+                          <label>Expected Total Earnings</label>
                           <span>
                             {record.Metadata.MachineInfo.Price *
                               record.Duration}{" "}
@@ -207,18 +182,6 @@ function Home({ className }) {
                           <span>{record.Uuid}</span>
                         </div>
                       </div>
-                      <div className="line">
-                        <div className="f">
-                          <span>From</span>
-                          <span>{record.Seller}</span>
-                        </div>
-                      </div>
-                      <div className="line">
-                        <div className="f">
-                          <span>To</span>
-                          <span>{record.Buyer}</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -235,7 +198,7 @@ function Home({ className }) {
 
 export default styled(Home)`
   color: #fff;
-  min-height: calc(100vh - 160px);
+  height: calc(100vh - 140px);
   .con {
     width: 1160px;
     margin: 10px auto;

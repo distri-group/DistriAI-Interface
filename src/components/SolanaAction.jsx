@@ -1,14 +1,11 @@
 import { useImperativeHandle, forwardRef } from "react";
 import * as solanaProgram from "../services/solana-program";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
-import { Buffer } from "buffer";
 import { PublicKey } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-window.Buffer = Buffer;
-window.global = window;
 
 function Home(props, ref) {
   const { connection } = useConnection();
@@ -20,6 +17,7 @@ function Home(props, ref) {
     cancelOffer,
     getTokenAccountBalance,
   }));
+  // Seller's Device Make Offer
   const makeOffer = async (machinePublicKey, price, duration, disk) => {
     solanaProgram.initProgram(connection, walletAn);
     let result = await solanaProgram.makeOffer(
@@ -30,11 +28,13 @@ function Home(props, ref) {
     );
     return result;
   };
+  // Unlist Device From Market
   const cancelOffer = async (machinePublicKey) => {
     solanaProgram.initProgram(connection, walletAn);
     let result = await solanaProgram.cancelOffer(machinePublicKey);
     return result;
   };
+  // Rent Device On Market
   const placeOrder = async (machinePublicKey, orderId, duration, metadata) => {
     await solanaProgram.initProgram(connection, walletAn);
     let result = await solanaProgram.placeOrder(
@@ -45,6 +45,7 @@ function Home(props, ref) {
     );
     return result;
   };
+  // Extend Renting Duration
   const renewOrder = async (machinePublicKey, orderPublicKey, duration) => {
     console.log({ machinePublicKey, orderPublicKey, duration });
     await solanaProgram.initProgram(connection, walletAn);
@@ -55,6 +56,7 @@ function Home(props, ref) {
     );
     return result;
   };
+  // Get User's DIST Balance
   const getTokenAccountBalance = async (mint, address) => {
     const [tokenAddress] = PublicKey.findProgramAddressSync(
       [address.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
