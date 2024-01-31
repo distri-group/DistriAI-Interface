@@ -12,7 +12,7 @@ function Home({ className }) {
   const loadList = async () => {
     setLoading(true);
     try {
-      let res = await getMachineList(true, 1, [], wallet.publicKey.toString());
+      let res = await getMachineList(1, [], wallet.publicKey.toString());
       res.list.map((item) => (item.loading = false));
       setList(res.list);
     } catch (e) {
@@ -25,12 +25,7 @@ function Home({ className }) {
     const loadList = async () => {
       setLoading(true);
       try {
-        let res = await getMachineList(
-          true,
-          1,
-          [],
-          wallet.publicKey.toString()
-        );
+        let res = await getMachineList(1, [], wallet.publicKey.toString());
         res.list.map((item) => (item.loading = false));
         setList(res.list);
       } catch (e) {
@@ -42,7 +37,6 @@ function Home({ className }) {
   }, [wallet?.publicKey]);
   return (
     <div className={className}>
-      <div className="hold"></div>
       <div className="con">
         <h1 className="title">Share My Device</h1>
         <div className="con-table">

@@ -244,14 +244,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
   }
-  .hold {
-    display: block;
-    overflow: hidden;
-    width: 100%;
-    height: 56px;
-    clear: both;
-    background-color: rgb(0, 0, 0);
-  }
   .box1 {
     background-repeat: no-repeat;
     background-size: cover;

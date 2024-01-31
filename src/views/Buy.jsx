@@ -10,10 +10,11 @@ import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
+import DurationToggle from "../components/DurationToggle";
 
 let formData = {
   taskName: "",
-  duration: 0,
+  duration: 1,
 };
 
 function Home({ className }) {
@@ -27,6 +28,7 @@ function Home({ className }) {
   const [balance, setBalance] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [index, setIndex] = useState(0);
+  const [duration, setDuration] = useState(1);
   const childRef = useRef();
 
   const getTokenBalance = async (mint, address) => {
@@ -60,8 +62,8 @@ function Home({ className }) {
     const mint = new PublicKey(webconfig.mintAddress);
     const getBalance = async () => {
       setLoading(true);
-      let amount = await getTokenBalance(mint, wallet.publicKey);
-      let res = await getOrderList(1, [], wallet.publicKey.toString());
+      const amount = await getTokenBalance(mint, wallet.publicKey);
+      const res = await getOrderList(1, [], wallet.publicKey.toString());
       setIndex(res.total + 1);
       setBalance(amount / LAMPORTS_PER_SOL);
       setLoading(false);
@@ -108,7 +110,7 @@ function Home({ className }) {
       deviceDetail.Uuid,
       orderId,
       formData.duration,
-      { formData }
+      { formData, MachineInfo: deviceDetail }
     );
     return result;
   }
@@ -116,9 +118,8 @@ function Home({ className }) {
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
-      <div className="hold"></div>
       <div className="con">
-        <h1 className="title">Edit model</h1>
+        <h1 className="title">Purchase Computing Power</h1>
         <div className="myform">
           <div className="info-box">
             <div className="info-box-title">Configuration</div>
@@ -131,60 +132,35 @@ function Home({ className }) {
                   <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
                 </div>
               </div>
-              <div className="line">
-                <div className="l">
+              <div className="line" style={{ justifyContent: "space-between" }}>
+                <div>
                   <span>RAM</span>
                   <span>{deviceDetail.RAM}</span>
                 </div>
-                <div className="r">
+                <div>
                   <span>Avail Disk Storage</span>
                   <span>{deviceDetail.Disk} GB</span>
                 </div>
-              </div>
-              <div className="line">
-                <div className="f">
+                <div>
                   <span>CPU</span>
                   <span>{deviceDetail.Cpu}</span>
-                </div>
-              </div>
-              <div className="line">
-                <div className="f">
-                  <span>Max Duration</span>
-                  <span>{deviceDetail.MaxDuration}h</span>
                 </div>
               </div>
             </div>
           </div>
           <div className="info-box">
             <div className="info-box-title">Order Info</div>
-            <div className="info-box-body">
-              <div className="line">
-                <div className="f">
-                  <span>Price(per hour)</span>
-                  <span>{deviceDetail.Price} DIST</span>
-                </div>
-              </div>
-            </div>
+            <div className="info-box-body"></div>
           </div>
+          <DurationToggle
+            max={deviceDetail.MaxDuration}
+            duration={duration}
+            setDuration={setDuration}
+          />
           <div className="form-row">
-            <div className="row-txt">Duration </div>
+            <div className="row-txt">Task Name</div>
             <TextField
-              color="success"
-              inputProps={{ style: { color: "white" } }}
-              data-name="duration"
-              fullWidth
-              disabled={loading}
-              placeholder="Hour"
-              onChange={onInput}
-            />
-          </div>
-          <div className="form-row">
-            <div className="row-txt">Task Name </div>
-            <TextField
-              color="success"
-              inputProps={{ style: { color: "white" } }}
               data-name="taskName"
-              fullWidth
               onChange={onInput}
               placeholder="Must be 4-45 characters"
             />
@@ -339,7 +315,7 @@ export default styled(Home)`
         line-height: 48px;
       }
       .info-box-body {
-        padding: 5px 18px;
+        padding: 0 18px;
         display: block;
         .line {
           padding: 10px 0;
@@ -437,47 +413,18 @@ export default styled(Home)`
     line-height: 30px;
     cursor: pointer;
   }
-  .ant-btn-primary {
-    color: #000;
-    height: 50px;
-    line-height: 40px;
+  .duration-btn {
+    width: 86px;
   }
-  .mytable {
-    display: table;
-    border: 1px solid #fff;
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    .link {
-      color: #fff;
-      cursor: pointer;
-    }
-    .btn-link {
-      color: #fff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    th {
-      background-color: #92d5e1;
-      color: #000;
-      height: 40px;
-      line-height: 40px;
-      text-align: left;
-      padding: 0 10px;
-    }
-    tr td {
-      border-bottom: 1px solid #fff;
-      border-collapse: collapse;
-      height: 40px;
-      line-height: 40px;
-      padding: 0 10px;
-    }
-    tr:last-children {
-      td {
-        border-bottom: none;
-      }
+  .count {
+    display: flex;
+    justify-content: space-between;
+    .count-btn {
+      background-color: white;
+      border: 1px solid black;
+      color: black;
+      font-size: 20px;
+      font-weight: bolder;
     }
   }
 `;

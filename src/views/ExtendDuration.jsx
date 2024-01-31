@@ -8,9 +8,8 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
-import { TextField } from "@mui/material";
+import { CircularProgress, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-let formData = {};
 
 function Home({ className }) {
   const { id } = useParams();
@@ -20,76 +19,45 @@ function Home({ className }) {
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
+  const [duration, setDuration] = useState(0);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
 
   const onInput = (e) => {
-    let value = e.target.value;
-    let n = e.target.dataset.name;
-    formData[n] = value;
-    if (n === "duration" && value) {
-      value = parseInt(value);
-      if (value <= 0) {
-        setAmount(0);
-        return enqueueSnackbar(
-          "The duration must be an integer greater than 0",
-          { variant: "error" }
-        );
-      }
-      formData[n] = value;
-      setAmount(value * (deviceDetail.Price || 0));
+    const value = e.target.value;
+    if (!value) {
+      setDuration(0);
+      setAmount(0);
+      return null;
     }
+    if (!parseInt(value)) {
+      setDuration(0);
+      setAmount(0);
+      return enqueueSnackbar("Duration should be number greater than 0", {
+        variant: "error",
+      });
+    }
+    setDuration(parseInt(value));
+    setAmount(value * (deviceDetail.Price || 0));
   };
   const getTokenBalance = async (mint, address) => {
     let res = await childRef.current.getTokenAccountBalance(mint, address);
     setBalance(res / LAMPORTS_PER_SOL);
     return res;
   };
-
-  useEffect(() => {
-    const init = async () => {
-      setLoading(true);
-      let res = await getDetailByUuid(id, wallet.publicKey.toString());
-      if (res.Status === 1) {
-        setOrderDetail(res.Detail);
-        if (res.Detail.Metadata?.machineInfo) {
-          setDeviceDetail(res.Detail.Metadata.machineInfo);
-        }
-      } else {
-        return enqueueSnackbar(res.Msg, { variant: "error" });
-      }
-      const mint = new PublicKey(webconfig.mintAddress);
-      getTokenBalance(mint, wallet.publicKey);
-      setLoading(false);
-    };
-    if (wallet?.publicKey) {
-      init();
-    }
-    // eslint-disable-next-line
-  }, [wallet, id]);
-  const valid = () => {
-    if (amount === 0) {
-      return "Payment token greater than 0.";
-    }
-    return null;
-  };
   const onSubmit = async () => {
-    let vmsg = valid();
-    if (vmsg) {
-      return enqueueSnackbar(vmsg, { variant: "warning" });
-    }
     setLoading(true);
-    console.log("OrderData", { formData, orderDetail });
+    console.log("OrderData", { duration, orderDetail });
     let res = await childRef.current.renewOrder(
-      orderDetail.Metadata.machineInfo.Uuid,
+      orderDetail.Metadata.MachineInfo.Uuid,
       stringToPublicKey(id).toString(),
-      formData.duration
+      duration
     );
     setTimeout(() => {
       if (res?.msg) {
-        enqueueSnackbar(`Order extended ${formData.duration} h.`, {
+        enqueueSnackbar(`Order extended ${duration} h.`, {
           variant: "success",
         });
         setLoading(false);
@@ -97,7 +65,6 @@ function Home({ className }) {
       }
     }, 300);
   };
-
   const stringToPublicKey = (str) => {
     if (str.startsWith("0x")) {
       let hexString = str.slice(2);
@@ -118,102 +85,122 @@ function Home({ className }) {
       return publicKey;
     }
   };
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      let res = await getDetailByUuid(id, wallet.publicKey.toString());
+      if (res.Status === 1) {
+        setOrderDetail(res.Detail);
+        if (res.Detail.Metadata?.MachineInfo) {
+          setDeviceDetail(res.Detail.Metadata.MachineInfo);
+        }
+      } else {
+        return enqueueSnackbar(res.Msg, { variant: "error" });
+      }
+      const mint = new PublicKey(webconfig.mintAddress);
+      getTokenBalance(mint, wallet.publicKey);
+      setLoading(false);
+    };
+    if (wallet?.publicKey) {
+      init();
+    }
+    // eslint-disable-next-line
+  }, [wallet, id]);
 
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
       <div className="con">
         <h1 className="title">Extend Duration</h1>
-        <div className="myform" style={{ display: "block" }}>
-          <div className="info-box">
-            <div className="info-box-title">Configuration</div>
-            <div className="info-box-body">
-              <div className="line">
-                <div className="f">
-                  <span style={{ fontSize: 18, fontWeight: "bold" }}>
-                    {deviceDetail.GpuCount + "x " + deviceDetail.Gpu}
-                  </span>
-                  <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <div className="myform">
+            <div className="info-box">
+              <div className="info-box-title">Configuration</div>
+              <div className="info-box-body">
+                <div className="line">
+                  <div className="f">
+                    <span style={{ fontSize: 18, fontWeight: "bold" }}>
+                      {deviceDetail.GpuCount + "x " + deviceDetail.Gpu}
+                    </span>
+                    <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
+                  </div>
                 </div>
-              </div>
-              <div className="line">
-                <div className="l">
-                  <span>RAM</span>
-                  <span>{deviceDetail.RAM}</span>
+                <div className="line">
+                  <div className="l">
+                    <span>RAM</span>
+                    <span>{deviceDetail.RAM}</span>
+                  </div>
+                  <div className="r">
+                    <span>Avail Disk Storage</span>
+                    <span>{deviceDetail.Disk} GB</span>
+                  </div>
                 </div>
-                <div className="r">
-                  <span>Avail Disk Storage</span>
-                  <span>{deviceDetail.Disk} GB</span>
+                <div className="line">
+                  <div className="f">
+                    <span>CPU</span>
+                    <span>{deviceDetail.Cpu}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="line">
-                <div className="f">
-                  <span>CPU</span>
-                  <span>{deviceDetail.Cpu}</span>
-                </div>
-              </div>
-              <div className="line">
-                <div className="f">
-                  <span>Max Duration</span>
-                  <span>{deviceDetail.MaxDuration}h</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="info-box">
-            <div className="info-box-title">Order Info</div>
-            <div className="info-box-body">
-              <div className="line">
-                <div className="f">
-                  <span>Dataset Size</span>
-                  <span>485 MB</span>
-                </div>
-              </div>
-              <div className="line">
-                <div className="f">
-                  <span>Price(per hour)</span>
-                  <span>{deviceDetail.Price} DIST</span>
+                <div className="line">
+                  <div className="f">
+                    <span>Max Duration</span>
+                    <span>{deviceDetail.MaxDuration}h</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="b-box">
-            <div className="row">
-              <b>5</b> h
+            <div className="info-box">
+              <div className="info-box-title">Order Info</div>
+              <div className="info-box-body">
+                <div className="line">
+                  <div className="f">
+                    <span>Dataset Size</span>
+                    <span>485 MB</span>
+                  </div>
+                </div>
+                <div className="line">
+                  <div className="f">
+                    <span>Price(per hour)</span>
+                    <span>{deviceDetail.Price} DIST</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="row">Estimate the computing time</div>
-          </div>
-          <div className="form-row">
-            <div className="row-txt">Duration </div>
-            <TextField
-              fullWidth
-              inputProps={{ style: { color: "white" } }}
-              disabled={loading}
-              data-name="duration"
-              placeholder="Hour"
-              onChange={onInput}
-            />
-          </div>
-
-          <div className="right-txt">Balance: {balance} DIST</div>
-
-          <div className="color-box">
-            <div className="row-txt">Total</div>
-            <div className="drow">
-              <span className="num">{amount}</span>
-              <label>DIST</label>
+            <div className="b-box">
+              <div className="row">
+                <b>5</b> h
+              </div>
+              <div className="row">Estimate the computing time</div>
+            </div>
+            <div className="form-row">
+              <div className="row-txt">Duration </div>
+              <TextField
+                disabled={loading}
+                placeholder="Hour"
+                onChange={onInput}
+              />
+            </div>
+            <div className="right-txt">Balance: {balance} DIST</div>
+            <div className="color-box">
+              <div className="row-txt">Total</div>
+              <div className="drow">
+                <span className="num">{amount}</span>
+                <label>DIST</label>
+              </div>
+            </div>
+            <div className="form-row btn-row">
+              <LoadingButton
+                loading={loading}
+                style={{ width: 154 }}
+                className="cbtn"
+                onClick={onSubmit}>
+                {loading ? "" : "Confirm"}
+              </LoadingButton>
             </div>
           </div>
-          <div className="form-row btn-row">
-            <LoadingButton
-              loading={loading}
-              style={{ width: 154 }}
-              className="cbtn"
-              onClick={onSubmit}>
-              {loading ? "" : "Confirm"}
-            </LoadingButton>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

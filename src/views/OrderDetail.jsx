@@ -4,21 +4,21 @@ import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { getDetailByUuid } from "../services/order";
 import { useSnackbar } from "notistack";
-import { CircularProgress } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
+import ProgressWithLabel from "../components/ProgressWithLabel";
 
 function Home({ className }) {
-  const { uuid } = useParams();
+  const { id } = useParams();
   document.title = "Order detail";
   const [record, setRecord] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const wallet = useAnchorWallet();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const loadDetail = async () => {
-      setLoading(true);
-      let res = await getDetailByUuid(uuid, wallet.publicKey.toString());
+      const res = await getDetailByUuid(id, wallet.publicKey.toString());
       setLoading(false);
       if (res.Status === 1) {
         setRecord(res.Detail);
@@ -29,171 +29,211 @@ function Home({ className }) {
     if (wallet?.publicKey) {
       loadDetail();
     }
-  }, [uuid, wallet]);
-
+  }, [id, wallet]);
   return (
     <div className={className}>
-      <div className="hold"></div>
       <div className="con">
-        <h1 className="title">Details</h1>
-        <div className="d" style={{ width: "70%" }}>
-          {loading ? (
-            <CircularProgress />
-          ) : record && record.Metadata.machineInfo ? (
-            <div className="detail">
-              <div className="info-box">
-                <div className="info-box-title">Configuration</div>
-                <div className="info-box-body">
-                  <div className="title2">
-                    # {record.Metadata.machineInfo.UuidShort}
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <>
+            <h1>{record.Metadata.formData.taskName}</h1>
+            <h2 className={record.StatusName}>{record.StatusName}</h2>
+            {record.Metadata.MachineInfo ? (
+              <div style={{ width: "64%" }}>
+                <div className="detail">
+                  <div className="info-box">
+                    <div className="info-box-title">
+                      <span>Task Info</span>
+                      <div>
+                        <Button
+                          className="extend-duration"
+                          sx={{
+                            backgroundColor: "#94d6e2",
+                            color: "black",
+                            "&:hover": {
+                              backgroundColor: "#94d6e2",
+                              color: "black",
+                            },
+                          }}
+                          onClick={() => navigate(`/extend-duration/${id}`)}>
+                          Extend Duration
+                        </Button>
+                        <Button
+                          className="end-duration"
+                          sx={{
+                            backgroundColor: "#fff",
+                            color: "black",
+                            "&:hover": {
+                              backgroundColor: "#fff",
+                              color: "black",
+                            },
+                          }}
+                          onClick={() => navigate(`/end-duration/${id}`)}>
+                          End Duration
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="info-box-body">
+                      <div className="time">
+                        <span>
+                          Start Time{" "}
+                          {new Date(record.OrderTime).toLocaleString()}
+                        </span>
+                        <span>Remaining Time {}</span>
+                      </div>
+                      <ProgressWithLabel
+                        value={60}
+                        label={`Duration: ${record.Duration}h`}
+                      />
+                      <div className="price">
+                        <div className="price-box">
+                          <label>Price</label>
+                          <span>
+                            {record.Metadata.MachineInfo.Price} DIST / h
+                          </span>
+                        </div>
+                        <div className="price-box">
+                          <label>Total Duration</label>
+                          <span>{record.Duration}h</span>
+                        </div>
+                        <div className="price-box">
+                          <label>Total Price</label>
+                          <span>
+                            {record.Metadata.MachineInfo.Price *
+                              record.Duration}{" "}
+                            DIST
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Provider</span>
-                      <span>{record.Metadata.machineInfo.Owner}</span>
+                  <div className="info-box">
+                    <div className="info-box-title">
+                      <span>Configuration</span>
                     </div>
-                    <div className="r">
-                      <span>Region</span>
-                      <span>{record.Metadata.machineInfo.Region}</span>
+                    <div className="info-box-body">
+                      <div className="title2">
+                        # {record.Metadata.MachineInfo.UuidShort}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}>
+                        <div className="box">
+                          <div className="vertical">
+                            <label>Provider</label>
+                            <span>{record.Metadata.MachineInfo.Owner}</span>
+                          </div>
+                          <div className="vertical">
+                            <label>Region</label>
+                            <span>{record.Metadata.MachineInfo.Region}</span>
+                          </div>
+                        </div>
+                        <div className="box">
+                          <div className="vertical">
+                            <label>GPU</label>
+                            <span>
+                              {record.Metadata.MachineInfo.GpuCount +
+                                "x " +
+                                record.Metadata.MachineInfo.Gpu}
+                            </span>
+                          </div>
+                          <div className="vertical">
+                            <label>CPU</label>
+                            <span>{record.Metadata.MachineInfo.Cpu}</span>
+                          </div>
+                        </div>
+                        <div className="box">
+                          <div className="horizontal">
+                            <label>TFLOPS</label>
+                            <span>
+                              {record.Metadata.MachineInfo.TFLOPS || "--"}
+                            </span>
+                          </div>
+                          <div className="horizontal">
+                            <label>RAM</label>
+                            <span>{record.Metadata.MachineInfo.RAM}</span>
+                          </div>
+                          <div className="horizontal">
+                            <label>Avail Disk Storage</label>
+                            <span>{record.Metadata.MachineInfo.Disk} GB</span>
+                          </div>
+                          <div className="horizontal">
+                            <label>Reliability</label>
+                            <span>
+                              {record.Metadata.MachineInfo.Reliability}
+                            </span>
+                          </div>
+                          <div className="horizontal">
+                            <label>CPS</label>
+                            <span>{record.Metadata.MachineInfo.Score}</span>
+                          </div>
+                          <div className="horizontal">
+                            <label
+                              style={{ fontSize: "14px", lineHeight: "36px" }}>
+                              Internet Speed
+                            </label>
+                            <span>
+                              <div className="speed">
+                                <img
+                                  src="/img/market/download.svg"
+                                  style={{ transform: "rotate(180deg)" }}
+                                  alt=""
+                                />{" "}
+                                {record.Metadata.MachineInfo.UploadSpeed ||
+                                  "--"}
+                              </div>
+                              <div className="speed">
+                                <img src="/img/market/download.svg" alt="" />{" "}
+                                {record.Metadata.MachineInfo.DownloadSpeed ||
+                                  "--"}
+                              </div>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>
-                        {record.Metadata.machineInfo.GpuCount +
-                          "x " +
-                          record.Metadata.machineInfo.Gpu}
-                      </span>
-                      <span>
-                        {record.Metadata.machineInfo.TFLOPS || "--"} TFLOPS
-                      </span>
+                  <div className="info-box">
+                    <div className="info-box-title">
+                      <span>Blockchain Info</span>
                     </div>
-                    <div className="r">
-                      <span>RAM</span>
-                      <span>{record.Metadata.machineInfo.RAM}</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>CPU</span>
-                      <span>{record.Metadata.machineInfo.Cpu}</span>
-                    </div>
-                    <div className="r">
-                      <span>Reliability</span>
-                      <span>{record.Metadata.machineInfo.Reliability}</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Internet Seed</span>
-                      <span>
-                        <img
-                          src="/img/market/download.svg"
-                          style={{ transform: "rotate(180deg)" }}
-                          alt=""
-                        />{" "}
-                        {record.Metadata.machineInfo.UploadSpeed || "--"}{" "}
-                        <img
-                          src="/img/market/download.svg"
-                          alt=""
-                          style={{ marginLeft: "40px" }}
-                        />{" "}
-                        {record.Metadata.machineInfo.DownloadSpeed || "--"}
-                      </span>
-                    </div>
-                    <div className="r">
-                      <span>CPS</span>
-                      <span>{record.Metadata.machineInfo.Score}</span>
+                    <div className="info-box-body">
+                      <div className="line">
+                        <div className="f">
+                          <span>Hash</span>
+                          <span>{record.Uuid}</span>
+                        </div>
+                      </div>
+                      <div className="line">
+                        <div className="f">
+                          <span>From</span>
+                          <span>{record.Seller}</span>
+                        </div>
+                      </div>
+                      <div className="line">
+                        <div className="f">
+                          <span>To</span>
+                          <span>{record.Buyer}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="info-box">
-                <div className="info-box-title">Task Info</div>
-                <div className="info-box-body">
-                  <div className="title2">
-                    {record.Metadata.formData.taskName}
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Start Time</span>
-                      <span>{new Date(record.OrderTime).toLocaleString()}</span>
-                    </div>
-                    <div className="r">
-                      <span>Remaining Time</span>
-                      <span>{record.RemainingTime}</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Duration</span>
-                      <span>{record.Duration}h</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>Price</span>
-                      <span>{record.Metadata.machineInfo.Price} DIST / h</span>
-                    </div>
-                    <div className="r">
-                      <span>Total</span>
-                      <span>{record.Total} DIST</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="info-box">
-                <div className="info-box-title">Blockchain Info</div>
-                <div className="info-box-body">
-                  <div className="line">
-                    <div className="l">
-                      <span>Hash</span>
-                      <span>{record.Uuid}</span>
-                    </div>
-                  </div>
-                  <div className="line">
-                    <div className="l">
-                      <span>From</span>
-                      <span>{record.Seller}</span>
-                    </div>
-                    <div className="r">
-                      <span>To</span>
-                      <span>{record.Buyer}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="color-box">
-                <div className="l">
-                  <span>Status</span>
-                  <label>{record.StatusName}</label>
-                </div>
-                {record.StatusName === "Available" && (
-                  <div className="r pointer">
-                    {record.Status === 0 && (
-                      <label
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          navigate("/extend-duration/" + record.Uuid)
-                        }>
-                        Extend Duration
-                      </label>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            "No Data"
-          )}
-        </div>
+            ) : (
+              <span>Machine Data Not Found</span>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 export default styled(Home)`
-  display: block;
   color: #fff;
   .con {
     width: 1160px;
@@ -201,27 +241,50 @@ export default styled(Home)`
     padding: 0 20px;
     display: block;
     overflow: hidden;
-    .title {
+    h1 {
       font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;
       color: #ffffff;
-      margin-top: 25px;
+      margin: 0;
       line-height: 70px;
+    }
+    h2 {
+      margin: 0;
     }
   }
   .info-box {
-    display: block;
     .info-box-title {
-      font-weight: bold;
-      font-size: 16px;
-      color: #ffffff;
       border-bottom: 1px solid #797979;
-      line-height: 48px;
+      display: flex;
+      justify-content: space-between;
+      span {
+        font-weight: bold;
+        font-size: 16px;
+        color: #ffffff;
+        line-height: 48px;
+      }
+      .extend-duration {
+        background-color: #94d6e2;
+        color: black;
+        margin-right: 20px;
+        :hover {
+          background-color: #94d6e2;
+          color: black;
+        }
+      }
+      .end-duration {
+        background-color: white;
+        color: black;
+        :hover {
+          background-color: white;
+          color: black;
+        }
+      }
     }
     .info-box-body {
-      padding: 5px 18px;
+      padding: 5px;
       display: block;
       .title2 {
         line-height: 20px;
@@ -247,6 +310,21 @@ export default styled(Home)`
         }
         .r {
           width: 40%;
+        }
+      }
+      .time {
+        display: flex;
+        justify-content: space-between;
+        margin: 16px 0 12px 0;
+      }
+      .price {
+        color: #aaa;
+        font-size: 12px;
+        padding-top: 20px;
+        width: 30%;
+        .price-box {
+          display: flex;
+          justify-content: space-between;
         }
       }
     }
@@ -298,8 +376,9 @@ export default styled(Home)`
     }
     .pointer {
       color: white !important;
+      cursor: pointer;
       background-image: linear-gradient(to right, #20ae98, #0aab50);
-      border-radius: 8px;
+      border-radius: 4px;
       padding: 0 10px;
     }
     .r {
@@ -320,6 +399,33 @@ export default styled(Home)`
       .disable {
         cursor: not-allowed;
         background-color: #2f2f2f;
+      }
+    }
+  }
+  .box {
+    width: 30%;
+    height: 120px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    span {
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    .vertical {
+      padding: 4px 0;
+      label {
+        display: block;
+      }
+      span {
+        width: 100%;
+      }
+    }
+    .horizontal {
+      display: flex;
+      justify-content: space-between;
+      .speed {
+        text-align: right;
       }
     }
   }

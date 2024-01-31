@@ -47,8 +47,7 @@ function Home({ className }) {
     inputValues[n] = value;
   };
   const onPriceChange = (value) => {
-    let price = parseFloat(value).toFixed(2);
-    setPrice(price);
+    setPrice(parseFloat(value).toFixed(2));
   };
   const onSubmit = async () => {
     let tprice = parseFloat(price);
@@ -96,18 +95,14 @@ function Home({ className }) {
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
-      <div className="hold"></div>
       <div className="con">
         <h1 className="title">Make Offer</h1>
         <div className="myform">
           <div className="form-row">
             <div className="row-txt">Price (per hour)</div>
             <TextField
-              fullWidth
-              inputProps={{ style: { color: "white" } }}
-              color="success"
               value={price}
-              onChange={onPriceChange}
+              onChange={(e) => onPriceChange(e.target.value)}
               placeholder="Enter the price per hour"
               min={0}
               max={99999}
@@ -117,9 +112,6 @@ function Home({ className }) {
           <div className="form-row">
             <div className="row-txt">Max duration</div>
             <TextField
-              fullWidth
-              inputProps={{ style: { color: "white" } }}
-              color="success"
               onChange={(e) => onInput(e, "duration")}
               type="number"
               placeholder="Enter an integer"
@@ -132,9 +124,6 @@ function Home({ className }) {
             <div className="row-txt">Max disk storage</div>
             <div className="row-title2">Avail Disk Storage: {maxStorage}GB</div>
             <TextField
-              fullWidth
-              inputProps={{ style: { color: "white" } }}
-              color="success"
               onChange={(e) => onInput(e, "disk")}
               type="number"
               placeholder="Enter an integer"
@@ -170,11 +159,10 @@ function Home({ className }) {
           <div className="form-row">
             <LoadingButton
               loading={loading}
-              disabled={loading}
               style={{ marginTop: 30 }}
               onClick={onSubmit}
               className="cbtn">
-              {loading ? "Confirming" : "Confirm"}
+              {loading ? "" : "Confirm"}
             </LoadingButton>
           </div>
         </div>
@@ -188,9 +176,6 @@ export default styled(Home)`
   width: 100%;
   height: 100vh;
   color: #fff;
-  .my-input {
-    width: 100%;
-  }
   .mini-btn {
     border: 1px solid #fff;
   }
@@ -244,50 +229,5 @@ export default styled(Home)`
     height: 30px;
     line-height: 30px;
     cursor: pointer;
-  }
-  .ant-btn-primary {
-    background-image: linear-gradient(to right, #20ae98, #0aab50);
-    color: white;
-    height: 50px;
-    line-height: 40px;
-    width: 130px;
-  }
-  .mytable {
-    display: table;
-    border: 1px solid #fff;
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    .link {
-      color: #fff;
-      cursor: pointer;
-    }
-    .btn-link {
-      color: #fff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    th {
-      background-color: #92d5e1;
-      color: #000;
-      height: 40px;
-      line-height: 40px;
-      text-align: left;
-      padding: 0 10px;
-    }
-    tr td {
-      border-bottom: 1px solid #fff;
-      border-collapse: collapse;
-      height: 40px;
-      line-height: 40px;
-      padding: 0 10px;
-    }
-    tr:last-children {
-      td {
-        border-bottom: none;
-      }
-    }
   }
 `;
