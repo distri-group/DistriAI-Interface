@@ -8,8 +8,10 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
-import { CircularProgress, TextField } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import ProgressWithLabel from "../components/ProgressWithLabel";
+import DurationToggle from "../components/DurationToggle";
 
 function Home({ className }) {
   const { id } = useParams();
@@ -127,26 +129,20 @@ function Home({ className }) {
                     <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
                   </div>
                 </div>
-                <div className="line">
-                  <div className="l">
+                <div
+                  className="line"
+                  style={{ justifyContent: "space-between" }}>
+                  <div style={{ width: "30%" }}>
                     <span>RAM</span>
                     <span>{deviceDetail.RAM}</span>
                   </div>
-                  <div className="r">
+                  <div style={{ width: "30%" }}>
                     <span>Avail Disk Storage</span>
                     <span>{deviceDetail.Disk} GB</span>
                   </div>
-                </div>
-                <div className="line">
-                  <div className="f">
+                  <div style={{ width: "30%" }}>
                     <span>CPU</span>
                     <span>{deviceDetail.Cpu}</span>
-                  </div>
-                </div>
-                <div className="line">
-                  <div className="f">
-                    <span>Max Duration</span>
-                    <span>{deviceDetail.MaxDuration}h</span>
                   </div>
                 </div>
               </div>
@@ -154,33 +150,26 @@ function Home({ className }) {
             <div className="info-box">
               <div className="info-box-title">Order Info</div>
               <div className="info-box-body">
-                <div className="line">
-                  <div className="f">
-                    <span>Dataset Size</span>
-                    <span>485 MB</span>
+                <div className="time">
+                  <div>
+                    <label>Start Time</label>
+                    <span>
+                      {new Date(orderDetail.OrderTime).toLocaleString()}
+                    </span>
+                  </div>
+                  <div>
+                    <label>Remaining Time</label>
+                    <span></span>
                   </div>
                 </div>
-                <div className="line">
-                  <div className="f">
-                    <span>Price(per hour)</span>
-                    <span>{deviceDetail.Price} DIST</span>
-                  </div>
-                </div>
+                <ProgressWithLabel value={60} label="Duration" />
+                <DurationToggle
+                  duration={duration}
+                  setDuration={setDuration}
+                  max={deviceDetail.MaxDuration}
+                  title="Extend Duration"
+                />
               </div>
-            </div>
-            <div className="b-box">
-              <div className="row">
-                <b>5</b> h
-              </div>
-              <div className="row">Estimate the computing time</div>
-            </div>
-            <div className="form-row">
-              <div className="row-txt">Duration </div>
-              <TextField
-                disabled={loading}
-                placeholder="Hour"
-                onChange={onInput}
-              />
             </div>
             <div className="right-txt">Balance: {balance} DIST</div>
             <div className="color-box">
@@ -210,6 +199,7 @@ export default styled(Home)`
   display: block;
   overflow: hidden;
   width: 100%;
+  min-height: calc(100vh - 160px);
   color: #fff;
   .con {
     width: 1160px;
@@ -236,7 +226,7 @@ export default styled(Home)`
         line-height: 48px;
       }
       .info-box-body {
-        padding: 5px 18px;
+        padding: 5px 0;
         display: block;
         .line {
           padding: 10px 0;
@@ -315,6 +305,15 @@ export default styled(Home)`
     .btn-row {
       display: block;
       margin: 30px 0;
+    }
+  }
+  .time {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    span {
+      font-weight: bolder;
+      padding: 0 8px;
     }
   }
 `;
