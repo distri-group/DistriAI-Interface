@@ -9,7 +9,7 @@ import ProgressWithLabel from "../components/ProgressWithLabel";
 
 function Home({ className }) {
   const { id } = useParams();
-  document.title = "Order detail";
+  document.title = "Earning Detail";
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
   const wallet = useAnchorWallet();

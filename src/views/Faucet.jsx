@@ -148,7 +148,7 @@ export default styled(Home)`
   }
   .con {
     width: 1210px;
-    margin: 66px auto 10px 0;
+    margin: 66px auto 10px auto;
     display: block;
     overflow: hidden;
     .title {

@@ -6,7 +6,6 @@ function Header({ className, current, total, pageSize, onChange }) {
   const [curr, setCurr] = useState(current);
   const onPagerChange = (c) => {
     setCurr(c);
-    console.log(c);
     onChange(c);
   };
   useEffect(() => {
@@ -29,7 +28,7 @@ function Header({ className, current, total, pageSize, onChange }) {
 export default styled(Header)`
   .pager-bar {
     display: flex;
-    flex-direction: row;
+    justify-content: center;
     margin: 0 auto;
     padding: 80px 20px;
     li {
@@ -56,7 +55,7 @@ export default styled(Header)`
     }
     .rc-pagination-prev {
       button {
-        background-color: #222;
+        background-color: transparent;
         padding: 0 12px;
         margin: 0;
         outline: none;
@@ -70,7 +69,7 @@ export default styled(Header)`
     }
     .rc-pagination-next {
       button {
-        background-color: #222;
+        background-color: transparent;
         padding: 0 12px;
         margin: 0;
         outline: none;

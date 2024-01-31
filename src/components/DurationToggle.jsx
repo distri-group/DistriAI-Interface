@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-function DurationToggle({ className, duration, setDuration, max }) {
+function DurationToggle({ className, duration, setDuration, max, title }) {
   const [type, setType] = useState(1);
   const [count, setCount] = useState(1);
   const onSelect = (e, value) => {
@@ -24,14 +24,8 @@ function DurationToggle({ className, duration, setDuration, max }) {
   };
   return (
     <div className={className}>
-      <div className="row-txt">Duration</div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          height: "40px",
-          paddingBottom: "16px",
-        }}>
+      <div className="row-txt">{title}</div>
+      <div className="toggle-box">
         <ToggleButtonGroup value={type} exclusive onChange={onSelect}>
           <ToggleButton value={1} className="duration-btn">
             Hourly
@@ -76,4 +70,30 @@ function DurationToggle({ className, duration, setDuration, max }) {
   );
 }
 
-export default styled(DurationToggle)``;
+export default styled(DurationToggle)`
+  .row-txt {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 51px;
+  }
+  .count {
+    display: flex;
+    justify-content: space-between;
+    .count-btn {
+      background-color: white;
+      border: 1px solid black;
+      color: black;
+      font-size: 20px;
+      font-weight: bolder;
+    }
+  }
+  .duration-btn {
+    width: 86px;
+  }
+  .toggle-box {
+    display: flex;
+    justify-content: space-between;
+    height: 40px;
+    padding-bottom: 16px;
+  }
+`;

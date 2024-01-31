@@ -235,6 +235,7 @@ function Home({ className }) {
 
 export default styled(Home)`
   color: #fff;
+  min-height: calc(100vh - 160px);
   .con {
     width: 1160px;
     margin: 10px auto;

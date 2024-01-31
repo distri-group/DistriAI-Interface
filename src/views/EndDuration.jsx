@@ -11,6 +11,7 @@ import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import webconfig from "../webconfig";
 
 function EndDuration({ className }) {
+  document.title = "End Duration";
   const { id } = useParams();
   const wallet = useAnchorWallet();
   const childRef = useRef();

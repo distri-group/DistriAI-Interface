@@ -126,6 +126,7 @@ export default styled(Home)`
   display: block;
   width: 100%;
   color: #fff;
+  min-height: calc(100vh - 150px);
   .hold {
     display: block;
     overflow: hidden;
@@ -174,8 +175,5 @@ export default styled(Home)`
         cursor: pointer;
       }
     }
-  }
-  .pager {
-    display: flex;
   }
 `;

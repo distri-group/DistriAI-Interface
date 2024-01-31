@@ -122,11 +122,8 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   width: 100%;
+  min-height: calc(100vh - 160px);
   color: #fff;
-  .pager {
-    margin: 0 auto;
-    width: 400px;
-  }
   .filter {
     padding: 11px 0;
     display: flex;

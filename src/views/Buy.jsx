@@ -156,6 +156,7 @@ function Home({ className }) {
             max={deviceDetail.MaxDuration}
             duration={duration}
             setDuration={setDuration}
+            title="Duration"
           />
           <div className="form-row">
             <div className="row-txt">Task Name</div>

@@ -102,7 +102,4 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
   }
-  .pager {
-    display: flex;
-  }
 `;
