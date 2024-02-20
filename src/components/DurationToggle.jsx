@@ -4,41 +4,73 @@ import {
   ToggleButtonGroup,
   Button,
   TextField,
+  InputAdornment,
+  OutlinedInput,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function DurationToggle({ className, duration, setDuration, max, title }) {
-  const [type, setType] = useState(1);
+  const [type, setType] = useState("hour");
+  const [num, setNum] = useState(0);
   const [count, setCount] = useState(1);
   const onSelect = (e, value) => {
     if (value !== null) {
       setType(value);
     }
   };
-  const onInput = (e) => {
-    const value = parseFloat(e.target.value);
-    if (!value) {
-      return setDuration(0);
-    }
+  const onCountInput = (e) => {
+    const value = parseFloat(e.target.value) || 0;
+    setCount(value);
+  };
+  const onDurationInput = (e) => {
+    const value = parseFloat(e.target.value) || 0;
     setDuration(value);
   };
+  useEffect(() => {
+    setDuration(count * num);
+  }, [count, num, setDuration]);
+  useEffect(() => {
+    switch (type) {
+      case "hour": {
+        setNum(1);
+        break;
+      }
+      case "day": {
+        setNum(24);
+        break;
+      }
+      case "max": {
+        setNum(max || 0);
+        setCount(1);
+        break;
+      }
+      default: {
+        setNum(1);
+      }
+    }
+  }, [type, max]);
   return (
     <div className={className}>
       <div className="row-txt">{title}</div>
       <div className="toggle-box">
         <ToggleButtonGroup value={type} exclusive onChange={onSelect}>
-          <ToggleButton value={1} className="duration-btn">
+          <ToggleButton value="hour" className="duration-btn">
             Hourly
           </ToggleButton>
-          <ToggleButton value={24} className="duration-btn">
+          <ToggleButton
+            value="day"
+            disabled={max < 24}
+            className="duration-btn"
+            style={{ margin: "0 20px" }}>
             Daily
           </ToggleButton>
-          <ToggleButton value={max || 0} className="duration-btn">
+          <ToggleButton value="max" className="duration-btn">
             MAX
           </ToggleButton>
         </ToggleButtonGroup>
         <div className="count">
           <Button
+            disabled={type === "max" || count - 1 === 0}
             className="count-btn"
             onClick={() => {
               setCount(count - 1);
@@ -47,11 +79,17 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
           </Button>
           <TextField
             size="small"
+            style={{
+              width: "100px",
+            }}
+            sx={{}}
+            disabled={type === "max"}
             value={count}
             type="number"
-            onChange={onInput}
+            onChange={onCountInput}
           />
           <Button
+            disabled={type === "max" || num * count >= max}
             className="count-btn"
             onClick={() => {
               setCount(count + 1);
@@ -60,11 +98,17 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
           </Button>
         </div>
       </div>
-      <TextField
+      <OutlinedInput
         data-name="duration"
-        value={duration * parseInt(type) * parseInt(count)}
+        value={duration}
         placeholder="Hour"
-        onChange={onInput}
+        onChange={onDurationInput}
+        fullWidth
+        endAdornment={
+          <InputAdornment position="end">
+            <span style={{ color: "white" }}>Hour</span>
+          </InputAdornment>
+        }
       />
     </div>
   );
@@ -88,6 +132,8 @@ export default styled(DurationToggle)`
     }
   }
   .duration-btn {
+    border-radius: 4px;
+    border: 1px solid white !important;
     width: 86px;
   }
   .toggle-box {

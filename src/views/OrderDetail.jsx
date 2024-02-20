@@ -5,7 +5,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { getDetailByUuid } from "../services/order";
 import { useSnackbar } from "notistack";
 import { Button, CircularProgress } from "@mui/material";
-import ProgressWithLabel from "../components/ProgressWithLabel";
+import DurationProgress from "../components/DurationProgress";
 
 function Home({ className }) {
   const { id } = useParams();
@@ -29,6 +29,7 @@ function Home({ className }) {
     if (wallet?.publicKey) {
       loadDetail();
     }
+    // eslint-disable-next-line
   }, [id, wallet]);
   return (
     <div className={className}>
@@ -45,34 +46,28 @@ function Home({ className }) {
                   <div className="info-box">
                     <div className="info-box-title">
                       <span>Task Info</span>
-                      <div>
-                        <Button
-                          className="extend-duration"
-                          sx={{
-                            backgroundColor: "#94d6e2",
-                            color: "black",
-                            "&:hover": {
-                              backgroundColor: "#94d6e2",
-                              color: "black",
-                            },
-                          }}
-                          onClick={() => navigate(`/extend-duration/${id}`)}>
-                          Extend Duration
-                        </Button>
-                        <Button
-                          className="end-duration"
-                          sx={{
-                            backgroundColor: "#fff",
-                            color: "black",
-                            "&:hover": {
+                      {record.StatusName === "Available" && (
+                        <div>
+                          <Button
+                            className="extend-duration cbtn"
+                            onClick={() => navigate(`/extend-duration/${id}`)}>
+                            Extend Duration
+                          </Button>
+                          <Button
+                            className="end-duration"
+                            sx={{
                               backgroundColor: "#fff",
                               color: "black",
-                            },
-                          }}
-                          onClick={() => navigate(`/end-duration/${id}`)}>
-                          End Duration
-                        </Button>
-                      </div>
+                              "&:hover": {
+                                backgroundColor: "#fff",
+                                color: "black",
+                              },
+                            }}
+                            onClick={() => navigate(`/end-duration/${id}`)}>
+                            End Duration
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div className="info-box-body">
                       <div className="time">
@@ -80,28 +75,60 @@ function Home({ className }) {
                           Start Time{" "}
                           {new Date(record.OrderTime).toLocaleString()}
                         </span>
-                        <span>Remaining Time {}</span>
+                        {record.Status !== 2 &&
+                          (record.Status === 0 ? (
+                            <span>Remaining Time {record.RemainingTime}</span>
+                          ) : (
+                            <span>
+                              End Time{" "}
+                              {record.Status === 3
+                                ? new Date(record.RefundTime).toLocaleString()
+                                : new Date(record.EndTime).toLocaleString()}
+                            </span>
+                          ))}
                       </div>
-                      <ProgressWithLabel
-                        value={60}
-                        label={`Duration: ${record.Duration}h`}
+                      <DurationProgress
+                        startTime={record.OrderTime}
+                        endTime={
+                          record.StatusName === "Available"
+                            ? null
+                            : record.EndTime
+                        }
+                        duration={record.Duration}
+                        refundTime={
+                          record.RefundDuration ? record.RefundTime : null
+                        }
                       />
                       <div className="price">
                         <div className="price-box">
                           <label>Price</label>
-                          <span>
-                            {record.Metadata.MachineInfo.Price} DIST / h
-                          </span>
+                          <span>{record.Price} DIST / h</span>
                         </div>
+                        {record.RefundDuration && (
+                          <div className="price-box">
+                            <label>Refunded</label>
+                            <span>
+                              {record.RefundDuration} h -{" "}
+                              {record.RefundDuration * record.Price} DIST
+                            </span>
+                          </div>
+                        )}
                         <div className="price-box">
                           <label>Total Duration</label>
-                          <span>{record.Duration}h</span>
+                          <span>
+                            {record.RefundDuration
+                              ? record.Duration - record.RefundDuration
+                              : record.Duration}{" "}
+                            h
+                          </span>
                         </div>
                         <div className="price-box">
                           <label>Total Price</label>
                           <span>
-                            {record.Metadata.MachineInfo.Price *
-                              record.Duration}{" "}
+                            {record.Price *
+                              (record.RefundDuration
+                                ? record.Duration - record.RefundDuration
+                                : record.Duration)}{" "}
                             DIST
                           </span>
                         </div>
@@ -114,7 +141,9 @@ function Home({ className }) {
                     </div>
                     <div className="info-box-body">
                       <div className="title2">
-                        # {record.Metadata.MachineInfo.UuidShort}
+                        #{" "}
+                        {record.Metadata.MachineInfo.UuidShort ||
+                          record.Metadata.MachineInfo.UUID.slice(-10)}
                       </div>
                       <div
                         style={{
@@ -124,7 +153,7 @@ function Home({ className }) {
                         <div className="box">
                           <div className="vertical">
                             <label>Provider</label>
-                            <span>{record.Metadata.MachineInfo.Owner}</span>
+                            <span>{record.Seller}</span>
                           </div>
                           <div className="vertical">
                             <label>Region</label>
@@ -135,21 +164,28 @@ function Home({ className }) {
                           <div className="vertical">
                             <label>GPU</label>
                             <span>
-                              {record.Metadata.MachineInfo.GpuCount +
-                                "x " +
-                                record.Metadata.MachineInfo.Gpu}
+                              {record.Metadata.MachineInfo.Gpu
+                                ? record.Metadata.MachineInfo.GpuCount +
+                                  "x " +
+                                  record.Metadata.MachineInfo.Gpu
+                                : record.Metadata.MachineInfo.GPU}
                             </span>
                           </div>
                           <div className="vertical">
                             <label>CPU</label>
-                            <span>{record.Metadata.MachineInfo.Cpu}</span>
+                            <span>
+                              {record.Metadata.MachineInfo.CPU ||
+                                record.Metadata.MachineInfo.Cpu}
+                            </span>
                           </div>
                         </div>
                         <div className="box">
                           <div className="horizontal">
                             <label>TFLOPS</label>
                             <span>
-                              {record.Metadata.MachineInfo.TFLOPS || "--"}
+                              {!isNaN(record.Metadata.MachineInfo.TFLOPS)
+                                ? record.Metadata.MachineInfo.TFLOPS
+                                : "--"}
                             </span>
                           </div>
                           <div className="horizontal">
@@ -158,7 +194,9 @@ function Home({ className }) {
                           </div>
                           <div className="horizontal">
                             <label>Avail Disk Storage</label>
-                            <span>{record.Metadata.MachineInfo.Disk} GB</span>
+                            <span>
+                              {record.Metadata.MachineInfo.AvailDiskStorage} GB
+                            </span>
                           </div>
                           <div className="horizontal">
                             <label>Reliability</label>
@@ -168,7 +206,7 @@ function Home({ className }) {
                           </div>
                           <div className="horizontal">
                             <label>CPS</label>
-                            <span>{record.Metadata.MachineInfo.Score}</span>
+                            <span>{record.Metadata.MachineInfo.CPS}</span>
                           </div>
                           <div className="horizontal">
                             <label
@@ -182,12 +220,14 @@ function Home({ className }) {
                                   style={{ transform: "rotate(180deg)" }}
                                   alt=""
                                 />{" "}
-                                {record.Metadata.MachineInfo.UploadSpeed ||
+                                {record.Metadata.MachineInfo.Speed?.Upload ||
+                                  record.Metadata.MachineInfo.UploadSpeed ||
                                   "--"}
                               </div>
                               <div className="speed">
                                 <img src="/img/market/download.svg" alt="" />{" "}
-                                {record.Metadata.MachineInfo.DownloadSpeed ||
+                                {record.Metadata.MachineInfo.Speed?.Download ||
+                                  record.Metadata.MachineInfo.DownloadSpeed ||
                                   "--"}
                               </div>
                             </span>
@@ -267,13 +307,8 @@ export default styled(Home)`
         line-height: 48px;
       }
       .extend-duration {
-        background-color: #94d6e2;
-        color: black;
-        margin-right: 20px;
-        :hover {
-          background-color: #94d6e2;
-          color: black;
-        }
+        height: 36px;
+        margin-right: 8px;
       }
       .end-duration {
         background-color: white;
@@ -326,6 +361,10 @@ export default styled(Home)`
         .price-box {
           display: flex;
           justify-content: space-between;
+          label,
+          span {
+            width: 50%;
+          }
         }
       }
     }

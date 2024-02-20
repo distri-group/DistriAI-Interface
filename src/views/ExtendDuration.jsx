@@ -10,7 +10,7 @@ import * as anchor from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import ProgressWithLabel from "../components/ProgressWithLabel";
+import DurationProgress from "../components/DurationProgress";
 import DurationToggle from "../components/DurationToggle";
 
 function Home({ className }) {
@@ -21,50 +21,35 @@ function Home({ className }) {
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const [duration, setDuration] = useState(0);
+  const [extending, setExtending] = useState(false);
+  const [duration, setDuration] = useState(1);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
 
-  const onInput = (e) => {
-    const value = e.target.value;
-    if (!value) {
-      setDuration(0);
-      setAmount(0);
-      return null;
-    }
-    if (!parseInt(value)) {
-      setDuration(0);
-      setAmount(0);
-      return enqueueSnackbar("Duration should be number greater than 0", {
-        variant: "error",
-      });
-    }
-    setDuration(parseInt(value));
-    setAmount(value * (deviceDetail.Price || 0));
-  };
   const getTokenBalance = async (mint, address) => {
     let res = await childRef.current.getTokenAccountBalance(mint, address);
     setBalance(res / LAMPORTS_PER_SOL);
     return res;
   };
   const onSubmit = async () => {
-    setLoading(true);
-    console.log("OrderData", { duration, orderDetail });
+    setExtending(true);
     let res = await childRef.current.renewOrder(
-      orderDetail.Metadata.MachineInfo.Uuid,
+      orderDetail.Metadata.MachineInfo.Metadata.MachineAccounts,
       stringToPublicKey(id).toString(),
       duration
     );
     setTimeout(() => {
-      if (res?.msg) {
+      if (res?.msg === "ok") {
         enqueueSnackbar(`Order extended ${duration} h.`, {
           variant: "success",
         });
-        setLoading(false);
         navigate("/order");
+      } else {
+        enqueueSnackbar(res.msg, { variant: "error" });
       }
+      setExtending(false);
     }, 300);
   };
   const stringToPublicKey = (str) => {
@@ -108,7 +93,9 @@ function Home({ className }) {
     }
     // eslint-disable-next-line
   }, [wallet, id]);
-
+  useEffect(() => {
+    setAmount(duration * deviceDetail.Price || 0);
+  }, [duration, deviceDetail]);
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
@@ -159,14 +146,17 @@ function Home({ className }) {
                   </div>
                   <div>
                     <label>Remaining Time</label>
-                    <span></span>
+                    <span>{orderDetail.RemainingTime}</span>
                   </div>
                 </div>
-                <ProgressWithLabel value={60} label="Duration" />
+                <DurationProgress
+                  startTime={orderDetail.OrderTime}
+                  duration={orderDetail.Duration}
+                />
                 <DurationToggle
                   duration={duration}
                   setDuration={setDuration}
-                  max={deviceDetail.MaxDuration}
+                  max={deviceDetail.MaxDuration - orderDetail.Duration}
                   title="Extend Duration"
                 />
               </div>
@@ -181,11 +171,11 @@ function Home({ className }) {
             </div>
             <div className="form-row btn-row">
               <LoadingButton
-                loading={loading}
+                loading={extending}
                 style={{ width: 154 }}
                 className="cbtn"
                 onClick={onSubmit}>
-                {loading ? "" : "Confirm"}
+                {extending ? "" : "Confirm"}
               </LoadingButton>
             </div>
           </div>
