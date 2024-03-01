@@ -15,22 +15,30 @@ export default function DurationProgress({
       return setUsed(0);
     }
     const start = new Date(startTime);
-    let end;
-    if (refundTime) {
-      end = new Date(refundTime);
-    } else {
-      end = endTime ? new Date(endTime) : new Date();
-    }
-    const difference = Math.abs(end - start);
     const hour = 1000 * 60 * 60;
-    const result = difference / hour / duration;
-    if (result <= 1) {
-      setProgress((result * 100).toFixed(2));
-      setUsed(Math.ceil(difference / hour));
-    } else {
-      setProgress(100);
-      setUsed(duration);
-    }
+    let interval;
+    const updateProgress = () => {
+      if (!refundTime && endTime) {
+        setProgress(100);
+        setUsed(duration);
+        clearInterval(interval);
+      } else {
+        if (refundTime) {
+          const difference = Math.abs(new Date(refundTime) - start);
+          const result = difference / hour / duration;
+          setProgress((result * 100).toFixed(2));
+          setUsed(Math.ceil(difference / hour));
+          clearInterval(interval);
+        } else {
+          const difference = Math.abs(Date.now() - start);
+          const result = difference / hour / duration;
+          setProgress((result * 100).toFixed(2));
+          setUsed(Math.ceil(difference / hour));
+        }
+      }
+    };
+    updateProgress();
+    interval = setInterval(updateProgress, 1000);
   }, [startTime, endTime, duration, refundTime]);
   return (
     <Box>
