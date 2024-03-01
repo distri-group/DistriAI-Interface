@@ -121,7 +121,6 @@ function Home(props, ref) {
         return { msg: "ok", data: transaction };
       }
     } catch (e) {
-      console.log(e);
       return { msg: e.message };
     }
   };

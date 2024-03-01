@@ -88,7 +88,7 @@ function Rewards({ className }) {
         variant: "error",
       });
     } catch (e) {
-      console.log(e);
+      return enqueueSnackbar(e.message, { variant: "error" });
     }
   };
   const onPageChange = (curr) => {

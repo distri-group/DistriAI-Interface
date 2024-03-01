@@ -66,7 +66,6 @@ function Home({ className }) {
         if (res.Detail.Metadata?.MachineInfo) {
           setDeviceDetail(res.Detail.Metadata.MachineInfo);
         }
-        console.log(res.Detail.Metadata.MachineInfo);
       } else {
         return enqueueSnackbar(res.Msg, { variant: "error" });
       }

@@ -67,7 +67,6 @@ function EndDuration({ className }) {
       setLoading(false);
       if (res.Status === 1) {
         setDetail(res.Detail);
-        console.log(res.Detail);
         let remains =
           new Date(res.Detail.EndTime).getTime() - new Date().getTime();
         setRemainingTime(remains);

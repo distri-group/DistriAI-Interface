@@ -31,7 +31,6 @@ function Home({ className }) {
       setLoading(false);
       if (res.Status === 1) {
         setRecord(res.Detail);
-        console.log(res.Detail);
       } else {
         return enqueueSnackbar(res.Msg, { variant: "error" });
       }

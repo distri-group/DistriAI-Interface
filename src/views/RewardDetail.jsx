@@ -84,7 +84,6 @@ function Home({ className }) {
       );
       if (total) {
         setTotal(total);
-        console.log("Reward Total", total);
       }
       setLoading(false);
     };

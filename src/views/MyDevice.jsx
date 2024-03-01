@@ -14,7 +14,6 @@ function Home({ className }) {
     try {
       let res = await getMachineList(1, [], wallet.publicKey.toString());
       res.list.map((item) => (item.loading = false));
-      console.log(res.list);
       setList(res.list);
     } catch (e) {
       setList([]);
