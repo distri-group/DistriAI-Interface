@@ -148,6 +148,20 @@ function Home({ className }) {
                   max={deviceDetail.MaxDuration - orderDetail.Duration}
                   title="Extend Duration"
                 />
+                <div
+                  style={{ margin: "16px 0", color: "#aaa", display: "flex" }}>
+                  <label style={{ width: "120px", display: "block" }}>
+                    Max Duration
+                  </label>
+                  <span>{deviceDetail.MaxDuration}h</span>
+                </div>
+                <div
+                  style={{ margin: "16px 0", color: "#aaa", display: "flex" }}>
+                  <label style={{ width: "120px", display: "block" }}>
+                    Price(h)
+                  </label>
+                  <span>{deviceDetail.Price} DIST</span>
+                </div>
               </div>
             </div>
             <div className="right-txt">Balance: {balance} DIST</div>
