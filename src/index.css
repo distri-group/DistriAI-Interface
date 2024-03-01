@@ -7,6 +7,7 @@ html,body{
 body {
   margin: 0;
   color: white;
+  font-family: Avenir Next;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -20,9 +21,6 @@ body {
 }
 h1, h2, h3, h4, h5, h6{
   font-family: Avenir Next Bold;
-}
-span, p, ul, li{
-  font-family: Avenir Next;
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
