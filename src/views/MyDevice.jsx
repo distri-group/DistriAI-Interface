@@ -14,6 +14,7 @@ function Home({ className }) {
     try {
       let res = await getMachineList(1, [], wallet.publicKey.toString());
       res.list.map((item) => (item.loading = false));
+      console.log(res.list);
       setList(res.list);
     } catch (e) {
       setList([]);
@@ -56,6 +57,7 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   width: 100%;
+  min-height: calc(100% - 160px);
   color: #fff;
   .con {
     width: 1200px;
@@ -63,7 +65,6 @@ export default styled(Home)`
     display: block;
     padding: 0 20px;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

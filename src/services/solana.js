@@ -3,7 +3,7 @@ import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 const rpcUrl = "https://api.devnet.solana.com";
 let connection = null;
 
-export async function connectToSolana() {
+async function connectToSolana() {
   try {
     if (connection) return connection;
     connection = new Connection(rpcUrl, "confirmed");

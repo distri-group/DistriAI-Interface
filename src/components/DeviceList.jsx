@@ -9,8 +9,17 @@ import { Box, Button, Modal } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { formatAddress } from "../utils";
 import Table from "./Table";
+import * as anchor from "@project-serum/anchor";
+import webconfig from "../webconfig";
 
-function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
+function DeviceList({
+  className,
+  list,
+  setList,
+  isMyDevice,
+  loading,
+  reloadFunc,
+}) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
@@ -20,13 +29,19 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   const childRef = useRef();
   const cancelOffer = async (row) => {
     setBtnLoading(true);
-    let id = row.Uuid;
-    if (!id) {
-      return enqueueSnackbar("Id Not Found", { variant: "error" });
-    }
-    let res = await childRef.current.cancelOffer(id);
+    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("machine"),
+        wallet.publicKey.toBytes(),
+        anchor.utils.bytes.hex.decode(row.Uuid),
+      ],
+      webconfig.PROGRAM
+    );
+    let res = await childRef.current.cancelOffer(machinePublicKey);
     if (res?.msg !== "ok") {
       setList([...list]);
+      setDeviceToCancel(null);
+      setBtnLoading(false);
       return enqueueSnackbar(res?.msg, { variant: "error" });
     }
     enqueueSnackbar("Cancel Offer Success.", {
@@ -53,14 +68,8 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
           <div className="provider">
             <div style={{ display: "flex" }}>
               <span
+                className="level"
                 style={{
-                  marginBottom: "5px",
-                  borderRadius: "5px",
-                  lineHeight: "20px",
-                  height: "20px",
-                  fontSize: "12px",
-                  padding: "0 15px",
-                  color: "rgb(51, 51, 51)",
                   backgroundColor:
                     record?.SecurityLevel === 0
                       ? "#f89898"
@@ -73,7 +82,14 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
                 level {record?.SecurityLevel}
               </span>
             </div>
-            <div className="addr">{formatAddress(record.Owner)}</div>
+            <a
+              className="addr"
+              href={`https://solscan.io/address/${record.Owner}?cluster=devne`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ textDecoration: "none" }}>
+              {formatAddress(record.Owner)}
+            </a>
             <div className="id"># {record.UuidShort}</div>
             <div className="reliability">
               <span className="l">
@@ -89,7 +105,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               <img src="/img/market/global.svg" alt="global" />
               <div className="region-info">
                 <span>{record.Region}</span>
-                <span>{record.Metadata.LocationInfo.query || ""}</span>
+                <span>{record.Metadata?.LocationInfo?.query || ""}</span>
               </div>
             </div>
           </div>
@@ -147,19 +163,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
         }
         return (
           <div className="price">
-            <span
-              style={{
-                margin: 0,
-                borderRadius: "100%",
-                backgroundColor: "white",
-                backgroundImage: "url('/img/token.png')",
-                backgroundSize: "70%",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                width: "24px",
-                height: "24px",
-              }}
-            />
+            <span className="token" />
             <span>{record.Price}</span>
           </div>
         );
@@ -221,7 +225,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
                 className="add-machine"
                 href="https://docs.distri.ai/core/getting-started/compute-node"
                 target="_blank"
-                rel="noreffer">
+                rel="noreferrer">
                 Add Your Machine
               </a>{" "}
               in the client
@@ -234,8 +238,11 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
       {deviceToCancel && (
         <Modal
           open={Boolean(deviceToCancel)}
-          onClose={() => setDeviceToCancel(null)}
-          className="cancel">
+          onClose={() => {
+            if (!btnLoading) {
+              setDeviceToCancel(null);
+            }
+          }}>
           <Box
             sx={{
               position: "absolute",
@@ -247,7 +254,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
               boxShadow: 24,
               p: 4,
               borderRadius: "8px",
-              color: "white",
+              color: "#fff",
             }}>
             <h1 style={{ fontSize: "72px", textAlign: "center" }}>
               Unlist The Offer
@@ -307,7 +314,7 @@ function Header({ className, list, setList, isMyDevice, loading, reloadFunc }) {
   );
 }
 
-export default styled(Header)`
+export default styled(DeviceList)`
   .spin-box {
     width: 100%;
     height: 150px;
@@ -320,6 +327,26 @@ export default styled(Header)`
     font-style: normal;
     font-size: 20px;
     color: #ffffff;
+  }
+  .level {
+    margin-bottom: 5px;
+    border-radius: 5px;
+    line-height: 20px;
+    height: 20px;
+    font-size: 12px;
+    padding: 0 15px;
+    color: #333;
+  }
+  .token {
+    margin: 0;
+    border-radius: 100%;
+    background-color: white;
+    background-image: url(/img/token.png);
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
   }
   .mini-btn {
     border-radius: 4px;
@@ -350,6 +377,7 @@ export default styled(Header)`
   }
   .mini-btn2 {
     background-color: rgba(70, 70, 70, 1);
+    color: white;
   }
   .mini-btn1:hover {
     background-color: rgba(255, 214, 214, 1);
@@ -540,14 +568,6 @@ export default styled(Header)`
     }
   }
   .empty-box {
-    height: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    span {
-      color: #6e6e6e;
-      font-size: 14px;
-    }
     .add-machine {
       text-decoration: none;
       color: #0aab50;

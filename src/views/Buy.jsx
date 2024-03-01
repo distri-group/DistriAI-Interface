@@ -5,12 +5,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { getMachineDetailByUuid } from "../services/machine";
 import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
-import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import DurationToggle from "../components/DurationToggle";
+import * as anchor from "@project-serum/anchor";
 
 let formData = {
   taskName: "",
@@ -50,19 +51,19 @@ function Home({ className }) {
           { variant: "error" }
         );
       }
-      formData[name] = value;
-      if (!deviceDetail.Price) {
-        deviceDetail.Price = 1;
-      }
-      setAmount(value * deviceDetail.Price);
+      setDuration(value);
     }
   };
-
   useEffect(() => {
-    const mint = new PublicKey(webconfig.mintAddress);
+    setAmount(duration * deviceDetail.Price || 0);
+  }, [duration, deviceDetail]);
+  useEffect(() => {
     const getBalance = async () => {
       setLoading(true);
-      const amount = await getTokenBalance(mint, wallet.publicKey);
+      const amount = await getTokenBalance(
+        webconfig.MINT_PROGRAM,
+        wallet.publicKey
+      );
       const res = await getOrderList(1, [], wallet.publicKey.toString());
       setIndex(res.total + 1);
       setBalance(amount / LAMPORTS_PER_SOL);
@@ -94,8 +95,9 @@ function Home({ className }) {
       return enqueueSnackbar(vmsg, { variant: "warning" });
     }
     setLoading(true);
-    let ret = await placeOrderStart(deviceDetail, formData, amount);
+    let ret = await placeOrderStart(deviceDetail, formData);
     if (ret.msg !== "ok") {
+      setLoading(false);
       return enqueueSnackbar(ret.msg, { variant: "error" });
     }
     enqueueSnackbar("Purchase Successfully.", { variant: "success" });
@@ -106,11 +108,35 @@ function Home({ className }) {
   };
   async function placeOrderStart(deviceDetail, formData) {
     let orderId = new Date().valueOf().toString();
+    const MachineInfo = {
+      UUID: deviceDetail.Uuid,
+      Provider: deviceDetail.Metadata.Addr,
+      Region: deviceDetail.Region,
+      GPU: deviceDetail.GpuCount + "x" + deviceDetail.Gpu,
+      CPU: deviceDetail.Cpu,
+      Tflops: deviceDetail.Tflops,
+      RAM: deviceDetail.RAM,
+      AvailDiskStorage: deviceDetail.Disk,
+      Reliability: deviceDetail.Reliability,
+      CPS: deviceDetail.Score,
+      Speed: {
+        Upload: deviceDetail.Metadata.SpeedInfo.Upload,
+        Download: deviceDetail.Metadata.SpeedInfo.Download,
+      },
+    };
+    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("machine"),
+        new PublicKey(deviceDetail.Metadata.Addr).toBytes(),
+        anchor.utils.bytes.hex.decode(deviceDetail.Uuid),
+      ],
+      webconfig.PROGRAM
+    );
     let result = await childRef.current.placeOrder(
-      deviceDetail.Uuid,
+      machinePublicKey,
       orderId,
-      formData.duration,
-      { formData, MachineInfo: deviceDetail }
+      duration,
+      { formData, MachineInfo }
     );
     return result;
   }
@@ -126,10 +152,10 @@ function Home({ className }) {
             <div className="info-box-body">
               <div className="line">
                 <div className="f">
-                  <span style={{ fontSize: 18, fontWeight: "bold" }}>
-                    {deviceDetail.GpuCount + "x " + deviceDetail.Gpu}
+                  <span>
+                    <b>{deviceDetail.GpuCount + "x " + deviceDetail.Gpu}</b>
                   </span>
-                  <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
+                  <span>{deviceDetail.Tflops || "--"} TFLOPS</span>
                 </div>
               </div>
               <div className="line" style={{ justifyContent: "space-between" }}>
@@ -172,7 +198,7 @@ function Home({ className }) {
           <div className="color-box">
             <div className="row-txt">Total</div>
             <div className="drow">
-              <span className="num">{amount}</span>
+              <span className="num">{amount || 0}</span>
               <label>DIST</label>
             </div>
           </div>
@@ -260,7 +286,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

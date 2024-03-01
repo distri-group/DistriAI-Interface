@@ -1,11 +1,12 @@
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { getDetailByUuid } from "../services/order";
 import { useSnackbar } from "notistack";
-import { Button, CircularProgress } from "@mui/material";
-import ProgressWithLabel from "../components/ProgressWithLabel";
+import { CircularProgress } from "@mui/material";
+import DurationProgress from "../components/DurationProgress";
+import Countdown from "../components/Countdown";
 
 function Home({ className }) {
   const { id } = useParams();
@@ -13,7 +14,6 @@ function Home({ className }) {
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
   const wallet = useAnchorWallet();
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -29,6 +29,7 @@ function Home({ className }) {
     if (wallet?.publicKey) {
       loadDetail();
     }
+    // eslint-disable-next-line
   }, [id, wallet]);
   return (
     <div className={className}>
@@ -55,11 +56,36 @@ function Home({ className }) {
                           Start Time{" "}
                           {new Date(record.OrderTime).toLocaleString()}
                         </span>
-                        <span>Remaining Time {}</span>
+                        {record.Status !== 2 &&
+                          (record.Status === 0 ? (
+                            <span>
+                              Remaining Time{" "}
+                              <Countdown
+                                deadlineTime={new Date(
+                                  record.EndTime
+                                ).getTime()}
+                              />
+                            </span>
+                          ) : (
+                            <span>
+                              End Time{" "}
+                              {record.Status === 3
+                                ? new Date(record.RefundTime).toLocaleString()
+                                : new Date(record.EndTime).toLocaleString()}
+                            </span>
+                          ))}
                       </div>
-                      <ProgressWithLabel
-                        value={60}
-                        label={`Duration: ${record.Duration}h`}
+                      <DurationProgress
+                        startTime={record.OrderTime}
+                        endTime={
+                          record.StatusName === "Available"
+                            ? null
+                            : record.EndTime
+                        }
+                        duration={record.Duration}
+                        refundTime={
+                          record.RefundDuration ? record.RefundTime : null
+                        }
                       />
                       <div className="price">
                         <div className="price-box">
@@ -68,15 +94,34 @@ function Home({ className }) {
                             {record.Metadata.MachineInfo.Price} DIST / h
                           </span>
                         </div>
+                        {record.RefundDuration && (
+                          <div className="price-box">
+                            <label>Refunded</label>
+                            <span>
+                              {record.RefundDuration} h -{" "}
+                              {record.RefundDuration * record.Price} DIST
+                            </span>
+                          </div>
+                        )}
                         <div className="price-box">
                           <label>Total Duration</label>
-                          <span>{record.Duration}h</span>
+                          <span>
+                            {record.RefundDuration
+                              ? record.Duration - record.RefundDuration
+                              : record.Duration}{" "}
+                            h
+                          </span>
                         </div>
                         <div className="price-box">
-                          <label>Expected Total Earnings</label>
+                          <label>
+                            {record.StatusName === "Available" && "Expected "}
+                            Total Earnings
+                          </label>
                           <span>
-                            {record.Metadata.MachineInfo.Price *
-                              record.Duration}{" "}
+                            {record.Price *
+                              (record.RefundDuration
+                                ? record.Duration - record.RefundDuration
+                                : record.Duration)}{" "}
                             DIST
                           </span>
                         </div>
@@ -124,7 +169,7 @@ function Home({ className }) {
                           <div className="horizontal">
                             <label>TFLOPS</label>
                             <span>
-                              {record.Metadata.MachineInfo.TFLOPS || "--"}
+                              {record.Metadata.MachineInfo.Tflops || "--"}
                             </span>
                           </div>
                           <div className="horizontal">
@@ -198,7 +243,7 @@ function Home({ className }) {
 
 export default styled(Home)`
   color: #fff;
-  height: calc(100vh - 140px);
+  height: calc(100% - 140px);
   .con {
     width: 1160px;
     margin: 10px auto;
@@ -206,7 +251,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     h1 {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;
@@ -289,6 +333,10 @@ export default styled(Home)`
         .price-box {
           display: flex;
           justify-content: space-between;
+          label,
+          span {
+            width: 50%;
+          }
         }
       }
     }

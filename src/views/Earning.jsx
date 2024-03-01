@@ -1,4 +1,4 @@
-import { Button, MenuItem, Select } from "@mui/material";
+import { MenuItem, Select } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getFilterData, getOrderList } from "../services/order";
 import styled from "styled-components";
@@ -20,19 +20,34 @@ function Earning({ className }) {
   const [current, setCurrent] = useState(1);
   const [filterData, setFilterData] = useState([]);
   const [filterValue, setFilterValue] = useState();
+  const [received, setReceived] = useState(0);
+  const [pending, setPending] = useState(0);
   const [loading, setLoading] = useState(false);
   const loadList = async (curr) => {
     setLoading(true);
+    setTotal(0);
     try {
       const res = await getOrderList(curr, filter, wallet.publicKey.toString());
-      console.log("Order List", res);
       if (!res) {
+        setLoading(false);
         return enqueueSnackbar("Order List Not Found", { variant: "error" });
       }
       setList(res.list);
       setTotal(res.total);
+      let totalReceived = 0;
+      let totalPending = 0;
+      for (let item of res.list) {
+        if (item.Status === 0) {
+          totalPending += item.Duration * item.Price;
+        } else {
+          totalReceived +=
+            (item.Duration - (item.RefundDuration || 0)) * item.Price;
+        }
+      }
+      setReceived(totalReceived);
+      setPending(totalPending);
     } catch (e) {
-      console.log(e);
+      enqueueSnackbar(e.message, { variant: "error" });
     }
     setLoading(false);
   };
@@ -73,7 +88,7 @@ function Earning({ className }) {
       render: (text) => (
         <div className="price">
           <span className="coin" />
-          <span>{text.toFixed(2)}</span>
+          <span style={{ lineHeight: "24px" }}>{text.toFixed(2)}</span>
         </div>
       ),
     },
@@ -89,7 +104,9 @@ function Earning({ className }) {
       key: "Uuid",
       render: (text, record, index) => (
         <span>
-          <b>{record.Duration * record.Price}</b>
+          <b>
+            {(record.Duration - (record.RefundDuration || 0)) * record.Price}
+          </b>
         </span>
       ),
     },
@@ -125,6 +142,7 @@ function Earning({ className }) {
     if (wallet?.publicKey) {
       loadList(1);
     }
+    // eslint-disable-next-line
   }, [wallet?.publicKey]);
   return (
     <div className={className}>
@@ -135,11 +153,13 @@ function Earning({ className }) {
             <p className="describe">
               All order earnings you have already received.
             </p>
-            <div className="volume">
-              <span className="number Completed">1230.25</span>
-              <span className="Completed">DIST</span>
-              <p>Claimed</p>
-            </div>
+            <span className="volume">
+              <div>
+                <span className="number">{received}</span>
+                <span className="Completed">DIST</span>
+              </div>
+              <p className="Completed">Received</p>
+            </span>
           </div>
         </div>
         <div className="box">
@@ -148,11 +168,13 @@ function Earning({ className }) {
               All order earnings you can expect to receive after orders are
               completed.
             </p>
-            <div className="volume">
-              <span className="number Completed">488.3</span>
-              <span className="Completed">DIST</span>
-              <p>Pending</p>
-            </div>
+            <span className="volume">
+              <div>
+                <span className="number">{pending}</span>
+                <span className="Completed">DIST</span>
+              </div>
+              <p className="Completed">Pending</p>
+            </span>
           </div>
         </div>
       </div>
@@ -201,11 +223,10 @@ function Earning({ className }) {
 export default styled(Earning)`
   color: white;
   width: 1200px;
-  min-height: calc(100vh - 162px);
+  min-height: calc(100% - 162px);
   margin: 10px auto;
   padding: 0 20px;
   h1 {
-    font-family: Montserrat Bold, Montserrat, sans-serif;
     font-weight: 700;
     font-style: normal;
     font-size: 28px;
@@ -215,6 +236,12 @@ export default styled(Earning)`
     background-size: 32px;
     background-position: left;
     margin-top: 25px;
+  }
+  .price {
+    display: flex;
+    .coin {
+      margin-right: 5px;
+    }
   }
   .container {
     display: flex;
@@ -236,13 +263,15 @@ export default styled(Earning)`
       font-size: 12px;
     }
     .volume {
+      display: inline-block;
+      padding: 8px 20px;
       .number {
         font-weight: bolder;
         font-size: 24px;
         padding: 0 8px;
       }
       p {
-        width: 100px;
+        margin: 0;
         text-align: center;
       }
     }
@@ -269,6 +298,7 @@ export default styled(Earning)`
     }
   }
   .coin {
+    display: block;
     margin: 0;
     border-radius: 100%;
     background-color: white;

@@ -6,8 +6,7 @@ body {
   background-image: url("../public/img/background.jpg");
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
-  font-family: Montserrat, sans-serif;
+  background-size: 100%;
 }
 .cbtn{
   height: 50px;
@@ -15,8 +14,25 @@ body {
   background-image: linear-gradient(to right, #20ae98, #0aab50);
   color:white!important;
 }
+.trans-btn{
+  width:240px;
+  background: rgba(39,206,181,0.12);
+  border: 1px solid #09E98D;
+  color: white;
+  height: 60px;
+  line-height: 60px;
+  border-radius: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.trans-btn:hover{
+  background: #ffffff;
+  color: black;
+  border: 1px solid transparent;
+  box-shadow: rgba(6, 241, 10, 0.686) 0px 0px 70px 4px;
+}
 .big-title {
-  font-family: Montserrat Bold, Montserrat, sans-serif;
   font-weight: 700;
   font-style: normal;
   font-size: 72px;
@@ -25,7 +41,6 @@ body {
   margin-bottom: 0;
 }
 .con-title {
-  font-family: Montserrat, sans-serif;
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
@@ -44,7 +59,6 @@ body {
     position: relative;
     left:0;
     .row-txt {
-      font-family: Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 16px;
@@ -55,33 +69,40 @@ body {
   }
 }
 
-.crypted{
-  position: relative;
-  height: 50px;
-  background-color: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .false span{
   color: #5f5f5f;
 }
 .true span{
   color:#fff
 }
-.hint{
-  position: absolute;
-  color: #fff;
-}
 .MuiOutlinedInput-notchedOutline{
   border-color: #797979!important;
+}
+.Mui-disabled{
+  color:#797979!important;
+  -webkit-text-fill-color:#797979!important;
 }
 .Available {
   color: #bdff95;
 }
-.Completed {
+.Completed, .Failed {
   color: #878787;
 }
 .Refunded {
   color: #ffb9b9;
+}
+.menu-item{
+  padding:6px 2px;
+}
+.icon{
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+}
+.subtitle {
+  height: 28px;
+  font-size: 20px;
+  font-weight: 500;
+  color: #898989;
+  line-height: 28px;
 }

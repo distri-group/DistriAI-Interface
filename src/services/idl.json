@@ -43,6 +43,38 @@
       "args": []
     },
     {
+      "name": "submitTask",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "task", "isMut": true, "isSigner": false },
+        { "name": "reward", "isMut": true, "isSigner": false },
+        { "name": "rewardMachine", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "uuid", "type": { "array": ["u8", 16] } },
+        { "name": "period", "type": "u32" },
+        { "name": "metadata", "type": "string" }
+      ]
+    },
+    {
+      "name": "claim",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "reward", "isMut": false, "isSigner": false },
+        { "name": "rewardMachine", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "ownerAta", "isMut": true, "isSigner": false },
+        { "name": "rewardPool", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "period", "type": "u32" }]
+    },
+    {
       "name": "placeOrder",
       "accounts": [
         { "name": "machine", "isMut": true, "isSigner": false },
@@ -74,6 +106,22 @@
         { "name": "associatedTokenProgram", "isMut": false, "isSigner": false }
       ],
       "args": [{ "name": "duration", "type": "u32" }]
+    },
+    {
+      "name": "refundOrder",
+      "accounts": [
+        { "name": "machine", "isMut": true, "isSigner": false },
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "buyer", "isMut": true, "isSigner": true },
+        { "name": "buyerAta", "isMut": true, "isSigner": false },
+        { "name": "sellerAta", "isMut": true, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
     },
     {
       "name": "orderCompleted",
@@ -131,7 +179,9 @@
           { "name": "disk", "type": "u32" },
           { "name": "completedCount", "type": "u32" },
           { "name": "failedCount", "type": "u32" },
-          { "name": "score", "type": "u8" }
+          { "name": "score", "type": "u8" },
+          { "name": "claimedPeriodicRewards", "type": "u64" },
+          { "name": "claimedTaskRewards", "type": "u64" }
         ]
       }
     },
@@ -149,7 +199,49 @@
           { "name": "total", "type": "u64" },
           { "name": "metadata", "type": "string" },
           { "name": "status", "type": { "defined": "OrderStatus" } },
-          { "name": "orderTime", "type": "i64" }
+          { "name": "orderTime", "type": "i64" },
+          { "name": "refundTime", "type": "i64" }
+        ]
+      }
+    },
+    {
+      "name": "Reward",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "period", "type": "u32" },
+          { "name": "startTime", "type": "i64" },
+          { "name": "pool", "type": "u64" },
+          { "name": "machineNum", "type": "u32" },
+          { "name": "unitPeriodicReward", "type": "u64" },
+          { "name": "taskNum", "type": "u32" },
+          { "name": "unitTaskReward", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "RewardMachine",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "period", "type": "u32" },
+          { "name": "owner", "type": "publicKey" },
+          { "name": "machineId", "type": { "array": ["u8", 16] } },
+          { "name": "taskNum", "type": "u32" },
+          { "name": "claimed", "type": "bool" }
+        ]
+      }
+    },
+    {
+      "name": "Task",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "uuid", "type": { "array": ["u8", 16] } },
+          { "name": "period", "type": "u32" },
+          { "name": "owner", "type": "publicKey" },
+          { "name": "machineId", "type": { "array": ["u8", 16] } },
+          { "name": "metadata", "type": "string" }
         ]
       }
     }
@@ -173,7 +265,8 @@
         "variants": [
           { "name": "Training" },
           { "name": "Completed" },
-          { "name": "Failed" }
+          { "name": "Failed" },
+          { "name": "Refunded" }
         ]
       }
     }
@@ -194,11 +287,30 @@
         { "name": "seller", "type": "publicKey", "index": false },
         { "name": "machineId", "type": { "array": ["u8", 16] }, "index": false }
       ]
+    },
+    {
+      "name": "RewardEvent",
+      "fields": [
+        { "name": "period", "type": "u32", "index": false },
+        { "name": "owner", "type": "publicKey", "index": false },
+        { "name": "machineId", "type": { "array": ["u8", 16] }, "index": false }
+      ]
+    },
+    {
+      "name": "TaskEvent",
+      "fields": [
+        { "name": "uuid", "type": { "array": ["u8", 16] }, "index": false },
+        { "name": "period", "type": "u32", "index": false },
+        { "name": "owner", "type": "publicKey", "index": false },
+        { "name": "machineId", "type": { "array": ["u8", 16] }, "index": false }
+      ]
     }
   ],
   "errors": [
     { "code": 6000, "name": "StringTooLong" },
     { "code": 6001, "name": "IncorrectStatus" },
-    { "code": 6002, "name": "DurationTooMuch" }
+    { "code": 6002, "name": "DurationTooMuch" },
+    { "code": 6003, "name": "InvalidPeriod" },
+    { "code": 6004, "name": "RepeatClaim" }
   ]
 }

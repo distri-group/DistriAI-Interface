@@ -1,26 +1,65 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { getDetailByUuid } from "../services/order";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
-import { Button, CircularProgress, Popover } from "@mui/material";
-import ProgressWithLabel from "../components/ProgressWithLabel";
+import { CircularProgress, Popover } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import DurationProgress from "../components/DurationProgress";
 import SolanaAction from "../components/SolanaAction";
-import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
+import * as anchor from "@project-serum/anchor";
+import Countdown from "../components/Countdown";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
   const { id } = useParams();
   const wallet = useAnchorWallet();
+  const navigate = useNavigate();
   const childRef = useRef();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
+  const [ending, setEnding] = useState(false);
   const [detail, setDetail] = useState();
   const [balance, setBalance] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [remainingTime, setRemainingTime] = useState();
   const open = Boolean(anchorEl);
+  const onSubmit = async () => {
+    if (remainingTime < 3600000) {
+      return enqueueSnackbar("Remaining duration less than 1 hour.", {
+        variant: "info",
+      });
+    }
+    if (detail.Status !== 0) {
+      return enqueueSnackbar("Order not in training", { variant: "info" });
+    }
+    setEnding(true);
+    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("machine"),
+        new PublicKey(detail.Metadata.MachineInfo.Metadata.Addr).toBytes(),
+        anchor.utils.bytes.hex.decode(detail.MachineUuid),
+      ],
+      webconfig.PROGRAM
+    );
+    const res = await childRef.current.refundOrder(
+      machinePublicKey,
+      id,
+      detail.Seller
+    );
+    setEnding(false);
+    if (res?.msg === "ok") {
+      enqueueSnackbar("Refund Order Success", {
+        variant: "success",
+      });
+      navigate("/order");
+    } else {
+      enqueueSnackbar(res.msg, { variant: "error" });
+    }
+  };
   useEffect(() => {
     const loadDetail = async () => {
       setLoading(true);
@@ -28,15 +67,18 @@ function EndDuration({ className }) {
       setLoading(false);
       if (res.Status === 1) {
         setDetail(res.Detail);
+        console.log(res.Detail);
+        let remains =
+          new Date(res.Detail.EndTime).getTime() - new Date().getTime();
+        setRemainingTime(remains);
       } else {
         return enqueueSnackbar(res.Msg, { variant: "error" });
       }
     };
     const getBalance = async () => {
       setLoading(true);
-      const mint = new PublicKey(webconfig.mintAddress);
       const amount = await childRef.current.getTokenAccountBalance(
-        mint,
+        webconfig.MINT_PROGRAM,
         wallet.publicKey
       );
       setBalance(amount / LAMPORTS_PER_SOL);
@@ -45,6 +87,7 @@ function EndDuration({ className }) {
       getBalance();
       loadDetail();
     }
+    // eslint-disable-next-line
   }, [id, wallet]);
   return (
     <div className={className}>
@@ -65,7 +108,7 @@ function EndDuration({ className }) {
                       detail.Metadata.MachineInfo.Gpu}
                   </p>
                   <span>
-                    {detail.Metadata.MachineInfo.TFLOPS || "--"} TFLOPS
+                    {detail.Metadata.MachineInfo.Tflops || "--"} TFLOPS
                   </span>
                   <div className="vertical">
                     <div className="box">
@@ -89,11 +132,16 @@ function EndDuration({ className }) {
                   <span>
                     Start Time {new Date(detail.OrderTime).toLocaleString()}
                   </span>
-                  <span>Remaining Time</span>
+                  <span>
+                    Remaining Time{" "}
+                    <Countdown
+                      deadlineTime={new Date(detail.EndTime).getTime()}
+                    />
+                  </span>
                 </div>
-                <ProgressWithLabel
-                  value={60}
-                  label={`Duration:${detail.Duration}h`}
+                <DurationProgress
+                  startTime={detail.OrderTime}
+                  duration={detail.Duration}
                 />
                 <div className="horizontal">
                   <div className="box">
@@ -112,12 +160,12 @@ function EndDuration({ className }) {
                   </div>
                   <div className="box">
                     <label>Remain Duration</label>
-                    <span></span>
+                    <span>{detail.RemainingDuration} h</span>
                   </div>
                 </div>
                 <p className="balance">Balance: {balance} DIST</p>
                 <div className="total">
-                  <span style={{ display: "flex" }}>
+                  <span style={{ display: "flex", alignItems: "center" }}>
                     Refund Total
                     <span
                       className="tip"
@@ -150,31 +198,37 @@ function EndDuration({ className }) {
                       }}
                       onClose={() => setAnchorEl(null)}
                       disableRestoreFocus>
-                      <h3 style={{ textAlign: "center", margin: "4px 0" }}>
-                        Refund Policy
-                      </h3>
-                      <p style={{ margin: "8px 0" }}>
-                        Full refunds are available for the unused rental time of
-                        'available' orders. The minimum unit for calculation is
-                        per hour (any partial hour used will be counted as 1
-                        full hour).
-                      </p>
-                      <p style={{ margin: "8px 0" }}>
-                        The used rental time will be deducted, and the refund
-                        amount calculated based on the remaining rental hours
-                        multiplied by the hourly rate.
-                      </p>
+                      <div style={{ padding: "8px 12px" }}>
+                        <h3 style={{ textAlign: "center", margin: "4px 0" }}>
+                          Refund Policy
+                        </h3>
+                        <p style={{ margin: "8px 0" }}>
+                          Full refunds are available for the unused rental time
+                          of 'available' orders. The minimum unit for
+                          calculation is per hour (any partial hour used will be
+                          counted as 1 full hour).
+                        </p>
+                        <p style={{ margin: "8px 0" }}>
+                          The used rental time will be deducted, and the refund
+                          amount calculated based on the remaining rental hours
+                          multiplied by the hourly rate.
+                        </p>
+                      </div>
                     </Popover>
                   </span>
-
                   <div>
                     <span className="balance">
-                      <b>65</b>
+                      <b>{detail.RemainingDuration * detail.Price}</b>
                     </span>
                     <span>DIST</span>
                   </div>
                 </div>
-                <Button className="confirm">Confirm</Button>
+                <LoadingButton
+                  loading={ending}
+                  onClick={onSubmit}
+                  className="cbtn confirm">
+                  {ending ? "" : "Confirm"}
+                </LoadingButton>
               </div>
             </>
           )}
@@ -186,9 +240,8 @@ function EndDuration({ className }) {
 
 export default styled(EndDuration)`
   color: white;
-  height: calc(100vh - 140px);
+  height: calc(100% - 140px);
   h1 {
-    font-family: Montserrat Bold, Montserrat, sans-serif;
     font-weight: 700;
     font-style: normal;
     font-size: 28px;
@@ -271,8 +324,6 @@ export default styled(EndDuration)`
       margin-top: 30px;
       width: 120px;
       height: 40px;
-      background-color: #94d6e2;
-      color: black;
     }
   }
 `;

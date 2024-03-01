@@ -7,7 +7,7 @@ function get(key) {
   try {
     json = JSON.parse(str);
   } catch (e) {
-    console.log(e);
+    throw e;
   }
   if (!json || typeof json != "object") {
     return str;

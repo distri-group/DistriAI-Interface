@@ -9,7 +9,6 @@ import OrderDetail from "./views/OrderDetail";
 import MyDevice from "./views/MyDevice";
 import MyOrder from "./views/MyOrder";
 import Faucet from "./views/Faucet";
-import Footer from "./components/footer";
 import ExtendDuration from "./views/ExtendDuration";
 import {
   WalletProvider,
@@ -25,14 +24,12 @@ import Rewards from "./views/Rewards";
 import EndDuration from "./views/EndDuration";
 import Earning from "./views/Earning";
 import EarningDetail from "./views/EarningDetail";
+import RewardDetail from "./views/RewardDetail";
 
 function App() {
   window.Buffer = Buffer;
   const [isHome, setIsHome] = useState(true);
   const Mtheme = createTheme({
-    typography: {
-      fontFamily: "Montserrat, sans-serif",
-    },
     palette: {
       white: {
         main: "#fff",
@@ -54,24 +51,13 @@ function App() {
           },
         },
       },
-      MuiMenu: {
-        styleOverrides: {
-          list: {
-            '&[role="menu"]': {
-              backgroundImage: "linear-gradient(to right, #20ae98, #0aab50)",
-              color: "white",
-            },
-          },
-          paper: {
-            backgroundColor: "#222",
-            color: "white",
-          },
-        },
-      },
       MuiButton: {
         styleOverrides: {
           root: {
             textTransform: "none",
+          },
+          "&:disabled": {
+            color: "white",
           },
         },
       },
@@ -142,10 +128,10 @@ function App() {
                   <Route path="/end-duration/:id" element={<EndDuration />} />
                   <Route path="/faucet" element={<Faucet />} />
                   <Route path="/reward" element={<Rewards />} />
+                  <Route path="/reward/:period" element={<RewardDetail />} />
                   <Route path="/earning" element={<Earning />} />
                   <Route path="/earning/:id" element={<EarningDetail />} />
                 </Routes>
-                <Footer />
               </SnackbarProvider>
             </ThemeProvider>
           </BrowserRouter>

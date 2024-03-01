@@ -7,13 +7,22 @@ import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
 import idl from "./idl.json";
 
-const PROGRAM_ID = webconfig.contractAddress;
 let program = null;
 let connection = null;
 let walletAn = null;
-const mint = new PublicKey(webconfig.mintAddress);
-let vault = null;
 let associatedTokenAccount = null;
+const [rewardPool] = anchor.web3.PublicKey.findProgramAddressSync(
+  [
+    anchor.utils.bytes.utf8.encode("reward-pool"),
+    webconfig.MINT_PROGRAM.toBytes(),
+  ],
+  webconfig.PROGRAM
+);
+const systemProgram = new PublicKey("11111111111111111111111111111111");
+const [vault] = anchor.web3.PublicKey.findProgramAddressSync(
+  [anchor.utils.bytes.utf8.encode("vault"), webconfig.MINT_PROGRAM.toBytes()],
+  webconfig.PROGRAM
+);
 export async function initProgram(conn, wallet) {
   try {
     if (program && walletAn?.publicKey) return program;
@@ -27,12 +36,11 @@ export async function initProgram(conn, wallet) {
     }
     if (!provider) provider = window.phantom?.solana;
     anchor.setProvider(provider);
-    program = new anchor.Program(idl, PROGRAM_ID);
+    program = new anchor.Program(idl, webconfig.PROGRAM);
     associatedTokenAccount = findAssociatedTokenAddress(
       walletAn.publicKey,
-      mint
+      webconfig.MINT_PROGRAM
     );
-    vault = await getVault();
     return program;
   } catch (error) {
     console.error(error);
@@ -86,7 +94,6 @@ export async function cancelOffer(machinePublicKey) {
       return { msg: "ok", data: transaction };
     }
   } catch (e) {
-    console.log(e);
     return { msg: e.message };
   }
 }
@@ -100,9 +107,7 @@ export async function placeOrder(
     if (!program) {
       return { msg: "Please run initProgram first." };
     }
-    if (typeof orderId == "string") {
-      orderId = anchor.utils.bytes.utf8.encode(orderId);
-    }
+    orderId = anchor.utils.bytes.utf8.encode(orderId);
     var myUint8Array = new Uint8Array(16);
     myUint8Array.set(orderId);
     orderId = myUint8Array;
@@ -113,7 +118,7 @@ export async function placeOrder(
     let seeds = [counterSeed, walletAn.publicKey.toBytes(), orderId];
     let [publick] = anchor.web3.PublicKey.findProgramAddressSync(
       seeds,
-      new PublicKey(PROGRAM_ID)
+      webconfig.PROGRAM
     );
     if (!walletAn || !walletAn.publicKey) {
       return { msg: "error", error: "walletAn is null" };
@@ -129,7 +134,7 @@ export async function placeOrder(
         buyer: walletAn.publicKey,
         buyerAta: associatedTokenAccount,
         vault,
-        mint,
+        mint: webconfig.MINT_PROGRAM,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
@@ -160,7 +165,7 @@ export async function renewOrder(machinePublicKey, orderPublicKey, duration) {
         buyer: walletAn.publicKey,
         buyerAta: associatedTokenAccount,
         vault,
-        mint,
+        mint: webconfig.MINT_PROGRAM,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
@@ -169,6 +174,97 @@ export async function renewOrder(machinePublicKey, orderPublicKey, duration) {
     if (res) {
       return { msg: "ok", data: transaction };
     }
+  } catch (e) {
+    console.error(e);
+    return { msg: e.message };
+  }
+}
+
+export async function refundOrder(
+  machinePublicKey,
+  orderPublicKey,
+  sellerPublicKey
+) {
+  try {
+    if (!program) {
+      return { msg: "Please run initProgram first." };
+    }
+    const sellerAta = findAssociatedTokenAddress(
+      new PublicKey(sellerPublicKey),
+      webconfig.MINT_PROGRAM
+    );
+    const transaction = await program.methods
+      .refundOrder()
+      .accounts({
+        machine: machinePublicKey,
+        order: orderPublicKey,
+        buyer: walletAn.publicKey,
+        buyerAta: associatedTokenAccount,
+        sellerAta,
+        vault,
+        mint: webconfig.MINT_PROGRAM,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram,
+      })
+      .rpc();
+    const res = await checkConfirmation(connection, transaction);
+    if (res) {
+      return { msg: "ok", data: transaction };
+    }
+  } catch (e) {
+    console.error(e);
+    return { msg: e.message };
+  }
+}
+
+export async function claimRewards(
+  machinePublicKey,
+  machineUuid,
+  ownerPublicKey,
+  period
+) {
+  try {
+    if (!program) {
+      return { msg: "Please run initProgram first." };
+    }
+    const ownerAta = findAssociatedTokenAddress(
+      ownerPublicKey,
+      webconfig.MINT_PROGRAM
+    );
+    const periodBytes = new anchor.BN(period).toArray("le", 4);
+    const uuid = anchor.utils.bytes.hex.decode(machineUuid);
+    const rewardSeed = [anchor.utils.bytes.utf8.encode("reward"), periodBytes];
+    const [reward] = anchor.web3.PublicKey.findProgramAddressSync(
+      rewardSeed,
+      webconfig.PROGRAM
+    );
+    const rewardMachineSeed = [
+      anchor.utils.bytes.utf8.encode("reward-machine"),
+      periodBytes,
+      ownerPublicKey.toBytes(),
+      uuid,
+    ];
+    const [rewardMachine] = anchor.web3.PublicKey.findProgramAddressSync(
+      rewardMachineSeed,
+      webconfig.PROGRAM
+    );
+    const instruction = await program.methods
+      .claim(period)
+      .accounts({
+        machine: machinePublicKey,
+        reward,
+        rewardMachine,
+        owner: ownerPublicKey,
+        ownerAta,
+        rewardPool,
+        mint: webconfig.MINT_PROGRAM,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram,
+      })
+      .instruction();
+    return instruction;
   } catch (e) {
     console.error(e);
     return { msg: e.message };
@@ -185,30 +281,8 @@ const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {
     ASSOCIATED_TOKEN_PROGRAM_ID
   )[0];
 };
-export const getVault = async () => {
-  let counterSeed = anchor.utils.bytes.utf8.encode("vault");
-  let seeds = [counterSeed, mint.toBytes()];
-  let [publick] = anchor.web3.PublicKey.findProgramAddressSync(
-    seeds,
-    new PublicKey(webconfig.contractAddress)
-  );
-  return publick;
-};
-export function getPublicKeyFromStr(name, ownerPublicKeyStr, str) {
-  let orderId = anchor.utils.bytes.hex.encode("0x" + str);
-  var myUint8Array = new Uint8Array(16);
-  myUint8Array.set(orderId);
-  orderId = myUint8Array;
-  let counterSeed = anchor.utils.bytes.utf8.encode(name);
-  let puk = new PublicKey(ownerPublicKeyStr);
-  let seeds = [counterSeed, puk.publicKey.toBytes(), orderId];
-  let [publick] = anchor.web3.PublicKey.findProgramAddressSync(
-    seeds,
-    new PublicKey(PROGRAM_ID)
-  );
-  return publick;
-}
-const checkConfirmation = async (connection, tx) => {
+
+export const checkConfirmation = async (connection, tx) => {
   const latestBlockHash = await connection.getLatestBlockhash();
   const confirmation = await connection.confirmTransaction(
     {

@@ -6,6 +6,9 @@ import SolanaAction from "../components/SolanaAction";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import * as anchor from "@project-serum/anchor";
+import webconfig from "../webconfig";
 
 let inputValues = {
   price: 0,
@@ -17,6 +20,7 @@ function Home({ className }) {
   const { id } = useParams();
   document.title = "Make Offer";
   const navigate = useNavigate();
+  const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [price, setPrice] = useState(0);
@@ -25,12 +29,19 @@ function Home({ className }) {
   const childRef = useRef();
   useEffect(() => {
     const init = async () => {
-      let detail = await getMachineDetailByUuid(id);
+      setLoading(true);
+      let detail = await getMachineDetailByUuid(
+        id,
+        wallet.publicKey.toString()
+      );
       if (detail) {
         setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
       }
+      setLoading(false);
     };
-    init();
+    if (wallet?.publicKey) {
+      init();
+    }
     return () => {
       inputValues = {
         price: 0,
@@ -38,7 +49,7 @@ function Home({ className }) {
         disk: 0,
       };
     };
-  }, [id]);
+  }, [id, wallet?.publicKey]);
   const onInput = (e, n) => {
     let value = parseInt(e.target.value);
     if (!e.target.value || isNaN(e.target.value)) {
@@ -47,7 +58,11 @@ function Home({ className }) {
     inputValues[n] = value;
   };
   const onPriceChange = (value) => {
-    setPrice(parseFloat(value).toFixed(2));
+    if (!isNaN(value)) {
+      setPrice(parseFloat(value));
+    } else {
+      setPrice(0);
+    }
   };
   const onSubmit = async () => {
     let tprice = parseFloat(price);
@@ -70,9 +85,17 @@ function Home({ className }) {
       });
     }
     setLoading(true);
+    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("machine"),
+        wallet.publicKey.toBytes(),
+        anchor.utils.bytes.hex.decode(id),
+      ],
+      webconfig.PROGRAM
+    );
     try {
       let result = await childRef.current.makeOffer(
-        id,
+        machinePublicKey,
         tprice,
         maxDuration,
         disk
@@ -81,13 +104,12 @@ function Home({ className }) {
       if (result?.msg === "ok") {
         enqueueSnackbar("Make Offer Success.", { variant: "success" });
         setTimeout(() => {
-          navigate("/device/");
+          navigate("/device");
         }, 300);
       } else {
         enqueueSnackbar(result?.msg, { variant: "error" });
       }
     } catch (e) {
-      console.log(e);
       enqueueSnackbar(e.message, { variant: "error" });
     }
   };
@@ -159,7 +181,7 @@ function Home({ className }) {
           <div className="form-row">
             <LoadingButton
               loading={loading}
-              style={{ marginTop: 30 }}
+              style={{ marginTop: 30, width: "100px" }}
               onClick={onSubmit}
               className="cbtn">
               {loading ? "" : "Confirm"}
@@ -174,7 +196,7 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   color: #fff;
   .mini-btn {
     border: 1px solid #fff;
@@ -208,7 +230,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

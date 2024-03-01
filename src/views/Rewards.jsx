@@ -1,6 +1,5 @@
 import { Button } from "@mui/material";
-import { useEffect, useState } from "react";
-import { getFilterData, getOrderList } from "../services/order";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Table from "../components/Table";
 import moment from "moment";
@@ -8,31 +7,89 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Pager from "../components/pager";
+import {
+  getRewardList,
+  getRewardTotal,
+  getClaimableReward,
+} from "../services/reward";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import SolanaAction from "../components/SolanaAction";
+import { LoadingButton } from "@mui/lab";
 
 function Rewards({ className }) {
-  let filter = { Direction: "sell" };
   document.title = "My Rewards";
   const wallet = useAnchorWallet();
+  const childRef = useRef();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [rewards, setRewards] = useState(null);
   const loadList = async (curr) => {
     setLoading(true);
     try {
-      const res = await getOrderList(curr, filter, wallet.publicKey.toString());
-      console.log("Order List", res);
+      const res = await getRewardList(curr, wallet.publicKey.toString());
+      setLoading(false);
       if (!res) {
-        return enqueueSnackbar("Order List Not Found", { variant: "error" });
+        return enqueueSnackbar("Reward List Not Found", { variant: "error" });
       }
-      setList(res.list);
-      setTotal(res.total);
+      setList(res.List);
+      setTotal(res.Total);
+    } catch (e) {
+      return enqueueSnackbar(e.message, { variant: "error" });
+    }
+  };
+  const getClaimableList = async () => {
+    const res = await getClaimableReward(null, 1, wallet.publicKey.toString());
+    if (res) {
+      let rewards = [];
+      let total = 0;
+      for (let item of res.List) {
+        if (item.Period) {
+          rewards.push({
+            machineUuid: item.MachineId,
+            period: item.Period,
+          });
+          total += item.PeriodicRewards;
+        }
+      }
+      return { rewards, total };
+    }
+  };
+  const claimButchRewards = async () => {
+    setClaiming(true);
+    const { rewards: claimableList, total } = await getClaimableList();
+    const res = await childRef.current.claimRewards(claimableList);
+    setTimeout(() => {
+      if (res?.msg === "ok") {
+        enqueueSnackbar(
+          `Successfully claimed ${(total / LAMPORTS_PER_SOL).toFixed(2)} DIST`,
+          {
+            variant: "success",
+          }
+        );
+      } else {
+        enqueueSnackbar(res.msg, { variant: "error" });
+      }
+      setClaiming(false);
+    }, 300);
+  };
+  const getTotal = async () => {
+    try {
+      const res = await getRewardTotal(0, wallet.publicKey.toString());
+      if (res) {
+        setRewards(res);
+        return null;
+      }
+      return enqueueSnackbar("Failed fetching total rewards", {
+        variant: "error",
+      });
     } catch (e) {
       console.log(e);
     }
-    setLoading(false);
   };
   const onPageChange = (curr) => {
     setCurrent(curr);
@@ -43,104 +100,250 @@ function Rewards({ className }) {
       title: "Period",
       width: "10%",
       key: "Period",
-      render: (text) => <span>{text}</span>,
+      render: (text) => (
+        <span style={{ display: "block", width: "80%", textAlign: "center" }}>
+          {text}
+        </span>
+      ),
     },
     {
       title: "Start",
       width: "10%",
       key: "StartTime",
+      render: (text) => {
+        return (
+          <div className="time">
+            <div className="y">{moment(text).format("YYYY.MM.DD")}</div>
+            <div className="h">{moment(text).format("HH:mm:ss")}</div>
+          </div>
+        );
+      },
     },
     {
       title: "End",
       width: "10%",
       key: "EndTime",
+      render: (text, record) => {
+        return (
+          <div className="time">
+            <div className="y">
+              {moment(
+                new Date(record.StartTime).getTime() + 24 * 3600 * 1000
+              ).format("YYYY.MM.DD")}
+            </div>
+            <div className="h">
+              {moment(
+                new Date(record.StartTime).getTime() + 24 * 3600 * 1000
+              ).format("HH:mm:ss")}
+            </div>
+          </div>
+        );
+      },
     },
     {
       title: "Duration",
       width: "10%",
       key: "Duration",
+      render: () => (
+        <span style={{ display: "block", textAlign: "center" }}>24 h</span>
+      ),
     },
     {
       title: "Reward pool",
       width: "10%",
       key: "Pool",
       render: (text) => (
-        <div>
+        <div style={{ display: "flex", justifyContent: "center" }}>
           <span className="coin" />
-          <span>{text}</span>
+          <span style={{ lineHeight: "24px" }}>
+            {(text / LAMPORTS_PER_SOL).toFixed(2)}
+          </span>
         </div>
       ),
     },
     {
       title: "Rewards",
       width: "10%",
-      key: "Rewards",
-      render: (text) => <span>{text.toFixed(2)}</span>,
+      key: "PeriodicRewards",
+      render: (text) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <span className="coin" />
+          <span style={{ lineHeight: "24px" }}>
+            {(text / LAMPORTS_PER_SOL).toFixed(2)}
+          </span>
+        </div>
+      ),
     },
     {
       title: "",
       width: "10%",
       key: "ID",
-      render: (text) => <span className="cbtn">Details</span>,
+      render: (text, record) => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <span
+            className="cbtn"
+            onClick={() => navigate("/reward/" + record.Period)}>
+            Details
+          </span>
+        </div>
+      ),
     },
   ];
   useEffect(() => {
     if (wallet?.publicKey) {
       loadList(1);
+      getTotal();
     }
+    // eslint-disable-next-line
   }, [wallet?.publicKey]);
   return (
     <div className={className}>
+      <SolanaAction ref={childRef} />
       <h1>My DAO Rewards</h1>
-      <div className="box">
-        <div style={{ width: "400px" }}>
-          <p className="describe">
-            All periodic & task rewards you can currently claim.
-          </p>
-          <div className="volume">
-            <div style={{ width: "160px" }}>
-              <span className="number">300.8</span>
-              <span>DIST</span>
-              <p>Total Claimable</p>
+      {rewards ? (
+        <>
+          <div className="box">
+            <div style={{ width: "400px" }}>
+              <p className="describe">
+                All periodic & task rewards you can currently claim.
+              </p>
+              <div className="volume">
+                <div style={{ width: "160px" }}>
+                  <span className="number">
+                    {(
+                      (rewards.ClaimablePeriodicRewards +
+                        rewards.ClaimableTaskRewards) /
+                      LAMPORTS_PER_SOL
+                    ).toFixed(2)}
+                  </span>
+                  <span>DIST</span>
+                  <p>Total Claimable</p>
+                </div>
+                <div className="vertical">
+                  <span>
+                    {(
+                      rewards.ClaimablePeriodicRewards / LAMPORTS_PER_SOL
+                    ).toFixed(2)}
+                  </span>
+                  <label>Periodic Rewards</label>
+                </div>
+                <div className="vertical">
+                  <span>
+                    {(rewards.ClaimableTaskRewards / LAMPORTS_PER_SOL).toFixed(
+                      2
+                    )}
+                  </span>
+                  <label>Task Rewards</label>
+                </div>
+              </div>
             </div>
-            <div className="vertical">
-              <span>155.04</span>
-              <label>Periodic Rewards</label>
-            </div>
-            <div className="vertical">
-              <span>220.00</span>
-              <label>Task Rewards</label>
+            {rewards.ClaimablePeriodicRewards ||
+            rewards.ClaimableTaskRewards ? (
+              <LoadingButton
+                onClick={claimButchRewards}
+                loading={claiming}
+                className="claim">
+                {claiming ? "" : "Claim Rewards"}
+              </LoadingButton>
+            ) : (
+              <Button className="claimed" disabled>
+                All Claimed
+              </Button>
+            )}
+          </div>
+          <div className="box">
+            <div style={{ width: "400px" }}>
+              <p className="describe">
+                All periodic & task rewards you have already claimed.
+              </p>
+              <div className="volume">
+                <div style={{ width: "160px" }}>
+                  <span className="number Completed">
+                    {(
+                      (rewards.ClaimedPeriodicRewards +
+                        rewards.ClaimedTaskRewards) /
+                      LAMPORTS_PER_SOL
+                    ).toFixed(2)}
+                  </span>
+                  <span className="Completed">DIST</span>
+                  <p>Total Claimed</p>
+                </div>
+                <div className="vertical">
+                  <span>
+                    {(
+                      rewards.ClaimedPeriodicRewards / LAMPORTS_PER_SOL
+                    ).toFixed(2)}
+                  </span>
+                  <label>Periodic Rewards</label>
+                </div>
+                <div className="vertical">
+                  <span>
+                    {(rewards.ClaimedTaskRewards / LAMPORTS_PER_SOL).toFixed(2)}
+                  </span>
+                  <label>Task Rewards</label>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <Button className="claim">Claim Rewards</Button>
-      </div>
-      <div className="box">
-        <div style={{ width: "400px" }}>
-          <p className="describe">
-            All periodic & task rewards you have already claimed.
-          </p>
-          <div className="volume">
-            <div style={{ width: "160px" }}>
-              <span className="number Completed">1230.25</span>
-              <span className="Completed">DIST</span>
-              <p>Total Claimed</p>
+        </>
+      ) : (
+        <>
+          <div className="box">
+            <div style={{ width: "400px" }}>
+              <p className="describe">
+                All periodic & task rewards you can currently claim.
+              </p>
+              <div className="volume">
+                <div style={{ width: "160px" }}>
+                  <span className="number">0</span>
+                  <span>DIST</span>
+                  <p>Total Claimable</p>
+                </div>
+                <div className="vertical">
+                  <span>0</span>
+                  <label>Periodic Rewards</label>
+                </div>
+                <div className="vertical">
+                  <span>0</span>
+                  <label>Task Rewards</label>
+                </div>
+              </div>
             </div>
-            <div className="vertical">
-              <span>155.04</span>
-              <label>Periodic Rewards</label>
-            </div>
-            <div className="vertical">
-              <span>220.00</span>
-              <label>Task Rewards</label>
+            <Button className="claim">Claim Rewards</Button>
+          </div>
+          <div className="box">
+            <div style={{ width: "400px" }}>
+              <p className="describe">
+                All periodic & task rewards you have already claimed.
+              </p>
+              <div className="volume">
+                <div style={{ width: "160px" }}>
+                  <span className="number Completed">0</span>
+                  <span className="Completed">DIST</span>
+                  <p>Total Claimed</p>
+                </div>
+                <div className="vertical">
+                  <span>0</span>
+                  <label>Periodic Rewards</label>
+                </div>
+                <div className="vertical">
+                  <span>0</span>
+                  <label>Task Rewards</label>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
       <Table
         className="reward-list"
         columns={columns}
-        list={[]}
+        list={list}
         empty={<span>No Item yet</span>}
         loading={loading}
       />
@@ -160,10 +363,9 @@ export default styled(Rewards)`
   color: white;
   width: 1200px;
   margin: 10px auto;
-  min-height: calc(100vh - 162px);
+  min-height: calc(100% - 162px);
   padding: 0 20px;
   h1 {
-    font-family: Montserrat Bold, Montserrat, sans-serif;
     font-weight: 700;
     font-style: normal;
     font-size: 28px;
@@ -180,6 +382,9 @@ export default styled(Rewards)`
     .box {
       width: 45%;
     }
+  }
+  .h {
+    color: #aaa;
   }
   .box {
     background-color: #222;
@@ -219,15 +424,24 @@ export default styled(Rewards)`
       }
     }
   }
-  .claim {
+  .claim,
+  .claimed {
     width: 140px;
     height: 30px;
+    margin-top: 48px;
+  }
+  .claim {
     background-color: #94d6e2;
     color: black;
-    margin-top: 48px;
+  }
+  .claimed {
+    background-color: #333;
   }
   .reward-list {
     margin-top: 20px;
+    th {
+      text-align: center;
+    }
     tr td {
       padding: 10px !important;
     }
@@ -235,14 +449,21 @@ export default styled(Rewards)`
       padding: 10px;
       font-size: 14px;
     }
+    .time {
+      width: 60%;
+      margin: 0 auto;
+    }
     .cbtn {
-      padding: 4px 8px;
+      padding: 4px 16px;
       border-radius: 4px;
       cursor: pointer;
+      height: 32px;
+      line-height: 32px;
     }
   }
   .coin {
-    margin: 0;
+    display: block;
+    margin-right: 5px;
     border-radius: 100%;
     background-color: white;
     background-image: url(/img/token.png);
@@ -251,5 +472,18 @@ export default styled(Rewards)`
     background-repeat: no-repeat;
     width: 24px;
     height: 24px;
+  }
+  .filter {
+    padding: 10px 0;
+    .sel {
+      margin: 0 12px;
+    }
+    .btn-txt {
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: underline;
+      color: #ffffff;
+      cursor: pointer;
+    }
   }
 `;

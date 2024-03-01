@@ -26,14 +26,15 @@ function Home({ className }) {
     setLoading(true);
     try {
       const res = await getOrderList(curr, filter, wallet.publicKey.toString());
-      console.log("Order List", res);
+      setLoading(false);
       if (!res) {
         return enqueueSnackbar("Order List Not Found", { variant: "error" });
       }
       setTotal(res.total);
       setList(res.list);
-    } catch (e) {}
-    setLoading(false);
+    } catch (e) {
+      return enqueueSnackbar(e.message, { variant: "error" });
+    }
   };
 
   useEffect(() => {
@@ -56,6 +57,7 @@ function Home({ className }) {
   const onFilter = (value, name) => {
     filter[name] = value;
     setFilterValue(filter);
+    setTotal(0);
     setCurrent(1);
     loadList(1);
   };
@@ -122,7 +124,7 @@ function Home({ className }) {
 export default styled(Home)`
   display: block;
   width: 100%;
-  min-height: calc(100vh - 160px);
+  min-height: calc(100% - 160px);
   color: #fff;
   .filter {
     padding: 11px 0;
@@ -152,7 +154,6 @@ export default styled(Home)`
     margin: 10px auto;
     display: block;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

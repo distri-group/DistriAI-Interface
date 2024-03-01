@@ -1,16 +1,28 @@
+html,body{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-width: 1200px;
+}
 body {
   margin: 0;
-  font-family: Montserrat, sans-serif;
+  color: white;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 @font-face {
-  font-family: Montserrat Bold;
-  src: url("../public/font/Montserrat\ Bold.ttf");
+  font-family: Avenir Next Bold;
+  src: url(/public/font/AvenirNext-DemiBold.ttf);
 }
 @font-face {
-  font-family: Montserrat;
-  src: url("../public/font/Montserrat\ Regular.ttf");
+  font-family: Avenir Next;
+  src: url(/public/font/AvenirNext-Medium.ttf);
+}
+h1, h2, h3, h4, h5, h6{
+  font-family: Avenir Next Bold;
+}
+span, p, ul, li{
+  font-family: Avenir Next;
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

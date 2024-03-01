@@ -62,13 +62,13 @@ export default styled(Header)`
       background-size: 40%;
     }
     .l1 {
-      background-image: url(/img/home/github.svg);
+      background-image: url(/img/home/icon_github.png);
     }
     .l2 {
-      background-image: url(/img/home/twitter.svg);
+      background-image: url(/img/home/icon_twitter.png);
     }
     .l3 {
-      background-image: url(/img/home/discord.svg);
+      background-image: url(/img/home/icon_discord.png);
     }
   }
   .copyright {

@@ -2,9 +2,10 @@ import request from "../utils/request";
 import { formatBalance } from "../utils";
 // Retrieve the detailed information of the machine from the storage based on the provided id.
 
-export async function getMachineDetailByUuid(uuid) {
-  const res = await getMachineList(1, []);
-  console.log(res);
+export async function getMachineDetailByUuid(uuid, publicKey) {
+  const res = await getMachineList(1, [], publicKey);
+  const list = res.list;
+  return list.find((item) => item.Metadata.MachineUUID === uuid);
 }
 
 export async function getFilterData() {
@@ -22,7 +23,8 @@ export async function getFilterData() {
       };
     });
     arr.unshift({
-      label: "ANY " + k,
+      label:
+        "ANY " + (k === "Gpu" ? "GPU" : k === "GpuCount" ? "GPU Count" : k),
       value: "all",
     });
     list.push({
@@ -96,16 +98,14 @@ export async function getMachineList(pageIndex, filter, publicKey) {
       list = list.filter((item) => item.SecurityLevel === level);
     }
     obj = { list, total };
-    console.log("Machine List", list);
     return obj;
   } catch (e) {
-    console.log(e);
-    return null;
+    throw e;
   }
 }
 
 // Format Machine's Info
-function formatMachine(item) {
+export function formatMachine(item) {
   try {
     item.Price = formatBalance(item.Price);
     if (item.CompletedCount + item.FailedCount <= 0) {
@@ -116,7 +116,6 @@ function formatMachine(item) {
           (item.CompletedCount * 100) / (item.CompletedCount + item.FailedCount)
         ) + "%";
     }
-    item.TFLOPS = item.Tflops;
     if (item.Metadata && typeof item.Metadata == "string") {
       item.Metadata = JSON.parse(item.Metadata);
       item.Uuid = item.Metadata.MachineUUID || "";
@@ -131,6 +130,6 @@ function formatMachine(item) {
       item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);
     }
   } catch (e) {
-    console.log(e);
+    throw e;
   }
 }

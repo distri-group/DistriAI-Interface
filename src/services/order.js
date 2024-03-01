@@ -38,18 +38,17 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     }
     let res = await getMachineList(1);
     let machineList = res.list;
-    list.map((item, index) => {
+    for (let item of list) {
       let machine = machineList.find(
         (machine) => machine.Uuid === item.MachineUuid.slice(2)
       );
       if (machine) {
-        list[index].Metadata.MachineInfo = machine;
+        item.Metadata.MachineInfo = machine;
       }
-    });
+    }
     return { list, total };
   } catch (e) {
-    console.log(e);
-    return null;
+    throw e;
   }
 }
 function formatOrder(item) {
@@ -58,19 +57,42 @@ function formatOrder(item) {
   }
   item.Price = formatBalance(item.Price);
   item.Total = formatBalance(item.Total);
+  const endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
   if (item.Status === 0) {
-    const endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
-    const result = getTimeDiff(new Date(), endTime);
-    item.RemainingTime = result.value + " " + result.suffix;
-  } else {
-    item.RemainingTime = "--";
+    if (new Date() < endTime) {
+      const result = getTimeDiff(new Date(), endTime);
+      item.RemainingTime = result.value + " " + result.suffix;
+      item.RemainingDuration = result.suffix.includes("hour")
+        ? result.value
+        : 1;
+    }
+  } else if (item.Status === 2) {
+    item.Duration = 0;
   }
-  item.StatusName =
-    item.Status === 0
-      ? "Available"
-      : item.Status === 1
-      ? "Completed"
-      : "Refunded";
+  item.EndTime = endTime.toISOString();
+  if (item.RefundTime && new Date(item.RefundTime).getTime() !== 0) {
+    item.RefundDuration =
+      item.Duration -
+      Math.ceil(
+        (new Date(item.RefundTime) - new Date(item.OrderTime)) / 3600000
+      );
+  }
+  switch (item.Status) {
+    case 0:
+      item.StatusName = "Available";
+      break;
+    case 1:
+      item.StatusName = "Completed";
+      break;
+    case 2:
+      item.StatusName = "Failed";
+      break;
+    case 3:
+      item.StatusName = "Refunded";
+      break;
+    default:
+      break;
+  }
 }
 export function getFilterData() {
   let list = [];
@@ -94,6 +116,5 @@ export async function getDetailByUuid(uuid, publicKey) {
   if (!orderDetail) {
     return { Status: 0, Msg: "Order detail of " + uuid + " not found." };
   }
-  console.log("Order Found", orderDetail);
   return { Status: 1, Detail: orderDetail };
 }

@@ -100,4 +100,14 @@ export default styled(Table)`
       }
     }
   }
+  .empty-box {
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    span {
+      color: #6e6e6e;
+      font-size: 14px;
+    }
+  }
 `;

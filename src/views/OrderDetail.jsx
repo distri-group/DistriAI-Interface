@@ -4,14 +4,23 @@ import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { getDetailByUuid } from "../services/order";
 import { useSnackbar } from "notistack";
-import { Button, CircularProgress } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import DurationProgress from "../components/DurationProgress";
+import Countdown from "../components/Countdown";
 
 function Home({ className }) {
   const { id } = useParams();
   document.title = "Order detail";
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
+  const [endDialog, setEndDialog] = useState(false);
   const wallet = useAnchorWallet();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -22,6 +31,7 @@ function Home({ className }) {
       setLoading(false);
       if (res.Status === 1) {
         setRecord(res.Detail);
+        console.log(res.Detail);
       } else {
         return enqueueSnackbar(res.Msg, { variant: "error" });
       }
@@ -31,6 +41,21 @@ function Home({ className }) {
     }
     // eslint-disable-next-line
   }, [id, wallet]);
+  const handleEndDuration = () => {
+    if (record.Status !== 0) {
+      return enqueueSnackbar("Order not in training", { variant: "info" });
+    }
+    if (
+      new Date(record.EndTime).getTime() > new Date().getTime() &&
+      new Date(record.EndTime).getTime() - new Date().getTime() > 3600000
+    ) {
+      navigate(`/end-duration/${id}`);
+    } else {
+      return enqueueSnackbar("Remaining rental time is less than 1 hour.", {
+        variant: "info",
+      });
+    }
+  };
   return (
     <div className={className}>
       <div className="con">
@@ -63,7 +88,7 @@ function Home({ className }) {
                                 color: "black",
                               },
                             }}
-                            onClick={() => navigate(`/end-duration/${id}`)}>
+                            onClick={handleEndDuration}>
                             End Duration
                           </Button>
                         </div>
@@ -77,7 +102,14 @@ function Home({ className }) {
                         </span>
                         {record.Status !== 2 &&
                           (record.Status === 0 ? (
-                            <span>Remaining Time {record.RemainingTime}</span>
+                            <span>
+                              Remaining Time{" "}
+                              <Countdown
+                                deadlineTime={new Date(
+                                  record.EndTime
+                                ).getTime()}
+                              />
+                            </span>
                           ) : (
                             <span>
                               End Time{" "}
@@ -183,8 +215,8 @@ function Home({ className }) {
                           <div className="horizontal">
                             <label>TFLOPS</label>
                             <span>
-                              {!isNaN(record.Metadata.MachineInfo.TFLOPS)
-                                ? record.Metadata.MachineInfo.TFLOPS
+                              {!isNaN(record.Metadata.MachineInfo.Tflops)
+                                ? record.Metadata.MachineInfo.Tflops
                                 : "--"}
                             </span>
                           </div>
@@ -269,13 +301,34 @@ function Home({ className }) {
           </>
         )}
       </div>
+      <Dialog open={endDialog} onClose={() => setEndDialog(false)}>
+        <DialogTitle style={{ textAlign: "center" }}>
+          Refund Unavailable.
+        </DialogTitle>
+        <DialogContent style={{ textAlign: "center" }}>
+          Remaining rental time is less than 1 hour.
+        </DialogContent>
+        <DialogActions>
+          <Button
+            style={{
+              backgroundColor: "#94d6e2",
+              borderRadius: "3px",
+              color: "black",
+              padding: "4px 12px",
+            }}
+            onClick={() => setEndDialog(false)}
+            autoFocus>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
 
 export default styled(Home)`
   color: #fff;
-  min-height: calc(100vh - 160px);
+  min-height: calc(100% - 160px);
   .con {
     width: 1160px;
     margin: 10px auto;
@@ -283,7 +336,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     h1 {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

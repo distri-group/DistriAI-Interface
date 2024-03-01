@@ -6,12 +6,13 @@ import SolanaAction from "../components/SolanaAction";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import * as anchor from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import DurationProgress from "../components/DurationProgress";
 import DurationToggle from "../components/DurationToggle";
+import * as anchor from "@project-serum/anchor";
+import Countdown from "../components/Countdown";
 
 function Home({ className }) {
   const { id } = useParams();
@@ -35,11 +36,15 @@ function Home({ className }) {
   };
   const onSubmit = async () => {
     setExtending(true);
-    let res = await childRef.current.renewOrder(
-      orderDetail.Metadata.MachineInfo.Metadata.MachineAccounts,
-      stringToPublicKey(id).toString(),
-      duration
+    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("machine"),
+        new PublicKey(deviceDetail.Metadata.Addr).toBytes(),
+        anchor.utils.bytes.hex.decode(deviceDetail.Uuid),
+      ],
+      webconfig.PROGRAM
     );
+    let res = await childRef.current.renewOrder(machinePublicKey, id, duration);
     setTimeout(() => {
       if (res?.msg === "ok") {
         enqueueSnackbar(`Order extended ${duration} h.`, {
@@ -52,26 +57,6 @@ function Home({ className }) {
       setExtending(false);
     }, 300);
   };
-  const stringToPublicKey = (str) => {
-    if (str.startsWith("0x")) {
-      let hexString = str.slice(2);
-      let uint8Array = new Uint8Array(hexString.length / 2);
-      for (let i = 0; i < hexString.length; i += 2) {
-        uint8Array[i / 2] = parseInt(hexString.substr(i, 2), 16);
-      }
-      let orderId = uint8Array;
-      let counterSeed = anchor.utils.bytes.utf8.encode("order");
-      let seeds = [counterSeed, wallet.publicKey.toBytes(), orderId];
-      let [publicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-        seeds,
-        new PublicKey(webconfig.contractAddress)
-      );
-      return publicKey;
-    } else {
-      let publicKey = new PublicKey(str);
-      return publicKey;
-    }
-  };
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -81,11 +66,11 @@ function Home({ className }) {
         if (res.Detail.Metadata?.MachineInfo) {
           setDeviceDetail(res.Detail.Metadata.MachineInfo);
         }
+        console.log(res.Detail.Metadata.MachineInfo);
       } else {
         return enqueueSnackbar(res.Msg, { variant: "error" });
       }
-      const mint = new PublicKey(webconfig.mintAddress);
-      getTokenBalance(mint, wallet.publicKey);
+      getTokenBalance(webconfig.MINT_PROGRAM, wallet.publicKey);
       setLoading(false);
     };
     if (wallet?.publicKey) {
@@ -113,7 +98,7 @@ function Home({ className }) {
                     <span style={{ fontSize: 18, fontWeight: "bold" }}>
                       {deviceDetail.GpuCount + "x " + deviceDetail.Gpu}
                     </span>
-                    <span>{deviceDetail.TFLOPS || "--"} TFLOPS</span>
+                    <span>{deviceDetail.Tflops || "--"} TFLOPS</span>
                   </div>
                 </div>
                 <div
@@ -146,7 +131,11 @@ function Home({ className }) {
                   </div>
                   <div>
                     <label>Remaining Time</label>
-                    <span>{orderDetail.RemainingTime}</span>
+                    <span>
+                      <Countdown
+                        deadlineTime={new Date(orderDetail.EndTime).getTime()}
+                      />
+                    </span>
                   </div>
                 </div>
                 <DurationProgress
@@ -189,7 +178,7 @@ export default styled(Home)`
   display: block;
   overflow: hidden;
   width: 100%;
-  min-height: calc(100vh - 160px);
+  min-height: calc(100% - 160px);
   color: #fff;
   .con {
     width: 1160px;
@@ -198,7 +187,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

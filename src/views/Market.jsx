@@ -25,7 +25,7 @@ function Home({ className }) {
       setTotal(res.total);
       setList(res.list);
     } catch (e) {
-      console.log(e);
+      enqueueSnackbar(e.message, { variant: "error" });
     }
     setLoading(false);
   };
@@ -44,7 +44,7 @@ function Home({ className }) {
         });
         setFilterValue(filter);
       } catch (e) {
-        console.log(e);
+        enqueueSnackbar(e.message, { variant: "error" });
       }
       setLoading(false);
     };
@@ -126,7 +126,7 @@ export default styled(Home)`
   display: block;
   width: 100%;
   color: #fff;
-  min-height: calc(100vh - 150px);
+  min-height: calc(100% - 150px);
   .hold {
     display: block;
     overflow: hidden;
@@ -140,7 +140,6 @@ export default styled(Home)`
     display: block;
     padding: 0 20px;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;

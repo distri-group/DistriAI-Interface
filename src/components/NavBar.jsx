@@ -22,7 +22,7 @@ function NavBar({ className }) {
       setUser("buyer");
     } else if (
       location.pathname === "/device" ||
-      location.pathname === "/reward" ||
+      location.pathname.includes("/reward") ||
       location.pathname.includes("/earning") ||
       location.pathname.includes("/makeoffer")
     ) {
@@ -31,7 +31,7 @@ function NavBar({ className }) {
     if (location.pathname === "/faucet" && !user) {
       setUser("buyer");
     }
-  }, [location.pathname]);
+  }, [location.pathname, user]);
   return (
     <div className={className}>
       <div className="con">

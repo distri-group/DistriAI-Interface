@@ -10,7 +10,7 @@ import { LoadingButton } from "@mui/lab";
 function Home({ className }) {
   document.title = "Faucet";
   const [loading, setLoading] = useState(false);
-  const [newAddr, setNewAddr] = useState();
+  const [newAddr, setNewAddr] = useState("");
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
@@ -52,7 +52,6 @@ function Home({ className }) {
         variant: "success",
       });
     } catch (e) {
-      console.log(e);
       return enqueueSnackbar(
         "Failed to claim airdrop. Please try again later",
         { variant: "error" }
@@ -80,7 +79,7 @@ function Home({ className }) {
               data-name="taskName"
               onChange={onInput}
               disabled={loading}
-              value={newAddr}
+              value={newAddr || ""}
               placeholder="Enter Your Wallet Address"
             />
           </div>
@@ -112,7 +111,7 @@ export default styled(Home)`
   display: block;
   overflow: hidden;
   width: 100%;
-  height: calc(100vh - 140px);
+  height: calc(100% - 140px);
   color: #fff;
   .myform {
     width: 800px;
@@ -128,7 +127,6 @@ export default styled(Home)`
         color: #797979;
         line-height: 30px;
         a {
-          font-family: Montserrat, sans-serif;
           font-weight: 400;
           font-style: normal;
           font-size: 16px;
@@ -152,7 +150,6 @@ export default styled(Home)`
     display: block;
     overflow: hidden;
     .title {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-weight: 700;
       font-style: normal;
       font-size: 28px;
@@ -162,7 +159,6 @@ export default styled(Home)`
       text-align: center;
     }
     .title2 {
-      font-family: Montserrat Bold, Montserrat, sans-serif;
       font-size: 16px;
       color: #797979;
       text-align: center;

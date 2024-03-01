@@ -2,17 +2,35 @@ import styled from "styled-components";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import copy from "copy-to-clipboard";
 import { useSnackbar } from "notistack";
-import { Button, Modal, Box } from "@mui/material";
 import Table from "./Table";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import * as anchor from "@project-serum/anchor";
+import { Backdrop, CircularProgress } from "@mui/material";
 
 function Header({ className, list, loading }) {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [selectedItem, setSelectedItem] = useState(null);
+  const wallet = useAnchorWallet();
   const [isLoading, setIsLoading] = useState(loading);
-  const [decrypted, setDecrypted] = useState(false);
+  const [signing, setSigning] = useState(false);
+  const signToken = async (ip, port) => {
+    setSigning(true);
+    const provider = window.phantom.solana;
+    const msg = "workspace/token/" + wallet.publicKey.toString();
+    const encodeMsg = new TextEncoder().encode(msg);
+    try {
+      const sign = await provider.signMessage(encodeMsg, "utf8");
+      const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+      setSigning(false);
+      window.open(
+        `http://${ip}:${port}/distri/workspace/debugToken/${signature}`
+      );
+    } catch (e) {
+      setSigning(false);
+      enqueueSnackbar(e, { variant: "error" });
+    }
+  };
   useEffect(() => {
     for (let item of list) {
       item.Loading = false;
@@ -51,19 +69,7 @@ function Header({ className, list, loading }) {
       render: (text, record, index) => {
         return (
           <div className="price">
-            <span
-              style={{
-                margin: 0,
-                borderRadius: "100%",
-                backgroundColor: "white",
-                backgroundImage: "url('/img/token.png')",
-                backgroundSize: "70%",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                width: "24px",
-                height: "24px",
-              }}
-            />
+            <span className="token" />
             <span>{record.Price}</span>
           </div>
         );
@@ -94,7 +100,7 @@ function Header({ className, list, loading }) {
       width: "10%",
       key: "StatusName",
       render: (text, record, index) => {
-        return <div className={"status-" + record.StatusName}>{text}</div>;
+        return <div className={record.StatusName}>{text}</div>;
       },
     },
     {
@@ -104,26 +110,14 @@ function Header({ className, list, loading }) {
       render: (text, record, index) => (
         <div className="btns">
           <span
-            onClick={() => setSelectedItem(record)}
-            className={`mini-btn ${
-              record.StatusName !== "Completed" &&
-              record.StatusName !== "Training"
-                ? ""
-                : "disabled"
-            }`}>
-            <span className="key" />
-          </span>
-          <span
             onClick={() => {
-              window.open(
-                `http://${record.Metadata.MachineInfo.IP}:${record.Metadata.MachineInfo.Port}`
+              signToken(
+                record.Metadata.MachineInfo.IP,
+                record.Metadata.MachineInfo.Port
               );
             }}
             className={`mini-btn ${
-              record.StatusName !== "Completed" &&
-              record.StatusName !== "Training"
-                ? ""
-                : "disabled"
+              record.StatusName !== "Available" && "disabled"
             }`}>
             Console
           </span>
@@ -146,76 +140,11 @@ function Header({ className, list, loading }) {
         empty={<span>No item yet</span>}
         loading={isLoading}
       />
-      <Modal
-        open={Boolean(selectedItem)}
-        onClose={() => {
-          setSelectedItem(null);
-          setDecrypted(false);
-        }}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 1000,
-            bgcolor: "#00000b",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: "8px",
-          }}>
-          <h1 className="big-title">Decrypted SSH Key</h1>
-          <div className="con-title">
-            <p>SSH Key was crypted by your public key.</p>
-            <p>It can be decrypted and obtained with the wallet signature.</p>
-          </div>
-          <div>
-            <h2
-              className="con-title"
-              style={{
-                marginTop: "20px",
-                marginBottom: "10px",
-                fontWeight: "700",
-              }}>
-              SSH Key
-            </h2>
-            <div className={`crypted ${decrypted}`}>
-              <span>
-                {decrypted
-                  ? selectedItem.Uuid
-                  : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
-              </span>
-              <div
-                className={`hint ${decrypted}`}
-                style={{ display: decrypted && "none" }}>
-                Please decryted to show the SSH Key
-              </div>
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "20px",
-            }}>
-            <Button
-              onClick={() => {
-                if (!decrypted) {
-                  setDecrypted(true);
-                  enqueueSnackbar("Decrypted", { variant: "success" });
-                } else {
-                  copy(selectedItem.Uuid);
-                  enqueueSnackbar("Copied to clipboard", {
-                    variant: "success",
-                  });
-                }
-              }}
-              className="cbtn">
-              {decrypted ? "Copy" : "Decrypted"}
-            </Button>
-          </div>
-        </Box>
-      </Modal>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={signing}>
+        <CircularProgress />
+      </Backdrop>
     </div>
   );
 }
@@ -243,10 +172,9 @@ export default styled(Header)`
       width: 20px;
     }
     span {
-      font-size: 14px;
       color: #ffffff;
       line-height: 20px;
-      margin-left: 5px;
+      margin-left: 8px;
     }
   }
   .total {
@@ -290,13 +218,10 @@ export default styled(Header)`
     background-repeat: no-repeat;
   }
   .disabled {
-    background-image: none;
-    background-color: #4a4a4a;
     opacity: 0.5;
     pointer-events: none;
   }
   .disabled:hover {
-    background-color: #4a4a4a !important;
     opacity: 0.5 !important;
   }
   .mini-btn {
@@ -317,5 +242,16 @@ export default styled(Header)`
     background-image: linear-gradient(to right, #20ae98, #0aab50);
     color: white;
     cursor: pointer;
+  }
+  .token {
+    margin: 0;
+    border-radius: 100%;
+    background-color: white;
+    background-image: url(/img/token.png);
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
   }
 `;
