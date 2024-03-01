@@ -20,12 +20,29 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
   };
   const onCountInput = (e) => {
     const value = parseFloat(e.target.value) || 0;
-    setCount(value);
+    if (value * num > max) {
+      setCount(Math.floor(max / num));
+    } else if (value < 1) {
+      setCount(1);
+    } else {
+      setCount(value);
+    }
   };
   const onDurationInput = (e) => {
     const value = parseFloat(e.target.value) || 0;
-    setDuration(value);
+    if (value > max) {
+      setDuration(max);
+    } else if (value < 1) {
+      setDuration(1);
+    } else {
+      setDuration(value);
+    }
   };
+  useEffect(() => {
+    if (duration === max) {
+      setType("max");
+    }
+  }, [duration, max]);
   useEffect(() => {
     setDuration(count * num);
   }, [count, num, setDuration]);
