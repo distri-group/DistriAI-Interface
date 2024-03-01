@@ -20,8 +20,9 @@ function Home({ className }) {
 
   const loadList = async (curr) => {
     setLoading(true);
+
     try {
-      let res = await getMachineList(curr, filter);
+      let res = await getMachineList(curr, filterValue);
       setTotal(res.total);
       setList(res.list);
     } catch (e) {
@@ -104,7 +105,11 @@ function Home({ className }) {
           )}
         </div>
         <div className="con-table">
-          <DeviceList list={list} loading={loading} />
+          <DeviceList
+            list={list}
+            loading={loading}
+            onPriceSort={(priceSort) => onFilter(priceSort, "PriceDesc")}
+          />
         </div>
         {total > 10 ? (
           <Pager
