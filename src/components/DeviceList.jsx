@@ -11,6 +11,7 @@ import { formatAddress } from "../utils";
 import Table from "./Table";
 import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
+import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 
 function DeviceList({
   className,
@@ -19,6 +20,7 @@ function DeviceList({
   isMyDevice,
   loading,
   reloadFunc,
+  onPriceSort,
 }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
@@ -26,6 +28,7 @@ function DeviceList({
   const [deviceToCancel, setDeviceToCancel] = useState(null);
   const [connectModal, setConnectModal] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
+  const [priceSort, setPriceSort] = useState(null);
   const childRef = useRef();
   const cancelOffer = async (row) => {
     setBtnLoading(true);
@@ -58,6 +61,11 @@ function DeviceList({
       setConnectModal(false);
     }
   }, [wallet?.publicKey]);
+  useEffect(() => {
+    if (priceSort !== null) {
+      onPriceSort(priceSort);
+    }
+  }, [priceSort]);
   let columns = [
     {
       title: isMyDevice ? "Device" : "Provider",
@@ -84,7 +92,7 @@ function DeviceList({
             </div>
             <a
               className="addr"
-              href={`https://solscan.io/address/${record.Owner}?cluster=devne`}
+              href={`https://solscan.io/address/${record.Owner}?cluster=devnet`}
               target="_blank"
               rel="noreferrer"
               style={{ textDecoration: "none" }}>
@@ -154,7 +162,26 @@ function DeviceList({
       },
     },
     {
-      title: "Price (h)",
+      title: (
+        <div style={{ display: "flex" }}>
+          <span>Price (h)</span>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}>
+            <ArrowDropUp
+              onClick={() => setPriceSort(true)}
+              style={{ width: "20px", height: "20px", cursor: "pointer" }}
+            />
+            <ArrowDropDown
+              onClick={() => setPriceSort(false)}
+              style={{ width: "20px", height: "20px", cursor: "pointer" }}
+            />
+          </div>
+        </div>
+      ),
       width: "12%",
       key: "Price",
       render: (text, record, index) => {

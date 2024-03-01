@@ -51,6 +51,9 @@ export async function getFilterData() {
       { label: "TFLOPS", value: "tflops DESC" },
       { label: "Score", value: "score DESC" },
       { label: "Reliability", value: "reliability" },
+      { label: "Max Duration", value: "max_duration DESC" },
+      { label: "Disk", value: "disk DESC" },
+      { label: "RAM", value: "ram DESC" },
     ],
   });
   return list;
@@ -70,7 +73,7 @@ export async function getMachineList(pageIndex, filter, publicKey) {
     if (filter) {
       for (let k in filter) {
         let v = filter[k];
-        if (v && v !== "all") {
+        if (v !== "all") {
           options.data[k] = v;
         }
       }
