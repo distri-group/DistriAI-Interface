@@ -59,6 +59,19 @@
       ]
     },
     {
+      "name": "rewardPoolDeposit",
+      "accounts": [
+        { "name": "signer", "isMut": true, "isSigner": true },
+        { "name": "signerAta", "isMut": true, "isSigner": false },
+        { "name": "rewardPool", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
       "name": "claim",
       "accounts": [
         { "name": "machine", "isMut": true, "isSigner": false },
