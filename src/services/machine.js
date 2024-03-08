@@ -46,8 +46,6 @@ export async function getFilterData() {
     name: "OrderBy",
     arr: [
       { label: "Auto Sort", value: "all" },
-      { label: "Price(Inc.)", value: "price" },
-      { label: "Price(Dec.)", value: "price DESC" },
       { label: "TFLOPS", value: "tflops DESC" },
       { label: "Score", value: "score DESC" },
       { label: "Reliability", value: "reliability" },

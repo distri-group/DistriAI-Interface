@@ -16,6 +16,7 @@ function Home({ className }) {
   const [loading, setLoading] = useState(false);
   const [filterData, setFilterData] = useState([]);
   const [filterValue, setFilterValue] = useState({});
+  const [priceSort, setPriceSort] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
 
   const loadList = async (curr) => {
@@ -73,6 +74,9 @@ function Home({ className }) {
     setCurrent(curr);
     loadList(curr);
   };
+  useEffect(() => {
+    onFilter(priceSort, "PriceOrder");
+  }, [priceSort]);
 
   return (
     <div className={className}>
@@ -108,7 +112,8 @@ function Home({ className }) {
           <DeviceList
             list={list}
             loading={loading}
-            onPriceSort={(priceSort) => onFilter(priceSort, "PriceDesc")}
+            priceSort={priceSort}
+            setPriceSort={setPriceSort}
           />
         </div>
         {total > 10 ? (
