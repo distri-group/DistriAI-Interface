@@ -1,4 +1,4 @@
-import { Button, Menu, MenuItem, Modal, Box } from "@mui/material";
+import { Modal, Box } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -6,23 +6,7 @@ import DropdownMenu from "./DropdownMenu";
 
 function Header({ className }) {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorEl2, setAnchorEl2] = useState(null);
-  const [anchorEl3, setAnchorEl3] = useState(null);
-  const [anchorEl4, setAnchorEl4] = useState(null);
   const [videoModal, setVideoModal] = useState(false);
-  const open = Boolean(anchorEl);
-  const open2 = Boolean(anchorEl2);
-  const open3 = Boolean(anchorEl3);
-  const open4 = Boolean(anchorEl4);
-  const transparent = {
-    paper: { style: { background: "transparent", boxShadow: "none" } },
-  };
-  const scrollToAboutUs = () => {
-    const aboutUs = document.getElementById("about-us");
-    aboutUs.scrollIntoView({ behavior: "smooth" });
-    setAnchorEl3(null);
-  };
   return (
     <div className={className}>
       <div className="container">
@@ -114,19 +98,18 @@ function Header({ className }) {
               </span>
             </DropdownMenu>
             <DropdownMenu title="Docs">
-              <span
+              <a
                 className="menu-item"
-                onClick={() => {
-                  window.open("https://docs.distri.ai/core/");
-                  setAnchorEl4(false);
-                }}>
+                href="https://docs.distri.ai/core/"
+                target="_blank"
+                rel="noreferrer">
                 <img
                   src="/img/navbar/Icon_Getting Started.png"
                   className="icon"
                   alt="Getting Started"
                 />
                 <span className="subtitle">Getting Started</span>
-              </span>
+              </a>
               <span
                 className="menu-item"
                 onClick={() => {
