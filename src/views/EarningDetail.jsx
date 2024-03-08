@@ -15,7 +15,6 @@ function Home({ className }) {
   const [loading, setLoading] = useState(true);
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
-
   useEffect(() => {
     const loadDetail = async () => {
       const res = await getDetailByUuid(id, wallet.publicKey.toString());
@@ -68,10 +67,11 @@ function Home({ className }) {
                             </span>
                           ) : (
                             <span>
-                              End Time{" "}
                               {record.Status === 3
-                                ? new Date(record.RefundTime).toLocaleString()
-                                : new Date(record.EndTime).toLocaleString()}
+                                ? "Refund Time " +
+                                  new Date(record.RefundTime).toLocaleString()
+                                : "End Time " +
+                                  new Date(record.EndTime).toLocaleString()}
                             </span>
                           ))}
                       </div>

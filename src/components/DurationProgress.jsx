@@ -32,8 +32,14 @@ export default function DurationProgress({
         } else {
           const difference = Math.abs(Date.now() - start);
           const result = difference / hour / duration;
-          setProgress((result * 100).toFixed(2));
-          setUsed(Math.ceil(difference / hour));
+          if (result > 1) {
+            setProgress(100);
+            setUsed(duration);
+            clearInterval(interval);
+          } else {
+            setProgress((result * 100).toFixed(2));
+            setUsed(Math.ceil(difference / hour));
+          }
         }
       }
     };

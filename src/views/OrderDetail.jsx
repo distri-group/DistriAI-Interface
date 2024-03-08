@@ -50,9 +50,7 @@ function Home({ className }) {
     ) {
       navigate(`/end-duration/${id}`);
     } else {
-      return enqueueSnackbar("Remaining rental time is less than 1 hour.", {
-        variant: "info",
-      });
+      return setEndDialog(true);
     }
   };
   return (
@@ -111,10 +109,11 @@ function Home({ className }) {
                             </span>
                           ) : (
                             <span>
-                              End Time{" "}
                               {record.Status === 3
-                                ? new Date(record.RefundTime).toLocaleString()
-                                : new Date(record.EndTime).toLocaleString()}
+                                ? "Refund Time " +
+                                  new Date(record.RefundTime).toLocaleString()
+                                : "End Time " +
+                                  new Date(record.EndTime).toLocaleString()}
                             </span>
                           ))}
                       </div>
