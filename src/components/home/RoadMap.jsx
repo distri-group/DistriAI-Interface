@@ -102,6 +102,9 @@ const RoadMap = ({ className }) => {
 export default styled(RoadMap)`
   height: 100vh;
   background-image: url(/img/home/roadmap.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   overflow-x: hidden;
   li {
     list-style: none;

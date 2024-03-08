@@ -28,12 +28,15 @@ const HorizontalColorChange = ({ delay = 0 }) => {
           }}
           initial={{ backgroundColor: "#808080" }}
           animate={{
-            backgroundColor: isInView ? ["#808080", "#ffffff"] : "#808080",
+            backgroundColor: isInView
+              ? ["#808080", "#ffffff", "#808080"]
+              : "#808080",
           }}
           transition={{
             delay: delay + index * 0.1,
-            duration: 0.1,
-            loop: Infinity,
+            duration: 0.3,
+            repeat: Infinity,
+            repeatDelay: 0.7,
           }}
         />
       ))}

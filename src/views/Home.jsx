@@ -9,6 +9,7 @@ import ContactUs from "../components/home/ContactUs";
 import HowToDo from "../components/home/HowToDo";
 import RoadMap from "../components/home/RoadMap";
 import { useRef, useState, useEffect } from "react";
+import Layers from "../components/home/Layers";
 
 function Home({ className }) {
   document.title = "DistriAI Home";
@@ -26,6 +27,7 @@ function Home({ className }) {
 
       const totalScroll = scrollHeight - clientHeight;
       const currentScrollProgress = (scrollTop / totalScroll) * 100;
+      // console.log(currentScrollProgress);
       setScrollProgress(currentScrollProgress);
     };
 
@@ -46,7 +48,8 @@ function Home({ className }) {
       <div ref={scrollableRef} className="content">
         <Header className="page-header" />
         <Banner />
-        {/* <ComputingPower /> */}
+        <ComputingPower progress={scrollProgress} />
+        <Layers progress={scrollProgress} />
         <HowToDo />
         <AboutUs progress={scrollProgress} />
         <RoadMap />
@@ -67,6 +70,7 @@ export default styled(Home)`
     scroll-snap-type: y mandatory;
     section {
       scroll-snap-align: start;
+      min-width: 1200px;
     }
     -ms-overflow-style: none;
     scrollbar-width: none;

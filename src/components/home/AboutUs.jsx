@@ -12,9 +12,9 @@ const AboutUs = ({ className, progress }) => {
   const [learnMore3, setLearnMore3] = useState(false);
   const initial = { opacity: 1, y: 0 };
   useEffect(() => {
-    if (progress <= 45.5) {
+    if (progress <= 50) {
       setVisible(1);
-    } else if (progress <= 53.5) {
+    } else if (progress <= 60) {
       setVisible(2);
     } else {
       setVisible(3);
@@ -224,13 +224,6 @@ export default styled(AboutUs)`
     position: sticky;
     top: 0;
   }
-  .scroll {
-    position: relative;
-    z-index: 1;
-    height: 100vh;
-    width: 100%;
-    top: 0;
-  }
   .video-container {
     position: absolute;
     top: 0;
@@ -326,9 +319,6 @@ export default styled(AboutUs)`
   }
   @media (max-width: 1200px) {
     height: 3240px;
-    .scroll {
-      height: 1080px;
-    }
     .video-container {
       height: 840px;
     }
