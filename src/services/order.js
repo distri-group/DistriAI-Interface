@@ -58,7 +58,7 @@ function formatOrder(item) {
   item.Price = formatBalance(item.Price);
   item.Total = formatBalance(item.Total);
   const endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
-  if (item.Status === 0) {
+  if (item.StatusName === "Available") {
     if (new Date() < endTime) {
       const result = getTimeDiff(new Date(), endTime);
       item.RemainingTime = result.value + " " + result.suffix;
@@ -66,7 +66,7 @@ function formatOrder(item) {
         ? result.value
         : 1;
     }
-  } else if (item.Status === 2) {
+  } else if (item.StatusName === "Failed") {
     item.Duration = 0;
   }
   item.EndTime = endTime.toISOString();
@@ -79,15 +79,18 @@ function formatOrder(item) {
   }
   switch (item.Status) {
     case 0:
-      item.StatusName = "Available";
+      item.StatusName = "Preparing";
       break;
     case 1:
-      item.StatusName = "Completed";
+      item.StatusName = "Available";
       break;
     case 2:
-      item.StatusName = "Failed";
+      item.StatusName = "Completed";
       break;
     case 3:
+      item.StatusName = "Failed";
+      break;
+    case 4:
       item.StatusName = "Refunded";
       break;
     default:
@@ -100,9 +103,11 @@ export function getFilterData() {
     name: "Status",
     arr: [
       { label: "All Status", value: "all" },
-      { label: "Available", value: "0" },
-      { label: "Completed", value: "1" },
-      { label: "Failed", value: "2" },
+      { label: "Preparing", value: "0" },
+      { label: "Available", value: "1" },
+      { label: "Completed", value: "2" },
+      { label: "Failed", value: "3" },
+      { label: "Refunded", value: "4" },
     ],
   });
   return list;

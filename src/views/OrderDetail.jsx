@@ -41,7 +41,7 @@ function Home({ className }) {
     // eslint-disable-next-line
   }, [id, wallet]);
   const handleEndDuration = () => {
-    if (record.Status !== 0) {
+    if (record.StatusName !== "Available") {
       return enqueueSnackbar("Order not in training", { variant: "info" });
     }
     if (
@@ -97,8 +97,8 @@ function Home({ className }) {
                           Start Time{" "}
                           {new Date(record.OrderTime).toLocaleString()}
                         </span>
-                        {record.Status !== 2 &&
-                          (record.Status === 0 ? (
+                        {record.StatusName !== "Failed" &&
+                          (record.StatusName === "Available" ? (
                             <span>
                               Remaining Time{" "}
                               <Countdown
@@ -109,7 +109,7 @@ function Home({ className }) {
                             </span>
                           ) : (
                             <span>
-                              {record.Status === 3
+                              {record.StatusName === "Refunded"
                                 ? "Refund Time " +
                                   new Date(record.RefundTime).toLocaleString()
                                 : "End Time " +

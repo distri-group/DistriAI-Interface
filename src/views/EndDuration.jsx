@@ -33,7 +33,7 @@ function EndDuration({ className }) {
         variant: "info",
       });
     }
-    if (detail.Status !== 0) {
+    if (detail.StatusName !== "Available") {
       return enqueueSnackbar("Order not in training", { variant: "info" });
     }
     setEnding(true);

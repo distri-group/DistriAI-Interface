@@ -55,8 +55,8 @@ function Home({ className }) {
                           Start Time{" "}
                           {new Date(record.OrderTime).toLocaleString()}
                         </span>
-                        {record.Status !== 2 &&
-                          (record.Status === 0 ? (
+                        {record.StatusName !== "Failed" &&
+                          (record.StatusName === "Available" ? (
                             <span>
                               Remaining Time{" "}
                               <Countdown
@@ -67,7 +67,7 @@ function Home({ className }) {
                             </span>
                           ) : (
                             <span>
-                              {record.Status === 3
+                              {record.StatusName === "Refunded"
                                 ? "Refund Time " +
                                   new Date(record.RefundTime).toLocaleString()
                                 : "End Time " +
