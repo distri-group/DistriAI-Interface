@@ -42,8 +42,7 @@ export default styled(Header)`
   .container {
     display: flex;
     justify-content: space-between;
-    width: 80%;
-    max-width: 1200px;
+    width: calc(100% - 320px);
     padding: 20px 0;
     margin: 0 auto;
   }

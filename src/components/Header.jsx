@@ -2,6 +2,7 @@ import { Button, Menu, MenuItem, Modal, Box } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import DropdownMenu from "./DropdownMenu";
 
 function Header({ className }) {
   const navigate = useNavigate();
@@ -31,156 +32,89 @@ function Header({ className }) {
             display: "flex",
             width: "60%",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "right",
           }}>
           <div className="nav">
-            <Button
-              disableRipple
-              onClick={(e) => setAnchorEl(e.currentTarget)}
-              aria-controls={open ? "basic-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
-              className={open ? "dropdown" : "disabled"}>
-              Product
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              disableScrollLock
-              slotProps={transparent}
-              onClose={() => setAnchorEl(null)}>
-              <MenuItem
-                className="menu-item"
-                onClick={() => navigate("/market")}>
+            <DropdownMenu title="Product">
+              <span className="menu-item" onClick={() => navigate("/market")}>
                 <img
                   src="/img/navbar/Icon_Need.png"
                   className="icon"
                   alt="Need"
                 />
                 <span className="subtitle">Need</span>
-              </MenuItem>
-              <MenuItem
-                className="menu-item"
-                onClick={() => navigate("/device")}>
+              </span>
+              <span className="menu-item" onClick={() => navigate("/device")}>
                 <img
                   src="/img/navbar/Icon_Share.png"
                   className="icon"
                   alt="Share"
                 />
                 <span className="subtitle">Share</span>
-              </MenuItem>
-            </Menu>
-            <Button
-              disableRipple
-              onClick={(e) => setAnchorEl2(e.currentTarget)}
-              aria-controls={open2 ? "basic-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open2 ? "true" : undefined}
-              className={open2 ? "dropdown" : "disabled"}>
-              Resources
-            </Button>
-            <Menu
-              anchorEl={anchorEl2}
-              open={open2}
-              disableScrollLock
-              slotProps={transparent}
-              onClose={() => setAnchorEl2(null)}>
-              <MenuItem
+              </span>
+            </DropdownMenu>
+            <DropdownMenu title="Resources">
+              <a
                 className="menu-item"
-                onClick={() => {
-                  window.open("https://github.com/distri-group");
-                  setAnchorEl2(null);
-                }}>
+                href="https://github.com/distri-group"
+                target="_blank"
+                rel="noreferrer">
                 <img
                   src="/img/navbar/Icon_Github.png"
                   className="icon"
                   alt="Github"
                 />
                 <span className="subtitle">Github</span>
-              </MenuItem>
-              <MenuItem
+              </a>
+              <a
                 className="menu-item"
-                onClick={() => {
-                  window.open("https://medium.com/@Distri.AI");
-                  setAnchorEl2(null);
-                }}>
+                href="https://medium.com/@Distri.AI"
+                target="_blank"
+                rel="noreferrer">
                 <img
                   src="/img/navbar/Icon_Blog.png"
                   className="icon"
                   alt="Blog"
                 />
                 <span className="subtitle">Blog</span>
-              </MenuItem>
-              <MenuItem className="menu-item">
+              </a>
+              <span className="menu-item">
                 <img
                   src="/img/navbar/Icon_Roadmap.png"
                   className="icon"
                   alt="Roadmap"
                 />
                 <span className="subtitle">Roadmap</span>
-              </MenuItem>
-              <MenuItem className="menu-item">
+              </span>
+              <a className="menu-item" href="distri.ai-whitepaper.pdf">
                 <img
-                  src="/img/navbar/Icon_About Us.png"
+                  src="/img/navbar/Icon_White Paper.png"
                   className="icon"
-                  alt="About Us"
+                  alt="White Paper"
                 />
-                <a
-                  className="subtitle"
-                  style={{ textDecoration: "none" }}
-                  href="distri.ai-whitepaper.pdf">
-                  White Paper
-                </a>
-              </MenuItem>
-            </Menu>
-            <Button
-              disableRipple
-              onClick={(e) => setAnchorEl3(e.currentTarget)}
-              aria-controls={open3 ? "basic-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open3 ? "true" : undefined}
-              className={open3 ? "dropdown" : "disabled"}>
-              About
-            </Button>
-            <Menu
-              anchorEl={anchorEl3}
-              open={open3}
-              disableScrollLock
-              slotProps={transparent}
-              onClose={() => setAnchorEl3(null)}>
-              <MenuItem onClick={scrollToAboutUs} className="menu-item">
+                <span className="subtitle">White Paper</span>
+              </a>
+            </DropdownMenu>
+            <DropdownMenu title="About">
+              <a href="#about-us" className="menu-item">
                 <img
                   src="/img/navbar/Icon_About Us.png"
                   className="icon"
                   alt="About Us"
                 />
                 <span className="subtitle">About Us</span>
-              </MenuItem>
-              <MenuItem className="menu-item">
+              </a>
+              <span className="menu-item">
                 <img
                   src="/img/navbar/Icon_Contact Us.png"
                   className="icon"
                   alt="Contact Us"
                 />
                 <span className="subtitle">Contact Us</span>
-              </MenuItem>
-            </Menu>
-            <Button
-              disableRipple
-              onClick={(e) => setAnchorEl4(e.currentTarget)}
-              aria-controls={open4 ? "basic-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open4 ? "true" : undefined}
-              className={open4 ? "dropdown" : "disabled"}>
-              Docs
-            </Button>
-            <Menu
-              anchorEl={anchorEl4}
-              open={open4}
-              disableScrollLock
-              slotProps={transparent}
-              onClose={() => setAnchorEl4(null)}>
-              <MenuItem
+              </span>
+            </DropdownMenu>
+            <DropdownMenu title="Docs">
+              <span
                 className="menu-item"
                 onClick={() => {
                   window.open("https://docs.distri.ai/core/");
@@ -192,12 +126,11 @@ function Header({ className }) {
                   alt="Getting Started"
                 />
                 <span className="subtitle">Getting Started</span>
-              </MenuItem>
-              <MenuItem
+              </span>
+              <span
                 className="menu-item"
                 onClick={() => {
                   setVideoModal(true);
-                  setAnchorEl4(false);
                 }}>
                 <img
                   src="/img/navbar/Icon_Demo Video.png"
@@ -205,8 +138,8 @@ function Header({ className }) {
                   alt="Demo Video"
                 />
                 <span className="subtitle">Demo Video</span>
-              </MenuItem>
-            </Menu>
+              </span>
+            </DropdownMenu>
           </div>
         </div>
       </div>

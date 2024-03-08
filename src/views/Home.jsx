@@ -27,7 +27,7 @@ function Home({ className }) {
 
       const totalScroll = scrollHeight - clientHeight;
       const currentScrollProgress = (scrollTop / totalScroll) * 100;
-      // console.log(currentScrollProgress);
+      console.log(currentScrollProgress);
       setScrollProgress(currentScrollProgress);
     };
 

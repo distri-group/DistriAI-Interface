@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import Shadow from "./Shadow";
 import MovingDot from "./MovingDot";
+import InnerBox from "./InnerBox";
 
 const ComputingPower = ({ className, progress }) => {
   const [titleSelected, setTitleSelected] = useState(true);
@@ -21,10 +22,10 @@ const ComputingPower = ({ className, progress }) => {
     shine: {
       boxShadow: [
         "0 0 10px #ffffff",
-        "0 0 40px #ffffff",
+        "0 0 30px #ffffff",
+        "0 0 50px #ffffff",
         "0 0 70px #ffffff",
-        "0 0 100px #ffffff",
-        "0 0 130px #ffffff",
+        "0 0 90px #ffffff",
         "0px 0px 110px rgba(255, 255, 255, 0.4)",
       ],
     },
@@ -35,7 +36,7 @@ const ComputingPower = ({ className, progress }) => {
     } else {
       setVisible(false);
     }
-    if (progress > 10 && progress <= 21) {
+    if (progress >= 10 && progress <= 21) {
       setIsInView(true);
     } else {
       setIsInView(false);
@@ -196,13 +197,21 @@ const ComputingPower = ({ className, progress }) => {
                       transition={{ duration: 0.5 }}>
                       <AnimatePresence mode="wait">
                         {titleSelected ? (
-                          <>
+                          <div
+                            style={{
+                              position: "relative",
+                              left: 10,
+                              bottom: 10,
+                            }}>
                             <motion.div
                               key="boxes"
                               initial="hiddenRev"
                               animate="visible"
                               exit="hidden"
                               variants={variants}
+                              transition={{
+                                duration: 0.4,
+                              }}
                               className="boxes">
                               <motion.div
                                 className="dots"
@@ -340,7 +349,7 @@ const ComputingPower = ({ className, progress }) => {
                                 />
                               </motion.div>
                             </motion.div>
-                          </>
+                          </div>
                         ) : (
                           <>
                             <motion.div
@@ -349,45 +358,33 @@ const ComputingPower = ({ className, progress }) => {
                               animate="visible"
                               exit="hidden"
                               variants={variants}
+                              transition={{
+                                duration: 0.4,
+                              }}
                               className="logo-cloud"
                             />
-                            <motion.div
-                              key="inner-box1"
-                              initial="hiddenRev"
-                              animate="visible"
-                              exit="hidden"
-                              variants={variants}
-                              transition={{ delay: 0.2 }}
-                              className="inner-box"
+                            <InnerBox
                               style={{ top: "113px", right: "32px" }}
+                              delay={0.2}
+                              visible={!titleSelected}
                             />
-                            <motion.div
-                              key="inner-box2"
-                              initial="hiddenRev"
-                              animate="visible"
-                              exit="hidden"
-                              variants={variants}
-                              transition={{ delay: 0.3 }}
-                              className="inner-box"
+                            <InnerBox
                               style={{
                                 scale: 1.2,
                                 bottom: "-5px",
                                 left: "244px",
                               }}
+                              delay={0.3}
+                              visible={!titleSelected}
                             />
-                            <motion.div
-                              key="inner-box3"
-                              initial="hiddenRev"
-                              animate="visible"
-                              exit="hidden"
-                              variants={variants}
-                              transition={{ delay: 0.4 }}
-                              className="inner-box"
+                            <InnerBox
                               style={{
                                 scale: 0.9,
                                 top: "117px",
                                 left: "22px",
                               }}
+                              delay={0.4}
+                              visible={!titleSelected}
                             />
                             <motion.div
                               initial="hiddenRev"
@@ -724,16 +721,6 @@ export default styled(ComputingPower)`
             left: 128px;
             z-index: 5;
             background-image: url(/img/home/computing/logo_cloud.png);
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 100%;
-          }
-          .inner-box {
-            width: 77px;
-            height: 88px;
-            position: absolute;
-            z-index: 5;
-            background-image: url(/img/home/computing/inner_box.png);
             background-position: center;
             background-repeat: no-repeat;
             background-size: 100%;

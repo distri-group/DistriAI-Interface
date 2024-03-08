@@ -43,7 +43,7 @@ const MapWithPoints = () => {
         <motion.div
           key={point.id}
           initial={{ scale: 0, opacity: 1 }}
-          animate={{ scale: 6, opacity: 0 }}
+          animate={{ scale: 3, opacity: 0 }}
           transition={{
             duration: 2.5,
             delay: index * 0.2,
@@ -52,10 +52,11 @@ const MapWithPoints = () => {
           }}
           style={{
             position: "absolute",
-            width: "10px",
-            height: "10px",
-            borderRadius: "50%",
+            width: "24px",
+            height: "24px",
+            borderRadius: "100%",
             border: "1px solid #6F4CFF",
+            borderWidth: "0.2px",
             backgroundColor: "rgba(111, 76 ,255, 0.4)",
             left: `${point.x}px`,
             top: `${point.y}px`,

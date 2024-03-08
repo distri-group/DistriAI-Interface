@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { motion, useInView } from "framer-motion";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const AboutUs = ({ className, progress }) => {
@@ -10,9 +10,9 @@ const AboutUs = ({ className, progress }) => {
   const [learnMore1, setLearnMore1] = useState(false);
   const [learnMore2, setLearnMore2] = useState(false);
   const [learnMore3, setLearnMore3] = useState(false);
-  const initial = { opacity: 1, y: 0 };
+  const initial = { opacity: 0, y: 20 };
   useEffect(() => {
-    if (progress <= 50) {
+    if (progress <= 55) {
       setVisible(1);
     } else if (progress <= 60) {
       setVisible(2);
@@ -41,176 +41,243 @@ const AboutUs = ({ className, progress }) => {
           </video>
         </div>
         <div className="about-us">
-          <motion.div
-            className="p1"
-            initial={initial}
-            animate={{
-              opacity: visible === 1 ? 1 : 0,
-              y: visible === 1 ? 0 : 20,
-            }}
-            transition={{ duration: 0.6 }}>
-            <h2 style={{ marginBottom: "60px" }}>
-              In the AI era, computing power has become the 'digital oil',
-              <br />
-              but we face such a dilemma
-            </h2>
-            <div className="card-container">
-              <div className="card">
-                <span
-                  className="bg"
-                  style={{ backgroundImage: "url(/img/home/about_us_1.png)" }}
-                />
-                <h3>GPUs monopolized by giants, high cost of use</h3>
-                <ul>
-                  <li>H100 selling for $40,000</li>
-                  <li>72% gross profit margin for cloud services</li>
-                </ul>
-              </div>
-              <div className="card">
-                <span
-                  className="bg"
-                  style={{ backgroundImage: "url(/img/home/about_us_2.png)" }}
-                />
-                <h3>Ensuring data privacy and security remains challenging</h3>
-                <ul>
-                  <li>Unauthorized access</li>
-                  <li>sensitive data leaks</li>
-                </ul>
-              </div>
-            </div>
-          </motion.div>
-          <motion.div
-            className="p2"
-            initial={initial}
-            animate={{
-              opacity: visible === 2 ? 1 : 0,
-              y: visible === 2 ? 0 : 20,
-            }}
-            transition={{ duration: 0.6 }}>
-            <h2 style={{ marginBottom: "120px" }}>
-              What do we aim to achieve?
-            </h2>
-            <div className="card-container">
-              <div
-                onMouseEnter={() => setLearnMore1(true)}
-                onMouseLeave={() => setLearnMore1(false)}
-                className="card">
-                <h3
+          <AnimatePresence>
+            {visible === 1 ? (
+              <motion.div
+                key="about-us-1"
+                className="p1"
+                initial={initial}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6 },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: 20,
+                  transition: {
+                    duration: 0.6,
+                  },
+                }}>
+                <h2 style={{ marginBottom: "60px" }}>
+                  In the AI era, computing power has become the 'digital oil',
+                  <br />
+                  but we face such a dilemma
+                </h2>
+                <div className="card-container">
+                  <div className="card">
+                    <span
+                      className="bg"
+                      style={{
+                        backgroundImage: "url(/img/home/about_us_1.png)",
+                      }}
+                    />
+                    <h3>GPUs monopolized by giants, high cost of use</h3>
+                    <ul>
+                      <li>H100 selling for $40,000</li>
+                      <li>72% gross profit margin for cloud services</li>
+                    </ul>
+                  </div>
+                  <div className="card">
+                    <span
+                      className="bg"
+                      style={{
+                        backgroundImage: "url(/img/home/about_us_2.png)",
+                      }}
+                    />
+                    <h3>
+                      Ensuring data privacy and security remains challenging
+                    </h3>
+                    <ul>
+                      <li>Unauthorized access</li>
+                      <li>sensitive data leaks</li>
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            ) : visible === 2 ? (
+              <motion.div
+                key="about-us-2"
+                className="p2"
+                initial={initial}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6 },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: 20,
+                  transition: {
+                    duration: 0.6,
+                  },
+                }}>
+                <h2 style={{ marginBottom: "120px" }}>
+                  What do we aim to achieve?
+                </h2>
+                <div className="card-container">
+                  <div
+                    onMouseEnter={() => setLearnMore1(true)}
+                    onMouseLeave={() => setLearnMore1(false)}
+                    className="card">
+                    <h3
+                      style={{
+                        display:
+                          window.innerWidth <= 1200 && learnMore1 && "none",
+                      }}>
+                      Pooling global computing resources
+                    </h3>
+                    <AnimatePresence initial={false}>
+                      {learnMore1 ? (
+                        <motion.div
+                          key="learnmore-1-desc"
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0 }}
+                          className="desc">
+                          <p>
+                            Distri.AI aggregates globally underutilized GPU
+                            resources, creating the industry's first
+                            privacy-centric economic distributed GPU computing
+                            network, establishing itself as the forefront of
+                            intelligent computing.
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="learnmore-1-btn"
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0 }}>
+                          <span
+                            className="bg"
+                            style={{
+                              backgroundImage: "url(/img/home/about_us_3.png)",
+                            }}
+                          />
+                          <span className="learn-more">Learn More &gt;</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div
+                    onMouseEnter={() => setLearnMore2(true)}
+                    onMouseLeave={() => setLearnMore2(false)}
+                    className="card">
+                    <h3
+                      style={{
+                        display:
+                          window.innerWidth <= 1200 && learnMore2 && "none",
+                      }}>
+                      PPML Framework
+                    </h3>
+                    <AnimatePresence initial={false}>
+                      {learnMore2 ? (
+                        <motion.div
+                          key="learnmore-2-desc"
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0 }}
+                          className="desc">
+                          <p>
+                            Distri.AI focuses on building a privacy- centricdeep
+                            learning framework. Ensuring optimal protection for
+                            data and models during the AI training process,
+                            driving AI innovation securely and worry-free.
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="learnmore-2-btn"
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0 }}>
+                          <span
+                            className="bg"
+                            style={{
+                              backgroundImage: "url(/img/home/about_us_4.png)",
+                            }}
+                          />
+                          <span className="learn-more">Learn More &gt;</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div
+                    onMouseEnter={() => setLearnMore3(true)}
+                    onMouseLeave={() => setLearnMore3(false)}
+                    className="card">
+                    <h3
+                      style={{
+                        display:
+                          window.innerWidth <= 1200 && learnMore3 && "none",
+                      }}>
+                      A secure, efficient, and sustainable transaction model
+                    </h3>
+                    <AnimatePresence initial={false}>
+                      {learnMore3 ? (
+                        <motion.div
+                          key="learnmore-3-desc"
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0 }}
+                          className="desc">
+                          <p>
+                            Distri.AI's model/data sharing platform allows users
+                            to securely share AI training data and models,
+                            ensuring the protection of data providers'
+                            interests.
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="learnmore-3-btn"
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0 }}>
+                          <span
+                            className="bg"
+                            style={{
+                              backgroundImage: "url(/img/home/about_us_5.png)",
+                            }}
+                          />
+                          <span className="learn-more">Learn More &gt;</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="about-us-3"
+                className="p3"
+                initial={initial}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6 },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: 20,
+                  transition: {
+                    duration: 0.6,
+                  },
+                }}>
+                <h2
                   style={{
-                    display: window.innerWidth <= 1200 && learnMore1 && "none",
+                    width: "1048px",
+                    margin: "0 auto",
+                    marginTop: "120px",
                   }}>
-                  Pooling global computing resources
-                </h3>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: learnMore1 ? 1 : 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="desc">
-                  <p>
-                    Distri.AI aggregates globally underutilized GPU resources,
-                    creating the industry's first privacy-centric economic
-                    distributed GPU computing network, establishing itself as
-                    the forefront of intelligent computing.
-                  </p>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: learnMore1 ? 0 : 1 }}
-                  transition={{ duration: 0.5 }}>
-                  <span
-                    className="bg"
-                    style={{
-                      backgroundImage: "url(/img/home/about_us_3.png)",
-                    }}
-                  />
-                  <span className="learn-more">Learn More &gt;</span>
-                </motion.div>
-              </div>
-              <div
-                onMouseEnter={() => setLearnMore2(true)}
-                onMouseLeave={() => setLearnMore2(false)}
-                className="card">
-                <h3
-                  style={{
-                    display: window.innerWidth <= 1200 && learnMore2 && "none",
-                  }}>
-                  PPML Framework
-                </h3>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: learnMore2 ? 1 : 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="desc">
-                  <p>
-                    Distri.AI focuses on building a privacy- centricdeep
-                    learning framework. Ensuring optimal protection for data and
-                    models during the AI training process, driving AI innovation
-                    securely and worry-free.
-                  </p>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: learnMore2 ? 0 : 1 }}
-                  transition={{ duration: 0.5 }}>
-                  <span
-                    className="bg"
-                    style={{
-                      backgroundImage: "url(/img/home/about_us_4.png)",
-                    }}
-                  />
-                  <span className="learn-more">Learn More &gt;</span>
-                </motion.div>
-              </div>
-              <div
-                onMouseEnter={() => setLearnMore3(true)}
-                onMouseLeave={() => setLearnMore3(false)}
-                className="card">
-                <h3
-                  style={{
-                    display: window.innerWidth <= 1200 && learnMore3 && "none",
-                  }}>
-                  A secure, efficient, and sustainable transaction model
-                </h3>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: learnMore3 ? 1 : 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="desc">
-                  <p>
-                    Distri.AI's model/data sharing platform allows users to
-                    securely share AI training data and models, ensuring the
-                    protection of data providers' interests.
-                  </p>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: learnMore3 ? 0 : 1 }}
-                  transition={{ duration: 0.5 }}>
-                  <span
-                    className="bg"
-                    style={{
-                      backgroundImage: "url(/img/home/about_us_5.png)",
-                    }}
-                  />
-                  <span className="learn-more">Learn More &gt;</span>
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-          <motion.div
-            className="p3"
-            initial={initial}
-            animate={{
-              opacity: visible === 3 ? 1 : 0,
-              y: visible === 3 ? 0 : 20,
-            }}
-            transition={{ duration: 0.6 }}>
-            <h2
-              style={{ width: "1048px", margin: "0 auto", marginTop: "120px" }}>
-              Join Distri.AI to collectively propel the future of intelligent
-              computing and explore the limitless possibilities of technology!
-            </h2>
-          </motion.div>
+                  Join Distri.AI to collectively propel the future of
+                  intelligent computing and explore the limitless possibilities
+                  of technology!
+                </h2>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -273,6 +340,17 @@ export default styled(AboutUs)`
         border-radius: 24px;
         backdrop-filter: blur(12px);
         padding: 40px;
+        h3 {
+          margin: 0;
+          margin-bottom: 24px;
+          height: 88px;
+          font-weight: 600;
+          font-size: 28px;
+          color: #9babff;
+          line-height: 44px;
+          text-align: left;
+          font-style: normal;
+        }
         ul {
           margin: 0;
           padding: 0;
@@ -280,7 +358,7 @@ export default styled(AboutUs)`
           z-index: 3;
         }
         li {
-          padding: 16px 0;
+          padding: 8px 0;
         }
         .desc {
           font-size: 20px;

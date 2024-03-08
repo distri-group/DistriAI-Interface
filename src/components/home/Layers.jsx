@@ -6,7 +6,6 @@ import MapWithPoints from "./MapWithPoints";
 
 const Layers = ({ className, progress }) => {
   const container = useRef(null);
-  const video = useRef(null);
   const isInView = useInView(container);
   const controls = useAnimation();
   const [view, setView] = useState(0);
@@ -19,14 +18,8 @@ const Layers = ({ className, progress }) => {
 
   useEffect(() => {
     if (progress > 21 && progress < 40) {
-      if (video.current && video.current.readyState >= 3) {
-        video.current.play();
-        video.current.loop = true;
-      }
       setView(1);
     } else {
-      video.current.pause();
-      video.current.currentTime = 0;
       setView(0);
     }
   }, [isInView, progress]);
@@ -48,11 +41,6 @@ const Layers = ({ className, progress }) => {
   return (
     <section ref={container} className={className}>
       <div className="container">
-        <div className="video-container">
-          <video ref={video} muted>
-            <source src="/video/bg.webm" type="video/webm" />
-          </video>
-        </div>
         <div className="layers">
           <div className="left">
             <div className="desc">
@@ -334,7 +322,7 @@ const Layers = ({ className, progress }) => {
             ) : view === 2 ? (
               <div className="layer">
                 <div className="desc">
-                  <h3>Privacyl Preserving Layer</h3>
+                  <h3>Privacy Preserving Layer</h3>
                   <span className="subtitle">
                     A Deep Learning Framework Based on Hierarchical Privacy
                     Protection
@@ -464,6 +452,28 @@ const Layers = ({ className, progress }) => {
                         repeatDelay: 2,
                       }}
                     />
+                    <motion.div
+                      className="horizontal-line"
+                      initial={{ x: 0, opacity: 0 }}
+                      animate={{ x: 150, opacity: [0, 1, 0] }}
+                      transition={{
+                        duration: 1,
+                        delay: 1,
+                        repeat: Infinity,
+                        repeatDelay: 2,
+                      }}
+                    />
+                    <motion.div
+                      className="horizontal-line"
+                      initial={{ x: 0, opacity: 0 }}
+                      animate={{ x: -150, opacity: [0, 1, 0] }}
+                      transition={{
+                        duration: 1,
+                        delay: 1,
+                        repeat: Infinity,
+                        repeatDelay: 2,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -495,17 +505,12 @@ const Layers = ({ className, progress }) => {
 export default styled(Layers)`
   height: 100vh;
   position: relative;
+  background-image: url(/img/home/layers/layers.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
   .Mui-selected {
     background-color: white !important;
-  }
-  .video-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 120px 0;
-    background-color: #090319;
-    width: 100vw;
-    height: calc(100vh - 240px);
   }
   video {
     width: 100%;
@@ -517,21 +522,22 @@ export default styled(Layers)`
     z-index: 1;
     max-width: 1600px;
     margin: 0 auto;
-    padding-top: 192px;
+    padding-top: 160px;
     display: flex;
     justify-content: center;
     .left,
     .right {
       height: 648px;
       padding: 40px;
+      border-radius: 22px;
       background-color: rgba(255, 255, 255, 0.12);
       backdrop-filter: blur(12px);
-      border-radius: 8px;
     }
     .left {
       width: 890px;
       margin-right: 40px;
       display: flex;
+
       .desc {
         width: 666px;
         p {
@@ -575,6 +581,10 @@ export default styled(Layers)`
     .right {
       width: 590px;
       padding: 40px 0;
+      background-image: url(/img/home/layers/right-card.png);
+      background-size: 100%;
+      background-repeat: no-repeat;
+      background-position: center;
       .layer {
         width: 590px;
         .desc {
@@ -749,11 +759,25 @@ export default styled(Layers)`
                 rgba(201, 177, 255, 0)
               );
             }
+            .horizontal-line {
+              width: 50px;
+              height: 1px;
+              position: relative;
+              top: -40px;
+              left: -25px;
+              background: linear-gradient(
+                to right,
+                rgba(201, 177, 255, 0),
+                #c9b1ff,
+                rgba(201, 177, 255, 0)
+              );
+            }
           }
         }
         .privacy {
           width: 100%;
           height: 332px;
+          mix-blend-mode: screen;
         }
         .map {
           width: 100%;

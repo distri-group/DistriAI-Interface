@@ -5,7 +5,7 @@ import styled from "styled-components";
 const RoadMap = ({ className }) => {
   const ref = useRef(null);
   const container = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(3);
   const [containerWidth, setContainerWidth] = useState(0);
   useEffect(() => {
     const width = ref.current.offsetWidth;
@@ -65,6 +65,7 @@ const RoadMap = ({ className }) => {
                       textAlign: "center",
                       margin: 0,
                       paddingTop: "20px",
+                      color: activeIndex === index && "#09e98d",
                     }}>
                     {road.id}
                   </h4>

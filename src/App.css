@@ -92,16 +92,20 @@ body {
   color: #ffb9b9;
 }
 .menu-item{
-  padding:6px 2px;
+  display: flex;
+  align-items: center;
+  padding:12px 0px!important;
+  text-decoration: none;
+  cursor: pointer;
 }
 .icon{
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   margin-right: 4px;
 }
 .subtitle {
   height: 28px;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
   color: #898989;
   line-height: 28px;
