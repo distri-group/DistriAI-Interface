@@ -1,7 +1,9 @@
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
+import { useContext } from "react";
+import { Context } from "../../views/Home";
 
 const HorizontalColorChange = ({ delay = 0 }) => {
+  const { width } = useContext(Context);
   const colors = [
     "#808080",
     "#a0a0a0",
@@ -12,26 +14,30 @@ const HorizontalColorChange = ({ delay = 0 }) => {
     "#f8f8f8",
     "#ffffff",
   ];
-  const ref = useRef(null);
-  const isInView = useInView(ref);
 
   return (
-    <div ref={ref} style={{ display: "flex", margin: "20px" }}>
+    <div
+      style={{
+        display: "flex",
+        margin: width > 500 ? "20px" : "24pt 0",
+        flexDirection: width <= 500 ? "column" : "row",
+        width: width <= 500 && "80pt",
+        alignItems: width <= 500 && "center",
+      }}>
       {colors.map((color, index) => (
         <motion.div
           key={index}
           style={{
             width: "12px",
             height: "12px",
-            marginTop: "54px",
-            marginRight: "10px",
+            marginTop: width <= 500 ? "6pt" : "54px",
+            marginRight: width > 500 && "10px",
           }}
           initial={{ backgroundColor: "#808080" }}
-          animate={{
-            backgroundColor: isInView
-              ? ["#808080", "#ffffff", "#808080"]
-              : "#808080",
+          whileInView={{
+            backgroundColor: ["#808080", "#ffffff", "#808080"],
           }}
+          viewport={{ once: true }}
           transition={{
             delay: delay + index * 0.1,
             duration: 0.3,

@@ -1,118 +1,215 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
 import styled from "styled-components";
+import ReactHammer from "react-hammerjs";
+import { Context } from "../../views/Home";
 
 const RoadMap = ({ className }) => {
+  const { width } = useContext(Context);
   const ref = useRef(null);
   const container = useRef(null);
   const [activeIndex, setActiveIndex] = useState(3);
   const [containerWidth, setContainerWidth] = useState(0);
   useEffect(() => {
-    const width = ref.current.offsetWidth;
-    setContainerWidth(width);
+    const handleResize = () => {
+      if (ref.current) {
+        setContainerWidth(ref.current.offsetWidth);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
   return (
-    <section ref={ref} className={className}>
-      <div className="container">
-        <ul ref={container} className="roadmap">
-          {roads.map((item, index) => (
-            <motion.div
-              key={index}
-              animate={{
-                x:
-                  (activeIndex === 8
-                    ? index - activeIndex + 1
-                    : index - activeIndex) *
-                  (containerWidth / 2),
-              }}
-              transition={{
-                ease: "anticipate",
-              }}
-              className={
-                "item" +
-                (index === activeIndex
-                  ? " item-active"
-                  : index === activeIndex - 1
-                  ? " item-prev"
-                  : index === activeIndex + 1
-                  ? " item-next"
-                  : "")
-              }>
-              <span className="time">{item.time}</span>
-              {item.features.map((feature) => (
-                <h3 key={feature}>{feature}</h3>
-              ))}
-            </motion.div>
-          ))}
-        </ul>
-        <div className="timeline">
-          <div className="dot-container">
-            {roads.map((road, index) => (
-              <>
-                <div
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setActiveIndex(index)}>
-                  <div className="dot-box">
-                    <span
-                      className={`dot-item dot--drop ${
-                        activeIndex === index && "dot-item--active"
-                      }`}
-                    />
-                  </div>
-                  <h4
-                    style={{
-                      width: "40px",
-                      textAlign: "center",
-                      margin: 0,
-                      paddingTop: "20px",
-                      color: activeIndex === index && "#09e98d",
-                    }}>
-                    {road.id}
-                  </h4>
-                </div>
-                {index < roads.length - 1 && (
-                  <>
-                    <div className="dot-box">
-                      <span
-                        className={`dot-item ${
-                          index === activeIndex && "dot-item--secondary"
-                        }`}
-                      />
-                    </div>
-                    <div className="dot-box">
-                      <span className="dot-item" />
-                    </div>
-                    <div className="dot-box">
-                      <span
-                        className={`dot-item ${
-                          index === activeIndex - 1 && "dot-item--secondary"
-                        }`}
-                      />
-                    </div>
-                  </>
-                )}
-              </>
+    <section id="roadmap" ref={ref} className={className}>
+      <ReactHammer
+        onSwipe={(e) => {
+          if (e.direction === 2) {
+            setActiveIndex(activeIndex === 8 ? 8 : activeIndex + 1);
+          } else if (e.direction === 4) {
+            setActiveIndex(activeIndex === 0 ? 0 : activeIndex - 1);
+          }
+        }}>
+        <div className="container">
+          <ul ref={container} className="roadmap">
+            {roads.map((item, index) => (
+              <motion.div
+                key={index}
+                animate={{
+                  x:
+                    containerWidth > 500
+                      ? ((activeIndex === 8
+                          ? index - activeIndex + 1
+                          : index - activeIndex) *
+                          containerWidth) /
+                        2
+                      : (index - activeIndex) * containerWidth,
+                }}
+                transition={{
+                  ease: "anticipate",
+                }}
+                className={
+                  "item" +
+                  (index === activeIndex
+                    ? " item-active"
+                    : index === activeIndex - 1
+                    ? " item-prev"
+                    : index === activeIndex + 1
+                    ? " item-next"
+                    : "")
+                }>
+                <span className="time">{item.id}</span>
+                {item.features.map((feature) => (
+                  <h3 key={feature}>{feature}</h3>
+                ))}
+              </motion.div>
             ))}
+          </ul>
+          <div className="timeline">
+            <div className="dot-container">
+              {roads.map((road, index) =>
+                width > 500 ? (
+                  <>
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setActiveIndex(index)}>
+                      <div className="dot-box">
+                        <span
+                          className={`dot-item dot--drop ${
+                            activeIndex === index && "dot-item--active"
+                          }`}
+                        />
+                      </div>
+                      <h4
+                        style={{
+                          width: "40px",
+                          textAlign: "center",
+                          margin: 0,
+                          paddingTop: "20px",
+                          color: activeIndex === index && "#09e98d",
+                        }}>
+                        {road.time}
+                      </h4>
+                    </div>
+                    {index !== 8 && (
+                      <>
+                        <div className="dot-box">
+                          <span
+                            className={`dot-item ${
+                              index === activeIndex && "dot-item--secondary"
+                            }`}
+                          />
+                        </div>
+                        <div className="dot-box">
+                          <span className="dot-item" />
+                        </div>
+                        <div className="dot-box">
+                          <span
+                            className={`dot-item ${
+                              index === activeIndex - 1 && "dot-item--secondary"
+                            }`}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div
+                    key={index}
+                    style={{
+                      display:
+                        Math.floor(activeIndex / 3) === Math.floor(index / 3)
+                          ? "flex"
+                          : "none",
+                      width: "30%",
+                    }}>
+                    {index === 6 && (
+                      <div className="dot-box">
+                        <span
+                          className="dot-item"
+                          style={{ opacity: 0.4 }}
+                          onClick={() => setActiveIndex(3)}
+                        />
+                      </div>
+                    )}
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setActiveIndex(index)}>
+                      <div className="dot-box">
+                        <span
+                          className={`dot-item dot--drop ${
+                            activeIndex === index && "dot-item--active"
+                          }`}
+                        />
+                      </div>
+                      <h4
+                        style={{
+                          width: "40px",
+                          textAlign: "center",
+                          margin: 0,
+                          paddingTop: "20px",
+                          color: activeIndex === index && "#09e98d",
+                        }}>
+                        {road.time}
+                      </h4>
+                    </div>
+                    {(index === 2 || index === 5) && (
+                      <div className="dot-box">
+                        <span
+                          className="dot-item"
+                          style={{ opacity: 0.4 }}
+                          onClick={() => setActiveIndex(index + 1)}
+                        />
+                      </div>
+                    )}
+                    {(index + 1) % 3 !== 0 && (
+                      <>
+                        <div className="dot-box">
+                          <span
+                            className={`dot-item ${
+                              index === activeIndex && "dot-item--secondary"
+                            }`}
+                          />
+                        </div>
+                        <div className="dot-box">
+                          <span className="dot-item" />
+                        </div>
+                        <div className="dot-box">
+                          <span
+                            className={`dot-item ${
+                              index === activeIndex - 1 && "dot-item--secondary"
+                            }`}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </ReactHammer>
     </section>
   );
 };
 
 export default styled(RoadMap)`
-  height: 100vh;
-  background-image: url(/img/home/roadmap.png);
+  height: 1080px;
+  /* background-image: url(/img/home/roadmap.png);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: cover; */
+  background-color: #090319;
   overflow-x: hidden;
   li {
     list-style: none;
   }
   .container {
     width: calc(100% - 320px);
-    padding-top: 120px;
+    padding-top: 60px;
     margin: 0 160px;
     .roadmap {
       padding: 160px 0;
@@ -179,8 +276,46 @@ export default styled(RoadMap)`
       }
     }
   }
-  @media (max-width: 1200px) {
-    height: 1080px;
+  @media (max-width: 1600px) {
+    .container {
+      .roadmap {
+        .item {
+          h3 {
+            font-size: 32px;
+            line-height: 48px;
+          }
+        }
+      }
+    }
+  }
+  @media (max-width: 500px) {
+    height: 812pt;
+    width: calc(100% - 80pt);
+    padding: 0 40pt;
+    position: relative;
+    .container {
+      width: 100%;
+      height: calc(100% - 184pt);
+      margin: 0;
+      padding: 0;
+      padding-top: 184pt;
+      .roadmap {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        .item {
+          width: 100%;
+        }
+      }
+      .timeline {
+        position: absolute;
+        bottom: 120pt;
+        width: 100%;
+        .dot-container {
+          justify-content: center;
+        }
+      }
+    }
   }
 `;
 const roads = [

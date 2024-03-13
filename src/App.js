@@ -25,6 +25,7 @@ import EndDuration from "./views/EndDuration";
 import Earning from "./views/Earning";
 import EarningDetail from "./views/EarningDetail";
 import RewardDetail from "./views/RewardDetail";
+import Test from "./views/Test";
 
 function App() {
   window.Buffer = Buffer;
@@ -103,6 +104,23 @@ function App() {
       clearInterval(tout);
     };
   });
+  useEffect(() => {
+    const setViewportContent = () => {
+      const screenWidth = window.screen.width;
+      const isSmallScreen = screenWidth > 500;
+      const metaViewport = document.querySelector('meta[name="viewport"]');
+      if (isSmallScreen) {
+        metaViewport.setAttribute("content", "width=1920");
+      } else {
+        metaViewport.setAttribute("content", "width=500");
+      }
+    };
+    setViewportContent();
+    window.addEventListener("resize", setViewportContent);
+    return () => {
+      window.removeEventListener("resize", setViewportContent);
+    };
+  }, []);
   return (
     <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
       <WalletProvider wallets={[]} autoConnect={true}>
@@ -131,6 +149,7 @@ function App() {
                   <Route path="/reward/:period" element={<RewardDetail />} />
                   <Route path="/earning" element={<Earning />} />
                   <Route path="/earning/:id" element={<EarningDetail />} />
+                  <Route path="/test" element={<Test />} />
                 </Routes>
               </SnackbarProvider>
             </ThemeProvider>

@@ -1,7 +1,7 @@
 import { useAnimate, motion } from "framer-motion";
 import { useEffect } from "react";
 
-export default function Shadow({ bottom, delay, visible }) {
+export default function Shadow({ height, bottom, delay, visible }) {
   const [scope, animate] = useAnimate();
   async function enterAndLoop() {
     await animate(scope.current, { opacity: 1, y: 0 }, { delay });
@@ -25,7 +25,7 @@ export default function Shadow({ bottom, delay, visible }) {
     <motion.div
       ref={scope}
       style={{
-        height: "438px",
+        height,
         width: "100%",
         position: "absolute",
         backgroundImage: "url(/img/home/computing/shadow.png)",
@@ -33,7 +33,8 @@ export default function Shadow({ bottom, delay, visible }) {
         backgroundRepeat: "no-repeat",
         backgroundSize: "100%",
         bottom,
-        opacity: 0,
+        opacity: 1,
+        zIndex: 20,
       }}
     />
   );

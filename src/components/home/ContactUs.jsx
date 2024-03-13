@@ -29,7 +29,7 @@ const ContactUs = ({ className }) => {
     });
   };
   return (
-    <section className={className}>
+    <section id="contact-us" className={className}>
       <div className="container">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -40,7 +40,8 @@ const ContactUs = ({ className }) => {
               staggerChildren: 0.1,
               duration: 0.3,
             },
-          }}>
+          }}
+          viewport={{ once: true }}>
           Learn more about DistriAI
         </motion.h2>
         <motion.h3
@@ -53,7 +54,8 @@ const ContactUs = ({ className }) => {
               duration: 0.3,
               delay: 0.3,
             },
-          }}>
+          }}
+          viewport={{ once: true }}>
           Subscribe to the latest news from DistriAI to stay informed about
           project updates in real time.
         </motion.h3>
@@ -68,6 +70,7 @@ const ContactUs = ({ className }) => {
               delay: 0.6,
             },
           }}
+          viewport={{ once: true }}
           className="sub-box">
           <OutlinedInput
             onChange={onInputEmail}
@@ -93,14 +96,14 @@ const ContactUs = ({ className }) => {
 };
 
 export default styled(ContactUs)`
-  height: 100vh;
+  height: 1080px;
   background-image: url(/img/home/contact_us.png);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
   .container {
-    padding-top: 280px;
+    padding-top: 160px;
     h2 {
       font-weight: 700;
       font-size: 40px;
@@ -146,7 +149,29 @@ export default styled(ContactUs)`
     bottom: 0;
     width: 100%;
   }
-  @media (max-width: 1200px) {
-    height: 1080px;
+  @media (max-width: 500px) {
+    height: 812pt;
+    .container {
+      width: calc(100% - 48pt);
+      padding: 0 24pt;
+      padding-top: 144pt;
+      h2 {
+        font-size: 28pt;
+        line-height: 40pt;
+      }
+      h3 {
+        margin: 0 22pt;
+        font-size: 14pt;
+        line-height: 24pt;
+      }
+      .sub-box {
+        width: 100%;
+        .email-submit {
+          span {
+            font-size: 14pt;
+          }
+        }
+      }
+    }
   }
 `;

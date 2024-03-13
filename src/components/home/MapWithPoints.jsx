@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Context } from "../../views/Home";
 
 const MapWithPoints = () => {
+  const { width } = useContext(Context);
   const canvasRef = useRef(null);
   const [points, setPoints] = useState([]);
 
@@ -11,8 +13,8 @@ const MapWithPoints = () => {
     const mapImage = new Image();
     mapImage.src = "/img/home/layers/map.png";
     mapImage.onload = () => {
-      canvas.width = mapImage.width;
-      canvas.height = mapImage.height;
+      canvas.width = width > 500 ? mapImage.width : 457;
+      canvas.height = width > 500 ? mapImage.height : 246;
       context.drawImage(mapImage, 0, 0);
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
@@ -36,7 +38,7 @@ const MapWithPoints = () => {
       style={{
         position: "relative",
         width: "100%",
-        height: "100%",
+        height: width > 500 ? "100%" : "185pt",
       }}>
       <canvas ref={canvasRef} width={510} />
       {points.map((point, index) => (

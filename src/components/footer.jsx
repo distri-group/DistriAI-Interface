@@ -77,4 +77,16 @@ export default styled(Header)`
     line-height: 20px;
     font-size: 13px;
   }
+  @media (max-width: 500px) {
+    .container {
+      flex-direction: column-reverse;
+      align-items: center;
+      width: 100%;
+      padding: 40pt 0;
+      .pater {
+        justify-content: center;
+        margin-bottom: 16pt;
+      }
+    }
+  }
 `;

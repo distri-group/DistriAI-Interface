@@ -1,16 +1,19 @@
 import styled from "styled-components";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
+import { useEffect, useState, useRef, useContext } from "react";
 import Shadow from "./Shadow";
 import MovingDot from "./MovingDot";
 import InnerBox from "./InnerBox";
+import { Context } from "../../views/Home";
 
-const ComputingPower = ({ className, progress }) => {
+const ComputingPower = ({ className }) => {
+  const { scrollProgress, width } = useContext(Context);
   const [titleSelected, setTitleSelected] = useState(true);
   const [visible, setVisible] = useState(false);
-  const [isInView, setIsInView] = useState(false);
   const [securityLevel, setSecurityLevel] = useState(1);
   const [banner, setBanner] = useState(false);
+  const container = useRef();
+  const isInView = useInView(container);
   let interval = useRef();
   const initial = { opacity: 0, y: 20 };
   const variants = {
@@ -31,18 +34,6 @@ const ComputingPower = ({ className, progress }) => {
     },
   };
   useEffect(() => {
-    if (progress <= 15) {
-      setVisible(true);
-    } else {
-      setVisible(false);
-    }
-    if (progress >= 10 && progress <= 21) {
-      setIsInView(true);
-    } else {
-      setIsInView(false);
-    }
-  }, [progress]);
-  useEffect(() => {
     if (interval.current) {
       interval.current = setInterval(() => {
         setTitleSelected((t) => !t);
@@ -52,7 +43,7 @@ const ComputingPower = ({ className, progress }) => {
   }, []);
   return (
     <section className={className}>
-      <div className="container">
+      <div ref={container} className="container">
         <div className="logo">
           <motion.div
             className="banner"
@@ -189,11 +180,6 @@ const ComputingPower = ({ className, progress }) => {
                       animate="visible"
                       exit="hidden"
                       variants={variants}
-                      style={{
-                        width: "571px",
-                        height: "336px",
-                        position: "absolute",
-                      }}
                       transition={{ duration: 0.5 }}>
                       <AnimatePresence mode="wait">
                         {titleSelected ? (
@@ -213,9 +199,7 @@ const ComputingPower = ({ className, progress }) => {
                                 duration: 0.4,
                               }}
                               className="boxes">
-                              <motion.div
-                                className="dots"
-                                style={{ height: "260px", width: "355px" }}>
+                              <motion.div className="dots">
                                 <motion.span
                                   initial={{
                                     boxShadow:
@@ -224,7 +208,10 @@ const ComputingPower = ({ className, progress }) => {
                                   animate="shine"
                                   variants={variants}
                                   transition={{ duration: 2, repeat: Infinity }}
-                                  style={{ top: 73, left: -5 }}
+                                  style={{
+                                    top: width > 500 ? 73 : 56,
+                                    left: -5,
+                                  }}
                                   className="dot"
                                 />
                                 <motion.span
@@ -239,7 +226,10 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 0.5,
                                   }}
-                                  style={{ top: 73, left: 83 }}
+                                  style={{
+                                    top: width > 500 ? 73 : 56,
+                                    left: width > 500 ? 83 : 61,
+                                  }}
                                   className="dot"
                                 />
                                 <motion.span
@@ -254,7 +244,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 0.2,
                                   }}
-                                  style={{ top: 21, left: 170 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 21, left: 170 }
+                                      : { top: 15, left: 127 }
+                                  }
                                   className="dot"
                                 />
                                 <motion.span
@@ -269,7 +263,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 0.8,
                                   }}
-                                  style={{ top: 46, left: 217 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 46, left: 217 }
+                                      : { top: 34, left: 162 }
+                                  }
                                   className="dot"
                                 />
                                 <motion.span
@@ -284,7 +282,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 1.1,
                                   }}
-                                  style={{ top: 46, left: 304 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 46, left: 304 }
+                                      : { top: 35, left: 227 }
+                                  }
                                   className="dot"
                                 />
                                 <motion.span
@@ -299,7 +301,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 0.3,
                                   }}
-                                  style={{ top: 124, left: 172 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 124, left: 172 }
+                                      : { top: 94, left: 128 }
+                                  }
                                   className="dot"
                                 />
                                 <motion.span
@@ -314,7 +320,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 0.6,
                                   }}
-                                  style={{ top: 151, left: 128 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 151, left: 128 }
+                                      : { top: 113, left: 96 }
+                                  }
                                   className="dot"
                                 />
                                 <motion.span
@@ -329,7 +339,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 0.7,
                                   }}
-                                  style={{ top: 151, left: 304 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 151, left: 304 }
+                                      : { top: 112, left: 228 }
+                                  }
                                   className="dot"
                                 />
                                 <motion.span
@@ -344,7 +358,11 @@ const ComputingPower = ({ className, progress }) => {
                                     repeat: Infinity,
                                     delay: 1,
                                   }}
-                                  style={{ top: 200, left: 217 }}
+                                  style={
+                                    width > 500
+                                      ? { top: 200, left: 217 }
+                                      : { top: 150, left: 162 }
+                                  }
                                   className="dot"
                                 />
                               </motion.div>
@@ -364,25 +382,37 @@ const ComputingPower = ({ className, progress }) => {
                               className="logo-cloud"
                             />
                             <InnerBox
-                              style={{ top: "113px", right: "32px" }}
+                              style={
+                                width > 500
+                                  ? { top: "113px", right: "32px" }
+                                  : { scale: 0.8, top: 123, right: 21 }
+                              }
                               delay={0.2}
                               visible={!titleSelected}
                             />
                             <InnerBox
-                              style={{
-                                scale: 1.2,
-                                bottom: "-5px",
-                                left: "244px",
-                              }}
+                              style={
+                                width > 500
+                                  ? {
+                                      scale: 1.2,
+                                      bottom: "-5px",
+                                      left: "244px",
+                                    }
+                                  : { scale: 0.9, bottom: 35, left: 177 }
+                              }
                               delay={0.3}
                               visible={!titleSelected}
                             />
                             <InnerBox
-                              style={{
-                                scale: 0.9,
-                                top: "117px",
-                                left: "22px",
-                              }}
+                              style={
+                                width > 500
+                                  ? {
+                                      scale: 0.9,
+                                      top: "117px",
+                                      left: "22px",
+                                    }
+                                  : { scale: 0.6, top: 122, left: 11 }
+                              }
                               delay={0.4}
                               visible={!titleSelected}
                             />
@@ -392,18 +422,21 @@ const ComputingPower = ({ className, progress }) => {
                               exit="hidden"
                               variants={variants}
                               transition={{ delay: 0.4 }}
-                              className="dots"
-                              style={{
-                                width: "571px",
-                                height: "336px",
-                              }}>
+                              className="dots">
                               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
                                 <>
                                   <MovingDot
-                                    steps={[
-                                      { x: -58, y: -34 },
-                                      { x: -163, y: 32 },
-                                    ]}
+                                    steps={
+                                      width > 500
+                                        ? [
+                                            { x: -58, y: -34 },
+                                            { x: -163, y: 32 },
+                                          ]
+                                        : [
+                                            { x: -62, y: -38 },
+                                            { x: -176, y: 34 },
+                                          ]
+                                    }
                                     position={{
                                       top: 132,
                                       left: 218,
@@ -412,14 +445,28 @@ const ComputingPower = ({ className, progress }) => {
                                     opacity={1 - value / 12}
                                   />
                                   <MovingDot
-                                    steps={[
-                                      { x: -58, y: 32 },
-                                      { x: 56, y: 96 },
-                                    ]}
-                                    position={{
-                                      bottom: 129,
-                                      left: 217,
-                                    }}
+                                    steps={
+                                      width > 500
+                                        ? [
+                                            { x: -58, y: 32 },
+                                            { x: 56, y: 96 },
+                                          ]
+                                        : [
+                                            { x: -50, y: 24 },
+                                            { x: 50, y: 78 },
+                                          ]
+                                    }
+                                    position={
+                                      width > 500
+                                        ? {
+                                            bottom: 129,
+                                            left: 217,
+                                          }
+                                        : {
+                                            bottom: 136,
+                                            left: 164,
+                                          }
+                                    }
                                     delay={30 * value}
                                     opacity={1 - value / 12}
                                   />
@@ -428,10 +475,17 @@ const ComputingPower = ({ className, progress }) => {
                                       { x: 52, y: 28 },
                                       { x: 164, y: -38 },
                                     ]}
-                                    position={{
-                                      bottom: 126,
-                                      right: 227,
-                                    }}
+                                    position={
+                                      width > 500
+                                        ? {
+                                            bottom: 126,
+                                            right: 227,
+                                          }
+                                        : {
+                                            bottom: 114,
+                                            right: 217,
+                                          }
+                                    }
                                     delay={30 * value}
                                     opacity={1 - value / 12}
                                   />
@@ -446,9 +500,24 @@ const ComputingPower = ({ className, progress }) => {
               </motion.div>
             </AnimatePresence>
           </motion.div>
-          <Shadow bottom={0} delay={0} visible={isInView} />
-          <Shadow bottom={71} delay={0.2} visible={isInView} />
-          <Shadow bottom={138} delay={0.4} visible={isInView} />
+          <Shadow
+            height={width > 500 ? 438 : "200pt"}
+            bottom={width > 500 ? 0 : 22}
+            delay={0}
+            visible={isInView}
+          />
+          <Shadow
+            height={width > 500 ? 438 : "200pt"}
+            bottom={width > 500 ? 71 : -10}
+            delay={0.2}
+            visible={isInView}
+          />
+          <Shadow
+            height={width > 500 ? 438 : "200pt"}
+            bottom={width > 500 ? 138 : -36}
+            delay={0.4}
+            visible={isInView}
+          />
         </div>
         <div className="desc">
           {visible ? (
@@ -542,7 +611,8 @@ const ComputingPower = ({ className, progress }) => {
                     staggerChildren: 0.1,
                     duration: 0.4,
                   },
-                }}>
+                }}
+                viewport={{ once: true }}>
                 Two computing power service models, Powering your largest
                 computing needs
               </motion.h2>
@@ -557,7 +627,9 @@ const ComputingPower = ({ className, progress }) => {
                     delay: 0.4,
                   },
                 }}
+                viewport={{ once: true }}
                 onClick={() => setTitleSelected(true)}
+                onMouseEnter={() => setTitleSelected(true)}
                 style={{ color: titleSelected ? "#9babff" : "#898989" }}>
                 Submit computing proposals to the DAO
               </motion.h3>
@@ -572,7 +644,9 @@ const ComputingPower = ({ className, progress }) => {
                     delay: 0.4,
                   },
                 }}
+                viewport={{ once: true }}
                 onClick={() => setTitleSelected(false)}
+                onMouseEnter={() => setTitleSelected(false)}
                 style={{ color: titleSelected ? "#898989" : "#9babff" }}>
                 Buy computing power - P2P market
               </motion.h3>
@@ -586,7 +660,8 @@ const ComputingPower = ({ className, progress }) => {
                     duration: 0.4,
                     delay: 0.8,
                   },
-                }}>
+                }}
+                viewport={{ once: true }}>
                 {titleSelected ? (
                   <motion.p
                     key="modal-1"
@@ -620,20 +695,21 @@ const ComputingPower = ({ className, progress }) => {
 };
 
 export default styled(ComputingPower)`
-  height: 200vh;
+  height: 1080px;
   position: relative;
   .container {
-    position: sticky;
+    position: static;
     top: 0;
     display: flex;
-    max-width: 1600px;
+    /* max-width: 1600px; */
     padding: 0 160px;
     justify-content: space-between;
-    height: 100vh;
-    background-image: url(/img/home/computing_power.png);
+    height: 1080px;
+    /* background-image: url(/img/home/computing_power.png);
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center; */
+    background-color: #090319;
     .desc {
       width: 730px;
       h2 {
@@ -646,7 +722,7 @@ export default styled(ComputingPower)`
       h3 {
         margin: 0;
         margin-bottom: 24px;
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 600;
         line-height: 44px;
         cursor: pointer;
@@ -666,9 +742,9 @@ export default styled(ComputingPower)`
   }
   .logo {
     height: 700px;
-    width: 762px;
+    min-width: 762px;
     position: relative;
-    margin-top: 197px;
+    margin-top: 144px;
     .banner {
       height: 499px;
       width: 100%;
@@ -688,6 +764,9 @@ export default styled(ComputingPower)`
         background-repeat: no-repeat;
         background-size: 100%;
         .p1 {
+          width: 571px;
+          height: 336px;
+          position: absolute;
           padding: 0;
           .boxes {
             height: 260px;
@@ -699,8 +778,14 @@ export default styled(ComputingPower)`
             background-position: center;
             background-repeat: no-repeat;
             background-size: 100%;
+            .dots {
+              height: 260px;
+              width: 355px;
+            }
           }
           .dots {
+            width: 571px;
+            height: 336px;
             position: absolute;
             top: 0;
             left: 0;
@@ -825,13 +910,95 @@ export default styled(ComputingPower)`
   }
   .p1,
   .p2 {
-    padding-top: 197px;
+    padding-top: 144px;
   }
-  @media (max-width: 1200px) {
-    height: 1080px;
+  @media (max-width: 1800px) {
     .container {
-      height: 1080px;
+      padding: 0 120px;
+    }
+  }
+  @media (max-width: 1600px) {
+    .container {
       padding: 0;
+    }
+  }
+  @media (max-width: 1440px) {
+    .container {
+      .desc {
+        h2 {
+          font-size: 36px;
+          line-height: 64px;
+        }
+        h3 {
+          font-size: 24px;
+          line-height: 36px;
+        }
+        p {
+          font-size: 20px;
+          line-height: 32px;
+        }
+      }
+    }
+  }
+  @media (max-width: 500px) {
+    .container {
+      padding: 24pt;
+      flex-direction: column-reverse;
+      justify-content: flex-end;
+      .desc {
+        width: 100%;
+        h2 {
+          font-size: 20pt;
+          line-height: 32pt;
+          text-align: center;
+        }
+        h3 {
+          font-size: 16pt;
+          line-height: 24pt;
+          text-align: center;
+        }
+        p {
+          font-size: 14pt;
+          line-height: 24pt;
+          text-align: center;
+        }
+        .p1 {
+          padding-top: 104pt;
+        }
+      }
+      .logo {
+        width: 100%;
+        margin-top: 40pt;
+        height: 296pt;
+        .banner {
+          height: 100%;
+          .grids {
+            width: 100%;
+            margin-top: 0;
+            .p1 {
+              width: 100%;
+              .logo-cloud {
+                width: 160pt;
+                height: 103pt;
+                top: 84pt;
+                left: 89pt;
+              }
+              .dots {
+                width: 100%;
+              }
+              .boxes {
+                width: 200pt;
+                height: 150pt;
+                top: 52pt;
+                left: 54pt;
+                .dots {
+                  height: 100%;
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;

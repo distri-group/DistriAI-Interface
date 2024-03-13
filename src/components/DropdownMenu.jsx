@@ -41,7 +41,15 @@ function DropdownMenu({ className, children, title, keyName }) {
           anchorEl={anchorEl}
           open={open}
           slotProps={{
-            paper: { style: { background: "transparent", boxShadow: "none" } },
+            root: {
+              style: {
+                marginTop: "8px",
+                padding: "6px",
+                borderRadius: 4,
+                background: "rgba(255, 255, 255, 255, 0.24)",
+                backdropFilter: "blur(12px)",
+              },
+            },
           }}
           placement="bottom-start"
           onMouseEnter={handleHover}

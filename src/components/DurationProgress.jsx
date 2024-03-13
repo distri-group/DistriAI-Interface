@@ -15,6 +15,12 @@ export default function DurationProgress({
       return setUsed(0);
     }
     const start = new Date(startTime);
+    if (!start.getTime() > 0) {
+      return () => {
+        setProgress(0);
+        setUsed(0);
+      };
+    }
     const hour = 1000 * 60 * 60;
     let interval;
     const updateProgress = () => {
@@ -67,7 +73,7 @@ export default function DurationProgress({
         style={{
           color: refundTime
             ? "#ffb9b9"
-            : duration === 0
+            : duration === 0 || new Date(startTime).getTime() === 0
             ? "#878787"
             : "#bdff95",
           position: "relative",

@@ -1,14 +1,16 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import styled from "styled-components";
 import { ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useInView, motion, useAnimation } from "framer-motion";
 import MapWithPoints from "./MapWithPoints";
+import { Context } from "../../views/Home";
 
-const Layers = ({ className, progress }) => {
+const Layers = ({ className }) => {
+  const { scrollProgress, width } = useContext(Context);
   const container = useRef(null);
   const isInView = useInView(container);
   const controls = useAnimation();
-  const [view, setView] = useState(0);
+  const [view, setView] = useState(1);
 
   const handleChange = (e, nextView) => {
     if (nextView) {
@@ -16,13 +18,13 @@ const Layers = ({ className, progress }) => {
     }
   };
 
-  useEffect(() => {
-    if (progress > 21 && progress < 40) {
-      setView(1);
-    } else {
-      setView(0);
-    }
-  }, [isInView, progress]);
+  // useEffect(() => {
+  //   if (scrollProgress > 21 && scrollProgress < 40) {
+  //     setView(1);
+  //   } else {
+  //     setView(0);
+  //   }
+  // }, [scrollProgress]);
   useEffect(() => {
     const sequence = async () => {
       await controls.start("main");
@@ -35,8 +37,10 @@ const Layers = ({ className, progress }) => {
       await controls.start("icon4");
       await controls.start("line4");
     };
-    sequence();
-  }, [controls, view]);
+    if (view === 1 || (scrollProgress > 21 && scrollProgress < 40)) {
+      sequence();
+    }
+  }, [controls, view, scrollProgress]);
 
   return (
     <section ref={container} className={className}>
@@ -49,14 +53,16 @@ const Layers = ({ className, progress }) => {
                 distributed artificial intelligence secure computing platform.
               </p>
               <div className="overall" />
-              <span
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "center",
-                }}>
-                Overall Architecture
-              </span>
+              {width > 500 && (
+                <span
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "center",
+                  }}>
+                  Overall Architecture
+                </span>
+              )}
             </div>
             <ToggleButtonGroup
               className="buttons"
@@ -64,7 +70,10 @@ const Layers = ({ className, progress }) => {
               value={view}
               exclusive
               onChange={handleChange}>
-              <ToggleButton className="button" value={1}>
+              <ToggleButton
+                className="button"
+                onMouseEnter={() => setView(1)}
+                value={1}>
                 <div
                   className="icon"
                   style={{
@@ -77,7 +86,10 @@ const Layers = ({ className, progress }) => {
                   }}
                 />
               </ToggleButton>
-              <ToggleButton className="button" value={2}>
+              <ToggleButton
+                className="button"
+                onMouseEnter={() => setView(2)}
+                value={2}>
                 <div
                   className="icon"
                   style={{
@@ -90,7 +102,10 @@ const Layers = ({ className, progress }) => {
                   }}
                 />
               </ToggleButton>
-              <ToggleButton className="button" value={3}>
+              <ToggleButton
+                className="button"
+                onMouseEnter={() => setView(3)}
+                value={3}>
                 <div
                   className="icon"
                   style={{
@@ -103,7 +118,10 @@ const Layers = ({ className, progress }) => {
                   }}
                 />
               </ToggleButton>
-              <ToggleButton className="button" value={4}>
+              <ToggleButton
+                className="button"
+                onMouseEnter={() => setView(4)}
+                value={4}>
                 <div
                   className="icon"
                   style={{
@@ -184,11 +202,7 @@ const Layers = ({ className, progress }) => {
                     viewBox="0 0 77 87"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    style={{
-                      position: "absolute",
-                      top: "53px",
-                      left: "219px",
-                    }}>
+                    className="line-1">
                     <motion.path
                       d="M76 73C76 73 76 111.5 76 57.5C76 3.50002 39 1 15 1C-8.99999 1 3 1 3 1"
                       stroke="url(#paint0_linear_151_27141)"
@@ -218,11 +232,7 @@ const Layers = ({ className, progress }) => {
                     viewBox="0 0 124 62"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    style={{
-                      position: "absolute",
-                      top: "128px",
-                      right: "124px",
-                    }}>
+                    className="line-2">
                     <motion.path
                       d="M124 1H112.5C41.5 1 73 61 15.5 61H0"
                       stroke="url(#paint0_linear_152_27154)"
@@ -253,11 +263,7 @@ const Layers = ({ className, progress }) => {
                     viewBox="0 0 149 60"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    style={{
-                      position: "absolute",
-                      bottom: "84px",
-                      left: "100px",
-                    }}>
+                    className="line-3">
                     <motion.path
                       d="M148.501 1H132.501C93.9315 1 68.501 59.4998 29.501 59.4998C17.5011 59.4998 0.0133284 50.7764 1.00101 19.4999V7.99999"
                       stroke="url(#paint0_linear_151_27142)"
@@ -288,11 +294,7 @@ const Layers = ({ className, progress }) => {
                     viewBox="0 0 126 61"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    style={{
-                      position: "absolute",
-                      bottom: "37px",
-                      right: "170px",
-                    }}>
+                    className="line-4">
                     <motion.path
                       d="M1 0V14.5C1 48.7158 15 60 29.5 60C57 60 60.5 31.5 107.5 37L125 39"
                       stroke="url(#grad)"
@@ -503,12 +505,12 @@ const Layers = ({ className, progress }) => {
 };
 
 export default styled(Layers)`
-  height: 100vh;
+  height: 1080px;
   position: relative;
   background-image: url(/img/home/layers/layers.png);
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 100%;
+  background-size: cover;
   .Mui-selected {
     background-color: white !important;
   }
@@ -520,9 +522,8 @@ export default styled(Layers)`
   .layers {
     position: relative;
     z-index: 1;
-    max-width: 1600px;
     margin: 0 auto;
-    padding-top: 160px;
+    padding-top: 120px;
     display: flex;
     justify-content: center;
     .left,
@@ -534,10 +535,11 @@ export default styled(Layers)`
       backdrop-filter: blur(12px);
     }
     .left {
-      width: 890px;
+      width: 40%;
+      max-width: 890px;
+      overflow: hidden;
       margin-right: 40px;
       display: flex;
-
       .desc {
         width: 666px;
         p {
@@ -579,14 +581,17 @@ export default styled(Layers)`
       }
     }
     .right {
-      width: 590px;
+      width: 35%;
+      max-width: 590px;
+      overflow: hidden;
       padding: 40px 0;
       background-image: url(/img/home/layers/right-card.png);
       background-size: 100%;
       background-repeat: no-repeat;
       background-position: center;
       .layer {
-        width: 590px;
+        width: 100%;
+        max-width: 590px;
         .desc {
           padding: 0px 40px;
           h3 {
@@ -610,6 +615,7 @@ export default styled(Layers)`
         }
         .lattice {
           width: 100%;
+          min-width: 590px;
           height: 332px;
           background-image: url(/img/home/layers/lattice.png);
           background-position: center;
@@ -671,6 +677,26 @@ export default styled(Layers)`
             background-repeat: no-repeat;
             background-size: 100%;
           }
+          .line-1 {
+            position: absolute;
+            top: 53px;
+            left: 219px;
+          }
+          .line-2 {
+            position: absolute;
+            top: 128px;
+            right: 124px;
+          }
+          .line-3 {
+            position: absolute;
+            bottom: 84px;
+            left: 100px;
+          }
+          .line-4 {
+            position: absolute;
+            bottom: 37px;
+            right: 170px;
+          }
           .types {
             width: 100%;
             height: 100%;
@@ -699,15 +725,17 @@ export default styled(Layers)`
           }
           .halos {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            height: 50%;
             .logo {
               width: 64px;
               height: 64px;
-              left: 263px;
-              top: 143px;
+              left: 50%;
+              top: 56%;
+              transform: translate(-50%, -50%);
             }
             .halo-1 {
               width: 72px;
@@ -717,8 +745,8 @@ export default styled(Layers)`
               background-size: 100%;
               background-position: center;
               position: absolute;
-              top: 139px;
-              left: 259px;
+              left: 112px;
+              top: 58px;
             }
             .halo-2 {
               width: 120px;
@@ -728,8 +756,8 @@ export default styled(Layers)`
               background-size: 100%;
               background-position: center;
               position: absolute;
-              top: 115px;
-              left: 235px;
+              top: 32px;
+              left: 87px;
             }
             .halo-3 {
               width: 160px;
@@ -739,8 +767,8 @@ export default styled(Layers)`
               background-size: 100%;
               background-position: center;
               position: absolute;
-              top: 95px;
-              left: 215px;
+              top: 14px;
+              left: 66px;
             }
           }
           .integrations-lines {
@@ -791,10 +819,177 @@ export default styled(Layers)`
       }
     }
   }
-  @media (max-width: 1200px) {
-    height: 1080px;
-    .video-container {
-      height: 840px;
+  @media (max-width: 1600px) {
+    .layers {
+      .left {
+        .desc {
+          p {
+            font-size: 20px;
+            line-height: 40px;
+          }
+        }
+      }
+      .right {
+        .layer {
+          .desc {
+            h3 {
+              font-size: 24px;
+              line-height: 40px;
+            }
+            .subtitle {
+              font-size: 20px;
+              line-height: 28px;
+            }
+          }
+        }
+      }
+    }
+  }
+  @media (max-width: 500px) {
+    .container {
+      height: 100%;
+      .layers {
+        flex-direction: column;
+        padding-top: 64pt;
+        .left {
+          width: 295pt;
+          height: 288pt;
+          padding: 24pt;
+          margin: 0 auto;
+          flex-direction: column;
+          .desc {
+            width: 100%;
+            p {
+              font-size: 12pt;
+              line-height: 24pt;
+              text-align: center;
+              margin: 0;
+            }
+            .overall {
+              width: 160pt;
+              height: 160pt;
+              margin: 0 auto;
+            }
+          }
+          .buttons {
+            flex-direction: row;
+            width: calc(100% - 48pt);
+            margin: 0 24pt;
+            .button {
+              width: 56pt;
+              height: 56pt;
+            }
+          }
+        }
+        .right {
+          overflow: hidden;
+          width: 343pt;
+          height: 300pt;
+          margin: 0 auto;
+          margin-top: 16pt;
+          padding: 24pt 0 12pt 0;
+          .layer {
+            width: 100%;
+            .desc {
+              padding: 0 24pt;
+              h3 {
+                margin: 0;
+                font-size: 16pt;
+                line-height: 22pt;
+                text-align: center;
+              }
+              .subtitle {
+                display: block;
+                width: 100%;
+                font-size: 14pt;
+                line-height: 20pt;
+                text-align: center;
+              }
+              p {
+                margin: 12pt 0;
+                font-size: 12pt;
+                line-height: 20pt;
+                text-align: center;
+              }
+            }
+            .lattice {
+              height: 193pt;
+              .halos {
+                .logo {
+                  top: 55pt;
+                  left: 85pt;
+                }
+                .halo-1 {
+                  top: 28pt;
+                  left: 58pt;
+                }
+                .halo-2 {
+                  top: 10pt;
+                  left: 39pt;
+                }
+                .halo-3 {
+                  top: -6pt;
+                  left: 23pt;
+                }
+              }
+              .logo {
+                width: 56pt;
+                height: 56pt;
+                top: 80pt;
+                left: 143pt;
+              }
+              .icon-1,
+              .icon-2,
+              .icon-3,
+              .icon-4 {
+                width: 36pt;
+                height: 36pt;
+              }
+              .line-1,
+              .line-2,
+              .line-3,
+              .line-4 {
+                scale: 0.8;
+              }
+              .icon-1 {
+                top: 12pt;
+                left: 90pt;
+              }
+              .icon-2 {
+                top: 56pt;
+                right: 34pt;
+              }
+              .icon-3 {
+                top: 79pt;
+                left: 38pt;
+              }
+              .icon-4 {
+                bottom: 20pt;
+                right: 62pt;
+              }
+              .line-1 {
+                top: 22pt;
+                left: 120pt;
+              }
+              .line-2 {
+                top: 70pt;
+                right: 61pt;
+              }
+              .line-3 {
+                bottom: 44pt;
+                left: 43pt;
+              }
+              .line-4 {
+                bottom: 17pt;
+                right: 87pt;
+              }
+            }
+            .privacy {
+              height: 193pt;
+            }
+          }
+        }
+      }
     }
   }
 `;
