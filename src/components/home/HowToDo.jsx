@@ -56,17 +56,19 @@ const HowToDo = ({ className }) => {
               <span className="title">BUY</span>
               <div className="card">
                 <span className="icon slsb" />
-                <span className="desc">Choose computing device</span>
+                <span className="desc">Choose a computing device</span>
               </div>
               <HorizontalColorChange />
               <div className="card">
                 <span className="icon ljqb" />
-                <span className="desc">Connect wallet, Purchase duration</span>
+                <span className="desc">
+                  Connect wallet and complete payment
+                </span>
               </div>
               <HorizontalColorChange delay={0.3} />
               <div className="card">
                 <span className="icon kssy" />
-                <span className="desc">Start using</span>
+                <span className="desc">Ready to use</span>
               </div>
             </motion.div>
             <motion.div
@@ -84,17 +86,17 @@ const HowToDo = ({ className }) => {
               <span className="title">SELL</span>
               <div className="card">
                 <span className="icon azcx" />
-                <span className="desc">Install client, Run program</span>
+                <span className="desc">Deploy a device</span>
               </div>
               <HorizontalColorChange delay={0.6} />
               <div className="card">
                 <span className="icon szsc" />
-                <span className="desc">Set rental duration and price</span>
+                <span className="desc">Set rental price</span>
               </div>
               <HorizontalColorChange delay={0.9} />
               <div className="card">
                 <span className="icon ksjy" />
-                <span className="desc">Start trading</span>
+                <span className="desc">Awaiting rental</span>
               </div>
             </motion.div>
             <motion.div
@@ -111,17 +113,17 @@ const HowToDo = ({ className }) => {
               <span className="title">DAO</span>
               <div className="card">
                 <span className="icon fbta" />
-                <span className="desc">Publish computing task proposal</span>
+                <span className="desc">Publish computing tasks</span>
               </div>
               <HorizontalColorChange delay={1.2} />
               <div className="card">
                 <span className="icon jsjd" />
-                <span className="desc">Computing nodes claims tasks</span>
+                <span className="desc">Claim by compute nodes</span>
               </div>
               <HorizontalColorChange delay={1.5} />
               <div className="card">
                 <span className="icon jssy" />
-                <span className="desc">Earn from computations</span>
+                <span className="desc">Tasks finished</span>
               </div>
             </motion.div>
           </>
@@ -173,21 +175,21 @@ const HowToDo = ({ className }) => {
                     <div className="card">
                       <span className="icon slsb" />
                       <div className="desc">
-                        <span>Choose computing device</span>
+                        <span>Choose a computing device</span>
                       </div>
                     </div>
                     <HorizontalColorChange />
                     <div className="card">
                       <span className="icon ljqb" />
                       <div className="desc">
-                        <span>Connect wallet, Purchase duration</span>
+                        <span>Connect wallet and complete payment</span>
                       </div>
                     </div>
                     <HorizontalColorChange delay={0.3} />
                     <div className="card">
                       <span className="icon kssy" />
                       <div className="desc">
-                        <span>Start using</span>
+                        <span>Ready to use</span>
                       </div>
                     </div>
                   </motion.div>
@@ -218,21 +220,21 @@ const HowToDo = ({ className }) => {
                     <div className="card">
                       <span className="icon azcx" />
                       <div className="desc">
-                        <span>Install client, Run program</span>
+                        <span>Deploy a device</span>
                       </div>
                     </div>
                     <HorizontalColorChange delay={0.6} />
                     <div className="card">
                       <span className="icon szsc" />
                       <div className="desc">
-                        <span>Set rental duration and price</span>
+                        <span>Set rental price</span>
                       </div>
                     </div>
                     <HorizontalColorChange delay={0.9} />
                     <div className="card">
                       <span className="icon ksjy" />
                       <div className="desc">
-                        <span>Start trading</span>
+                        <span>Awaiting rental</span>
                       </div>
                     </div>
                   </motion.div>
@@ -263,21 +265,21 @@ const HowToDo = ({ className }) => {
                       <div className="card">
                         <span className="icon fbta" />
                         <div className="desc">
-                          <span>Publish computing task proposal</span>
+                          <span>Publish computing tasks</span>
                         </div>
                       </div>
                       <HorizontalColorChange delay={1.2} />
                       <div className="card">
                         <span className="icon jsjd" />
                         <div className="desc">
-                          <span>Computing nodes claims tasks</span>
+                          <span>Claim by compute nodes</span>
                         </div>
                       </div>
                       <HorizontalColorChange delay={1.5} />
                       <div className="card">
                         <span className="icon jssy" />
                         <div className="desc">
-                          <span>Earn from computations</span>
+                          <span>Tasks finished</span>
                         </div>
                       </div>
                     </motion.div>
@@ -294,10 +296,6 @@ const HowToDo = ({ className }) => {
 
 export default styled(HowToDo)`
   height: 1080px;
-  /* background-image: url(/img/home/how_to_do.png);
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat; */
   background-color: #090319;
   .container {
     max-width: 1440px;

@@ -1,14 +1,12 @@
 import styled from "styled-components";
-import React, { createContext } from "react";
+import React, { useRef, useState, useEffect, createContext } from "react";
 import Header from "../components/Header";
 import AboutUs from "../components/home/AboutUs";
-import Backer from "../components/home/Backer";
 import Banner from "../components/home/Banner";
 import ComputingPower from "../components/home/ComputingPower";
 import ContactUs from "../components/home/ContactUs";
 import HowToDo from "../components/home/HowToDo";
 import RoadMap from "../components/home/RoadMap";
-import { useRef, useState, useEffect } from "react";
 import Layers from "../components/home/Layers";
 
 export const Context = createContext();
@@ -60,7 +58,6 @@ function Home({ className }) {
           <HowToDo />
           <AboutUs />
           <RoadMap />
-          {/* <Backer /> */}
           <ContactUs />
         </div>
       </Context.Provider>
@@ -73,12 +70,6 @@ export default styled(Home)`
   .content {
     overflow-x: hidden;
     position: relative;
-    /* scroll-snap-type: y mandatory;
-    section {
-      scroll-snap-align: start;
-    }
-    -ms-overflow-style: none;
-    scrollbar-width: none; */
   }
   .page-header {
     padding-top: 32px;

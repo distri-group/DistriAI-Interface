@@ -75,9 +75,9 @@ function Header({ className }) {
                   <img
                     src="/img/navbar/Icon_White Paper.png"
                     className="icon"
-                    alt="White Paper"
+                    alt="Whitepaper"
                   />
-                  <span className="subtitle">White Paper</span>
+                  <span className="subtitle">Whitepaper</span>
                 </a>
               </DropdownMenu>
               <DropdownMenu title="About">
@@ -195,7 +195,7 @@ export default styled(Header)`
       cursor: pointer;
     }
     background-color: rgba(0, 0, 0, 0.12);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(5px);
   }
   .dropdown {
     text-transform: none;

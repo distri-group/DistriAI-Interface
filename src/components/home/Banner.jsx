@@ -14,7 +14,7 @@ const Banner = ({ className }) => {
     y: 20,
   };
   const statements = [
-    "The first system with privacy and security protection for data/models.",
+    "Building a full-stack AI app with Distri.AI.",
     "The pioneering platform with large-scale distributed training capabilities.",
     "Building the next generation secure distributed Al computing network.",
   ];
@@ -46,8 +46,7 @@ const Banner = ({ className }) => {
               duration: 0.6,
             },
           }}>
-          Distributed Al <br />
-          Computing Network
+          Community-Powered AI Lab
         </motion.h1>
         <motion.h1
           className="green-title"
@@ -61,7 +60,7 @@ const Banner = ({ className }) => {
               delay: 0.5,
             },
           }}>
-          Safe · Cost-Effective
+          Open · Secure
         </motion.h1>
         {isVisible && (
           <motion.p

@@ -1,14 +1,13 @@
 import { useRef, useEffect, useState, useContext } from "react";
 import styled from "styled-components";
 import { ToggleButtonGroup, ToggleButton } from "@mui/material";
-import { useInView, motion, useAnimation } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import MapWithPoints from "./MapWithPoints";
 import { Context } from "../../views/Home";
 
 const Layers = ({ className }) => {
   const { scrollProgress, width } = useContext(Context);
   const container = useRef(null);
-  const isInView = useInView(container);
   const controls = useAnimation();
   const [view, setView] = useState(1);
 
@@ -18,13 +17,6 @@ const Layers = ({ className }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (scrollProgress > 21 && scrollProgress < 40) {
-  //     setView(1);
-  //   } else {
-  //     setView(0);
-  //   }
-  // }, [scrollProgress]);
   useEffect(() => {
     const sequence = async () => {
       await controls.start("main");
@@ -49,20 +41,10 @@ const Layers = ({ className }) => {
           <div className="left">
             <div className="desc">
               <p>
-                Distri.AI is committed to establishing a globally leading
-                distributed artificial intelligence secure computing platform.
+                Connect. Contribute. Commerce. -Unlocking the potential of AI
+                together.
               </p>
               <div className="overall" />
-              {width > 500 && (
-                <span
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "center",
-                  }}>
-                  Overall Architecture
-                </span>
-              )}
             </div>
             <ToggleButtonGroup
               className="buttons"
@@ -145,9 +127,9 @@ const Layers = ({ className }) => {
                     Distributed GPU Computing Network
                   </span>
                   <p>
-                    A system combining blockchain technology and P2P network
-                    architecture where computing nodes can contribute resources
-                    in two ways.
+                    Provide more cost-effective and transparent computational
+                    services,enabling users to conveniently and efficiently
+                    utilize computational resources.
                   </p>
                 </div>
                 <div className="lattice" style={{ display: "flex" }}>
@@ -326,13 +308,12 @@ const Layers = ({ className }) => {
                 <div className="desc">
                   <h3>Privacy Preserving Layer</h3>
                   <span className="subtitle">
-                    A Deep Learning Framework Based on Hierarchical Privacy
-                    Protection
+                    Privacy-PreservingMLFramework
                   </span>
                   <p>
-                    Introducing an innovative deep learning framework -
-                    PrivySphere, providing multi-layered, flexible privacy
-                    protection options.
+                    Provide users with multi-tiered and flexible
+                    privacy-preserving options,ensuring the privacy and security
+                    of data and models during AI development.
                   </p>
                 </div>
                 <video className="privacy" autoPlay muted loop>
@@ -344,12 +325,12 @@ const Layers = ({ className }) => {
                 <div className="desc">
                   <h3>Model Development Layer</h3>
                   <span className="subtitle">
-                    Online ML Platform with Shared Models and Datasets
+                    Models and Datasets Sharing Platform
                   </span>
                   <p>
-                    Allows users access to providers' models or data for AI
-                    training tasks, while ensuring providers' models and data
-                    are fully protected, maximizing value.
+                    Create more economic value while ensuring that models and
+                    datasets provided by contributors are not maliciously leaked
+                    or abused.
                   </p>
                 </div>
                 <div
@@ -479,23 +460,24 @@ const Layers = ({ className }) => {
                   </div>
                 </div>
               </div>
-            ) : view === 4 ? (
-              <div className="layer">
-                <div className="desc">
-                  <h3>Community Ecosystem</h3>
-                  <span className="subtitle">
-                    Technical exchange, friendly interaction, resource sharing
-                  </span>
-                  <p>
-                    Inviting cybersecurity experts, enterprise IT users, and
-                    academic researchers to join and provide instant messaging
-                    and collaboration toolkits.
-                  </p>
-                </div>
-                <MapWithPoints />
-              </div>
             ) : (
-              <></>
+              view === 4 && (
+                <div className="layer">
+                  <div className="desc">
+                    <h3>Community Ecosystem</h3>
+                    <span className="subtitle">
+                      Eco-Community for AI Developers
+                    </span>
+                    <p>
+                      Offer a platform for cutting-edge discussions, Q&A and
+                      innovative collaboration enabling deep exploration of Al
+                      potential, connection with peers, and collective
+                      advancement.
+                    </p>
+                  </div>
+                  <MapWithPoints />
+                </div>
+              )
             )}
           </div>
         </div>
@@ -914,6 +896,7 @@ export default styled(Layers)`
             }
             .lattice {
               height: 193pt;
+              min-width: 0;
               .halos {
                 .logo {
                   top: 55pt;

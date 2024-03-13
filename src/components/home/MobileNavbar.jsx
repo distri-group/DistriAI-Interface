@@ -164,9 +164,9 @@ function MobileNavbar({ className, onClose, onVideoOpen }) {
                   <img
                     src="/img/navbar/Icon_White Paper.png"
                     className="icon"
-                    alt="White Paper"
+                    alt="Whitepaper"
                   />
-                  <Typography className="item">White Paper</Typography>
+                  <Typography className="item">Whitepaper</Typography>
                 </ListItemButton>
               </Grid>
             </AccordionDetails>

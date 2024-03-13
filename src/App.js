@@ -1,15 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import Home from "./views/Home";
-import Buy from "./views/Buy";
-import Market from "./views/Market";
-import MakeOffer from "./views/MakeOffer";
-import OrderDetail from "./views/OrderDetail";
-import MyDevice from "./views/MyDevice";
-import MyOrder from "./views/MyOrder";
-import Faucet from "./views/Faucet";
-import ExtendDuration from "./views/ExtendDuration";
 import {
   WalletProvider,
   ConnectionProvider,
@@ -19,13 +10,21 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Buffer } from "buffer";
+import Home from "./views/Home";
+import Buy from "./views/Buy";
+import Market from "./views/Market";
+import MakeOffer from "./views/MakeOffer";
+import OrderDetail from "./views/OrderDetail";
+import MyDevice from "./views/MyDevice";
+import MyOrder from "./views/MyOrder";
+import Faucet from "./views/Faucet";
+import ExtendDuration from "./views/ExtendDuration";
 import NavBar from "./components/NavBar";
 import Rewards from "./views/Rewards";
 import EndDuration from "./views/EndDuration";
 import Earning from "./views/Earning";
 import EarningDetail from "./views/EarningDetail";
 import RewardDetail from "./views/RewardDetail";
-import Test from "./views/Test";
 
 function App() {
   window.Buffer = Buffer;
@@ -149,7 +148,6 @@ function App() {
                   <Route path="/reward/:period" element={<RewardDetail />} />
                   <Route path="/earning" element={<Earning />} />
                   <Route path="/earning/:id" element={<EarningDetail />} />
-                  <Route path="/test" element={<Test />} />
                 </Routes>
               </SnackbarProvider>
             </ThemeProvider>

@@ -42,7 +42,7 @@ const ContactUs = ({ className }) => {
             },
           }}
           viewport={{ once: true }}>
-          Learn more about DistriAI
+          Learn More About Distri.AI
         </motion.h2>
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
@@ -56,8 +56,8 @@ const ContactUs = ({ className }) => {
             },
           }}
           viewport={{ once: true }}>
-          Subscribe to the latest news from DistriAI to stay informed about
-          project updates in real time.
+          Subscribe to the latest news from Distri.AI to stay informed about
+          updates in realtime.
         </motion.h3>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
