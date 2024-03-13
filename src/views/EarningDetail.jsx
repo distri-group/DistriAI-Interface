@@ -53,7 +53,9 @@ function Home({ className }) {
                       <div className="time">
                         <span>
                           Start Time{" "}
-                          {new Date(record.OrderTime).toLocaleString()}
+                          {new Date(record.StartTime) > 0
+                            ? new Date(record.StartTime).toLocaleString()
+                            : "--"}
                         </span>
                         {record.StatusName !== "Failed" &&
                           (record.StatusName === "Available" ? (
@@ -75,18 +77,20 @@ function Home({ className }) {
                             </span>
                           ))}
                       </div>
-                      <DurationProgress
-                        startTime={record.OrderTime}
-                        endTime={
-                          record.StatusName === "Available"
-                            ? null
-                            : record.EndTime
-                        }
-                        duration={record.Duration}
-                        refundTime={
-                          record.RefundDuration ? record.RefundTime : null
-                        }
-                      />
+                      {record.StatusName !== "Failed" && (
+                        <DurationProgress
+                          startTime={record.StartTime}
+                          endTime={
+                            record.StatusName === "Available"
+                              ? null
+                              : record.EndTime
+                          }
+                          duration={record.Duration}
+                          refundTime={
+                            record.RefundDuration ? record.RefundTime : null
+                          }
+                        />
+                      )}
                       <div className="price">
                         <div className="price-box">
                           <label>Price</label>

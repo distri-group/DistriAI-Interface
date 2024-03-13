@@ -129,7 +129,10 @@ function EndDuration({ className }) {
                 <h2>Order Info</h2>
                 <div className="time">
                   <span>
-                    Start Time {new Date(detail.OrderTime).toLocaleString()}
+                    Start Time{" "}
+                    {new Date(detail.StartTime) > 0
+                      ? new Date(detail.StartTime).toLocaleString()
+                      : "--"}
                   </span>
                   <span>
                     Remaining Time{" "}
@@ -138,10 +141,12 @@ function EndDuration({ className }) {
                     />
                   </span>
                 </div>
-                <DurationProgress
-                  startTime={detail.OrderTime}
-                  duration={detail.Duration}
-                />
+                {detail.StatusName !== "Failed" && (
+                  <DurationProgress
+                    startTime={detail.StartTime}
+                    duration={detail.Duration}
+                  />
+                )}
                 <div className="horizontal">
                   <div className="box">
                     <label>Price</label>

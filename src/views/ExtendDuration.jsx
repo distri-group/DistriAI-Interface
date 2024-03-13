@@ -125,7 +125,7 @@ function Home({ className }) {
                   <div>
                     <label>Start Time</label>
                     <span>
-                      {new Date(orderDetail.OrderTime).toLocaleString()}
+                      {new Date(orderDetail.StartTime).toLocaleString()}
                     </span>
                   </div>
                   <div>
@@ -137,10 +137,12 @@ function Home({ className }) {
                     </span>
                   </div>
                 </div>
-                <DurationProgress
-                  startTime={orderDetail.OrderTime}
-                  duration={orderDetail.Duration}
-                />
+                {orderDetail.StatusName !== "Failed" && (
+                  <DurationProgress
+                    startTime={orderDetail.StartTime}
+                    duration={orderDetail.Duration}
+                  />
+                )}
                 <DurationToggle
                   duration={duration}
                   setDuration={setDuration}
