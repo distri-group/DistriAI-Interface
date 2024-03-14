@@ -46,6 +46,7 @@ export async function getOrderList(pageIndex, filter, publicKey) {
         item.Metadata.MachineInfo = machine;
       }
     }
+    console.log("Order List", list);
     return { list, total };
   } catch (e) {
     throw e;
@@ -77,25 +78,14 @@ function formatOrder(item) {
         (new Date(item.RefundTime) - new Date(item.OrderTime)) / 3600000
       );
   }
-  switch (item.Status) {
-    case 0:
-      item.StatusName = "Preparing";
-      break;
-    case 1:
-      item.StatusName = "Available";
-      break;
-    case 2:
-      item.StatusName = "Completed";
-      break;
-    case 3:
-      item.StatusName = "Failed";
-      break;
-    case 4:
-      item.StatusName = "Refunded";
-      break;
-    default:
-      break;
-  }
+  const statusName = [
+    "Preparing",
+    "Available",
+    "Completed",
+    "Failed",
+    "Refunded",
+  ];
+  item.StatusName = statusName[item.Status];
 }
 export function getFilterData() {
   let list = [];
