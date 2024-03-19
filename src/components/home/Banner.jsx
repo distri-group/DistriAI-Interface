@@ -1,37 +1,13 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState, useEffect, useContext } from "react";
-import useCycle from "../../utils/useCycle";
-import { Context } from "../../views/Home";
 
 const Banner = ({ className }) => {
-  const { width } = useContext(Context);
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
   const initial = {
     opacity: 0,
     y: 20,
   };
-  const statements = [
-    "Building a full-stack AI app with Distri.AI.",
-    "The pioneering platform with large-scale distributed training capabilities.",
-    "Building the next generation secure distributed Al computing network.",
-  ];
-  const [current, cycle] = useCycle(statements);
-  useEffect(() => {
-    let interval;
-    const timeout = setTimeout(() => {
-      setIsVisible(true);
-      interval = setInterval(() => {
-        cycle();
-      }, 3000);
-    }, 1000);
-    return () => {
-      clearTimeout(timeout);
-      clearInterval(interval);
-    };
-  }, [cycle]);
   return (
     <section id="banner" className={className}>
       <div className="title">
@@ -62,18 +38,16 @@ const Banner = ({ className }) => {
           }}>
           Open · Secure
         </motion.h1>
-        {isVisible && (
-          <motion.p
-            className="desc"
-            key={current}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{
-              duration: 0.5,
-            }}>
-            {current}
-          </motion.p>
-        )}
+        <motion.p
+          className="desc"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{
+            duration: 0.6,
+            delay: 1,
+          }}>
+          Building a full-stack AI app with Distri.AI.
+        </motion.p>
         <div className="buttons">
           <motion.span
             className="trans-btn"
@@ -134,7 +108,8 @@ const Banner = ({ className }) => {
 };
 
 export default styled(Banner)`
-  height: 1080px;
+  height: 100vh;
+  max-height: 1080px;
   /* position: relative;
   overflow: hidden; */
   background-color: #0b0118;
@@ -251,6 +226,19 @@ export default styled(Banner)`
       line-height: 28px;
     }
   }
+  @media (max-height: 1000px) {
+    .title {
+      padding-top: 200px;
+      padding-left: 120px;
+    }
+    .background,
+    .center {
+      top: -80px;
+    }
+    video {
+      top: 18%;
+    }
+  }
   @media (max-width: 500px) {
     .title {
       position: relative;
@@ -292,12 +280,15 @@ export default styled(Banner)`
       height: 60%;
       position: relative;
       .background {
+        top: 0;
         width: 100%;
       }
       .center {
+        top: 0;
         width: 90%;
       }
       video {
+        top: 25%;
         width: 100%;
       }
     }

@@ -96,7 +96,8 @@ const ContactUs = ({ className }) => {
 };
 
 export default styled(ContactUs)`
-  height: 1080px;
+  height: 100vh;
+  max-height: 1080px;
   background-image: url(/img/home/contact_us.png);
   background-position: center;
   background-repeat: no-repeat;

@@ -503,16 +503,19 @@ const ComputingPower = ({ className }) => {
 };
 
 export default styled(ComputingPower)`
-  height: 1080px;
+  height: 100vh;
+  max-height: 1080px;
   position: relative;
+  background-color: #090319;
   .container {
     position: static;
     top: 0;
     display: flex;
     padding: 0 160px;
+    max-width: 1600px;
+    margin: 0 auto;
     justify-content: space-between;
     height: 1080px;
-    background-color: #090319;
     .desc {
       width: 730px;
       h2 {
@@ -629,6 +632,7 @@ export default styled(ComputingPower)`
   .p1 {
     padding-top: 144px;
   }
+
   @media (max-width: 1800px) {
     .container {
       padding: 0 120px;
@@ -654,6 +658,14 @@ export default styled(ComputingPower)`
           font-size: 20px;
           line-height: 32px;
         }
+      }
+    }
+  }
+  @media (max-height: 1000px) {
+    .container {
+      .logo {
+        scale: 0.7;
+        margin-top: 100px;
       }
     }
   }
@@ -684,6 +696,7 @@ export default styled(ComputingPower)`
         }
       }
       .logo {
+        scale: 1;
         width: 100%;
         min-width: 0;
         margin-top: 40pt;

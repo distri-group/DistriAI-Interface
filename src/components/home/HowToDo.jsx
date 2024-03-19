@@ -295,10 +295,11 @@ const HowToDo = ({ className }) => {
 };
 
 export default styled(HowToDo)`
-  height: 1080px;
+  height: 100vh;
+  max-height: 1080px;
   background-color: #090319;
   .container {
-    max-width: 1440px;
+    max-width: 1200px;
     height: calc(100% - 360px);
     margin: 0 auto;
     display: flex;
@@ -334,7 +335,6 @@ export default styled(HowToDo)`
         font-weight: 500;
         color: rgba(255, 255, 255, 0.8);
         line-height: 28px;
-        white-space: nowrap;
       }
     }
   }
@@ -364,6 +364,13 @@ export default styled(HowToDo)`
   }
   .jssy {
     background-image: url(/img/home/icon_jssy.png);
+  }
+  @media (max-width: 1600px) {
+    .row {
+      .card {
+        width: 240px;
+      }
+    }
   }
   @media (max-width: 500px) {
     .container {

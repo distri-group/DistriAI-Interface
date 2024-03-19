@@ -41,8 +41,8 @@ const Layers = ({ className }) => {
           <div className="left">
             <div className="desc">
               <p>
-                Connect. Contribute. Commerce. -Unlocking the potential of AI
-                together.
+                Connect. Contribute. Commerce. <br />
+                Unlocking the potential of AI together.
               </p>
               <div className="overall" />
             </div>
@@ -308,7 +308,7 @@ const Layers = ({ className }) => {
                 <div className="desc">
                   <h3>Privacy Preserving Layer</h3>
                   <span className="subtitle">
-                    Privacy-PreservingMLFramework
+                    Privacy-Preserving ML Framework
                   </span>
                   <p>
                     Provide users with multi-tiered and flexible
@@ -380,7 +380,7 @@ const Layers = ({ className }) => {
                     </div>
                   </div>
                   <div className="halos">
-                    <motion.span
+                    {/* <motion.span
                       initial={{ scale: 0, opacity: 1 }}
                       animate={{ scale: 1.5, opacity: 0 }}
                       transition={{
@@ -409,7 +409,20 @@ const Layers = ({ className }) => {
                         ease: "easeOut",
                       }}
                       className="halo-3"
-                    />
+                    /> */}
+                    <motion.span
+                      initial={{ scale: 0, opacity: 1 }}
+                      animate={{ scale: 1.5, opacity: 0 }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeOut",
+                      }}
+                      className="halo-3">
+                      <motion.span className="halo-2">
+                        <motion.span className="halo-1" />
+                      </motion.span>
+                    </motion.span>
                     <span className="logo" />
                   </div>
                   <div className="integrations-lines">
@@ -544,10 +557,10 @@ export default styled(Layers)`
         margin-left: 48px;
         width: 160px;
         height: 100%;
-        justify-content: space-between;
+        justify-content: space-around;
         .button {
           width: 100%;
-          height: 144px;
+          height: 100px;
           border-radius: 16px;
           border: none;
           background: rgba(155, 171, 255, 0.12);
@@ -568,7 +581,7 @@ export default styled(Layers)`
       overflow: hidden;
       padding: 40px 0;
       background-image: url(/img/home/layers/right-card.png);
-      background-size: 100%;
+      background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
       .layer {
@@ -597,7 +610,6 @@ export default styled(Layers)`
         }
         .lattice {
           width: 100%;
-          min-width: 590px;
           height: 332px;
           background-image: url(/img/home/layers/lattice.png);
           background-position: center;
@@ -608,76 +620,72 @@ export default styled(Layers)`
             width: 96px;
             height: 96px;
             position: absolute;
-            top: 138px;
-            left: 247px;
+            top: 42%;
+            left: 42%;
             background-image: url(/img/home/layers/logo.png);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 100%;
+            z-index: 5;
+          }
+          .icon-1,
+          .icon-2,
+          .icon-3,
+          .icon-4 {
+            width: 64px;
+            height: 64px;
+            position: absolute;
+            z-index: 2;
             background-position: center;
             background-repeat: no-repeat;
             background-size: 100%;
           }
           .icon-1 {
-            width: 64px;
-            height: 64px;
-            position: absolute;
-            top: 21px;
-            left: 155px;
+            top: 8%;
+            left: 26%;
             background-image: url(/img/home/layers/icon_01.png);
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 100%;
           }
           .icon-2 {
-            width: 64px;
-            height: 64px;
-            position: absolute;
-            top: 96px;
-            right: 62px;
+            top: 29%;
+            left: 78%;
             background-image: url(/img/home/layers/icon_02.png);
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 100%;
           }
           .icon-3 {
-            width: 64px;
-            height: 64px;
-            position: absolute;
-            top: 133px;
-            left: 68px;
+            top: 40%;
+            left: 13%;
             background-image: url(/img/home/layers/icon_03.png);
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 100%;
           }
           .icon-4 {
-            width: 64px;
-            height: 64px;
-            position: absolute;
-            bottom: 25px;
-            right: 108px;
+            bottom: 10%;
+            right: 18%;
             background-image: url(/img/home/layers/icon_04.png);
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 100%;
+          }
+
+          .line-1,
+          .line-2,
+          .line-3,
+          .line-4 {
+            z-index: 1;
           }
           .line-1 {
             position: absolute;
-            top: 53px;
-            left: 219px;
+            top: 16.5%;
+            left: 37.1%;
           }
           .line-2 {
             position: absolute;
-            top: 128px;
-            right: 124px;
+            top: 38.5%;
+            right: 21.2%;
           }
           .line-3 {
             position: absolute;
-            bottom: 84px;
-            left: 100px;
+            bottom: 25.3%;
+            left: 17.3%;
           }
           .line-4 {
             position: absolute;
-            bottom: 37px;
-            right: 170px;
+            top: 70%;
+            left: 50%;
           }
           .types {
             width: 100%;
@@ -712,11 +720,14 @@ export default styled(Layers)`
             transform: translate(-50%, -50%);
             width: 50%;
             height: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             .logo {
               width: 64px;
               height: 64px;
               left: 50%;
-              top: 56%;
+              top: 50%;
               transform: translate(-50%, -50%);
             }
             .halo-1 {
@@ -726,9 +737,6 @@ export default styled(Layers)`
               background-repeat: no-repeat;
               background-size: 100%;
               background-position: center;
-              position: absolute;
-              left: 112px;
-              top: 58px;
             }
             .halo-2 {
               width: 120px;
@@ -737,9 +745,9 @@ export default styled(Layers)`
               background-repeat: no-repeat;
               background-size: 100%;
               background-position: center;
-              position: absolute;
-              top: 32px;
-              left: 87px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             }
             .halo-3 {
               width: 160px;
@@ -748,9 +756,9 @@ export default styled(Layers)`
               background-repeat: no-repeat;
               background-size: 100%;
               background-position: center;
-              position: absolute;
-              top: 14px;
-              left: 66px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             }
           }
           .integrations-lines {
@@ -803,10 +811,13 @@ export default styled(Layers)`
   }
   @media (max-width: 1600px) {
     .layers {
+      .left,
+      .right {
+        height: 596px;
+      }
       .left {
         .desc {
           p {
-            font-size: 20px;
             line-height: 40px;
           }
         }
@@ -866,7 +877,7 @@ export default styled(Layers)`
         .right {
           overflow: hidden;
           width: 343pt;
-          height: 300pt;
+          height: auto;
           margin: 0 auto;
           margin-top: 16pt;
           padding: 24pt 0 12pt 0;
@@ -899,20 +910,9 @@ export default styled(Layers)`
               min-width: 0;
               .halos {
                 .logo {
-                  top: 55pt;
-                  left: 85pt;
-                }
-                .halo-1 {
-                  top: 28pt;
-                  left: 58pt;
-                }
-                .halo-2 {
-                  top: 10pt;
-                  left: 39pt;
-                }
-                .halo-3 {
-                  top: -6pt;
-                  left: 23pt;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
                 }
               }
               .logo {
@@ -963,8 +963,8 @@ export default styled(Layers)`
                 left: 43pt;
               }
               .line-4 {
-                bottom: 17pt;
-                right: 87pt;
+                top: 68%;
+                left: 47%;
               }
             }
             .privacy {

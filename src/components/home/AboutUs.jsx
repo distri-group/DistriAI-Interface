@@ -197,7 +197,7 @@ const AboutUs = ({ className }) => {
         </div>
         <div className="about-us">
           <motion.div
-            key="about-us-2"
+            key="about-us"
             className="p2"
             initial={initial}
             animate={{
@@ -212,7 +212,7 @@ const AboutUs = ({ className }) => {
                 duration: 0.6,
               },
             }}>
-            <h2 style={{ maxWidth: 1600, margin: "0 auto 120px auto" }}>
+            <h2>
               The innovation of Distri.AI consists in its large-Scale
               distributed training, flexible privacy-peserving mechanism and
               model as a service.
@@ -253,7 +253,8 @@ const AboutUs = ({ className }) => {
 };
 
 export default styled(AboutUs)`
-  height: 1080px;
+  height: 100vh;
+  max-height: 1080px;
   position: relative;
   .container {
     position: static;
@@ -281,30 +282,30 @@ export default styled(AboutUs)`
     margin: 0 auto;
     height: 100vh;
     h2 {
-      margin: 0;
+      margin: 0 140px;
+      margin-bottom: 40px;
+      margin-top: 0;
       font-size: 48px;
       font-weight: 600;
       line-height: 72px;
       text-align: center;
     }
     .p2 {
+      height: 748px;
       position: absolute;
       top: 0;
       width: 100%;
       padding-top: 162px;
     }
-    .p2 {
-      height: 748pt;
-    }
     .card-container {
       display: flex;
       justify-content: center;
       position: relative;
-      height: 343pt;
+      height: 343px;
       .card {
         z-index: 10;
         width: 400px;
-        height: 400px;
+        height: calc(100% - 80px);
         margin: 0 40px;
         background: rgba(255, 255, 255, 0.12);
         border-radius: 24px;
@@ -380,6 +381,12 @@ export default styled(AboutUs)`
   }
   @media (max-width: 1600px) {
     .about-us {
+      .p2 {
+        h2 {
+          font-size: 36px;
+          line-height: 48px;
+        }
+      }
       .card-container {
         .card {
           h3 {
@@ -398,19 +405,18 @@ export default styled(AboutUs)`
     .about-us {
       .p2 {
         padding-top: 64pt;
-      }
-      .p2 {
         h2 {
-          margin-top: 80pt;
+          font-size: 24pt;
+          line-height: 48pt;
+          margin: 0;
+          margin-bottom: 40pt;
         }
         .card-container {
           .card {
             position: absolute;
             top: 0;
             width: 263pt;
-            height: 263pt;
             margin: 0;
-            padding: 40pt;
             h3 {
               height: auto;
             }
