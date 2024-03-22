@@ -8,7 +8,7 @@
 
 ## Install
 
-node:v21.1.0
+node:^21.1.0
 
 ```
 yarn
