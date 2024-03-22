@@ -8,7 +8,7 @@ import { KeyboardDoubleArrowDown } from "@mui/icons-material";
 function NavBar({ className }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState("buyer");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   useEffect(() => {
@@ -27,9 +27,6 @@ function NavBar({ className }) {
       location.pathname.includes("/makeoffer")
     ) {
       setUser("seller");
-    }
-    if (location.pathname === "/faucet" && !user) {
-      setUser("buyer");
     }
   }, [location.pathname, user]);
   return (
@@ -81,6 +78,8 @@ function NavBar({ className }) {
           {user === "buyer" && (
             <>
               <span onClick={() => navigate("/market")}>Market</span>
+              <span onClick={() => navigate("/models")}>Models</span>
+              <span onClick={() => navigate("/datasets")}>Datasets</span>
               <span onClick={() => navigate("/order")}>My Orders</span>
             </>
           )}

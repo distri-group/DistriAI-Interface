@@ -25,6 +25,11 @@ import EndDuration from "./views/EndDuration";
 import Earning from "./views/Earning";
 import EarningDetail from "./views/EarningDetail";
 import RewardDetail from "./views/RewardDetail";
+import Models from "./views/Models";
+import Datasets from "./views/Datasets";
+import CreateModel from "./views/CreateModel";
+import ModelDetail from "./views/ModelDetail";
+import ModelDeploy from "./views/ModelDeploy";
 
 function App() {
   window.Buffer = Buffer;
@@ -39,6 +44,13 @@ function App() {
       },
     },
     components: {
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: "white",
+          },
+        },
+      },
       MuiTextField: {
         defaultProps: {
           fullWidth: true,
@@ -57,6 +69,14 @@ function App() {
             textTransform: "none",
           },
           "&:disabled": {
+            color: "white",
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          colorPrimary: {
+            backgroundColor: "#555",
             color: "white",
           },
         },
@@ -87,6 +107,22 @@ function App() {
             },
             color: "white",
             borderColor: "white",
+          },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            backgroundColor: "#2d2d2d",
+          },
+        },
+      },
+      MuiTabPanel: {
+        styleOverrides: {
+          root: {
+            padding: "24px 0",
+            backgroundColor: "#2d2d2d",
+            borderRadius: "0 15px 15px 15px",
           },
         },
       },
@@ -121,7 +157,11 @@ function App() {
     };
   }, []);
   return (
-    <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
+    <ConnectionProvider
+      endpoint={
+        "https://solana-devnet.g.alchemy.com/v2/2h8WfGQlu5CkB0SVf_zHWpi7gsZP-rs2"
+      }>
+      {/* <ConnectionProvider endpoint={"https://api.devnet.solana.com"}> */}
       <WalletProvider wallets={[]} autoConnect={true}>
         <WalletModalProvider>
           <BrowserRouter>
@@ -148,6 +188,11 @@ function App() {
                   <Route path="/reward/:period" element={<RewardDetail />} />
                   <Route path="/earning" element={<Earning />} />
                   <Route path="/earning/:id" element={<EarningDetail />} />
+                  <Route path="/models" element={<Models />} />
+                  <Route path="/models/:id" element={<ModelDetail />} />
+                  <Route path="/models/:id/deploy" element={<ModelDeploy />} />
+                  <Route path="/models/create" element={<CreateModel />} />
+                  <Route path="/datasets" element={<Datasets />} />
                 </Routes>
               </SnackbarProvider>
             </ThemeProvider>
