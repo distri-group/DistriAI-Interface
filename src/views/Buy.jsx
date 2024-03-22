@@ -9,121 +9,57 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
-import { TextField } from "@mui/material";
+import { CircularProgress, Grid, TextField } from "@mui/material";
 import DurationToggle from "../components/DurationToggle";
+import DeviceCard from "../components/DeviceCard";
 import * as anchor from "@project-serum/anchor";
 
-let formData = {
-  taskName: "",
-  duration: 1,
-};
-
-function Home({ className }) {
-  const { id } = useParams();
+function Buy({ className }) {
   document.title = "Edit model";
+  const { id } = useParams();
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
+  const [formValue, setFormValue] = useState({
+    duration: 0,
+    taskName: "",
+  });
   const [deviceDetail, setDeviceDetail] = useState({});
-  const [index, setIndex] = useState(0);
-  const [duration, setDuration] = useState(1);
   const childRef = useRef();
 
-  const getTokenBalance = async (mint, address) => {
-    let res = await childRef.current.getTokenAccountBalance(mint, address);
-    return res;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValue((prevState) => ({ ...prevState, [name]: value }));
   };
-
-  const onInput = (e) => {
-    let value = e.target.value;
-    let name = e.target.dataset.name;
-    formData[name] = value;
-    if (name === "duration" && value && !isNaN(value)) {
-      value = parseInt(value);
-      if (value <= 0) {
-        setAmount(0);
-        e.target.value = 0;
-        return enqueueSnackbar(
-          "The duration must be an integer greater than 0",
-          { variant: "error" }
-        );
-      }
-      setDuration(value);
-    }
-  };
-  useEffect(() => {
-    setAmount(duration * deviceDetail.Price || 0);
-  }, [duration, deviceDetail]);
-  useEffect(() => {
-    const getBalance = async () => {
-      setLoading(true);
-      const amount = await getTokenBalance(
-        webconfig.MINT_PROGRAM,
-        wallet.publicKey
-      );
-      const res = await getOrderList(1, [], wallet.publicKey.toString());
-      setIndex(res.total + 1);
-      setBalance(amount / LAMPORTS_PER_SOL);
-      setLoading(false);
-    };
-    if (wallet?.publicKey) {
-      getBalance();
-    }
-    const init = async () => {
-      let detail = await getMachineDetailByUuid(id);
-      if (detail) {
-        setDeviceDetail(detail);
-      }
-    };
-    init();
-  }, [id, wallet]);
-  const valid = () => {
-    if (!formData.taskName) {
-      formData.taskName = `Computing Task - ${index}`;
-    }
-    if (!formData.duration) {
-      return "Duration is required.";
-    }
-    return null;
-  };
-  const onSubmit = async () => {
-    let vmsg = valid();
-    if (vmsg) {
-      return enqueueSnackbar(vmsg, { variant: "warning" });
-    }
-    setLoading(true);
-    let ret = await placeOrderStart(deviceDetail, formData);
-    if (ret.msg !== "ok") {
-      setLoading(false);
-      return enqueueSnackbar(ret.msg, { variant: "error" });
-    }
-    enqueueSnackbar("Purchase Successfully.", { variant: "success" });
-    setTimeout(() => {
-      setLoading(false);
-      navigate("/order");
-    }, 300);
-  };
-  async function placeOrderStart(deviceDetail, formData) {
-    let orderId = new Date().valueOf().toString();
+  const onSubmit = async (e) => {
+    const orderId = new Date().valueOf().toString();
+    e.preventDefault();
     const MachineInfo = {
-      UUID: deviceDetail.Uuid,
-      Provider: deviceDetail.Metadata.Addr,
+      UUID: deviceDetail.UUID,
+      Provider: deviceDetail.Provider,
       Region: deviceDetail.Region,
-      GPU: deviceDetail.GpuCount + "x" + deviceDetail.Gpu,
-      CPU: deviceDetail.Cpu,
+      GPU: deviceDetail.GPU,
+      CPU: deviceDetail.CPU,
       Tflops: deviceDetail.Tflops,
       RAM: deviceDetail.RAM,
       AvailDiskStorage: deviceDetail.Disk,
       Reliability: deviceDetail.Reliability,
-      CPS: deviceDetail.Score,
-      Speed: {
-        Upload: deviceDetail.Metadata.SpeedInfo.Upload,
-        Download: deviceDetail.Metadata.SpeedInfo.Download,
-      },
+      CPS: deviceDetail.CPS,
+      Speed: deviceDetail.Speed,
+      MaxDuration: deviceDetail.MaxDuration,
+      Price: deviceDetail.Price,
     };
+    // const OrderInfo = {
+    //   Intent: deviceDetail ? "train" : "deploy",
+    //   DownloadURL: [],
+    // };
+    // OrderInfo.DownloadURL.sort((a, b) =>
+    //   b.includes("requirements.txt") ? -1 : 0
+    // );
     const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("machine"),
@@ -132,325 +68,163 @@ function Home({ className }) {
       ],
       webconfig.PROGRAM
     );
-    let result = await childRef.current.placeOrder(
+    setSubmitting(true);
+    const res = await childRef.current.placeOrder(
       machinePublicKey,
       orderId,
-      duration,
-      { formData, MachineInfo }
+      formValue.duration,
+      { formData: formValue, MachineInfo }
     );
-    return result;
-  }
+    if (res.msg !== "ok") {
+      setSubmitting(false);
+      return enqueueSnackbar(res.msg, { variant: "error" });
+    }
+    enqueueSnackbar("Purchase Successfully.", { variant: "success" });
+    setTimeout(() => {
+      setSubmitting(false);
+      navigate("/order");
+    }, 300);
+  };
 
+  useEffect(() => {
+    if (formValue.duration && deviceDetail.Price) {
+      setAmount(formValue.duration * deviceDetail.Price);
+    }
+  }, [formValue, deviceDetail]);
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      const amount = await childRef.current.getTokenAccountBalance(
+        webconfig.MINT_PROGRAM,
+        wallet.publicKey
+      );
+      const res = await getOrderList(1, [], wallet.publicKey.toString());
+      setFormValue((prevState) => ({
+        ...prevState,
+        taskName: `Computing Task-${res.total}`,
+      }));
+      setBalance(amount / LAMPORTS_PER_SOL);
+      const detail = await getMachineDetailByUuid(id);
+      if (detail) {
+        setDeviceDetail(detail);
+      }
+      setLoading(false);
+    };
+    if (wallet?.publicKey) {
+      init();
+    }
+  }, [wallet, id]);
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
-      <div className="con">
-        <h1 className="title">Purchase Computing Power</h1>
-        <div className="myform">
-          <div className="info-box">
-            <div className="info-box-title">Configuration</div>
-            <div className="info-box-body">
-              <div className="line">
-                <div className="f">
-                  <span>
-                    <b>{deviceDetail.GpuCount + "x " + deviceDetail.Gpu}</b>
-                  </span>
-                  <span>{deviceDetail.Tflops || "--"} TFLOPS</span>
-                </div>
-              </div>
-              <div className="line" style={{ justifyContent: "space-between" }}>
-                <div>
-                  <span>RAM</span>
-                  <span>{deviceDetail.RAM}</span>
-                </div>
-                <div>
-                  <span>Avail Disk Storage</span>
-                  <span>{deviceDetail.Disk} GB</span>
-                </div>
-                <div>
-                  <span>CPU</span>
-                  <span>{deviceDetail.Cpu}</span>
-                </div>
-              </div>
-            </div>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <div className="container">
+          <h1>Purchase Computing Power</h1>
+          <div>
+            <h2>Configuration</h2>
+            <DeviceCard device={deviceDetail} />
           </div>
-          <div className="info-box">
-            <div className="info-box-title">Order Info</div>
-            <div className="info-box-body"></div>
-          </div>
-          <DurationToggle
-            max={deviceDetail.MaxDuration}
-            duration={duration}
-            setDuration={setDuration}
-            title="Duration"
-          />
-          <div className="form-row">
-            <div className="row-txt">Task Name</div>
-            <TextField
-              data-name="taskName"
-              onChange={onInput}
-              placeholder="Must be 4-45 characters"
-            />
-          </div>
-          <div className="right-txt">
-            Balance: {!isNaN(balance) ? balance : 0} DIST
-          </div>
-          <div className="color-box">
-            <div className="row-txt">Total</div>
-            <div className="drow">
-              <span className="num">{amount || 0}</span>
-              <label>DIST</label>
-            </div>
-          </div>
-          <div className="form-row btn-row">
-            <LoadingButton
-              loading={loading}
-              style={{ width: 154 }}
-              type="primary"
-              className="cbtn"
-              onClick={onSubmit}>
-              {loading ? "" : "Confirm"}
-            </LoadingButton>
+          <div>
+            <h2>Order Info</h2>
+            <form onSubmit={onSubmit}>
+              <Grid container spacing={2}>
+                <Grid item md={12}>
+                  <DurationToggle
+                    duration={formValue.duration}
+                    setDuration={(duration) =>
+                      setFormValue((prevState) => ({ ...prevState, duration }))
+                    }
+                    max={deviceDetail.MaxDuration}
+                    title="Duration"
+                  />
+                </Grid>
+                <Grid item md={12}>
+                  <label>Task Name</label>
+                </Grid>
+                <Grid item md={12}>
+                  <TextField
+                    value={formValue.taskName}
+                    name="taskName"
+                    onChange={handleChange}
+                    placeholder="Must be 4-45 characters"
+                  />
+                </Grid>
+                <Grid item md={8} />
+                <Grid item md={4}>
+                  <p className="balance">Balance: {balance} DIST</p>
+                </Grid>
+                <Grid item md={12}>
+                  <div className="box">
+                    <div className="left">Total</div>
+                    <div className="right">
+                      <span style={{ fontSize: "28px" }}>{amount || 0}</span>
+                      <label>DIST</label>
+                    </div>
+                  </div>
+                </Grid>
+                <Grid item md={12}>
+                  <LoadingButton
+                    type="submit"
+                    loading={submitting}
+                    className="cbtn"
+                    style={{ width: 100 }}>
+                    {!submitting && "Confirm"}
+                  </LoadingButton>
+                </Grid>
+              </Grid>
+            </form>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-export default styled(Home)`
-  display: block;
-  overflow: hidden;
-  width: 100%;
-  color: #fff;
-  .mini-btn {
-    border: 1px solid #fff;
-  }
-  .none {
-    display: none !important;
-  }
-  .sel-out {
-    width: 100%;
-    display: flex;
-    overflow: hidden;
-    flex-direction: row;
-    padding: 20px 0 10px;
-    justify-content: space-between;
-    .sel-box {
-      width: 270px;
-      height: 100px;
-      border-width: 1px;
-      border-style: solid;
-      border-radius: 5px;
-      font-size: 14px;
-      background-repeat: no-repeat;
-      background-size: 40px;
-      background-position: center 10px;
-      display: block;
-      overflow: hidden;
-      line-height: 140px;
-      text-align: center;
-      cursor: pointer;
-    }
-    .lib {
-      color: #dddddd;
-      background-color: rgba(32, 32, 32, 1);
-      border-color: rgba(121, 121, 121, 1);
-      background-image: url(/img/market/lib.svg);
-    }
-    .lib-curr {
-      color: #bae5ee;
-      background-color: #000;
-      border-color: rgba(186, 229, 238, 1);
-      background-image: url(/img/market/lib-curr.svg);
-      box-shadow: 0px 0px 20px rgba(186, 229, 238, 0.5137254901960784);
-    }
-    .docker {
-      color: #dddddd;
-      background-color: rgba(32, 32, 32, 1);
-      border-color: rgba(121, 121, 121, 1);
-      background-image: url(/img/market/docker.svg);
-    }
-    .docker-curr {
-      color: #bae5ee;
-      background-color: #000;
-      border-color: rgba(186, 229, 238, 1);
-      background-image: url(/img/market/docker-curr.svg);
-      box-shadow: 0px 0px 20px rgba(186, 229, 238, 0.5137254901960784);
-    }
-  }
-  .con {
-    width: 1160px;
-    margin: 10px auto;
-    padding: 0 20px;
-    display: block;
-    overflow: hidden;
-    .title {
+export default styled(Buy)`
+  width: 1200px;
+  margin: 0 auto;
+  .container {
+    width: 750px;
+    h1 {
       font-weight: 700;
       font-style: normal;
       font-size: 28px;
-      color: #ffffff;
       margin-top: 25px;
       line-height: 70px;
     }
-    .tab-bar {
-      width: 50%;
-      padding: 20px 0;
-      .bar {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        span {
-          text-align: center;
-          width: 50%;
-          display: block;
-          overflow: hidden;
-          font-size: 14px;
-          line-height: 48px;
-          cursor: pointer;
-          color: #94d6e2;
-          .fa-check-circle {
-            font-size: 22px;
-          }
-        }
-      }
-      .bar1 {
-        .l {
-          border-bottom: 3px solid rgba(148, 214, 226, 1);
-        }
-        .r {
-          color: #797979;
-        }
-      }
-      .bar2 {
-        .l {
-          color: #94e2b8;
-        }
-        .r {
-          border-bottom: 3px solid rgba(148, 214, 226, 1);
-        }
-      }
+    h2 {
+      font-size: 20px;
+      margin: 0;
+      border-bottom: 1px solid rgb(121, 121, 121);
+      line-height: 48px;
     }
-    .info-box {
-      display: block;
-      .info-box-title {
-        font-weight: bold;
-        font-size: 16px;
-        color: #ffffff;
-        border-bottom: 1px solid #797979;
-        line-height: 48px;
-      }
-      .info-box-body {
-        padding: 0 18px;
-        display: block;
-        .line {
-          padding: 10px 0;
-          display: flex;
-          flex-direction: row;
-          .f {
-            width: 100%;
-          }
-          span {
-            line-height: 24px;
-            display: block;
-            clear: both;
-            font-size: 14px;
-          }
-          .l {
-            width: 50%;
-          }
-          .r {
-            width: 50%;
-          }
-        }
-      }
-    }
-    .b-box {
-      display: block;
-      padding: 30px;
-      border: 1px solid rgba(121, 121, 121, 1);
-      border-radius: 5px;
-      margin: 20px 0;
-      .row {
-        display: block;
-        line-height: 30px;
-        font-size: 14px;
-        text-align: center;
-        b {
-          font-size: 24px;
-        }
-      }
-    }
-    .right-txt {
-      display: block;
-      overflow: hidden;
+    .balance {
       text-align: right;
       line-height: 50px;
       font-size: 14px;
-      color: #e0c4bd;
+      color: rgb(224, 196, 189);
+      margin: 0;
     }
-    .color-box {
+    .box {
       border-radius: 5px;
-      background-color: #151515;
+      background-color: rgb(21, 21, 21);
       display: flex;
-      flex-direction: row;
       justify-content: space-between;
-      padding: 19px 20px;
-      .row-txt {
-        font-size: 16px;
-        font-weight: bold;
-        line-height: 51px;
-      }
-      .drow {
+      padding: 20px;
+      .left {
         display: flex;
-        flex-direction: column;
-        .num {
-          font-size: 30px;
-        }
-        span {
-          width: 100%;
-          font-size: 28px;
-          font-weight: bold;
-          text-align: right;
-        }
+        align-items: center;
+      }
+      .right {
+        span,
         label {
-          width: 100%;
-          font-size: 13px;
+          display: block;
+          font-weight: 600;
           text-align: right;
-          line-height: 30px;
         }
       }
-    }
-    .btn-row {
-      display: block;
-      margin: 30px 0;
-    }
-  }
-  .block {
-    display: block;
-    overflow: hidden;
-  }
-  .mini-btn {
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 4px;
-    padding: 0 10px;
-    height: 30px;
-    line-height: 30px;
-    cursor: pointer;
-  }
-  .duration-btn {
-    width: 86px;
-  }
-  .count {
-    display: flex;
-    justify-content: space-between;
-    .count-btn {
-      background-color: white;
-      border: 1px solid black;
-      color: black;
-      font-size: 20px;
-      font-weight: bolder;
     }
   }
 `;

@@ -21,7 +21,6 @@ function Home({ className }) {
 
   const loadList = async (curr) => {
     setLoading(true);
-
     try {
       let res = await getMachineList(curr, filterValue);
       setTotal(res.total);
@@ -100,9 +99,7 @@ function Home({ className }) {
               </span>
             );
           })}
-          {loading ? (
-            ""
-          ) : (
+          {!loading && (
             <span className="btn-txt" onClick={onResetFilter}>
               reset
             </span>

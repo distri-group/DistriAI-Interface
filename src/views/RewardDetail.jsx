@@ -12,6 +12,7 @@ import { Button, CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import SolanaAction from "../components/SolanaAction";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import DeviceCard from "../components/DeviceCard";
 
 function Home({ className }) {
   const { period } = useParams();
@@ -72,6 +73,7 @@ function Home({ className }) {
       );
       if (machines) {
         setMachineList(machines.List);
+        console.log(machines);
         setPeriodInfo({
           StartTime: machines.List[0].StartTime,
           Pool: machines.List[0].Pool,
@@ -236,85 +238,9 @@ function Home({ className }) {
             </div>
             <h2>Nodes Info</h2>
             <hr />
-            {machineList.map((device) => (
-              <div key={device.Uuid}>
-                <h2>Device # {device.UuidShort}</h2>
-                <div className="space-between">
-                  <div className="info-box vertical" style={{ width: "30%" }}>
-                    <div className="info-box-item">
-                      <label>Provider</label>
-                      <span>{wallet.publicKey.toString()}</span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>Region</label>
-                      <span>{device.Region || "--"}</span>
-                    </div>
-                  </div>
-                  <div className="info-box vertical" style={{ width: "30%" }}>
-                    <div className="info-box-item">
-                      <label>GPU</label>
-                      <span>
-                        {device.GpuCount}x {device.Gpu}
-                      </span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>CPU</label>
-                      <span>{device.Cpu || "--"}</span>
-                    </div>
-                  </div>
-                  <div className="info-box horizontal" style={{ width: "30%" }}>
-                    <div className="info-box-item">
-                      <label>TFLOPS</label>
-                      <span>{device.Tflops}</span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>RAM</label>
-                      <span>{device.RAM || "--"}</span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>Avail Disk Storage</label>
-                      <span>{device.Disk}GB</span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>Reliability</label>
-                      <span>{device.Reliability}</span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>CPS</label>
-                      <span>{device.Score}</span>
-                    </div>
-                    <div className="info-box-item">
-                      <label>Internet Speed</label>
-                      <span>
-                        <div className="speed">
-                          <img
-                            src="/img/market/download.svg"
-                            style={{ transform: "rotate(180deg)" }}
-                            alt=""
-                          />
-                          {device.Metadata.SpeedInfo?.Upload || "-- Mbps"}
-                        </div>
-                        <div className="speed">
-                          <img src="/img/market/download.svg" alt="" />
-                          {device.Metadata.SpeedInfo?.Download || "-- Mbps"}
-                        </div>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="box">
-                  <div className="box-item">Rewards</div>
-                  <div className="box-item">
-                    <span>
-                      <b>
-                        {(device.PeriodicRewards / LAMPORTS_PER_SOL).toFixed(2)}
-                      </b>
-                      <span className="dist">DIST</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+            {/* {machineList.map((device) => (
+              <DeviceCard device={device} />
+            ))} */}
           </>
         )}
       </div>
@@ -403,18 +329,6 @@ export default styled(Home)`
       span,
       label {
         color: #aaa;
-      }
-    }
-    .vertical {
-      span,
-      label {
-        display: block;
-      }
-      span {
-        word-wrap: break-word;
-      }
-      label {
-        margin: 8px 0;
       }
     }
     .horizontal {

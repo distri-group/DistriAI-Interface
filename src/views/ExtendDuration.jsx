@@ -14,7 +14,7 @@ import DurationToggle from "../components/DurationToggle";
 import * as anchor from "@project-serum/anchor";
 import Countdown from "../components/Countdown";
 
-function Home({ className }) {
+function ExtendDuration({ className }) {
   const { id } = useParams();
   document.title = "Edit model";
   const navigate = useNavigate();
@@ -39,8 +39,8 @@ function Home({ className }) {
     const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("machine"),
-        new PublicKey(deviceDetail.Metadata.Addr).toBytes(),
-        anchor.utils.bytes.hex.decode(deviceDetail.Uuid),
+        new PublicKey(deviceDetail.Provider).toBytes(),
+        anchor.utils.bytes.hex.decode(deviceDetail.UUID),
       ],
       webconfig.PROGRAM
     );
@@ -60,7 +60,7 @@ function Home({ className }) {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      let res = await getDetailByUuid(id, wallet.publicKey.toString());
+      const res = await getDetailByUuid(id, wallet.publicKey.toString());
       if (res.Status === 1) {
         setOrderDetail(res.Detail);
         if (res.Detail.Metadata?.MachineInfo) {
@@ -69,7 +69,7 @@ function Home({ className }) {
       } else {
         return enqueueSnackbar(res.Msg, { variant: "error" });
       }
-      getTokenBalance(webconfig.MINT_PROGRAM, wallet.publicKey);
+      await getTokenBalance(webconfig.MINT_PROGRAM, wallet.publicKey);
       setLoading(false);
     };
     if (wallet?.publicKey) {
@@ -95,7 +95,7 @@ function Home({ className }) {
                 <div className="line">
                   <div className="f">
                     <span style={{ fontSize: 18, fontWeight: "bold" }}>
-                      {deviceDetail.GpuCount + "x " + deviceDetail.Gpu}
+                      {deviceDetail.GPU}
                     </span>
                     <span>{deviceDetail.Tflops || "--"} TFLOPS</span>
                   </div>
@@ -109,11 +109,11 @@ function Home({ className }) {
                   </div>
                   <div style={{ width: "30%" }}>
                     <span>Avail Disk Storage</span>
-                    <span>{deviceDetail.Disk} GB</span>
+                    <span>{deviceDetail.AvailDiskStorage} GB</span>
                   </div>
                   <div style={{ width: "30%" }}>
                     <span>CPU</span>
-                    <span>{deviceDetail.Cpu}</span>
+                    <span>{deviceDetail.CPU}</span>
                   </div>
                 </div>
               </div>
@@ -161,7 +161,7 @@ function Home({ className }) {
                   <label style={{ width: "120px", display: "block" }}>
                     Price(h)
                   </label>
-                  <span>{deviceDetail.Price} DIST</span>
+                  <span>{orderDetail.Price} DIST</span>
                 </div>
               </div>
             </div>
@@ -189,12 +189,8 @@ function Home({ className }) {
   );
 }
 
-export default styled(Home)`
-  display: block;
-  overflow: hidden;
+export default styled(ExtendDuration)`
   width: 100%;
-  min-height: calc(100% - 160px);
-  color: #fff;
   .con {
     width: 1160px;
     padding: 0 20px;

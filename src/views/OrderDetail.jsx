@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import DurationProgress from "../components/DurationProgress";
 import Countdown from "../components/Countdown";
+import DeviceCard from "../components/DeviceCard";
 
 function Home({ className }) {
   const { id } = useParams();
@@ -173,102 +174,7 @@ function Home({ className }) {
                     <div className="info-box-title">
                       <span>Configuration</span>
                     </div>
-                    <div className="info-box-body">
-                      <div className="title2">
-                        #{" "}
-                        {record.Metadata.MachineInfo.UuidShort ||
-                          record.Metadata.MachineInfo.UUID.slice(-10)}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}>
-                        <div className="box">
-                          <div className="vertical">
-                            <label>Provider</label>
-                            <span>{record.Seller}</span>
-                          </div>
-                          <div className="vertical">
-                            <label>Region</label>
-                            <span>{record.Metadata.MachineInfo.Region}</span>
-                          </div>
-                        </div>
-                        <div className="box">
-                          <div className="vertical">
-                            <label>GPU</label>
-                            <span>
-                              {record.Metadata.MachineInfo.Gpu
-                                ? record.Metadata.MachineInfo.GpuCount +
-                                  "x " +
-                                  record.Metadata.MachineInfo.Gpu
-                                : record.Metadata.MachineInfo.GPU}
-                            </span>
-                          </div>
-                          <div className="vertical">
-                            <label>CPU</label>
-                            <span>
-                              {record.Metadata.MachineInfo.CPU ||
-                                record.Metadata.MachineInfo.Cpu}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="box">
-                          <div className="horizontal">
-                            <label>TFLOPS</label>
-                            <span>
-                              {!isNaN(record.Metadata.MachineInfo.Tflops)
-                                ? record.Metadata.MachineInfo.Tflops
-                                : "--"}
-                            </span>
-                          </div>
-                          <div className="horizontal">
-                            <label>RAM</label>
-                            <span>{record.Metadata.MachineInfo.RAM}</span>
-                          </div>
-                          <div className="horizontal">
-                            <label>Avail Disk Storage</label>
-                            <span>
-                              {record.Metadata.MachineInfo.AvailDiskStorage} GB
-                            </span>
-                          </div>
-                          <div className="horizontal">
-                            <label>Reliability</label>
-                            <span>
-                              {record.Metadata.MachineInfo.Reliability}
-                            </span>
-                          </div>
-                          <div className="horizontal">
-                            <label>CPS</label>
-                            <span>{record.Metadata.MachineInfo.CPS}</span>
-                          </div>
-                          <div className="horizontal">
-                            <label
-                              style={{ fontSize: "14px", lineHeight: "36px" }}>
-                              Internet Speed
-                            </label>
-                            <span>
-                              <div className="speed">
-                                <img
-                                  src="/img/market/download.svg"
-                                  style={{ transform: "rotate(180deg)" }}
-                                  alt=""
-                                />{" "}
-                                {record.Metadata.MachineInfo.Speed?.Upload ||
-                                  record.Metadata.MachineInfo.UploadSpeed ||
-                                  "--"}
-                              </div>
-                              <div className="speed">
-                                <img src="/img/market/download.svg" alt="" />{" "}
-                                {record.Metadata.MachineInfo.Speed?.Download ||
-                                  record.Metadata.MachineInfo.DownloadSpeed ||
-                                  "--"}
-                              </div>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <DeviceCard device={record.Metadata.MachineInfo} />
                   </div>
                   <div className="info-box">
                     <div className="info-box-title">

@@ -1,6 +1,8 @@
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-const rpcUrl = "https://api.devnet.solana.com";
+// const rpcUrl = "https://api.devnet.solana.com";
+const rpcUrl =
+  "https://solana-devnet.g.alchemy.com/v2/2h8WfGQlu5CkB0SVf_zHWpi7gsZP-rs2";
 let connection = null;
 
 async function connectToSolana() {

@@ -4,7 +4,9 @@ const baseUrl = webconfig.apiUrl;
 
 const request = {
   request: function (url, options = {}) {
-    url = baseUrl + url;
+    if (!url.includes("http")) {
+      url = baseUrl + url;
+    }
     if (!options.method) options.method = "get";
     return new Promise((resolve, reject) => {
       fetch(url, options)

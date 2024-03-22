@@ -37,10 +37,7 @@ export async function initProgram(conn, wallet) {
     if (!provider) provider = window.phantom?.solana;
     anchor.setProvider(provider);
     program = new anchor.Program(idl, webconfig.PROGRAM);
-    associatedTokenAccount = findAssociatedTokenAddress(
-      walletAn.publicKey,
-      webconfig.MINT_PROGRAM
-    );
+    associatedTokenAccount = findAssociatedTokenAddress(walletAn.publicKey);
     return program;
   } catch (error) {
     console.error(error);
@@ -190,8 +187,7 @@ export async function refundOrder(
       return { msg: "Please run initProgram first." };
     }
     const sellerAta = findAssociatedTokenAddress(
-      new PublicKey(sellerPublicKey),
-      webconfig.MINT_PROGRAM
+      new PublicKey(sellerPublicKey)
     );
     const transaction = await program.methods
       .refundOrder()
@@ -228,10 +224,7 @@ export async function claimRewards(
     if (!program) {
       return { msg: "Please run initProgram first." };
     }
-    const ownerAta = findAssociatedTokenAddress(
-      ownerPublicKey,
-      webconfig.MINT_PROGRAM
-    );
+    const ownerAta = findAssociatedTokenAddress(ownerPublicKey);
     const periodBytes = new anchor.BN(period).toArray("le", 4);
     const uuid = anchor.utils.bytes.hex.decode(machineUuid);
     const rewardSeed = [anchor.utils.bytes.utf8.encode("reward"), periodBytes];
@@ -271,12 +264,12 @@ export async function claimRewards(
   }
 }
 
-const findAssociatedTokenAddress = (walletAddress, tokenMintAddress) => {
+const findAssociatedTokenAddress = (walletAddress) => {
   return PublicKey.findProgramAddressSync(
     [
       walletAddress.toBuffer(),
       TOKEN_PROGRAM_ID.toBuffer(),
-      tokenMintAddress.toBuffer(),
+      webconfig.MINT_PROGRAM.toBuffer(),
     ],
     ASSOCIATED_TOKEN_PROGRAM_ID
   )[0];

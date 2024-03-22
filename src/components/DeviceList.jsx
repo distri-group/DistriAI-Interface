@@ -5,7 +5,7 @@ import SolanaAction from "../components/SolanaAction";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useSnackbar } from "notistack";
-import { Box, Button, Modal } from "@mui/material";
+import { Box, Button, Chip, Modal, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { formatAddress } from "../utils";
 import Table from "./Table";
@@ -69,22 +69,34 @@ function DeviceList({
       render: (text, record, index) => {
         return (
           <div className="provider">
-            <div style={{ display: "flex" }}>
-              <span
-                className="level"
+            <Stack direction="row" alignItems="end">
+              <Chip
                 style={{
-                  backgroundColor:
-                    record?.SecurityLevel === 0
-                      ? "#f89898"
-                      : record.SecurityLevel === 1
-                      ? "#eebe77"
-                      : record.SecurityLevel === 2
-                      ? "#95d475"
-                      : "#79bbff",
-                }}>
-                level {record?.SecurityLevel}
-              </span>
-            </div>
+                  height: 20,
+                }}
+                size="small"
+                label={`level ${record?.SecurityLevel}`}
+                color={
+                  record.SecurityLevel === 0
+                    ? "primary"
+                    : record.SecurityLevel === 1
+                    ? "success"
+                    : record.SecurityLevel === 2 && "info"
+                }
+              />
+              {!isMyDevice && record.Id !== 10 ? (
+                <span style={{ marginLeft: 5, lineHeight: "20px" }}>
+                  From{" "}
+                  <span style={{ fontWeight: 600, fontSize: 20 }}>
+                    {record.From}
+                  </span>
+                </span>
+              ) : (
+                <span style={{ marginLeft: 5, fontWeight: 600, fontSize: 20 }}>
+                  Personal
+                </span>
+              )}
+            </Stack>
             <a
               className="addr"
               href={`https://solscan.io/address/${record.Owner}?cluster=devnet`}
@@ -93,14 +105,14 @@ function DeviceList({
               style={{ textDecoration: "none" }}>
               {formatAddress(record.Owner)}
             </a>
-            <div className="id"># {record.UuidShort}</div>
+            <div className="id"># {record.UUID.slice(-10)}</div>
             <div className="reliability">
               <span className="l">
                 <label>{record.Reliability}</label>
                 <span>Reliability</span>
               </span>
               <span className="r">
-                <label>{record.Score}</label>
+                <label>{record.CPS}</label>
                 <span>CPS</span>
               </span>
             </div>
@@ -108,7 +120,6 @@ function DeviceList({
               <img src="/img/market/global.svg" alt="global" />
               <div className="region-info">
                 <span>{record.Region}</span>
-                <span>{record.Metadata?.LocationInfo?.query || ""}</span>
               </div>
             </div>
           </div>
@@ -122,8 +133,10 @@ function DeviceList({
       render: (text, record, index) => {
         return (
           <div className="configuration">
-            <div className="gpu">{record.GpuCount + "x " + record.Gpu}</div>
-            <div className="graphicsCoprocessor">#{record.Cpu}</div>
+            <div className="gpu">
+              {record.GPU} {record.GPUMemory}
+            </div>
+            <div className="graphicsCoprocessor">#{record.CPU}</div>
             <div className="more">
               <span className="l">
                 <label>{record.Tflops || "--"}</label>
@@ -145,11 +158,11 @@ function DeviceList({
               <label>Max Duration: {record.MaxDuration}h</label>
               <span>
                 <img className="t180" src="/img/market/download.svg" alt="" />{" "}
-                {record.UploadSpeed}
+                {record.Speed.Upload}
               </span>
               <font>
                 <img src="/img/market/download.svg" alt="" />{" "}
-                {record.DownloadSpeed}
+                {record.Speed.Download}
               </font>
             </div>
           </div>
@@ -159,7 +172,7 @@ function DeviceList({
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>Price (h)</span>
+          <span>DIST / hr</span>
           {priceSort !== null && (
             <div
               style={{
@@ -464,7 +477,8 @@ export default styled(DeviceList)`
       display: block;
       font-size: 16px;
       color: #94d6e2;
-      line-height: 20px;
+      line-height: 24px;
+      margin-top: 4px;
     }
     .id {
       font-size: 13px;

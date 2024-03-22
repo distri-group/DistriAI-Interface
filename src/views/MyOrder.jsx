@@ -1,79 +1,61 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from "react";
 import OrderList from "../components/OrderList";
-import { getOrderList, getFilterData } from "../services/order";
-
+import { getOrderList } from "../services/order";
 import Pager from "../components/pager";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { MenuItem, Select } from "@mui/material";
 
-let filter = {
-  Direction: "buy",
-};
+const filterData = [
+  { label: "All Status", value: "all" },
+  { label: "Preparing", value: "0" },
+  { label: "Available", value: "1" },
+  { label: "Completed", value: "2" },
+  { label: "Failed", value: "3" },
+  { label: "Refunded", value: "4" },
+];
 
 function Home({ className }) {
   document.title = "My Order";
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filterData, setFilterData] = useState([]);
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
-  const [filterValue, setFilterValue] = useState({});
+  const [filterValue, setFilterValue] = useState({
+    Direction: "buy",
+  });
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
-  const loadList = async (curr) => {
-    setLoading(true);
-    try {
-      const res = await getOrderList(curr, filter, wallet.publicKey.toString());
-      setLoading(false);
-      if (!res) {
-        return enqueueSnackbar("Order List Not Found", { variant: "error" });
-      }
-      setTotal(res.total);
-      setList(res.list);
-    } catch (e) {
-      return enqueueSnackbar(e.message, { variant: "error" });
-    }
-  };
 
+  const onFilter = (e) => {
+    const { value, name } = e.target;
+    setFilterValue((prevState) => ({ ...prevState, [name]: value }));
+    setCurrent(1);
+  };
   useEffect(() => {
-    const loadFilterData = () => {
-      let res = getFilterData();
-      setFilterData(res);
-      res.forEach((t) => {
-        filter[t.name] = "all";
-      });
-      setFilterValue(filter);
+    const loadList = async (curr) => {
+      setLoading(true);
+      try {
+        const res = await getOrderList(
+          curr,
+          filterValue,
+          wallet.publicKey.toString()
+        );
+        setLoading(false);
+        if (!res) {
+          return enqueueSnackbar("Order List Not Found", { variant: "error" });
+        }
+        setTotal(res.total);
+        setList(res.list);
+      } catch (e) {
+        return enqueueSnackbar(e.message, { variant: "error" });
+      }
     };
-    loadFilterData();
     if (wallet?.publicKey) {
-      setTotal(0);
-      loadList(1);
+      loadList(current);
     }
-    // eslint-disable-next-line
-  }, [wallet?.publicKey]);
-
-  const onFilter = (value, name) => {
-    filter[name] = value;
-    setFilterValue(filter);
-    setTotal(0);
-    setCurrent(1);
-    loadList(1);
-  };
-  const onResetFilter = () => {
-    filterData.forEach((t) => {
-      filter[t.name] = "all";
-    });
-    setFilterValue(filter);
-    setCurrent(1);
-    loadList(1);
-  };
-
-  const onPagerChange = (curr) => {
-    setCurrent(curr);
-    loadList(curr);
-  };
+  }, [wallet?.publicKey, filterValue, current]);
 
   return (
     <div className={className}>
@@ -81,39 +63,38 @@ function Home({ className }) {
         <h1 className="title">My Orders</h1>
         <div className="filter">
           <span className="txt">Filter</span>
-          {filterData.map((t) => {
-            return (
-              <span className="sel" key={t.name}>
-                <Select
-                  className="select"
-                  defaultValue="all"
-                  value={filterValue[t.name]}
-                  onChange={(e) => onFilter(e.target.value, t.name)}>
-                  {t.arr.map((item) => (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </span>
-            );
-          })}
-          <span className="btn-txt" onClick={onResetFilter}>
+          <span className="sel">
+            <Select
+              className="select"
+              defaultValue="all"
+              name="Status"
+              value={filterValue.Status}
+              onChange={onFilter}>
+              {filterData.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </span>
+          <span
+            className="btn-txt"
+            onClick={() => setFilterValue({ Direction: "buy" })}>
             reset
           </span>
         </div>
         <div className="con-table">
           <OrderList list={list} loading={loading} />
-          {total > 10 ? (
+          {total > 10 && (
             <Pager
               current={current}
               total={total}
               pageSize={10}
-              onChange={onPagerChange}
+              onChange={(curr) => {
+                setCurrent(curr);
+              }}
               className="pager"
             />
-          ) : (
-            ""
           )}
         </div>
       </div>

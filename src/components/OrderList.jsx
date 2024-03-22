@@ -7,6 +7,7 @@ import Table from "./Table";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
 import { Backdrop, CircularProgress } from "@mui/material";
+import { getMachineList } from "../services/machine";
 
 function Header({ className, list, loading }) {
   const navigate = useNavigate();
@@ -15,21 +16,28 @@ function Header({ className, list, loading }) {
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
   const signToken = async (ip, port) => {
-    setSigning(true);
     const provider = window.phantom.solana;
     const msg = "workspace/token/" + wallet.publicKey.toString();
     const encodeMsg = new TextEncoder().encode(msg);
     try {
       const sign = await provider.signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
-      setSigning(false);
       window.open(
         `http://${ip}:${port}/distri/workspace/debugToken/${signature}`
       );
     } catch (e) {
-      setSigning(false);
       enqueueSnackbar(e, { variant: "error" });
     }
+  };
+  const handleConsole = async (uuid) => {
+    setSigning(true);
+    const res = await getMachineList(1);
+    const machineList = res.list;
+    const machine = machineList.find((machine) => machine.Uuid === uuid);
+    if (machine) {
+      await signToken(machine.IP, machine.Port);
+    }
+    setSigning(false);
   };
   useEffect(() => {
     for (let item of list) {
@@ -63,7 +71,7 @@ function Header({ className, list, loading }) {
       },
     },
     {
-      title: "Price (h)",
+      title: "DIST / hr",
       width: "10%",
       key: "Price",
       render: (text, record, index) => {
@@ -111,17 +119,18 @@ function Header({ className, list, loading }) {
         <div className="btns">
           <span
             onClick={() => {
-              signToken(
-                record.Metadata.MachineInfo.IP,
-                record.Metadata.MachineInfo.Port
-              );
+              handleConsole(record.Metadata.MachineInfo.UUID);
             }}
             className={`mini-btn ${
               record.StatusName !== "Available" && "disabled"
             }`}>
             Console
           </span>
-          <span onClick={() => navigate("/order/" + text)} className="mini-btn">
+          <span
+            onClick={() => navigate("/order/" + text)}
+            className={`mini-btn ${
+              record.StatusName === "Preparing" && "disabled"
+            }`}>
             Detail
           </span>
         </div>
@@ -180,13 +189,6 @@ export default styled(Header)`
   .total {
     display: flex;
     flex-direction: column;
-    label {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 14px;
-      color: #ffffff;
-      text-align: left;
-    }
     span {
       padding: 1px;
       background-color: #000;

@@ -1,7 +1,6 @@
 import moment from "moment";
 import { formatBalance } from "../utils";
 import { getTimeDiff } from "time-difference-js";
-import { getMachineList } from "./machine";
 import request from "../utils/request";
 
 export async function getOrderList(pageIndex, filter, publicKey) {
@@ -36,17 +35,6 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     for (let item of list) {
       formatOrder(item, publicKey);
     }
-    let res = await getMachineList(1);
-    let machineList = res.list;
-    for (let item of list) {
-      let machine = machineList.find(
-        (machine) => machine.Uuid === item.MachineUuid.slice(2)
-      );
-      if (machine) {
-        item.Metadata.MachineInfo = machine;
-      }
-    }
-    console.log("Order List", list);
     return { list, total };
   } catch (e) {
     throw e;
@@ -58,7 +46,15 @@ function formatOrder(item) {
   }
   item.Price = formatBalance(item.Price);
   item.Total = formatBalance(item.Total);
-  const endTime = moment(item.OrderTime).add(item.Duration, "hours").toDate();
+  let endTime = moment(item.StartTime).add(item.Duration, "hours").toDate();
+  const statusName = [
+    "Preparing",
+    "Available",
+    "Completed",
+    "Failed",
+    "Refunded",
+  ];
+  item.StatusName = statusName[item.Status];
   if (item.StatusName === "Available") {
     if (new Date() < endTime) {
       const result = getTimeDiff(new Date(), endTime);
@@ -78,14 +74,6 @@ function formatOrder(item) {
         (new Date(item.RefundTime) - new Date(item.OrderTime)) / 3600000
       );
   }
-  const statusName = [
-    "Preparing",
-    "Available",
-    "Completed",
-    "Failed",
-    "Refunded",
-  ];
-  item.StatusName = statusName[item.Status];
 }
 export function getFilterData() {
   let list = [];
@@ -103,11 +91,11 @@ export function getFilterData() {
   return list;
 }
 export async function getDetailByUuid(uuid, publicKey) {
-  let obj = await getOrderList(1, [], publicKey);
+  const obj = await getOrderList(1, [], publicKey);
   if (!obj) {
     return { Status: 0, Msg: "Order list not found" };
   }
-  let orderDetail = obj.list.find((t) => t.Uuid === uuid);
+  const orderDetail = obj.list.find((t) => t.Uuid === uuid);
   if (!orderDetail) {
     return { Status: 0, Msg: "Order detail of " + uuid + " not found." };
   }

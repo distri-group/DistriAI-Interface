@@ -5,7 +5,7 @@ import { formatBalance } from "../utils";
 export async function getMachineDetailByUuid(uuid, publicKey) {
   const res = await getMachineList(1, [], publicKey);
   const list = res.list;
-  return list.find((item) => item.Metadata.MachineUUID === uuid);
+  return list.find((item) => item.Uuid === uuid);
 }
 
 export async function getFilterData() {
@@ -93,6 +93,7 @@ export async function getMachineList(pageIndex, filter, publicKey) {
     for (let item of list) {
       formatMachine(item);
     }
+    console.log(list);
     let obj;
     if (Number.isInteger(filter?.SecurityLevel)) {
       let level = filter.SecurityLevel;
@@ -107,30 +108,40 @@ export async function getMachineList(pageIndex, filter, publicKey) {
 
 // Format Machine's Info
 export function formatMachine(item) {
-  try {
-    item.Price = formatBalance(item.Price);
-    if (item.CompletedCount + item.FailedCount <= 0) {
-      item.Reliability = "--";
+  item.Price = formatBalance(item.Price);
+  if (item.CompletedCount + item.FailedCount <= 0) {
+    item.Reliability = "--";
+  } else {
+    item.Reliability =
+      parseInt(
+        (item.CompletedCount * 100) / (item.CompletedCount + item.FailedCount)
+      ) + "%";
+  }
+  if (item.Metadata && typeof item.Metadata == "string") {
+    item.Metadata = JSON.parse(item.Metadata);
+    item.Provider = item.Metadata.Addr;
+    item.UUID = item.Metadata.MachineUUID || "";
+    item.CPS = item.Metadata.Score?.toFixed(2) || 0;
+    item.CPU = item.Metadata.CPUInfo?.ModelName || "";
+    item.GPU = item.GpuCount + "x" + item.Gpu;
+    item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0) + "GB";
+    item.IP = item.Metadata.Ip?.ip;
+    item.Port = item.Metadata.Ip?.port;
+    item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);
+    item.Tflops = item.Metadata.InfoTFLOPS?.TFLOPS;
+    item.Speed = item.Metadata.SpeedInfo;
+    item.AvailDiskStorage = item.Disk;
+    item.Speed = {
+      Upload: item.Metadata.SpeedInfo.Upload,
+      Download: item.Metadata.SpeedInfo.Download,
+    };
+    item.GPUMemory = item.Metadata.GPUInfo.Memory;
+    if (item.CPS > 75) {
+      item.From = "Distri.AI";
+    } else if (item.CPS > 70) {
+      item.From = "Render";
     } else {
-      item.Reliability =
-        parseInt(
-          (item.CompletedCount * 100) / (item.CompletedCount + item.FailedCount)
-        ) + "%";
+      item.From = "io.net";
     }
-    if (item.Metadata && typeof item.Metadata == "string") {
-      item.Metadata = JSON.parse(item.Metadata);
-      item.Uuid = item.Metadata.MachineUUID || "";
-      item.UuidShort = item.Metadata.MachineUUID?.slice(-10);
-      item.Score = item.Metadata.Score?.toFixed(2) || 0;
-      item.Cpu = item.Metadata.CPUInfo?.ModelName || "";
-      item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0) + "GB";
-      item.UploadSpeed = item.Metadata.SpeedInfo?.Upload;
-      item.DownloadSpeed = item.Metadata.SpeedInfo?.Download;
-      item.IP = item.Metadata.Ip?.ip;
-      item.Port = item.Metadata.Ip?.port;
-      item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);
-    }
-  } catch (e) {
-    throw e;
   }
 }

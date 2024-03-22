@@ -40,8 +40,8 @@ function EndDuration({ className }) {
     const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("machine"),
-        new PublicKey(detail.Metadata.MachineInfo.Metadata.Addr).toBytes(),
-        anchor.utils.bytes.hex.decode(detail.MachineUuid),
+        new PublicKey(detail.Metadata.MachineInfo.Provider).toBytes(),
+        anchor.utils.bytes.hex.decode(detail.Metadata.MachineInfo.UUID),
       ],
       webconfig.PROGRAM
     );
@@ -67,6 +67,7 @@ function EndDuration({ className }) {
       setLoading(false);
       if (res.Status === 1) {
         setDetail(res.Detail);
+        console.log(res.Detail);
         let remains =
           new Date(res.Detail.EndTime).getTime() - new Date().getTime();
         setRemainingTime(remains);
@@ -101,11 +102,7 @@ function EndDuration({ className }) {
               <div>
                 <h2>Configuration</h2>
                 <div>
-                  <p>
-                    {detail.Metadata.MachineInfo.GpuCount +
-                      "x " +
-                      detail.Metadata.MachineInfo.Gpu}
-                  </p>
+                  <p>{detail.Metadata.MachineInfo.GPU}</p>
                   <span>
                     {detail.Metadata.MachineInfo.Tflops || "--"} TFLOPS
                   </span>
@@ -116,11 +113,13 @@ function EndDuration({ className }) {
                     </div>
                     <div className="box">
                       <label>Avail Disk Storage</label>
-                      <span>{detail.Metadata.MachineInfo.Disk} GB</span>
+                      <span>
+                        {detail.Metadata.MachineInfo.AvailDiskStorage} GB
+                      </span>
                     </div>
                     <div className="box">
                       <label>CPU</label>
-                      <span>{detail.Metadata.MachineInfo.Cpu}</span>
+                      <span>{detail.Metadata.MachineInfo.CPU}</span>
                     </div>
                   </div>
                 </div>
