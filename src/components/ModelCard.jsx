@@ -46,7 +46,7 @@ function ModelCard({ model, className }) {
 export default styled(ModelCard)`
   width: 100%;
   background-color: #1a1a1a;
-  margin: 12px 0;
+  margin: 6px 0;
   border-radius: 15px;
   overflow: hidden;
   cursor: pointer;

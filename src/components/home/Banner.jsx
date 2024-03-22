@@ -62,11 +62,11 @@ const Banner = ({ className }) => {
                 delay: 1,
               },
             }}>
-            Need GPU
+            GPUs Market
           </motion.span>
           <motion.span
             className="trans-btn"
-            onClick={() => navigate("/device")}
+            onClick={() => navigate("/models")}
             initial={initial}
             animate={{
               opacity: 1,
@@ -77,7 +77,7 @@ const Banner = ({ className }) => {
                 delay: 1,
               },
             }}>
-            Share GPU
+            AI-Apps Workshop
           </motion.span>
         </div>
       </div>

@@ -144,41 +144,49 @@ function ModelDetail({ className }) {
                 <Tab className="tab" label="Deployment" value="deployment" />
               </TabList>
               <TabPanel value="model-card">
-                <div>
-                  <Chip
-                    label="metadata"
-                    style={{
-                      background: "gray",
-                      color: "white",
-                    }}
-                  />
-                  <SyntaxHighlighter language="yaml" style={tomorrow}>
-                    {metadata}
-                  </SyntaxHighlighter>
-                </div>
-                <Markdown
-                  className="markdown-body"
-                  children={markdown}
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    code({ node, inline, className, children, ...props }) {
-                      const match = /language-(\w+)/.exec(className || "");
-                      return !inline && match ? (
-                        <SyntaxHighlighter
-                          children={String(children).replace(/\n$/, "")}
-                          style={tomorrow}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                        />
-                      ) : (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                />
+                {markdown && metadata ? (
+                  <>
+                    <div>
+                      <Chip
+                        label="metadata"
+                        style={{
+                          background: "gray",
+                          color: "white",
+                        }}
+                      />
+                      <SyntaxHighlighter language="yaml" style={tomorrow}>
+                        {metadata}
+                      </SyntaxHighlighter>
+                    </div>
+                    <Markdown
+                      className="markdown-body"
+                      children={markdown}
+                      rehypePlugins={[rehypeRaw]}
+                      components={{
+                        code({ node, inline, className, children, ...props }) {
+                          const match = /language-(\w+)/.exec(className || "");
+                          return !inline && match ? (
+                            <SyntaxHighlighter
+                              children={String(children).replace(/\n$/, "")}
+                              style={tomorrow}
+                              language={match[1]}
+                              PreTag="div"
+                              {...props}
+                            />
+                          ) : (
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
+                          );
+                        },
+                      }}
+                    />
+                  </>
+                ) : (
+                  <div className="empty">
+                    <span>There is no detailed model introduction yet</span>
+                  </div>
+                )}
               </TabPanel>
               <TabPanel value="files">
                 <FileList prefix={Prefix} id={id} />
@@ -264,5 +272,12 @@ export default styled(ModelDetail)`
     max-width: 800px;
     max-height: 800px;
     margin: 0 auto;
+  }
+  .empty {
+    width: 100%;
+    height: 480px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 `;
