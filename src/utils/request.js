@@ -41,7 +41,7 @@ const request = {
       url = `${url}?${queryParams.toString()}`;
     }
     if (localStorage.getItem("token")) {
-      options.headers["token"] = localStorage.getItem("token");
+      options.headers["Authorization"] = localStorage.getItem("token");
     }
     return this.request(url, options);
   },
@@ -57,7 +57,7 @@ const request = {
       options.body = JSON.stringify(options.data);
     }
     if (localStorage.getItem("token")) {
-      options.headers["token"] = localStorage.getItem("token");
+      options.headers["Authorization"] = localStorage.getItem("token");
     }
     return this.request(url, options);
   },
@@ -73,7 +73,7 @@ const request = {
       options.body = JSON.stringify(options.data);
     }
     if (localStorage.getItem("token")) {
-      options.headers["token"] = localStorage.getItem("token");
+      options.headers["Authorization"] = localStorage.getItem("token");
     }
     return this.request(url, options);
   },
@@ -89,7 +89,7 @@ const request = {
       options.body = JSON.stringify(options.data);
     }
     if (localStorage.getItem("token")) {
-      options.headers["token"] = localStorage.getItem("token");
+      options.headers["Authorization"] = localStorage.getItem("token");
     }
     return this.request(url, options);
   },

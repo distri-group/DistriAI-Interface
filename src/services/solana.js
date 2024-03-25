@@ -1,24 +1,43 @@
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import * as anchor from "@project-serum/anchor";
+import request from "../utils/request";
 
-// const rpcUrl = "https://api.devnet.solana.com";
-const rpcUrl =
-  "https://solana-devnet.g.alchemy.com/v2/2h8WfGQlu5CkB0SVf_zHWpi7gsZP-rs2";
-let connection = null;
+const rpcUrl = "https://api.devnet.solana.com";
 
-async function connectToSolana() {
+export async function connectToSolana() {
   try {
-    if (connection) return connection;
-    connection = new Connection(rpcUrl, "confirmed");
+    const connection = new Connection(rpcUrl, "confirmed");
     await connection.getVersion();
+    if (window.solana && window.solana.isPhantom && window.solana.publicKey) {
+      const publicKey = window.solana.publicKey.toString();
+      const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
+      const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
+      const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+      await login(publicKey.toString(), signature);
+    }
     return connection;
   } catch (error) {
     console.error("link Solana error:", error);
     return null;
   }
 }
+async function login(Account, Signature) {
+  let apiUrl = "/index-api/user/login";
+  let options = {
+    data: {
+      Account,
+      Signature,
+    },
+  };
+  const res = await request.post(apiUrl, options);
+  if (res.Data) {
+    window.localStorage.setItem("token", res.Data);
+  }
+  return res;
+}
 export async function faucet(accountId) {
   try {
-    await connectToSolana();
+    const connection = await connectToSolana();
     const publicKey = new PublicKey(accountId);
     const signature = await connection.requestAirdrop(
       publicKey,

@@ -29,7 +29,8 @@ import Models from "./views/Models";
 import Datasets from "./views/Datasets";
 import CreateModel from "./views/CreateModel";
 import ModelDetail from "./views/ModelDetail";
-import ModelDeploy from "./views/ModelDeploy";
+import Test from "./views/Test";
+import { connectToSolana } from "./services/solana";
 
 function App() {
   window.Buffer = Buffer;
@@ -126,6 +127,24 @@ function App() {
           },
         },
       },
+      MuiTableCell: {
+        styleOverrides: {
+          root: {
+            color: "white",
+            paddingBottom: 4,
+          },
+        },
+      },
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            color: "white",
+            "&.Mui-checked": {
+              color: "#0aab50",
+            },
+          },
+        },
+      },
     },
   });
   useEffect(() => {
@@ -156,12 +175,11 @@ function App() {
       window.removeEventListener("resize", setViewportContent);
     };
   }, []);
+  useEffect(() => {
+    if (!window.localStorage.getItem("token")) connectToSolana();
+  }, []);
   return (
-    <ConnectionProvider
-      endpoint={
-        "https://solana-devnet.g.alchemy.com/v2/2h8WfGQlu5CkB0SVf_zHWpi7gsZP-rs2"
-      }>
-      {/* <ConnectionProvider endpoint={"https://api.devnet.solana.com"}> */}
+    <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
       <WalletProvider wallets={[]} autoConnect={true}>
         <WalletModalProvider>
           <BrowserRouter>
@@ -190,9 +208,9 @@ function App() {
                   <Route path="/earning/:id" element={<EarningDetail />} />
                   <Route path="/models" element={<Models />} />
                   <Route path="/models/:id" element={<ModelDetail />} />
-                  <Route path="/models/:id/deploy" element={<ModelDeploy />} />
                   <Route path="/models/create" element={<CreateModel />} />
                   <Route path="/datasets" element={<Datasets />} />
+                  <Route path="/test" element={<Test />} />
                 </Routes>
               </SnackbarProvider>
             </ThemeProvider>
