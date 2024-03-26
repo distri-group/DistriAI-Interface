@@ -5,11 +5,13 @@ import Pager from "../components/pager";
 import { getMachineList, getFilterData } from "../services/machine";
 import { useSnackbar } from "notistack";
 import { MenuItem, Select } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 let filter = {};
 
 function Home({ className }) {
   document.title = "Market";
+  const { state } = useLocation();
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
@@ -111,6 +113,7 @@ function Home({ className }) {
             loading={loading}
             priceSort={priceSort}
             setPriceSort={setPriceSort}
+            model={state}
           />
         </div>
         {total > 10 ? (

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import React, { useState, useEffect, useRef } from "react";
 import { getMachineDetailByUuid } from "../services/machine";
@@ -9,15 +9,24 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
-import { CircularProgress, Grid, TextField } from "@mui/material";
+import {
+  CircularProgress,
+  Grid,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
+import { getModelList } from "../services/model";
 import DurationToggle from "../components/DurationToggle";
 import DeviceCard from "../components/DeviceCard";
 import * as anchor from "@project-serum/anchor";
+import FileList from "../components/FileList";
 
 function Buy({ className }) {
   document.title = "Edit model";
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state } = useLocation();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
@@ -27,13 +36,24 @@ function Buy({ className }) {
   const [formValue, setFormValue] = useState({
     duration: 0,
     taskName: "",
+    usage: "",
+    model: "",
+    downloadLinks: [],
   });
   const [deviceDetail, setDeviceDetail] = useState({});
+  const [models, setModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState({});
   const childRef = useRef();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
+    if (name === "model") {
+      setSelectedModel(models.find((model) => model.Id == value));
+    }
+  };
+  const handleFileSelect = (files) => {
+    setFormValue((prevState) => ({ ...prevState, downloadLinks: files }));
   };
   const onSubmit = async (e) => {
     const orderId = new Date().valueOf().toString();
@@ -53,13 +73,11 @@ function Buy({ className }) {
       MaxDuration: deviceDetail.MaxDuration,
       Price: deviceDetail.Price,
     };
-    // const OrderInfo = {
-    //   Intent: deviceDetail ? "train" : "deploy",
-    //   DownloadURL: [],
-    // };
-    // OrderInfo.DownloadURL.sort((a, b) =>
-    //   b.includes("requirements.txt") ? -1 : 0
-    // );
+    const OrderInfo = {
+      Model: formValue.model,
+      Intent: formValue.usage,
+      DownloadURL: formValue.downloadLinks,
+    };
     const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("machine"),
@@ -73,7 +91,14 @@ function Buy({ className }) {
       machinePublicKey,
       orderId,
       formValue.duration,
-      { formData: formValue, MachineInfo }
+      {
+        formData: {
+          duration: formValue.duration,
+          taskName: formValue.taskName,
+        },
+        MachineInfo,
+        OrderInfo,
+      }
     );
     if (res.msg !== "ok") {
       setSubmitting(false);
@@ -90,6 +115,14 @@ function Buy({ className }) {
     if (formValue.duration && deviceDetail.Price) {
       setAmount(formValue.duration * deviceDetail.Price);
     }
+    if (formValue.usage === "deploy") {
+      setFormValue((prevState) => ({
+        ...prevState,
+        downloadLinks: [
+          `https://distriai.s3.ap-northeast-2.amazonaws.com/model/${selectedModel.Owner}/${selectedModel.Name}/deployment.py`,
+        ],
+      }));
+    }
   }, [formValue, deviceDetail]);
   useEffect(() => {
     const init = async () => {
@@ -99,6 +132,18 @@ function Buy({ className }) {
         wallet.publicKey
       );
       const res = await getOrderList(1, [], wallet.publicKey.toString());
+      const models = await getModelList(1, []);
+      setModels(models.list);
+      if (state) {
+        setFormValue((prevState) => ({
+          ...prevState,
+          usage: state.intent,
+          model: state.modelId,
+        }));
+        setSelectedModel(
+          models.list.find((model) => model.Id == state.modelId)
+        );
+      }
       setFormValue((prevState) => ({
         ...prevState,
         taskName: `Computing Task-${res.total}`,
@@ -113,7 +158,7 @@ function Buy({ className }) {
     if (wallet?.publicKey) {
       init();
     }
-  }, [wallet, id]);
+  }, [wallet, id, state]);
   return (
     <div className={className}>
       <SolanaAction ref={childRef}></SolanaAction>
@@ -145,12 +190,66 @@ function Buy({ className }) {
                 </Grid>
                 <Grid item md={12}>
                   <TextField
+                    required={true}
                     value={formValue.taskName}
                     name="taskName"
                     onChange={handleChange}
                     placeholder="Must be 4-45 characters"
                   />
                 </Grid>
+                <Grid item md={6}>
+                  <label>Model</label>
+                </Grid>
+                <Grid item md={6}>
+                  <label>Usage</label>
+                </Grid>
+                <Grid item md={6}>
+                  <Select
+                    fullWidth
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFormValue((prevState) => ({
+                        ...prevState,
+                        downloadLinks: [],
+                      }));
+                    }}
+                    name="model"
+                    value={formValue.model}>
+                    {models.map((model) => (
+                      <MenuItem value={model.Id} key={model.Id}>
+                        {model.Name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item md={6}>
+                  <Select
+                    disabled={!formValue.model}
+                    required={Boolean(formValue.model)}
+                    fullWidth
+                    value={formValue.usage}
+                    name="usage"
+                    onChange={handleChange}>
+                    <MenuItem value="train">Training</MenuItem>
+                    <MenuItem value="deploy">Deploy</MenuItem>
+                  </Select>
+                </Grid>
+                {formValue.usage === "train" && formValue.model && (
+                  <>
+                    <Grid item md={12}>
+                      <label>Data for trainning</label>
+                    </Grid>
+                    <Grid item md={12}>
+                      {selectedModel && (
+                        <FileList
+                          prefix={`model/${selectedModel.Owner}/${selectedModel.Name}/`}
+                          id={formValue.model}
+                          onSelect={handleFileSelect}
+                        />
+                      )}
+                    </Grid>
+                  </>
+                )}
                 <Grid item md={8} />
                 <Grid item md={4}>
                   <p className="balance">Balance: {balance} DIST</p>
