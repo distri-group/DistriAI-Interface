@@ -1,111 +1,168 @@
 import { ArrowDownward, InsertDriveFile } from "@mui/icons-material";
-import { Button, Stack } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  CircularProgress,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+} from "@mui/material";
 import { useSnackbar } from "notistack";
 import styled from "styled-components";
 import prettyBytes from "pretty-bytes";
 import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
 import { useEffect, useState, useRef } from "react";
 import { fileUpload, generatePresignUrl } from "../services/model";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
-function FileList({ className, prefix, id }) {
+function FileList({ className, prefix, id, onSelect }) {
   const { enqueueSnackbar } = useSnackbar();
+  const wallet = useAnchorWallet();
+  const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
-  const [uploadFile, setUploadFile] = useState("");
+  const [downloadLinks, setLinks] = useState([]);
   const fileInputRef = useRef(null);
 
   const S3client = new S3Client({
     region: "ap-northeast-2",
     signer: { sign: async (request) => request },
   });
-
-  const handleFileInputChange = (event) => {
-    const file = event.target.files[0];
-    setUploadFile(file);
+  const handleUpload = async (file) => {
+    try {
+      const path = await generatePresignUrl(
+        parseInt(id),
+        file.name,
+        wallet.publicKey.toString()
+      );
+      await fileUpload(path, file);
+    } catch (e) {
+      console.log(e);
+    }
   };
-  const handleUpload = async () => {
-    const path = await generatePresignUrl(parseInt(id), uploadFile.name);
-    console.log(path);
-    const res = await fileUpload(path, uploadFile);
-    console.log(res);
+  const handleFileInputChange = async (event) => {
+    try {
+      const file = event.target.files[0];
+      await handleUpload(file);
+      loadFileList();
+      enqueueSnackbar("Upload Success", { variant: "success" });
+    } catch (e) {
+      enqueueSnackbar(e, { variant: "error" });
+    }
   };
-  useEffect(() => {
+  const loadFileList = () => {
+    setLoading(true);
     const command = new ListObjectsCommand({
       Bucket: "distriai",
       Prefix: prefix,
     });
-    S3client.send(command).then(({ Contents }) => setFiles(Contents || []));
-  }, []);
-  useEffect(() => {
-    if (uploadFile) {
-      handleUpload();
+    S3client.send(command)
+      .then(({ Contents }) => setFiles(Contents || []))
+      .then(() => setLoading(false));
+  };
+  const handleSelection = (e, key) => {
+    if (e.target.checked) {
+      setLinks([
+        ...downloadLinks,
+        `https://distriai.s3.ap-northeast-2.amazonaws.com/${key}`,
+      ]);
+    } else {
+      setLinks(
+        downloadLinks.filter(
+          (link) =>
+            link !== `https://distriai.s3.ap-northeast-2.amazonaws.com/${key}`
+        )
+      );
     }
-  }, [uploadFile]);
+  };
+  useEffect(() => {
+    if (onSelect) {
+      onSelect(downloadLinks);
+    }
+  }, [onSelect, downloadLinks]);
+  useEffect(() => {
+    loadFileList();
+  }, [prefix]);
   return (
     <div className={className}>
       <Stack direction="column">
-        <Stack direction="row" justifyContent="end" spacing={2}>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileInputChange}
-          />
-          <Button
-            variant="contained"
-            className="cbtn"
-            style={{ width: 100, margin: "0 20px" }}
-            onClick={() => {
-              fileInputRef.current.click();
-            }}>
-            Add File
-          </Button>
-        </Stack>
-        <div>
-          {files.length > 0 &&
-            files.map(
-              (file) =>
-                file.Key !==
-                  "model/Bv3qEmRjPn3z7bB3JynCoXJmopcNM8PGa6ASxPCi7bY/animagine-xl-3.0/" && (
-                  <Stack
-                    key={file.Key}
-                    direction="row"
-                    justifyContent="space-between"
-                    style={{ padding: 10, borderBottom: "1px solid #eeeeee" }}>
-                    <Stack
-                      style={{ width: "20%" }}
-                      direction="row"
-                      alignItems="end">
-                      <InsertDriveFile />
-                      {file.Key.replace(
-                        "model/Bv3qEmRjPn3z7bB3JynCoXJmopcNM8PGa6ASxPCi7bY/animagine-xl-3.0/",
-                        ""
-                      )}
-                    </Stack>
-                    <div style={{ width: "20%" }}>
-                      <a
-                        href={`https://distriai.s3.ap-northeast-2.amazonaws.com/${file.Key}`}
-                        download>
-                        <Stack
-                          direction="row"
-                          alignItems="end"
-                          style={{ height: "100%" }}>
+        {!onSelect && (
+          <Stack direction="row" justifyContent="end" spacing={2}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileInputChange}
+            />
+            <Button
+              variant="contained"
+              className="cbtn"
+              style={{ width: 100, margin: "0 20px" }}
+              onClick={() => {
+                fileInputRef.current.click();
+              }}>
+              Add File
+            </Button>
+          </Stack>
+        )}
+        {loading ? (
+          <CircularProgress />
+        ) : files.length > 0 ? (
+          <TableContainer>
+            <Table>
+              <TableBody>
+                {files.map(
+                  (file) =>
+                    file.Key !== prefix && (
+                      <TableRow key={file.Key}>
+                        {onSelect && (
+                          <TableCell width="5%">
+                            <Checkbox
+                              checked={downloadLinks.includes(
+                                `https://distriai.s3.ap-northeast-2.amazonaws.com/${file.Key}`
+                              )}
+                              onChange={(e) => handleSelection(e, file.Key)}
+                            />
+                          </TableCell>
+                        )}
+                        <TableCell width="20%">
+                          <InsertDriveFile />
+                          {file.Key.replace(prefix, "")}
+                        </TableCell>
+                        <TableCell align="right">
                           <ArrowDownward />
-                          {prettyBytes(file.Size)}
-                        </Stack>
-                      </a>
-                    </div>
-                    <div>
-                      <span className="date">
-                        {new Date(file.LastModified).toLocaleDateString()}
-                      </span>
-                      <span className="time">
-                        {new Date(file.LastModified).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  </Stack>
-                )
-            )}
-        </div>
+                          <a
+                            style={{
+                              display: "inline",
+                            }}
+                            href={`https://distriai.s3.ap-northeast-2.amazonaws.com/${file.Key}`}
+                            download>
+                            <span className="size">
+                              {prettyBytes(file.Size)}
+                            </span>
+                          </a>
+                        </TableCell>
+                        <TableCell align="right">
+                          <span className="date">
+                            {new Date(file.LastModified).toLocaleDateString()}
+                          </span>
+                          <span className="time">
+                            {new Date(file.LastModified).toLocaleTimeString()}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    )
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <div className="empty">
+            <span>No file uploaded yet</span>
+          </div>
+        )}
       </Stack>
     </div>
   );
@@ -124,26 +181,16 @@ export default styled(FileList)`
   .time {
     color: #aaa;
   }
+  .size {
+    display: inline-block;
+    width: 64px;
+    text-align: right;
+  }
+  .empty {
+    width: 100%;
+    height: 480px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 `;
-const files = [
-  {
-    name: ".gitattributes",
-    size: "1.62kb",
-  },
-  {
-    name: "README.md",
-    size: "21.1kb",
-  },
-  {
-    name: "config.json",
-    size: "629 Bytes",
-  },
-  {
-    name: "gemma-7b.gguf",
-    size: "34.2GB",
-  },
-  {
-    name: "generation_config.json",
-    size: "137 Bytes",
-  },
-];

@@ -65,13 +65,10 @@ export const createModel = async (model) => {
   }
 };
 
-export const generatePresignUrl = async (id, path, publicKey) => {
+export const generatePresignUrl = async (id, path) => {
   try {
     let apiUrl = "/index-api/model/presign";
     let options = {
-      headers: {
-        Account: publicKey,
-      },
       data: {
         Id: id,
         FilePath: path,
@@ -88,28 +85,39 @@ export const generatePresignUrl = async (id, path, publicKey) => {
   }
 };
 
-export const fileUpload = async (path, file) => {
+export const fileUpload = async (url, file) => {
   try {
-    let options = {
+    const response = await fetch(url, {
+      method: "PUT",
       headers: {
-        "Content-Length": new Blob([file]).size,
+        "Content-Length": file.size,
       },
-    };
-    let ret = await request.post(path, options);
-    return ret;
-  } catch (e) {
-    throw e;
+      body: file,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload file (${response.status})`);
+    }
+
+    const responseBody = await response.text();
+    return responseBody;
+  } catch (error) {
+    throw error;
   }
 };
 
 const formatTags = (model) => {
   if (model.Tags.includes(",")) {
     model.Tags = model.Tags.split(",");
+  } else {
+    model.Tags = [model.Tags];
   }
   model.Tags.unshift(licenses[model.License - 1]);
   model.Tags.unshift(frameworks[model.Framework - 1]);
   model.Tags.unshift(types[model.Type1 - 1].items[model.Type2 - 1]);
-  model.Tags.unshift(types[model.Type1 - 1].title);
+  if (model.Type1 !== 5) {
+    model.Tags.unshift(types[model.Type1 - 1].title);
+  }
   return model;
 };
 

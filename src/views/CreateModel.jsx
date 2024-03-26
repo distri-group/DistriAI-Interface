@@ -13,10 +13,12 @@ import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
 import { licenses, frameworks, createModel } from "../services/model";
 import { useSnackbar } from "notistack";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 function CreateModel({ className }) {
   document.title = "Create Model";
   const navigate = useNavigate();
+  const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [formValue, setFormValue] = useState({
     Name: "",
@@ -40,10 +42,13 @@ function CreateModel({ className }) {
     console.log(formValue);
     e.preventDefault();
     try {
-      const res = await createModel({
-        ...formValue,
-        Tags: formValue.Tags.toString(),
-      });
+      const res = await createModel(
+        {
+          ...formValue,
+          Tags: formValue.Tags.toString(),
+        },
+        wallet.publicKey.toString()
+      );
       if (res.Msg === "success") {
         enqueueSnackbar("Create Model Success.");
         setTimeout(() => {

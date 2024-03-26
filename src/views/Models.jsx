@@ -21,7 +21,7 @@ function Models({ className }) {
     Name: "",
     OrderBy: "Updated Time",
   });
-  const [filterType, setType] = useState(0);
+  const [filterType, setType] = useState("");
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const onFilter = (e) => {
@@ -30,7 +30,7 @@ function Models({ className }) {
   };
   const clearFilter = () => {
     setFilterValue({ Name: "", OrderBy: "Updated Time" });
-    setType(0);
+    setType("");
   };
   const onTypeFilter = (e) => {
     setType(e.target.value);

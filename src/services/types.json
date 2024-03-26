@@ -13,6 +13,8 @@
       "Text Generation",
       "Fill-Mask",
       "Sentence Similarity",
+      "Sentiment Analysis",
+      "Named Entity Recognition",
       "Others"
     ]
   },
@@ -42,20 +44,32 @@
   {
     "title": "MultiModal",
     "items": [
+      "Image Captioning",
+      "Video Captioning",
+      "Visual Grounding",
+      "Mulitimodal Dialoue",
       "Image-Text-to-Text",
       "Visual Question Answering",
-      "Document Question Answering"
+      "Text-to-Image",
+      "Image-to-Text",
+      "Text-to-Video",
+      "Text-to-3D",
+      "Text-to-Speech",
+      "Text-to-Audio",
+      "Automatic Speech Recognition",
+      "Others"
     ]
   },
   {
     "title": "Audio",
     "items": [
-      "Text-to-Speech",
-      "Text-to-Audio",
-      "Automatic Speech Recognition",
+      "Speech Synthesis",
+      "Voice Activity Detection",
+      "Speech Enhancement",
+      "Speech Separation",
       "Audio-to-Audio",
       "Audio Classification",
-      "Voice Activity Detection"
+      "Others"
     ]
   },
   {

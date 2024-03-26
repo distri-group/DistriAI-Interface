@@ -8,6 +8,7 @@ import {
   Stack,
   Tab,
   TextField,
+  Backdrop,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,12 +23,20 @@ import { client } from "@gradio/client";
 import { Favorite } from "@mui/icons-material";
 import "../dark.css";
 import { getModelDetail } from "../services/model";
+import { getMachineList } from "../services/machine";
+import { getOrderList } from "../services/order";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { signToken } from "../services/order";
+import { useSnackbar } from "notistack";
 
 function ModelDetail({ className }) {
   document.title = "Model Detail";
   const navigate = useNavigate();
+  const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
   const [model, setModel] = useState({});
+  const [machineId, setMachineId] = useState("");
+  const [prefix, setPrefix] = useState("");
   const [gradio, setGradio] = useState();
   const [tabValue, setTabValue] = useState("model-card");
   const [markdown, setMarkdown] = useState("");
@@ -35,9 +44,9 @@ function ModelDetail({ className }) {
   const [prompt, setPrompt] = useState("");
   const [output, setOutput] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [signing, setSigning] = useState(false);
   const { id } = useParams();
-  const Prefix =
-    "model/Bv3qEmRjPn3z7bB3JynCoXJmopcNM8PGa6ASxPCi7bY/animagine-xl-3.0/";
+  const { enqueueSnackbar } = useSnackbar();
   const handleTabChange = (e, newValue) => {
     setTabValue(newValue);
   };
@@ -51,30 +60,77 @@ function ModelDetail({ className }) {
     }
     setGenerating(false);
   };
+  const handleConsole = async (uuid) => {
+    setSigning(true);
+    const res = await getMachineList(1);
+    const machineList = res.list;
+    const machine = machineList.find((machine) => machine.UUID === uuid);
+    if (machine) {
+      try {
+        await signToken(machine.IP, machine.Port, wallet.publicKey.toString());
+      } catch (e) {
+        enqueueSnackbar(e, { variant: "error" });
+      }
+    }
+    setSigning(false);
+  };
   useEffect(() => {
-    fetch(
-      "https://distriai.s3.ap-northeast-2.amazonaws.com/" + Prefix + "README.md"
-    ).then((res) =>
-      res.text().then((text) => {
-        const match = text.match(/^---\n([\s\S]+?)\n---/);
-        const result = metadataParser(text);
-        setMarkdown(result.content);
-        setMetadata(match[1]);
-      })
-    );
     const loadDetail = async () => {
       setLoading(true);
       const res = await getModelDetail(id);
       setModel(res);
+      setPrefix(`model/${res.Owner}/${res.Name}/`);
+      fetch(
+        "https://distriai.s3.ap-northeast-2.amazonaws.com/" +
+          `model/${res.Owner}/${res.Name}/` +
+          "README.md"
+      )
+        .then((res) =>
+          res.text().then((text) => {
+            const match = text.match(/^---\n([\s\S]+?)\n---/);
+            const result = metadataParser(text);
+            setMarkdown(result.content);
+            setMetadata(match[1]);
+          })
+        )
+        .catch((e) => {
+          console.log(e);
+        });
       setLoading(false);
     };
+
+    loadDetail();
+  }, []);
+
+  useEffect(() => {
     const connectToGradio = async () => {
-      const gradio = await client("http://3.236.221.156:7860/");
+      const gradio = await client("http://3.236.221.156:7860/"); // IP needed
       setGradio(gradio);
     };
-    loadDetail();
-    connectToGradio();
-  }, []);
+    const loadOrderDetail = async () => {
+      const res = await getOrderList(1, [], wallet.publicKey);
+      const orderUsing = res.list.find(
+        (item) =>
+          item.Metadata.OrderInfo?.Model &&
+          item.Metadata.OrderInfo.Model === Number(id) &&
+          item.Status === 1
+      );
+      if (orderUsing) {
+        setModel((prevState) => ({
+          ...prevState,
+          Intent: orderUsing.Metadata.OrderInfo.Intent,
+        }));
+        setMachineId(orderUsing.Metadata.MachineInfo.UUID);
+        if (orderUsing.Metadata.OrderInfo.Intent === "deploy") {
+          connectToGradio();
+        }
+      }
+    };
+
+    if (wallet?.publicKey) {
+      loadOrderDetail();
+    }
+  }, [wallet, id]);
 
   return (
     <div className={className}>
@@ -104,17 +160,41 @@ function ModelDetail({ className }) {
                 </Stack>
               </div>
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
-                <Button className="cbtn" style={{ width: 100 }}>
-                  Notebook
-                </Button>
-                <Button
-                  onClick={() => {
-                    navigate(`/models/${id}/deploy`);
-                  }}
-                  className="cbtn"
-                  style={{ width: 100 }}>
-                  Deploy
-                </Button>
+                {model.Intent ? (
+                  model.Intent === "train" && (
+                    <Button
+                      className="cbtn"
+                      style={{ width: 100 }}
+                      onClick={() => {
+                        handleConsole(machineId);
+                      }}>
+                      Notebook
+                    </Button>
+                  )
+                ) : (
+                  <>
+                    <Button
+                      className="cbtn"
+                      style={{ width: 100 }}
+                      onClick={() =>
+                        navigate("/market", {
+                          state: { modelId: id, intent: "train" },
+                        })
+                      }>
+                      Train
+                    </Button>
+                    <Button
+                      className="cbtn"
+                      style={{ width: 100 }}
+                      onClick={() =>
+                        navigate("/market", {
+                          state: { modelId: id, intent: "deploy" },
+                        })
+                      }>
+                      Deploy
+                    </Button>
+                  </>
+                )}
               </Stack>
             </Stack>
             <div style={{ margin: "10px 0" }}>
@@ -125,6 +205,7 @@ function ModelDetail({ className }) {
                     size="small"
                     style={{
                       margin: 4,
+                      minWidth: 50,
                     }}
                     key={tag}
                     label={tag}
@@ -141,7 +222,9 @@ function ModelDetail({ className }) {
                   label="Model Files"
                   value="files"
                 />
-                <Tab className="tab" label="Deployment" value="deployment" />
+                {model.Intent === "deploy" && (
+                  <Tab className="tab" label="Deployment" value="deployment" />
+                )}
               </TabList>
               <TabPanel value="model-card">
                 {markdown && metadata ? (
@@ -189,69 +272,76 @@ function ModelDetail({ className }) {
                 )}
               </TabPanel>
               <TabPanel value="files">
-                <FileList prefix={Prefix} id={id} />
+                <FileList prefix={prefix} id={id} />
               </TabPanel>
-              <TabPanel value="deployment">
-                <div style={{ padding: 20 }}>
-                  <Grid container spacing={2}>
-                    <Grid item md={12}>
-                      <h2>Interactive Demo</h2>
-                    </Grid>
-                    <Grid item md={12}>
-                      <label>Input</label>
-                    </Grid>
-                    <Grid item md={12}>
-                      <TextField
-                        disabled={generating}
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        multiline
-                        fullWidth
-                        placeholder="Input your prompt here."
-                      />
-                    </Grid>
-                    <Grid item md={8} />
-                    <Grid item md={4}>
-                      <Stack direction="row-reverse">
-                        <Button
+              {model.Intent === "deploy" && (
+                <TabPanel value="deployment">
+                  <div style={{ padding: 20 }}>
+                    <Grid container spacing={2}>
+                      <Grid item md={12}>
+                        <h2>Interactive Demo</h2>
+                      </Grid>
+                      <Grid item md={12}>
+                        <label>Input</label>
+                      </Grid>
+                      <Grid item md={12}>
+                        <TextField
                           disabled={generating}
-                          onClick={handleOutput}
-                          className="cbtn"
-                          style={{ width: 100, margin: "0 8px" }}>
-                          Submit
-                        </Button>
-                        <Button
-                          disabled={generating}
-                          onClick={() => {
-                            setPrompt("");
-                            setOutput("");
-                          }}
-                          className="cbtn"
-                          style={{ width: 100 }}>
-                          Clear
-                        </Button>
-                      </Stack>
-                    </Grid>
-                    <Grid item md={12}>
-                      {generating ? (
-                        <Skeleton
-                          variant="rectangular"
-                          width={800}
-                          height={800}
-                          style={{ display: "block", margin: "0 auto" }}
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          multiline
+                          fullWidth
+                          placeholder="Input your prompt here."
                         />
-                      ) : (
-                        output && (
-                          <img src={output} alt="output" className="output" />
-                        )
-                      )}
+                      </Grid>
+                      <Grid item md={8} />
+                      <Grid item md={4}>
+                        <Stack direction="row-reverse">
+                          <Button
+                            disabled={generating}
+                            onClick={handleOutput}
+                            className="cbtn"
+                            style={{ width: 100, margin: "0 8px" }}>
+                            Submit
+                          </Button>
+                          <Button
+                            disabled={generating}
+                            onClick={() => {
+                              setPrompt("");
+                              setOutput("");
+                            }}
+                            className="cbtn"
+                            style={{ width: 100 }}>
+                            Clear
+                          </Button>
+                        </Stack>
+                      </Grid>
+                      <Grid item md={12}>
+                        {generating ? (
+                          <Skeleton
+                            variant="rectangular"
+                            width={800}
+                            height={800}
+                            style={{ display: "block", margin: "0 auto" }}
+                          />
+                        ) : (
+                          output && (
+                            <img src={output} alt="output" className="output" />
+                          )
+                        )}
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </div>
-              </TabPanel>
+                  </div>
+                </TabPanel>
+              )}
             </TabContext>
           </>
         )}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={signing}>
+          <CircularProgress />
+        </Backdrop>
       </div>
     </div>
   );
