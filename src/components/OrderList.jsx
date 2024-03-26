@@ -5,37 +5,27 @@ import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import Table from "./Table";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import * as anchor from "@project-serum/anchor";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { getMachineList } from "../services/machine";
+import { signToken } from "../services/order";
 
 function Header({ className, list, loading }) {
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
-  const signToken = async (ip, port) => {
-    const provider = window.phantom.solana;
-    const msg = "workspace/token/" + wallet.publicKey.toString();
-    const encodeMsg = new TextEncoder().encode(msg);
-    try {
-      const sign = await provider.signMessage(encodeMsg, "utf8");
-      const signature = anchor.utils.bytes.bs58.encode(sign.signature);
-      window.open(
-        `http://${ip}:${port}/distri/workspace/debugToken/${signature}`
-      );
-    } catch (e) {
-      enqueueSnackbar(e, { variant: "error" });
-    }
-  };
   const handleConsole = async (uuid) => {
     setSigning(true);
     const res = await getMachineList(1);
     const machineList = res.list;
-    const machine = machineList.find((machine) => machine.Uuid === uuid);
+    const machine = machineList.find((machine) => machine.UUID === uuid);
     if (machine) {
-      await signToken(machine.IP, machine.Port);
+      try {
+        await signToken(machine.IP, machine.Port, wallet.publicKey.toString());
+      } catch (e) {
+        enqueueSnackbar(e, { variant: "error" });
+      }
     }
     setSigning(false);
   };

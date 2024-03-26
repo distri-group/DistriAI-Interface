@@ -64,7 +64,7 @@ function Home({ className }) {
             <h1>{record.Metadata.formData.taskName}</h1>
             <h2 className={record.StatusName}>{record.StatusName}</h2>
             {record.Metadata.MachineInfo ? (
-              <div style={{ width: "64%" }}>
+              <div style={{ width: 720 }}>
                 <div className="detail">
                   <div className="info-box">
                     <div className="info-box-title">

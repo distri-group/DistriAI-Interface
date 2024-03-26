@@ -2,6 +2,7 @@ import moment from "moment";
 import { formatBalance } from "../utils";
 import { getTimeDiff } from "time-difference-js";
 import request from "../utils/request";
+import * as anchor from "@project-serum/anchor";
 
 export async function getOrderList(pageIndex, filter, publicKey) {
   try {
@@ -35,6 +36,7 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     for (let item of list) {
       formatOrder(item, publicKey);
     }
+    console.log(list);
     return { list, total };
   } catch (e) {
     throw e;
@@ -90,6 +92,22 @@ export function getFilterData() {
   });
   return list;
 }
+
+export const signToken = async (ip, port, publicKey) => {
+  const provider = window.phantom.solana;
+  const msg = "workspace/token/" + publicKey;
+  const encodeMsg = new TextEncoder().encode(msg);
+  try {
+    const sign = await provider.signMessage(encodeMsg, "utf8");
+    const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+    window.open(
+      `http://${ip}:${port}/distri/workspace/debugToken/${signature}`
+    );
+  } catch (e) {
+    throw e;
+  }
+};
+
 export async function getDetailByUuid(uuid, publicKey) {
   const obj = await getOrderList(1, [], publicKey);
   if (!obj) {
