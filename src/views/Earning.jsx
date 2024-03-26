@@ -25,7 +25,6 @@ function Earning({ className }) {
   const [loading, setLoading] = useState(false);
   const loadList = async (curr) => {
     setLoading(true);
-    setTotal(0);
     try {
       const res = await getOrderList(curr, filter, wallet.publicKey.toString());
       if (!res) {
@@ -33,7 +32,6 @@ function Earning({ className }) {
         return enqueueSnackbar("Order List Not Found", { variant: "error" });
       }
       setList(res.list);
-      setTotal(res.total);
       let totalReceived = 0;
       let totalPending = 0;
       for (let item of res.list) {
@@ -44,12 +42,12 @@ function Earning({ className }) {
             (item.Duration - (item.RefundDuration || 0)) * item.Price;
         }
       }
-      setReceived(totalReceived);
-      setPending(totalPending);
+      setLoading(false);
+      return { total: res.total, totalPending, totalReceived };
     } catch (e) {
       enqueueSnackbar(e.message, { variant: "error" });
+      setLoading(false);
     }
-    setLoading(false);
   };
   const onFilter = (value) => {
     filter.Status = value;
@@ -139,11 +137,27 @@ function Earning({ className }) {
       setFilterValue(filter);
     };
     loadFilterData();
+    const init = async () => {
+      const { total } = await loadList(1);
+      setTotal(total);
+    };
     if (wallet?.publicKey) {
-      loadList(1);
+      init();
     }
     // eslint-disable-next-line
   }, [wallet?.publicKey]);
+  useEffect(() => {
+    const getTotal = async () => {
+      for (let i = 2; i <= Math.ceil(total / 10); i++) {
+        const { totalPending, totalReceived } = await loadList(i);
+        setPending((prevState) => prevState + totalPending);
+        setReceived((prevState) => prevState + totalReceived);
+      }
+    };
+    if (total > 10) {
+      getTotal();
+    }
+  }, [total]);
   return (
     <div className={className}>
       <h1>My Order Earnings</h1>

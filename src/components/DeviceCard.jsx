@@ -25,7 +25,7 @@ function DeviceCard({ className, device }) {
             <span>{device.CPU || "--"}</span>
           </div>
         </div>
-        <div className="info-box horizontal">
+        <div className="info-box horizontal" style={{ width: "35%" }}>
           <div className="box-item">
             <label>TFLOPS</label>
             <span>{device.Tflops}</span>
@@ -78,7 +78,7 @@ export default styled(DeviceCard)`
     justify-content: space-between;
     height: 180px;
     .info-box {
-      width: 30%;
+      width: 25%;
       padding: 14px;
       background-color: black;
       border: 1px solid rgba(170, 170, 170, 1);

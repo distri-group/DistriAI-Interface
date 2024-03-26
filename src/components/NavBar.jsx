@@ -79,7 +79,7 @@ function NavBar({ className }) {
             <>
               <span onClick={() => navigate("/market")}>Market</span>
               <span onClick={() => navigate("/models")}>Models</span>
-              <span onClick={() => navigate("/datasets")}>Datasets</span>
+              <span style={{ cursor: "default" }}>Datasets</span>
               <span onClick={() => navigate("/order")}>My Orders</span>
             </>
           )}

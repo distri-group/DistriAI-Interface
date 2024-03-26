@@ -22,6 +22,7 @@ function DeviceList({
   reloadFunc,
   priceSort,
   setPriceSort,
+  model,
 }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
@@ -236,7 +237,7 @@ function DeviceList({
                 return setConnectModal(true);
               }
               if (!isMyDevice) {
-                return navigate("/buy/" + record.Uuid);
+                return navigate("/buy/" + record.Uuid, { state: model });
               }
               if (record.Status === 0) {
                 return navigate("/makeoffer/" + record.Uuid);
