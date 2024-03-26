@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Table from "../components/Table";
 import moment from "moment";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Pager from "../components/pager";
@@ -15,10 +15,13 @@ import {
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import SolanaAction from "../components/SolanaAction";
 import { LoadingButton } from "@mui/lab";
+import * as anchor from "@project-serum/anchor";
+import webconfig from "../webconfig";
 
 function Rewards({ className }) {
   document.title = "My Rewards";
   const wallet = useAnchorWallet();
+  const { connection } = useConnection();
   const childRef = useRef();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -49,10 +52,7 @@ function Rewards({ className }) {
       let total = 0;
       for (let item of res.List) {
         if (item.Period) {
-          rewards.push({
-            machineUuid: item.MachineId,
-            period: item.Period,
-          });
+          rewards.push(item);
           total += item.PeriodicRewards;
         }
       }
@@ -62,7 +62,27 @@ function Rewards({ className }) {
   const claimButchRewards = async () => {
     setClaiming(true);
     const { rewards: claimableList, total } = await getClaimableList();
-    const res = await childRef.current.claimRewards(claimableList);
+    console.log(claimableList);
+    const machineSet = new Set(claimableList.map((item) => item.MachineId));
+    machineSet.forEach(async (key, value, set) => {
+      const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode("machine"),
+          wallet.publicKey.toBytes(),
+          anchor.utils.bytes.hex.decode(value),
+        ],
+        webconfig.PROGRAM
+      );
+      if (!(await connection.getParsedAccountInfo(machinePublicKey)).value) {
+        set.delete(key);
+      }
+    });
+    console.log("MachineSet", machineSet);
+    const filterList = claimableList.filter((item) =>
+      machineSet.has(item.MachineId)
+    );
+    console.log("FilterList", filterList);
+    const res = await childRef.current.claimRewards(filterList);
     setTimeout(() => {
       if (res?.msg === "ok") {
         enqueueSnackbar(

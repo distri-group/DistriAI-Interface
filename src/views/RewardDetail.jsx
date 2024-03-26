@@ -73,7 +73,6 @@ function Home({ className }) {
       );
       if (machines) {
         setMachineList(machines.List);
-        console.log(machines);
         setPeriodInfo({
           StartTime: machines.List[0].StartTime,
           Pool: machines.List[0].Pool,
@@ -238,9 +237,9 @@ function Home({ className }) {
             </div>
             <h2>Nodes Info</h2>
             <hr />
-            {/* {machineList.map((device) => (
-              <DeviceCard device={device} />
-            ))} */}
+            {machineList.map(
+              (device) => device.Metadata && <DeviceCard device={device} />
+            )}
           </>
         )}
       </div>

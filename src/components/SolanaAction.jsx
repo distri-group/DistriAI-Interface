@@ -89,38 +89,43 @@ function Home(props, ref) {
   const claimRewards = async (rewards) => {
     try {
       await solanaProgram.initProgram(connection, walletAn);
-      const transaction = new Transaction();
+      // const transaction = new Transaction();
+      const transactions = [];
+      const blockhash = (await connection.getLatestBlockhash("finalized"))
+        .blockhash;
       for (let reward of rewards) {
+        const transaction = new Transaction();
         const [publicKey] = anchor.web3.PublicKey.findProgramAddressSync(
           [
             anchor.utils.bytes.utf8.encode("machine"),
             walletAn.publicKey.toBytes(),
-            anchor.utils.bytes.hex.decode(reward.machineUuid),
+            anchor.utils.bytes.hex.decode(reward.MachineId),
           ],
           webconfig.PROGRAM
         );
         let instruction = await solanaProgram.claimRewards(
           publicKey,
-          reward.machineUuid,
+          reward.MachineId,
           walletAn.publicKey,
-          Number(reward.period)
+          Number(reward.Period)
         );
         transaction.add(instruction);
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = walletAn.publicKey;
+        transactions.push(transaction);
       }
-      const blockhash = (await connection.getLatestBlockhash("finalized"))
-        .blockhash;
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = walletAn.publicKey;
-      const provider = window.phantom.solana;
-      const { signature } = await provider.signAndSendTransaction(transaction);
-      const result = await solanaProgram.checkConfirmation(
-        connection,
-        signature
-      );
-      if (result) {
-        return { msg: "ok", data: transaction };
+      const signedTx = await walletAn.signAllTransactions(transactions);
+      const sentTxns = [];
+      for await (const tx of signedTx) {
+        const confirmTransaction = await connection.sendRawTransaction(
+          tx.serialize()
+        );
+        sentTxns.push(confirmTransaction);
       }
+      console.log(sentTxns);
+      return { msg: "ok", data: sentTxns };
     } catch (e) {
+      console.log(e);
       return { msg: e.message };
     }
   };
