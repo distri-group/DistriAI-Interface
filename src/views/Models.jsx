@@ -24,6 +24,7 @@ function Models({ className }) {
   const [filterType, setType] = useState("");
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
+  let inputTimer;
   const onFilter = (e) => {
     const { name, value } = e.target;
     setFilterValue({ ...filterValue, [name]: value });
@@ -40,7 +41,6 @@ function Models({ className }) {
     setLoading(true);
     const res = await getModelList(1, filterValue);
     setList(res.list);
-    console.log(res.list);
     setLoading(false);
   };
   useEffect(() => {
@@ -86,11 +86,11 @@ function Models({ className }) {
               </div>
             </div>
           ) : (
-            types.map((type) => (
+            types.map((type, index) => (
               <div key={type.title}>
                 <h2>{type.title}</h2>
                 <div>
-                  {type.items.map((item) => (
+                  {type.items.map((item, itemIndex) => (
                     <Chip
                       key={item}
                       sx={{
@@ -98,6 +98,14 @@ function Models({ className }) {
                       }}
                       color="success"
                       label={item}
+                      onClick={() => {
+                        setType(index + 1);
+                        setFilterValue((prevState) => ({
+                          ...prevState,
+                          Type1: index + 1,
+                          Type2: itemIndex + 1,
+                        }));
+                      }}
                     />
                   ))}
                 </div>
@@ -110,8 +118,12 @@ function Models({ className }) {
             <Stack direction="row" alignItems="end" spacing={2}>
               <span>Filter</span>
               <TextField
-                value={filterValue.Name}
-                onChange={onFilter}
+                onChange={(e) => {
+                  clearTimeout(inputTimer);
+                  inputTimer = setTimeout(() => {
+                    onFilter(e);
+                  }, 1000);
+                }}
                 name="Name"
                 size="small"
                 placeholder="Search By Name"
@@ -141,7 +153,9 @@ function Models({ className }) {
           </div>
           <div className="list">
             {loading ? (
-              <CircularProgress />
+              <div className="empty">
+                <CircularProgress />
+              </div>
             ) : list.length > 0 ? (
               list.map((model) => <ModelCard model={model} key={model.Id} />)
             ) : (
@@ -179,12 +193,20 @@ export default styled(Models)`
       width: 800px;
     }
   }
+  .reset {
+    text-decoration: underline;
+    font-size: 18px;
+    cursor: pointer;
+  }
   .empty {
     width: 100%;
     margin: 12px 0;
     padding: 36px 0;
     background-color: #1a1a1a;
     border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     p {
       text-align: center;
       color: #aaa;
@@ -192,72 +214,3 @@ export default styled(Models)`
   }
 `;
 const sorts = ["Updated Time", "Likes", "Downloads"];
-// const models = [
-//   {
-//     id: 1,
-//     name: "google/gemma-7b",
-//     tags: ["Text Generation", "JAX", "gemma-terms-of-use", "transformers"],
-//     time: "2024.3.12",
-//     like: "1.9k",
-//     download: "12k",
-//   },
-//   {
-//     id: 2,
-//     name: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-//     tags: [
-//       "Text Generation",
-//       "PyTorch",
-//       "apache-2.0",
-//       "5 languages",
-//       "conversational",
-//     ],
-//     time: "2024.3.12",
-//     like: "2.9k",
-//     download: "25k",
-//   },
-//   {
-//     id: 3,
-//     name: "ByteDance/SDXL-Lightning",
-//     tags: [
-//       "Text-to-Image",
-//       "PyTorch",
-//       "openrail++",
-//       "Diffusers",
-//       "stable-diffusion",
-//     ],
-//     time: "2024.2.29",
-//     like: "2.0k",
-//     download: "22k",
-//   },
-//   {
-//     id: 4,
-//     name: "meta-llama/Llama-2-7b-chat-hf",
-//     tags: [
-//       "Text Generation",
-//       "PyTorch",
-//       "other",
-//       "llama",
-//       "facebook",
-//       "llama-2",
-//       "English",
-//     ],
-//     time: "2024.2.28",
-//     like: "2.3k",
-//     download: "20k",
-//   },
-//   {
-//     id: 5,
-//     name: "stabilityai/stable-diffusion-xl-base-1.0",
-//     tags: [
-//       "Text-to-Image",
-//       "PyTorch",
-//       "openrail++",
-//       "Diffusers",
-//       "ONNX",
-//       "stable-diffusion",
-//     ],
-//     time: "2024.2.12",
-//     like: "1.6k",
-//     download: "10k",
-//   },
-// ];
