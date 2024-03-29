@@ -36,7 +36,6 @@ export async function getOrderList(pageIndex, filter, publicKey) {
     for (let item of list) {
       formatOrder(item, publicKey);
     }
-    console.log(list);
     return { list, total };
   } catch (e) {
     throw e;
@@ -93,16 +92,14 @@ export function getFilterData() {
   return list;
 }
 
-export const signToken = async (ip, port, publicKey) => {
+export const signToken = async (ip, port, publicKey, deploy) => {
   const provider = window.phantom.solana;
-  const msg = "workspace/token/" + publicKey;
+  const msg = (deploy ? "deploy" : "workspace") + "/token/" + publicKey;
   const encodeMsg = new TextEncoder().encode(msg);
   try {
     const sign = await provider.signMessage(encodeMsg, "utf8");
     const signature = anchor.utils.bytes.bs58.encode(sign.signature);
-    window.open(
-      `http://${ip}:${port}/distri/workspace/debugToken/${signature}`
-    );
+    return `http://${ip}:${port}/distri/workspace/debugToken/${signature}`;
   } catch (e) {
     throw e;
   }

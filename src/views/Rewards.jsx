@@ -62,7 +62,6 @@ function Rewards({ className }) {
   const claimButchRewards = async () => {
     setClaiming(true);
     const { rewards: claimableList, total } = await getClaimableList();
-    console.log(claimableList);
     const machineSet = new Set(claimableList.map((item) => item.MachineId));
     machineSet.forEach(async (key, value, set) => {
       const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -77,11 +76,9 @@ function Rewards({ className }) {
         set.delete(key);
       }
     });
-    console.log("MachineSet", machineSet);
     const filterList = claimableList.filter((item) =>
       machineSet.has(item.MachineId)
     );
-    console.log("FilterList", filterList);
     const res = await childRef.current.claimRewards(filterList);
     setTimeout(() => {
       if (res?.msg === "ok") {
