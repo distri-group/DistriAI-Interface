@@ -6,7 +6,7 @@ import MapWithPoints from "./MapWithPoints";
 import { Context } from "../../views/Home";
 
 const Layers = ({ className }) => {
-  const { scrollProgress, width } = useContext(Context);
+  const { scrollProgress } = useContext(Context);
   const container = useRef(null);
   const controls = useAnimation();
   const [view, setView] = useState(1);
@@ -41,7 +41,7 @@ const Layers = ({ className }) => {
           <div className="left">
             <div className="desc">
               <p>
-                Connect. Contribute. Commerce. <br />
+                Your gateway to decentralized AI solutions. <br />
                 Unlocking the potential of AI together.
               </p>
               <div className="overall" />

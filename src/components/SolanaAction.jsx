@@ -122,10 +122,8 @@ function Home(props, ref) {
         );
         sentTxns.push(confirmTransaction);
       }
-      console.log(sentTxns);
       return { msg: "ok", data: sentTxns };
     } catch (e) {
-      console.log(e);
       return { msg: e.message };
     }
   };

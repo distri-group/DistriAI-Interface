@@ -112,12 +112,10 @@ const formatTags = (model) => {
   } else {
     model.Tags = [model.Tags];
   }
-  model.Tags.unshift(licenses[model.License - 1]);
-  model.Tags.unshift(frameworks[model.Framework - 1]);
-  model.Tags.unshift(types[model.Type1 - 1].items[model.Type2 - 1]);
-  if (model.Type1 !== 5) {
-    model.Tags.unshift(types[model.Type1 - 1].title);
-  }
+  model.license = licenses[model.License - 1];
+  model.type1 = types[model.Type1 - 1].title;
+  model.type2 = types[model.Type1 - 1].items[model.Type2 - 1];
+  model.expanded = false;
   return model;
 };
 

@@ -174,7 +174,7 @@ function DeviceList({
       title: (
         <div style={{ display: "flex" }}>
           <span>DIST / hr</span>
-          {priceSort !== null && (
+          {priceSort !== (null || undefined) && (
             <div
               style={{
                 display: "flex",

@@ -18,7 +18,7 @@ import { useEffect, useState, useRef } from "react";
 import { fileUpload, generatePresignUrl } from "../services/model";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
-function FileList({ className, prefix, id, onSelect }) {
+function FileList({ className, prefix, id, onSelect, upload }) {
   const { enqueueSnackbar } = useSnackbar();
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
@@ -88,7 +88,7 @@ function FileList({ className, prefix, id, onSelect }) {
   return (
     <div className={className}>
       <Stack direction="column">
-        {!onSelect && (
+        {!onSelect && upload && (
           <Stack direction="row" justifyContent="end" spacing={2}>
             <input
               type="file"
@@ -132,13 +132,13 @@ function FileList({ className, prefix, id, onSelect }) {
                           {file.Key.replace(prefix, "")}
                         </TableCell>
                         <TableCell align="right">
-                          <ArrowDownward />
                           <a
                             style={{
                               display: "inline",
                             }}
                             href={`https://distriai.s3.ap-northeast-2.amazonaws.com/${file.Key}`}
                             download>
+                            <ArrowDownward />
                             <span className="size">
                               {prettyBytes(file.Size)}
                             </span>
@@ -184,7 +184,6 @@ export default styled(FileList)`
   .size {
     display: inline-block;
     width: 64px;
-    text-align: right;
   }
   .empty {
     width: 100%;

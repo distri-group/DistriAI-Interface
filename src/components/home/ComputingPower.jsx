@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { AnimatePresence, motion, useInView } from "framer-motion";
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useRef, useContext, Fragment } from "react";
 import Shadow from "./Shadow";
 import MovingDot from "./MovingDot";
 import InnerBox from "./InnerBox";
@@ -311,7 +311,7 @@ const ComputingPower = ({ className }) => {
                             transition={{ delay: 0.4 }}
                             className="dots">
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-                              <>
+                              <Fragment key={value}>
                                 <MovingDot
                                   steps={
                                     width > 500
@@ -376,7 +376,7 @@ const ComputingPower = ({ className }) => {
                                   delay={30 * value}
                                   opacity={1 - value / 12}
                                 />
-                              </>
+                              </Fragment>
                             ))}
                           </motion.div>
                         </>
