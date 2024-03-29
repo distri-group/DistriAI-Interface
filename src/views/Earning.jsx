@@ -153,6 +153,7 @@ function Earning({ className }) {
         setPending((prevState) => prevState + totalPending);
         setReceived((prevState) => prevState + totalReceived);
       }
+      loadList(1);
     };
     if (total > 10) {
       getTotal();
