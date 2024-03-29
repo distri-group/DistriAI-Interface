@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import SolanaAction from "../components/SolanaAction";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useSnackbar } from "notistack";
 import { Box, Button, Chip, Modal, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
@@ -12,6 +11,7 @@ import Table from "./Table";
 import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
+import ConnectToWallet from "./ConnectToWallet";
 
 function DeviceList({
   className,
@@ -330,34 +330,10 @@ function DeviceList({
           </Box>
         </Modal>
       )}
-      <Modal
-        open={connectModal}
+      <ConnectToWallet
+        modal={connectModal}
         onClose={() => setConnectModal(false)}
-        slotProps={{ root: { style: { zIndex: "300" } } }}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 1000,
-            bgcolor: "#00000b",
-            p: 4,
-            zIndex: 300,
-            borderRadius: "8px",
-          }}>
-          <div className="login-box">
-            <p className="big-title">Connect Your Wallet</p>
-            <p className="con-title">
-              If you don't have a wallet yet, you can select a provider and
-              create one now
-            </p>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <WalletMultiButton />
-            </div>
-          </div>
-        </Box>
-      </Modal>
+      />
     </div>
   );
 }

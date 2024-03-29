@@ -13,6 +13,8 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import ModelCard from "../components/ModelCard";
 import { getModelList } from "../services/model";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import ConnectToWallet from "../components/ConnectToWallet";
 
 function Models({ className }) {
   document.title = "Models";
@@ -24,6 +26,8 @@ function Models({ className }) {
   const [filterType, setType] = useState("");
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [connectModal, setConnectModal] = useState(false);
+  const wallet = useAnchorWallet();
   let inputTimer;
   const onFilter = (e) => {
     const { name, value } = e.target;
@@ -147,7 +151,12 @@ function Models({ className }) {
                 reset
               </span>
             </Stack>
-            <Button onClick={() => navigate("/models/create")} className="cbtn">
+            <Button
+              onClick={() => {
+                if (wallet?.publicKey) navigate("/models/create");
+                else setConnectModal(true);
+              }}
+              className="cbtn">
               Create Model
             </Button>
           </div>
@@ -166,6 +175,10 @@ function Models({ className }) {
           </div>
         </div>
       </div>
+      <ConnectToWallet
+        modal={connectModal}
+        onClose={() => setConnectModal(false)}
+      />
     </div>
   );
 }

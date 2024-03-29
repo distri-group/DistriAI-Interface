@@ -66,25 +66,6 @@ function ModelDetail({ className }) {
   useEffect(() => {
     const loadDetail = async () => {
       setLoading(true);
-      const res = await getModelDetail(id);
-      setModel(res);
-      setPrefix(`model/${res.Owner}/${res.Name}/`);
-      fetch(
-        "https://distriai.s3.ap-northeast-2.amazonaws.com/" +
-          `model/${res.Owner}/${res.Name}/` +
-          "README.md"
-      )
-        .then((res) =>
-          res.text().then((text) => {
-            const match = text.match(/^---\n([\s\S]+?)\n---/);
-            const result = metadataParser(text);
-            setMarkdown(result.content);
-            setMetadata(match[1]);
-          })
-        )
-        .catch((e) => {
-          console.log(e);
-        });
       const order = await getOrderList(1, [], wallet.publicKey);
       const orderUsing = order.list.find(
         (item) =>
@@ -105,6 +86,32 @@ function ModelDetail({ className }) {
       loadDetail();
     }
   }, [wallet, id]);
+  useEffect(() => {
+    const loadModel = async () => {
+      setLoading(true);
+      const res = await getModelDetail(id);
+      setModel(res);
+      setPrefix(`model/${res.Owner}/${res.Name}/`);
+      fetch(
+        "https://distriai.s3.ap-northeast-2.amazonaws.com/" +
+          `model/${res.Owner}/${res.Name}/` +
+          "README.md"
+      )
+        .then((res) =>
+          res.text().then((text) => {
+            const match = text.match(/^---\n([\s\S]+?)\n---/);
+            const result = metadataParser(text);
+            setMarkdown(result.content);
+            setMetadata(match[1]);
+          })
+        )
+        .catch((e) => {
+          console.log(e);
+        });
+      setLoading(false);
+    };
+    loadModel();
+  }, []);
 
   return (
     <div className={className}>
