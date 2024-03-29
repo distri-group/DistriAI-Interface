@@ -1,4 +1,4 @@
-import { ArrowDownward, Favorite } from "@mui/icons-material";
+import { AccountBalance, ArrowDownward, Favorite } from "@mui/icons-material";
 import { Chip, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -13,6 +13,15 @@ function ModelCard({ model, className }) {
       }}>
       <h3>{model.Name}</h3>
       <Stack direction="row" spacing={1} style={{ padding: 10 }}>
+        <Chip color="success" size="small" label={model.type1} />
+        {model.type1 !== "Others" && (
+          <Chip
+            size="small"
+            variant="outlined"
+            color="success"
+            label={model.type2}
+          />
+        )}
         {model.Tags.map((tag) => (
           <Chip
             color="primary"
@@ -22,6 +31,16 @@ function ModelCard({ model, className }) {
             style={{ minWidth: 50 }}
           />
         ))}
+        <Chip
+          avatar={
+            <AccountBalance
+              style={{ background: "transparent", color: "white" }}
+            />
+          }
+          color="info"
+          size="small"
+          label={model.license}
+        />
       </Stack>
       <Stack
         direction="row"
