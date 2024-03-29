@@ -276,14 +276,18 @@ const findAssociatedTokenAddress = (walletAddress) => {
 };
 
 export const checkConfirmation = async (connection, tx) => {
-  const latestBlockHash = await connection.getLatestBlockhash();
-  const confirmation = await connection.confirmTransaction(
-    {
-      blockhash: latestBlockHash,
-      lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-      signature: tx,
-    },
-    "finalized"
-  );
-  return confirmation;
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const latestBlockHash = await connection.getLatestBlockhash();
+      const confirmation = await connection.confirmTransaction(
+        {
+          blockhash: latestBlockHash,
+          lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+          signature: tx,
+        },
+        "finalized"
+      );
+      resolve(confirmation);
+    }, 3000);
+  });
 };
