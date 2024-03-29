@@ -3,12 +3,12 @@ import {
   Button,
   Chip,
   CircularProgress,
-  Grid,
-  Skeleton,
   Stack,
   Tab,
-  TextField,
   Backdrop,
+  Dialog,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -19,15 +19,14 @@ import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import FileList from "../components/FileList";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { client } from "@gradio/client";
 import { Favorite } from "@mui/icons-material";
 import "../dark.css";
 import { getModelDetail } from "../services/model";
-import { getMachineList } from "../services/machine";
 import { getOrderList } from "../services/order";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { signToken } from "../services/order";
 import { useSnackbar } from "notistack";
+import { AccountBalance } from "@mui/icons-material";
 
 function ModelDetail({ className }) {
   document.title = "Model Detail";
@@ -35,45 +34,35 @@ function ModelDetail({ className }) {
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
   const [model, setModel] = useState({});
-  const [machineId, setMachineId] = useState("");
+  const [machine, setMachine] = useState("");
   const [prefix, setPrefix] = useState("");
-  const [gradio, setGradio] = useState();
   const [tabValue, setTabValue] = useState("model-card");
   const [markdown, setMarkdown] = useState("");
   const [metadata, setMetadata] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [output, setOutput] = useState("");
-  const [generating, setGenerating] = useState(false);
   const [signing, setSigning] = useState(false);
+  const [dialog, setDialog] = useState("");
   const { id } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const handleTabChange = (e, newValue) => {
     setTabValue(newValue);
   };
-  const handleOutput = async () => {
-    setGenerating(true);
-    try {
-      const res = await gradio.predict("/predict", [prompt]);
-      setOutput(res.data[0].url);
-    } catch (e) {
-      console.log(e);
-    }
-    setGenerating(false);
-  };
-  const handleConsole = async (uuid) => {
+
+  const handleConsole = async (machine, deploy) => {
     setSigning(true);
-    const res = await getMachineList(1);
-    const machineList = res.list;
-    const machine = machineList.find((machine) => machine.UUID === uuid);
-    if (machine) {
-      try {
-        await signToken(machine.IP, machine.Port, wallet.publicKey.toString());
-      } catch (e) {
-        enqueueSnackbar(e, { variant: "error" });
-      }
+    try {
+      const href = await signToken(
+        machine.IP,
+        machine.Port,
+        wallet.publicKey.toString(),
+        deploy
+      );
+      window.open(href);
+    } catch (e) {
+      enqueueSnackbar(e, { variant: "error" });
     }
     setSigning(false);
   };
+
   useEffect(() => {
     const loadDetail = async () => {
       setLoading(true);
@@ -96,23 +85,11 @@ function ModelDetail({ className }) {
         .catch((e) => {
           console.log(e);
         });
-      setLoading(false);
-    };
-
-    loadDetail();
-  }, []);
-
-  useEffect(() => {
-    const connectToGradio = async () => {
-      const gradio = await client("http://3.236.221.156:7860/"); // IP needed
-      setGradio(gradio);
-    };
-    const loadOrderDetail = async () => {
-      const res = await getOrderList(1, [], wallet.publicKey);
-      const orderUsing = res.list.find(
+      const order = await getOrderList(1, [], wallet.publicKey);
+      const orderUsing = order.list.find(
         (item) =>
           item.Metadata.OrderInfo?.Model &&
-          item.Metadata.OrderInfo.Model === Number(id) &&
+          item.Metadata.OrderInfo.Model == id &&
           item.Status === 1
       );
       if (orderUsing) {
@@ -120,15 +97,12 @@ function ModelDetail({ className }) {
           ...prevState,
           Intent: orderUsing.Metadata.OrderInfo.Intent,
         }));
-        setMachineId(orderUsing.Metadata.MachineInfo.UUID);
-        if (orderUsing.Metadata.OrderInfo.Intent === "deploy") {
-          connectToGradio();
-        }
+        setMachine(orderUsing.Metadata.MachineInfo);
       }
+      setLoading(false);
     };
-
     if (wallet?.publicKey) {
-      loadOrderDetail();
+      loadDetail();
     }
   }, [wallet, id]);
 
@@ -161,14 +135,23 @@ function ModelDetail({ className }) {
               </div>
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
                 {model.Intent ? (
-                  model.Intent === "train" && (
+                  model.Intent === "train" ? (
                     <Button
                       className="cbtn"
                       style={{ width: 100 }}
                       onClick={() => {
-                        handleConsole(machineId);
+                        handleConsole(machine, false);
                       }}>
                       Notebook
+                    </Button>
+                  ) : (
+                    <Button
+                      className="cbtn"
+                      style={{ width: 100 }}
+                      onClick={() => {
+                        handleConsole(machine, true);
+                      }}>
+                      Deployment
                     </Button>
                   )
                 ) : (
@@ -177,9 +160,10 @@ function ModelDetail({ className }) {
                       className="cbtn"
                       style={{ width: 100 }}
                       onClick={() =>
-                        navigate("/market", {
-                          state: { modelId: id, intent: "train" },
-                        })
+                        // navigate("/market", {
+                        //   state: { modelId: id, intent: "train" },
+                        // })
+                        setDialog("train")
                       }>
                       Train
                     </Button>
@@ -187,9 +171,10 @@ function ModelDetail({ className }) {
                       className="cbtn"
                       style={{ width: 100 }}
                       onClick={() =>
-                        navigate("/market", {
-                          state: { modelId: id, intent: "deploy" },
-                        })
+                        // navigate("/market", {
+                        //   state: { modelId: id, intent: "deploy" },
+                        // })
+                        setDialog("deploy")
                       }>
                       Deploy
                     </Button>
@@ -197,21 +182,37 @@ function ModelDetail({ className }) {
                 )}
               </Stack>
             </Stack>
-            <div style={{ margin: "10px 0" }}>
+            <Stack direction="row" spacing={2} style={{ margin: "10px 0" }}>
+              <Chip color="success" size="small" label={model.type1} />
+              {model.type1 !== "Others" && (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="success"
+                  label={model.type2}
+                />
+              )}
               {model.Tags &&
                 model.Tags.map((tag) => (
                   <Chip
                     color="primary"
                     size="small"
-                    style={{
-                      margin: 4,
-                      minWidth: 50,
-                    }}
-                    key={tag}
                     label={tag}
+                    key={tag}
+                    style={{ minWidth: 50 }}
                   />
                 ))}
-            </div>
+              <Chip
+                avatar={
+                  <AccountBalance
+                    style={{ background: "transparent", color: "white" }}
+                  />
+                }
+                color="info"
+                size="small"
+                label={model.license}
+              />
+            </Stack>
             <hr style={{ margin: "32px 0" }} />
             <TabContext value={tabValue}>
               <TabList onChange={handleTabChange}>
@@ -222,9 +223,6 @@ function ModelDetail({ className }) {
                   label="Model Files"
                   value="files"
                 />
-                {model.Intent === "deploy" && (
-                  <Tab className="tab" label="Deployment" value="deployment" />
-                )}
               </TabList>
               <TabPanel value="model-card">
                 {markdown && metadata ? (
@@ -235,6 +233,7 @@ function ModelDetail({ className }) {
                         style={{
                           background: "gray",
                           color: "white",
+                          marginLeft: 16,
                         }}
                       />
                       <SyntaxHighlighter language="yaml" style={tomorrow}>
@@ -272,76 +271,58 @@ function ModelDetail({ className }) {
                 )}
               </TabPanel>
               <TabPanel value="files">
-                <FileList prefix={prefix} id={id} />
+                {wallet?.publicKey && (
+                  <FileList
+                    prefix={prefix}
+                    id={id}
+                    upload={model.Owner === wallet.publicKey.toString()}
+                  />
+                )}
               </TabPanel>
-              {model.Intent === "deploy" && (
-                <TabPanel value="deployment">
-                  <div style={{ padding: 20 }}>
-                    <Grid container spacing={2}>
-                      <Grid item md={12}>
-                        <h2>Interactive Demo</h2>
-                      </Grid>
-                      <Grid item md={12}>
-                        <label>Input</label>
-                      </Grid>
-                      <Grid item md={12}>
-                        <TextField
-                          disabled={generating}
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          multiline
-                          fullWidth
-                          placeholder="Input your prompt here."
-                        />
-                      </Grid>
-                      <Grid item md={8} />
-                      <Grid item md={4}>
-                        <Stack direction="row-reverse">
-                          <Button
-                            disabled={generating}
-                            onClick={handleOutput}
-                            className="cbtn"
-                            style={{ width: 100, margin: "0 8px" }}>
-                            Submit
-                          </Button>
-                          <Button
-                            disabled={generating}
-                            onClick={() => {
-                              setPrompt("");
-                              setOutput("");
-                            }}
-                            className="cbtn"
-                            style={{ width: 100 }}>
-                            Clear
-                          </Button>
-                        </Stack>
-                      </Grid>
-                      <Grid item md={12}>
-                        {generating ? (
-                          <Skeleton
-                            variant="rectangular"
-                            width={800}
-                            height={800}
-                            style={{ display: "block", margin: "0 auto" }}
-                          />
-                        ) : (
-                          output && (
-                            <img src={output} alt="output" className="output" />
-                          )
-                        )}
-                      </Grid>
-                    </Grid>
-                  </div>
-                </TabPanel>
-              )}
             </TabContext>
           </>
         )}
+
         <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={signing}>
           <CircularProgress />
         </Backdrop>
+        <Dialog open={Boolean(dialog)}>
+          <DialogContent>
+            <p>
+              No available machine yet. Please rent a machine in market before
+              using.
+            </p>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              style={{
+                backgroundColor: "rgb(148, 214, 226)",
+                borderRadius: "3px",
+                color: "black",
+                padding: "4px 12px",
+              }}
+              onClick={() => setDialog("")}>
+              Cancel
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "rgb(148, 214, 226)",
+                borderRadius: "3px",
+                color: "black",
+                padding: "4px 12px",
+              }}
+              onClick={() => {
+                navigate("/market", {
+                  state: { modelId: id, intent: dialog },
+                });
+                setDialog("");
+              }}>
+              Go to Market
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );
@@ -369,5 +350,17 @@ export default styled(ModelDetail)`
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  .deployment {
+    width: 100%;
+    height: 800px;
+    border: none;
+  }
+  .default-btn {
+    background-color: rgb(148, 214, 226);
+    border-radius: 3px;
+    color: black;
+    padding: 4px 12px;
+    margin-left: 8px;
   }
 `;
