@@ -15,14 +15,19 @@ function Header({ className, list, loading }) {
   const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
-  const handleConsole = async (uuid) => {
+  const handleConsole = async (uuid, deploy) => {
     setSigning(true);
     const res = await getMachineList(1);
     const machineList = res.list;
     const machine = machineList.find((machine) => machine.UUID === uuid);
     if (machine) {
       try {
-        await signToken(machine.IP, machine.Port, wallet.publicKey.toString());
+        const href = await signToken(
+          machine.IP,
+          machine.Port,
+          wallet.publicKey.toString()
+        );
+        window.open(href);
       } catch (e) {
         enqueueSnackbar(e, { variant: "error" });
       }
@@ -107,15 +112,28 @@ function Header({ className, list, loading }) {
       key: "Uuid",
       render: (text, record, index) => (
         <div className="btns">
-          <span
-            onClick={() => {
-              handleConsole(record.Metadata.MachineInfo.UUID);
-            }}
-            className={`mini-btn ${
-              record.StatusName !== "Available" && "disabled"
-            }`}>
-            Console
-          </span>
+          {record.Metadata.OrderInfo?.Intent &&
+          record.Metadata.OrderInfo.Intent === "deploy" ? (
+            <span
+              onClick={() => {
+                handleConsole(record.Metadata.MachineInfo.UUID, true);
+              }}
+              className={`mini-btn ${
+                record.StatusName !== "Available" && "disabled"
+              }`}>
+              Deployment
+            </span>
+          ) : (
+            <span
+              onClick={() => {
+                handleConsole(record.Metadata.MachineInfo.UUID, false);
+              }}
+              className={`mini-btn ${
+                record.StatusName !== "Available" && "disabled"
+              }`}>
+              Console
+            </span>
+          )}
           <span
             onClick={() => navigate("/order/" + text)}
             className={`mini-btn ${
