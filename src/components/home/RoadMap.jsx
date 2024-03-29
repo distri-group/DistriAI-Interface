@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useContext } from "react";
+import { useRef, useState, useEffect, useContext, Fragment } from "react";
 import { motion } from "framer-motion";
 import styled from "styled-components";
 import ReactHammer from "react-hammerjs";
@@ -71,7 +71,7 @@ const RoadMap = ({ className }) => {
             <div className="dot-container">
               {roads.map((road, index) =>
                 width > 500 ? (
-                  <>
+                  <Fragment key={index}>
                     <div
                       style={{ cursor: "pointer" }}
                       onClick={() => setActiveIndex(index)}>
@@ -114,7 +114,7 @@ const RoadMap = ({ className }) => {
                         </div>
                       </>
                     )}
-                  </>
+                  </Fragment>
                 ) : (
                   <div
                     key={index}

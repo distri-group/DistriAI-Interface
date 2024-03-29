@@ -132,17 +132,19 @@ const HowToDo = ({ className }) => {
             <div className="titles">
               <span
                 style={{ color: activeState === 1 && "#09E98D" }}
-                onClick={() => setActiveState(1)}>
+                onClick={() => setActiveState([1, -1])}>
                 BUY
               </span>
               <span
                 style={{ color: activeState === 2 && "#09E98D" }}
-                onClick={() => setActiveState(2)}>
+                onClick={() =>
+                  setActiveState((prevState) => [2, 2 - prevState[0]])
+                }>
                 SELL
               </span>
               <span
                 style={{ color: activeState === 3 && "#09E98D" }}
-                onClick={() => setActiveState(3)}>
+                onClick={() => setActiveState([3, 1])}>
                 DAO
               </span>
             </div>
@@ -373,6 +375,7 @@ export default styled(HowToDo)`
     }
   }
   @media (max-width: 500px) {
+    height: 1080px;
     .container {
       padding: 0;
       padding-top: 64pt;
