@@ -22,15 +22,16 @@ function ModelCard({ model, className }) {
             label={model.type2}
           />
         )}
-        {model.Tags.map((tag) => (
-          <Chip
-            color="primary"
-            size="small"
-            label={tag}
-            key={tag}
-            style={{ minWidth: 50 }}
-          />
-        ))}
+        {model.Tags &&
+          model.Tags.map((tag) => (
+            <Chip
+              color="primary"
+              size="small"
+              label={tag}
+              key={tag}
+              style={{ minWidth: 50 }}
+            />
+          ))}
         <Chip
           avatar={
             <AccountBalance

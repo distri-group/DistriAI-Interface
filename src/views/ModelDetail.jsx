@@ -159,23 +159,13 @@ function ModelDetail({ className }) {
                     <Button
                       className="cbtn"
                       style={{ width: 100 }}
-                      onClick={() =>
-                        // navigate("/market", {
-                        //   state: { modelId: id, intent: "train" },
-                        // })
-                        setDialog("train")
-                      }>
+                      onClick={() => setDialog("train")}>
                       Train
                     </Button>
                     <Button
                       className="cbtn"
                       style={{ width: 100 }}
-                      onClick={() =>
-                        // navigate("/market", {
-                        //   state: { modelId: id, intent: "deploy" },
-                        // })
-                        setDialog("deploy")
-                      }>
+                      onClick={() => setDialog("deploy")}>
                       Deploy
                     </Button>
                   </>

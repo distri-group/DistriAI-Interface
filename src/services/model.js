@@ -109,7 +109,8 @@ export const fileUpload = async (url, file) => {
 const formatTags = (model) => {
   if (model.Tags.includes(",")) {
     model.Tags = model.Tags.split(",");
-  } else {
+  } else if (!model.Tags.length) model.Tags = null;
+  else {
     model.Tags = [model.Tags];
   }
   model.license = licenses[model.License - 1];
