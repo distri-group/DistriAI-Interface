@@ -14,6 +14,7 @@ import { MuiChipsInput } from "mui-chips-input";
 import { licenses, frameworks, createModel } from "../services/model";
 import { useSnackbar } from "notistack";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { LoadingButton } from "@mui/lab";
 
 function CreateModel({ className }) {
   document.title = "Create Model";
@@ -29,6 +30,7 @@ function CreateModel({ className }) {
     Tags: [],
   });
   const [chips, setChips] = useState([]);
+  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
@@ -39,8 +41,8 @@ function CreateModel({ className }) {
     setFormValue((prevState) => ({ ...prevState, Tags: newChips }));
   };
   const onSubmit = async (e) => {
-    console.log(formValue);
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await createModel(
         {
@@ -50,7 +52,7 @@ function CreateModel({ className }) {
         wallet.publicKey.toString()
       );
       if (res.Msg === "success") {
-        enqueueSnackbar("Create Model Success.");
+        enqueueSnackbar("Create Model Success.", { variant: "success" });
         setTimeout(() => {
           navigate("/models");
         }, 300);
@@ -58,6 +60,7 @@ function CreateModel({ className }) {
     } catch (e) {
       console.log(e);
     }
+    setLoading(false);
   };
   return (
     <div className={className}>
@@ -149,23 +152,18 @@ function CreateModel({ className }) {
               onChange={handleChipsChange}
             />
           </Grid>
-          {/* <Grid item md={12}>
-            <label>README</label>
-          </Grid>
-          <Grid item md={12}>
-            <TextField
-              name="readme"
-              onChange={handleChange}
-              placeholder="Please click here to upload the README.md file. You can also add it later."
-            />
-          </Grid> */}
           <Grid item md={8} />
           <Grid item md={4}>
             <Stack spacing={2} direction="row">
-              <Button style={{ width: 100 }} className="cbtn" type="submit">
-                Submit
-              </Button>
+              <LoadingButton
+                loading={loading}
+                style={{ width: 100 }}
+                className="cbtn"
+                type="submit">
+                {!loading && "Submit"}
+              </LoadingButton>
               <Button
+                disabled={loading}
                 style={{ width: 100 }}
                 className="cbtn"
                 onClick={() => {
