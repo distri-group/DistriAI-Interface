@@ -72,6 +72,8 @@ function Buy({ className }) {
       Speed: deviceDetail.Speed,
       MaxDuration: deviceDetail.MaxDuration,
       Price: deviceDetail.Price,
+      IP: deviceDetail.IP,
+      Port: deviceDetail.Port,
     };
     const OrderInfo = {
       Model: formValue.model,
@@ -119,7 +121,7 @@ function Buy({ className }) {
       setFormValue((prevState) => ({
         ...prevState,
         downloadLinks: [
-          `https://distriai.s3.ap-northeast-2.amazonaws.com/model/${selectedModel.Owner}/${selectedModel.Name}/deployment.py`,
+          `https://distriai.s3.ap-northeast-2.amazonaws.com/model/${selectedModel.Owner}/${selectedModel.Name}/deploy-stabilityai.py`,
         ],
       }));
     }
