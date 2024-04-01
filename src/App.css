@@ -114,3 +114,9 @@ body {
 a{
   text-decoration: none;
 }
+.default-btn{
+  background-color: rgb(148, 214, 226)!important;
+  border-radius: 3px!important;
+  color: black!important;
+  padding: 4px 12px!important;
+}

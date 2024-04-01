@@ -3,12 +3,17 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableRow,
+  TextField,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import styled from "styled-components";
@@ -24,6 +29,8 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
+  const [createFolderDialog, setCreateFolderDialog] = useState(false);
+  const [folderName, setFolderName] = useState("");
   const [downloadLinks, setLinks] = useState([]);
   const [initialPrefix] = useState(prefix);
   const fileInputRef = useRef(null);
@@ -32,6 +39,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
     signer: { sign: async (request) => request },
   });
   const handleUpload = async (file) => {
+    enqueueSnackbar("File uploading...", { variant: "info" });
     try {
       const path = await generatePresignUrl(
         parseInt(id),
@@ -52,6 +60,26 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
       enqueueSnackbar("Upload Success", { variant: "success" });
     } catch (e) {
       enqueueSnackbar(e, { variant: "error" });
+    }
+  };
+  const handleFolderCreate = async () => {
+    const blob = new Blob([""], { type: "text/plain" });
+    const file = new File([blob], "empty.txt", { type: "text/plain" });
+    const path = await generatePresignUrl(
+      parseInt(id),
+      (prefix !== initialPrefix ? prefix.replace(initialPrefix, "") : "") +
+        folderName +
+        "/",
+      wallet.publicKey.toString()
+    );
+    setCreateFolderDialog(false);
+    enqueueSnackbar("Folder creating...", { variant: "info" });
+    try {
+      await fileUpload(path, file);
+      loadFileList();
+      enqueueSnackbar("Folder created", { variant: "success" });
+    } catch (e) {
+      console.log(e);
     }
   };
   const loadFileList = () => {
@@ -105,17 +133,24 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
             <Button
               variant="contained"
               className="cbtn"
-              style={{ width: 100, margin: "0 20px" }}
+              style={{ width: 100, margin: "0 10px" }}
               onClick={() => {
                 fileInputRef.current.click();
               }}>
               Add File
             </Button>
+            <Button
+              variant="contained"
+              className="cbtn"
+              style={{ margin: "0 10px" }}
+              onClick={() => setCreateFolderDialog(true)}>
+              Create Folder
+            </Button>
           </Stack>
         )}
         {loading ? (
           <CircularProgress />
-        ) : files.length > 0 ? (
+        ) : files.length > 0 || folders.length > 0 ? (
           <TableContainer>
             <Table>
               <TableBody>
@@ -200,6 +235,31 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
           </div>
         )}
       </Stack>
+      <Dialog open={createFolderDialog} fullWidth maxWidth="sm">
+        <DialogTitle>Input folder name here:</DialogTitle>
+        <DialogContent>
+          <TextField
+            onChange={(e) => {
+              setFolderName(e.target.value);
+            }}
+            InputProps={{
+              style: {
+                color: "black",
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            className="default-btn"
+            onClick={() => setCreateFolderDialog(false)}>
+            Cancel
+          </Button>
+          <Button className="default-btn" onClick={handleFolderCreate}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

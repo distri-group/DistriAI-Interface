@@ -292,23 +292,11 @@ function ModelDetail({ className }) {
             </p>
           </DialogContent>
           <DialogActions>
-            <Button
-              style={{
-                backgroundColor: "rgb(148, 214, 226)",
-                borderRadius: "3px",
-                color: "black",
-                padding: "4px 12px",
-              }}
-              onClick={() => setDialog("")}>
+            <Button className="default-btn" onClick={() => setDialog("")}>
               Cancel
             </Button>
             <Button
-              style={{
-                backgroundColor: "rgb(148, 214, 226)",
-                borderRadius: "3px",
-                color: "black",
-                padding: "4px 12px",
-              }}
+              className="default-btn"
               onClick={() => {
                 navigate("/market", {
                   state: { modelId: id, intent: dialog },
