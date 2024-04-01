@@ -62,6 +62,14 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
       enqueueSnackbar(e, { variant: "error" });
     }
   };
+  const getParentPrefix = (prefix) => {
+    const lastIndex = prefix.lastIndexOf("/", prefix.length - 2);
+    if (lastIndex === -1) {
+      return "";
+    }
+    const parentPrefix = prefix.slice(0, lastIndex + 1);
+    return parentPrefix;
+  };
   const handleFolderCreate = async () => {
     const blob = new Blob([""], { type: "text/plain" });
     const file = new File([blob], "empty.txt", { type: "text/plain" });
@@ -159,7 +167,9 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
                     <TableCell width="20%">
                       <Folder />
                       <span
-                        onClick={() => setPrefix(initialPrefix)}
+                        onClick={() => {
+                          setPrefix(getParentPrefix(prefix));
+                        }}
                         style={{ marginLeft: 8, cursor: "pointer" }}>
                         ..
                       </span>
