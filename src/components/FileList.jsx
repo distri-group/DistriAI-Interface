@@ -35,7 +35,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
     try {
       const path = await generatePresignUrl(
         parseInt(id),
-        (prefix !== initialPrefix && prefix.replace(initialPrefix, "")) +
+        (prefix !== initialPrefix ? prefix.replace(initialPrefix, "") : "") +
           file.name,
         wallet.publicKey.toString()
       );
