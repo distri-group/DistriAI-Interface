@@ -1,4 +1,4 @@
-import { ArrowDownward, InsertDriveFile } from "@mui/icons-material";
+import { ArrowDownward, Folder, InsertDriveFile } from "@mui/icons-material";
 import {
   Button,
   Checkbox,
@@ -13,19 +13,20 @@ import {
 import { useSnackbar } from "notistack";
 import styled from "styled-components";
 import prettyBytes from "pretty-bytes";
-import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { useEffect, useState, useRef } from "react";
 import { fileUpload, generatePresignUrl } from "../services/model";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
-function FileList({ className, prefix, id, onSelect, upload }) {
+function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
   const { enqueueSnackbar } = useSnackbar();
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [downloadLinks, setLinks] = useState([]);
+  const [initialPrefix] = useState(prefix);
   const fileInputRef = useRef(null);
-
   const S3client = new S3Client({
     region: "ap-northeast-2",
     signer: { sign: async (request) => request },
@@ -34,7 +35,8 @@ function FileList({ className, prefix, id, onSelect, upload }) {
     try {
       const path = await generatePresignUrl(
         parseInt(id),
-        file.name,
+        (prefix !== initialPrefix && prefix.replace(initialPrefix, "")) +
+          file.name,
         wallet.publicKey.toString()
       );
       await fileUpload(path, file);
@@ -54,12 +56,16 @@ function FileList({ className, prefix, id, onSelect, upload }) {
   };
   const loadFileList = () => {
     setLoading(true);
-    const command = new ListObjectsCommand({
+    const command = new ListObjectsV2Command({
       Bucket: "distriai",
       Prefix: prefix,
+      Delimiter: "/",
     });
     S3client.send(command)
-      .then(({ Contents }) => setFiles(Contents || []))
+      .then(({ Contents, CommonPrefixes }) => {
+        setFiles(Contents || []);
+        setFolders(CommonPrefixes || []);
+      })
       .then(() => setLoading(false));
   };
   const handleSelection = (e, key) => {
@@ -113,6 +119,34 @@ function FileList({ className, prefix, id, onSelect, upload }) {
           <TableContainer>
             <Table>
               <TableBody>
+                {prefix !== initialPrefix && (
+                  <TableRow>
+                    <TableCell width="20%">
+                      <Folder />
+                      <span
+                        onClick={() => setPrefix(initialPrefix)}
+                        style={{ marginLeft: 8, cursor: "pointer" }}>
+                        ..
+                      </span>
+                    </TableCell>
+                    <TableCell />
+                    <TableCell />
+                  </TableRow>
+                )}
+                {folders.map((folder) => (
+                  <TableRow key={folder.Prefix}>
+                    <TableCell width="20%">
+                      <Folder />
+                      <span
+                        onClick={() => setPrefix(folder.Prefix)}
+                        style={{ marginLeft: 8, cursor: "pointer" }}>
+                        {folder.Prefix.replace(prefix, "")}
+                      </span>
+                    </TableCell>
+                    <TableCell />
+                    <TableCell />
+                  </TableRow>
+                ))}
                 {files.map(
                   (file) =>
                     file.Key !== prefix && (
@@ -129,7 +163,9 @@ function FileList({ className, prefix, id, onSelect, upload }) {
                         )}
                         <TableCell width="20%">
                           <InsertDriveFile />
-                          {file.Key.replace(prefix, "")}
+                          <span style={{ marginLeft: 8 }}>
+                            {file.Key.replace(prefix, "")}
+                          </span>
                         </TableCell>
                         <TableCell align="right">
                           <a
