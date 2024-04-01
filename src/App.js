@@ -176,8 +176,9 @@ function App() {
     };
   }, []);
   useEffect(() => {
-    if (!window.localStorage.getItem("token")) connectToSolana();
-  }, []);
+    if (!window.localStorage.getItem("token") && window.solana.publicKey)
+      connectToSolana();
+  }, [window.solana?.publicKey]);
   return (
     <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
       <WalletProvider wallets={[]} autoConnect={true}>

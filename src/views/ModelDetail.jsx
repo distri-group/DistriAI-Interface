@@ -268,13 +268,12 @@ function ModelDetail({ className }) {
                 )}
               </TabPanel>
               <TabPanel value="files">
-                {wallet?.publicKey && (
-                  <FileList
-                    prefix={prefix}
-                    id={id}
-                    upload={model.Owner === wallet.publicKey.toString()}
-                  />
-                )}
+                <FileList
+                  prefix={prefix}
+                  setPrefix={setPrefix}
+                  id={id}
+                  upload={model.Owner === wallet?.publicKey?.toString()}
+                />
               </TabPanel>
             </TabContext>
           </>
