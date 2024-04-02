@@ -1,50 +1,67 @@
-import request from "../utils/request";
 import { formatBalance } from "../utils";
-// Retrieve the detailed information of the machine from the storage based on the provided id.
+import axios from "../utils/axios";
 
-export async function getMachineDetailByUuid(uuid, publicKey) {
-  const res = await getMachineList(1, [], publicKey);
-  const list = res.list;
-  return list.find((item) => item.Uuid === uuid);
+const baseUrl = "/machine";
+
+export async function getMachineList(pageIndex, pageSize, filter, publicKey) {
+  const apiUrl = baseUrl + (publicKey ? "/mine" : "/market");
+  const body = {
+    Page: pageIndex,
+    PageSize: pageSize,
+  };
+  const headers = {
+    Account: publicKey ?? "",
+  };
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== "all") {
+        body[key] = value;
+      }
+    });
+  }
+  try {
+    const res = await axios.post(apiUrl, body, {
+      headers,
+    });
+    for (let machine of res.List) {
+      machine = formatMachine(machine);
+    }
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Retrieve the detailed information of the machine from the storage based on the provided id.
+export async function getMachineDetail(Owner, Id) {
+  const apiUrl = baseUrl + `/${Owner}/${Id}`;
+  try {
+    const res = await axios.get(apiUrl);
+    return formatMachine(res);
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function getFilterData() {
-  let apiUrl = "/index-api/machine/filter";
-  let ret = await request.post(apiUrl);
-  if (ret.Msg !== "success") {
-    return ret;
-  }
-  let list = [];
-  for (let k in ret.Data) {
-    let arr = ret.Data[k].map((t) => {
-      return {
-        label: t,
-        value: t,
-      };
+  const apiUrl = baseUrl + "/filter";
+  try {
+    let res = await axios.post(apiUrl);
+    Object.entries(res).forEach(([key, value]) => {
+      value.forEach((item, index) => {
+        value[index] = {
+          label: item,
+          value: item,
+        };
+      });
+      value.unshift({
+        label:
+          "ANY " +
+          (key === "Gpu" ? "GPU" : key === "GpuCount" ? "GPU Count" : key),
+        value: "all",
+      });
     });
-    arr.unshift({
-      label:
-        "ANY " + (k === "Gpu" ? "GPU" : k === "GpuCount" ? "GPU Count" : k),
-      value: "all",
-    });
-    list.push({
-      name: k,
-      arr,
-    });
-  }
-  list.push({
-    name: "SecurityLevel",
-    arr: [
-      { label: "ANY Level", value: "all" },
-      { label: "Level 0", value: 0 },
-      { label: "Level 1", value: 1 },
-      { label: "Level 2", value: 2 },
-      { label: "Level 3", value: 3 },
-    ],
-  });
-  list.push({
-    name: "OrderBy",
-    arr: [
+    res.OrderBy = [
       { label: "Auto Sort", value: "all" },
       { label: "TFLOPS", value: "tflops DESC" },
       { label: "Score", value: "score DESC" },
@@ -52,60 +69,14 @@ export async function getFilterData() {
       { label: "Max Duration", value: "max_duration DESC" },
       { label: "Disk", value: "disk DESC" },
       { label: "RAM", value: "ram DESC" },
-    ],
-  });
-  return list;
-}
-
-export async function getMachineList(pageIndex, filter, publicKey) {
-  try {
-    let apiUrl = publicKey
-      ? "/index-api/machine/mine"
-      : "/index-api/machine/market";
-    let options = {
-      data: {
-        Page: pageIndex,
-        PageSize: 10,
-      },
-    };
-    if (filter) {
-      for (let k in filter) {
-        let v = filter[k];
-        if (v !== "all") {
-          options.data[k] = v;
-        }
-      }
-    }
-    if (publicKey) {
-      let Account = publicKey;
-      if (Account) {
-        options.headers = {
-          Account,
-        };
-      }
-    }
-    let ret = await request.post(apiUrl, options);
-    if (ret.Msg !== "success") {
-      return null;
-    }
-    let total = ret.Data.Total;
-    let list = ret.Data.List;
-    for (let item of list) {
-      formatMachine(item);
-    }
-    let obj;
-    if (Number.isInteger(filter?.SecurityLevel)) {
-      let level = filter.SecurityLevel;
-      list = list.filter((item) => item.SecurityLevel === level);
-    }
-    obj = { list, total };
-    return obj;
-  } catch (e) {
-    throw e;
+    ];
+    return res;
+  } catch (error) {
+    throw error;
   }
 }
 
-// Format Machine's Info
+// Format Machine Info
 export function formatMachine(item) {
   item.Price = formatBalance(item.Price);
   if (item.CompletedCount + item.FailedCount <= 0) {
@@ -135,12 +106,8 @@ export function formatMachine(item) {
       Download: item.Metadata.SpeedInfo.Download,
     };
     item.GPUMemory = item.Metadata.GPUInfo.Memory;
-    if (item.CPS > 75) {
-      item.From = "Distri.AI";
-    } else if (item.CPS > 70) {
-      item.From = "Render";
-    } else {
-      item.From = "io.net";
-    }
+    item.From =
+      item.CPS > 75 ? "Distri.AI" : item.CPS > 70 ? "Render" : "io.net";
   }
+  return item;
 }

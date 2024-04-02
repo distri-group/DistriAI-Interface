@@ -9,9 +9,9 @@ import {
 import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
 
-function Home(props, ref) {
+function SolanaAction(props, ref) {
   const { connection } = useConnection();
-  const walletAn = useAnchorWallet();
+  const wallet = useAnchorWallet();
   useImperativeHandle(ref, () => ({
     makeOffer,
     placeOrder,
@@ -23,7 +23,7 @@ function Home(props, ref) {
   }));
   // Seller's Device Make Offer
   const makeOffer = async (machinePublicKey, price, duration, disk) => {
-    solanaProgram.initProgram(connection, walletAn);
+    solanaProgram.initProgram(connection, wallet);
     let result = await solanaProgram.makeOffer(
       machinePublicKey,
       parseFloat(price),
@@ -34,13 +34,13 @@ function Home(props, ref) {
   };
   // Unlist Device From Market
   const cancelOffer = async (machinePublicKey) => {
-    solanaProgram.initProgram(connection, walletAn);
+    solanaProgram.initProgram(connection, wallet);
     let result = await solanaProgram.cancelOffer(machinePublicKey);
     return result;
   };
   // Rent Device On Market
   const placeOrder = async (machinePublicKey, orderId, duration, metadata) => {
-    await solanaProgram.initProgram(connection, walletAn);
+    await solanaProgram.initProgram(connection, wallet);
     let result = await solanaProgram.placeOrder(
       machinePublicKey,
       orderId,
@@ -51,11 +51,11 @@ function Home(props, ref) {
   };
   // Extend Renting Duration
   const renewOrder = async (machinePublicKey, orderId, duration) => {
-    await solanaProgram.initProgram(connection, walletAn);
+    await solanaProgram.initProgram(connection, wallet);
     const [orderPublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("order"),
-        walletAn.publicKey.toBytes(),
+        wallet.publicKey.toBytes(),
         anchor.utils.bytes.hex.decode(orderId),
       ],
       webconfig.PROGRAM
@@ -69,11 +69,11 @@ function Home(props, ref) {
   };
   // Refund Order
   const refundOrder = async (machinePublicKey, orderId, sellerPublicKey) => {
-    await solanaProgram.initProgram(connection, walletAn);
+    await solanaProgram.initProgram(connection, wallet);
     const [orderPublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("order"),
-        walletAn.publicKey.toBytes(),
+        wallet.publicKey.toBytes(),
         anchor.utils.bytes.hex.decode(orderId),
       ],
       webconfig.PROGRAM
@@ -88,7 +88,7 @@ function Home(props, ref) {
   // Claim Period Rewards
   const claimRewards = async (rewards) => {
     try {
-      await solanaProgram.initProgram(connection, walletAn);
+      await solanaProgram.initProgram(connection, wallet);
       // const transaction = new Transaction();
       const transactions = [];
       const blockhash = (await connection.getLatestBlockhash("finalized"))
@@ -98,7 +98,7 @@ function Home(props, ref) {
         const [publicKey] = anchor.web3.PublicKey.findProgramAddressSync(
           [
             anchor.utils.bytes.utf8.encode("machine"),
-            walletAn.publicKey.toBytes(),
+            wallet.publicKey.toBytes(),
             anchor.utils.bytes.hex.decode(reward.MachineId),
           ],
           webconfig.PROGRAM
@@ -106,15 +106,15 @@ function Home(props, ref) {
         let instruction = await solanaProgram.claimRewards(
           publicKey,
           reward.MachineId,
-          walletAn.publicKey,
+          wallet.publicKey,
           Number(reward.Period)
         );
         transaction.add(instruction);
         transaction.recentBlockhash = blockhash;
-        transaction.feePayer = walletAn.publicKey;
+        transaction.feePayer = wallet.publicKey;
         transactions.push(transaction);
       }
-      const signedTx = await walletAn.signAllTransactions(transactions);
+      const signedTx = await wallet.signAllTransactions(transactions);
       const sentTxns = [];
       for await (const tx of signedTx) {
         const confirmTransaction = await connection.sendRawTransaction(
@@ -142,4 +142,4 @@ function Home(props, ref) {
   };
   return "";
 }
-export default forwardRef(Home);
+export default forwardRef(SolanaAction);

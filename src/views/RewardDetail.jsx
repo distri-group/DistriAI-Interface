@@ -58,6 +58,7 @@ function Home({ className }) {
     const res = await getClaimableReward(
       Number(period),
       1,
+      10,
       wallet.publicKey.toString()
     );
     if (res) {
@@ -69,6 +70,7 @@ function Home({ className }) {
       const machines = await getPeriodMachine(
         Number(period),
         1,
+        10,
         wallet.publicKey.toString()
       );
       if (machines) {

@@ -1,70 +1,34 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
-import SolanaAction from "../components/SolanaAction";
+import { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useSnackbar } from "notistack";
-import { Box, Button, Chip, Modal, Stack } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
+import { Button, Chip, Stack } from "@mui/material";
 import { formatAddress } from "../utils";
 import Table from "./Table";
-import * as anchor from "@project-serum/anchor";
-import webconfig from "../webconfig";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import ConnectToWallet from "./ConnectToWallet";
 
 function DeviceList({
   className,
   list,
-  setList,
-  isMyDevice,
   loading,
-  reloadFunc,
-  priceSort,
-  setPriceSort,
+  onPriceSort,
+  onCancel,
   model,
 }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
-  const { enqueueSnackbar } = useSnackbar();
-  const [deviceToCancel, setDeviceToCancel] = useState(null);
   const [connectModal, setConnectModal] = useState(false);
-  const [btnLoading, setBtnLoading] = useState(false);
-  const childRef = useRef();
-  const cancelOffer = async (row) => {
-    setBtnLoading(true);
-    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("machine"),
-        wallet.publicKey.toBytes(),
-        anchor.utils.bytes.hex.decode(row.Uuid),
-      ],
-      webconfig.PROGRAM
-    );
-    let res = await childRef.current.cancelOffer(machinePublicKey);
-    if (res?.msg !== "ok") {
-      setList([...list]);
-      setDeviceToCancel(null);
-      setBtnLoading(false);
-      return enqueueSnackbar(res?.msg, { variant: "error" });
-    }
-    enqueueSnackbar("Cancel Offer Success.", {
-      variant: "success",
-    });
-    setTimeout(() => {
-      setBtnLoading(false);
-      setDeviceToCancel(null);
-      reloadFunc();
-    }, 300);
-  };
+  const [priceSort, setPriceSort] = useState(0);
+
   useEffect(() => {
-    if (wallet?.publicKey) {
-      setConnectModal(false);
+    if (priceSort) {
+      onPriceSort(priceSort);
     }
-  }, [wallet?.publicKey]);
+  }, [priceSort]);
   let columns = [
     {
-      title: isMyDevice ? "Device" : "Provider",
+      title: onCancel ? "Device" : "Provider",
       width: "14%",
       key: "addr",
       render: (text, record, index) => {
@@ -85,7 +49,7 @@ function DeviceList({
                     : record.SecurityLevel === 2 && "info"
                 }
               />
-              {!isMyDevice && record.Id !== 10 ? (
+              {onPriceSort ? (
                 <span style={{ marginLeft: 5, lineHeight: "20px" }}>
                   From{" "}
                   <span style={{ fontWeight: 600, fontSize: 20 }}>
@@ -174,7 +138,7 @@ function DeviceList({
       title: (
         <div style={{ display: "flex" }}>
           <span>DIST / hr</span>
-          {priceSort !== (null || undefined) && (
+          {onPriceSort && (
             <div
               style={{
                 display: "flex",
@@ -187,7 +151,7 @@ function DeviceList({
                   width: "20px",
                   height: "20px",
                   cursor: "pointer",
-                  color: priceSort && priceSort === 1 ? "#898989" : "white",
+                  color: priceSort === 1 ? "#898989" : "white",
                 }}
               />
               <ArrowDropDown
@@ -196,7 +160,7 @@ function DeviceList({
                   width: "20px",
                   height: "20px",
                   cursor: "pointer",
-                  color: priceSort && priceSort === 2 ? "#898989" : "white",
+                  color: priceSort === 2 ? "#898989" : "white",
                 }}
               />
             </div>
@@ -226,7 +190,7 @@ function DeviceList({
           <Button
             disabled={record.Status === 2}
             className={
-              isMyDevice
+              onCancel
                 ? "mini-btn mini-btn" + record.Status
                 : record.Status === 1
                 ? "mini-btn mini-btn0"
@@ -236,17 +200,21 @@ function DeviceList({
               if (!window.solana || !window.phantom || !wallet?.publicKey) {
                 return setConnectModal(true);
               }
-              if (!isMyDevice) {
-                return navigate("/buy/" + record.Uuid, { state: model });
+              if (onPriceSort) {
+                return navigate("/buy/" + record.Uuid, {
+                  state: { model, Owner: record.Owner },
+                });
               }
               if (record.Status === 0) {
-                return navigate("/makeoffer/" + record.Uuid);
+                return navigate("/makeoffer/" + record.Uuid, {
+                  state: { Owner: record.Owner },
+                });
               }
               if (record.Status === 1) {
-                return setDeviceToCancel(record);
+                return onCancel(record);
               }
             }}>
-            {isMyDevice
+            {onCancel
               ? record.Status === 0
                 ? "Make Offer"
                 : "Unlist"
@@ -260,13 +228,12 @@ function DeviceList({
   ];
   return (
     <div className={className}>
-      <SolanaAction ref={childRef}></SolanaAction>
       <Table
         columns={columns}
         list={list}
         loading={loading}
         empty={
-          isMyDevice ? (
+          onCancel ? (
             <span>
               Please{" "}
               <a
@@ -283,53 +250,6 @@ function DeviceList({
           )
         }
       />
-      {deviceToCancel && (
-        <Modal
-          open={Boolean(deviceToCancel)}
-          onClose={() => {
-            if (!btnLoading) {
-              setDeviceToCancel(null);
-            }
-          }}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 1000,
-              bgcolor: "#00000b",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: "8px",
-              color: "#fff",
-            }}>
-            <h1 style={{ fontSize: "72px", textAlign: "center" }}>
-              Unlist The Offer
-            </h1>
-            <div style={{ fontSize: "16px", textAlign: "center" }}>
-              <p style={{ margin: 0, lineHeight: "19px" }}>
-                This will cancel your listing.
-              </p>
-              <p style={{ margin: 0, lineHeight: "19px" }}>
-                You will also be asked to confirm this cancelation from your
-                wallet.
-              </p>
-            </div>
-            <LoadingButton
-              style={{ margin: "0 auto", display: "block", marginTop: "150px" }}
-              className="cbtn"
-              loading={btnLoading}
-              onClick={() => {
-                cancelOffer(deviceToCancel);
-              }}>
-              <span style={{ padding: "0 40px" }}>
-                {btnLoading ? "" : "Confirm"}
-              </span>
-            </LoadingButton>
-          </Box>
-        </Modal>
-      )}
       <ConnectToWallet
         modal={connectModal}
         onClose={() => setConnectModal(false)}

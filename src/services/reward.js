@@ -1,83 +1,86 @@
-import request from "../utils/request";
+import axios from "../utils/axios";
 import { formatMachine } from "./machine";
 
-export const getRewardList = async (pageIndex, publicKey) => {
-  const apiUrl = "/index-api/reward/period/list";
-  const options = {
-    data: {
-      Page: pageIndex,
-      PageSize: 10,
-    },
-    headers: {
-      Account: publicKey,
-    },
+const baseUrl = "/reward";
+
+export const getRewardList = async (pageIndex, pageSize, publicKey) => {
+  const apiUrl = baseUrl + "/period/list";
+  const body = {
+    Page: pageIndex,
+    PageSize: pageSize,
   };
-  const res = await request.post(apiUrl, options);
-  if (res.Code !== 1) {
-    return null;
+  const headers = {
+    Account: publicKey,
+  };
+  try {
+    const res = await axios.post(apiUrl, body, { headers });
+    return res;
+  } catch (error) {
+    throw error;
   }
-  return res.Data;
 };
 
 export const getRewardTotal = async (period, publicKey) => {
-  const apiUrl = "/index-api/reward/total";
-  let options = {
-    headers: {
-      Account: publicKey,
-    },
-    data: {},
+  const apiUrl = baseUrl + "/total";
+  const body = {
+    Period: period ?? "",
   };
-  if (period) {
-    options.data.Period = period;
+  const headers = {
+    Account: publicKey,
+  };
+  try {
+    const res = await axios.post(apiUrl, body, { headers });
+    return res;
+  } catch (error) {
+    throw error;
   }
-  const res = await request.post(apiUrl, options);
-  if (res.Code !== 1) {
-    return null;
-  }
-  return res.Data;
 };
 
-export const getClaimableReward = async (period, pageIndex, publicKey) => {
-  const apiUrl = "/index-api/reward/claimable/list";
-  let options = {
-    headers: {
-      Account: publicKey,
-    },
-    data: {
-      Page: pageIndex,
-      PageSize: 10,
-    },
+export const getClaimableReward = async (
+  period,
+  pageIndex,
+  pageSize,
+  publicKey
+) => {
+  const apiUrl = baseUrl + "/claimable/list";
+  const body = {
+    Period: period ?? "",
+    Page: pageIndex,
+    PageSize: pageSize,
   };
-  if (period) {
-    options.data.Period = period;
+  const headers = {
+    Account: publicKey,
+  };
+  try {
+    const res = await axios.post(apiUrl, body, { headers });
+    return res;
+  } catch (error) {
+    throw error;
   }
-  const res = await request.post(apiUrl, options);
-  if (res.Code !== 1) {
-    return null;
-  }
-  return res.Data;
 };
 
-export const getPeriodMachine = async (period, pageIndex, publicKey) => {
-  const apiUrl = "/index-api/reward/machine/list";
-  const options = {
-    headers: {
-      Account: publicKey,
-    },
-    data: {
-      Page: pageIndex,
-      PageSize: 10,
-      Period: period,
-    },
+export const getPeriodMachine = async (
+  period,
+  pageIndex,
+  pageSize,
+  publicKey
+) => {
+  const apiUrl = baseUrl + "/machine/list";
+  const body = {
+    Page: pageIndex,
+    PageSize: pageSize,
+    Period: period,
   };
-  const res = await request.post(apiUrl, options);
-  if (res.Code !== 1) {
-    return null;
-  }
-  if (res.Data.List) {
-    for (let machine of res.Data.List) {
-      formatMachine(machine);
+  const headers = {
+    Account: publicKey,
+  };
+  try {
+    const res = await axios.post(apiUrl, body, { headers });
+    for (let machine of res.List) {
+      machine = formatMachine(machine);
     }
+    return res;
+  } catch (error) {
+    throw error;
   }
-  return res.Data;
 };

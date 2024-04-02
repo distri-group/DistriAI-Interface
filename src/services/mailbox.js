@@ -1,6 +1,11 @@
-import request from "../utils/request";
-let apiUrl = "/index-api/mailbox/subscribe";
+import axios from "../utils/axios";
+let apiUrl = "/mailbox/subscribe";
 
-export function subscribe(data) {
-  return request.post(apiUrl, { data });
+export async function subscribe(data) {
+  try {
+    const res = await axios.post(apiUrl, data);
+    return res;
+  } catch (error) {
+    throw error;
+  }
 }

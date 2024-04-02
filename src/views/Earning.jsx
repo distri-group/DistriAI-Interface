@@ -1,72 +1,66 @@
-import { MenuItem, Select } from "@mui/material";
+import { MenuItem, Select, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getFilterData, getOrderList } from "../services/order";
+import { getOrderList, filterData } from "../services/order";
 import styled from "styled-components";
 import Table from "../components/Table";
 import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Pager from "../components/pager";
 
 function Earning({ className }) {
   document.title = "My Earnings";
-  let filter = { Direction: "sell" };
   const wallet = useAnchorWallet();
-  const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
-  const [filterData, setFilterData] = useState([]);
-  const [filterValue, setFilterValue] = useState();
+  const [filterValue, setFilterValue] = useState({
+    Direction: "sell",
+    Status: "all",
+  });
   const [received, setReceived] = useState(0);
   const [pending, setPending] = useState(0);
   const [loading, setLoading] = useState(false);
-  const loadList = async (curr) => {
-    setLoading(true);
-    try {
-      const res = await getOrderList(curr, filter, wallet.publicKey.toString());
-      if (!res) {
-        setLoading(false);
-        return enqueueSnackbar("Order List Not Found", { variant: "error" });
-      }
-      setList(res.list);
-      let totalReceived = 0;
-      let totalPending = 0;
-      for (let item of res.list) {
-        if (item.Status === 0) {
-          totalPending += item.Duration * item.Price;
-        } else {
-          totalReceived +=
-            (item.Duration - (item.RefundDuration || 0)) * item.Price;
+
+  const onFilter = (event) => {
+    setFilterValue((prevState) => ({
+      ...prevState,
+      Status: parseInt(event.target.value),
+    }));
+    setCurrent(1);
+  };
+  useEffect(() => {
+    const loadList = async (curr) => {
+      setLoading(true);
+      try {
+        const res = await getOrderList(
+          curr,
+          10,
+          filterValue,
+          wallet.publicKey.toString()
+        );
+        setTotal(res.Total);
+        setList(res.List);
+        let totalReceived = 0;
+        let totalPending = 0;
+        for (let item of res.List) {
+          if (item.Status === 0) {
+            totalPending += item.Duration * item.Price;
+          } else {
+            totalReceived +=
+              (item.Duration - (item.RefundDuration || 0)) * item.Price;
+          }
         }
-      }
+        setPending(totalPending);
+        setReceived(totalReceived);
+      } catch (error) {}
       setLoading(false);
-      return { total: res.total, totalPending, totalReceived };
-    } catch (e) {
-      enqueueSnackbar(e.message, { variant: "error" });
-      setLoading(false);
+    };
+    if (wallet?.publicKey) {
+      loadList(current);
     }
-  };
-  const onFilter = (value) => {
-    filter.Status = value;
-    setFilterValue(filter);
-    setCurrent(1);
-    loadList(1);
-  };
-  const onResetFilter = () => {
-    filterData.forEach((t) => {
-      filter[t.name] = "all";
-    });
-    setFilterValue(filter);
-    setCurrent(1);
-    loadList(1);
-  };
-  const onPageChange = (curr) => {
-    setCurrent(curr);
-    loadList(curr);
-  };
+  }, [wallet, filterValue, current]);
   const columns = [
     {
       title: "Time",
@@ -127,38 +121,6 @@ function Earning({ className }) {
       ),
     },
   ];
-  useEffect(() => {
-    const loadFilterData = () => {
-      const res = getFilterData();
-      setFilterData(res);
-      res.forEach((t) => {
-        filter[t.name] = "all";
-      });
-      setFilterValue(filter);
-    };
-    loadFilterData();
-    const init = async () => {
-      const { total } = await loadList(1);
-      setTotal(total);
-    };
-    if (wallet?.publicKey) {
-      init();
-    }
-    // eslint-disable-next-line
-  }, [wallet?.publicKey]);
-  useEffect(() => {
-    const getTotal = async () => {
-      for (let i = 2; i <= Math.ceil(total / 10); i++) {
-        const { totalPending, totalReceived } = await loadList(i);
-        setPending((prevState) => prevState + totalPending);
-        setReceived((prevState) => prevState + totalReceived);
-      }
-      loadList(1);
-    };
-    if (total > 10) {
-      getTotal();
-    }
-  }, [total]);
   return (
     <div className={className}>
       <h1>My Order Earnings</h1>
@@ -193,29 +155,25 @@ function Earning({ className }) {
           </div>
         </div>
       </div>
-      <div className="filter">
+      <Stack direction="row" spacing={2} className="filter">
         <span>Filter</span>
-        {filterData.map((t) => {
-          return (
-            <span className="sel" key={t.name}>
-              <Select
-                className="select"
-                defaultValue="all"
-                value={filterValue[t.name]}
-                onChange={(e) => onFilter(e.target.value, t.name)}>
-                {t.arr.map((item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </span>
-          );
-        })}
-        <span className="btn-txt" onClick={onResetFilter}>
+        {Object.entries(filterData).map(([key, value]) => (
+          <span key={key}>
+            <Select value={filterValue[key]} onChange={onFilter}>
+              {value.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </span>
+        ))}
+        <span
+          className="btn-txt"
+          onClick={() => setFilterValue({ Direction: "buy", Status: "all" })}>
           reset
         </span>
-      </div>
+      </Stack>
       <Table
         className="earning-list"
         columns={columns}
@@ -228,7 +186,9 @@ function Earning({ className }) {
           current={current}
           total={total}
           pageSize={10}
-          onChange={onPageChange}
+          onChange={(curr) => {
+            setCurrent(curr);
+          }}
         />
       )}
     </div>

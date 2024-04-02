@@ -3,7 +3,7 @@ import styled from "styled-components";
 function DeviceCard({ className, device }) {
   return (
     <div className={className}>
-      <h3># {device.UUID.slice(-10)}</h3>
+      <h3># {(device.Uuid || device.UUID).slice(-10)}</h3>
       <div className="card-container">
         <div className="info-box vertical">
           <div className="box-item">

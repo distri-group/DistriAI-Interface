@@ -18,11 +18,12 @@ const [rewardPool] = anchor.web3.PublicKey.findProgramAddressSync(
   ],
   webconfig.PROGRAM
 );
-const systemProgram = new PublicKey("11111111111111111111111111111111");
 const [vault] = anchor.web3.PublicKey.findProgramAddressSync(
   [anchor.utils.bytes.utf8.encode("vault"), webconfig.MINT_PROGRAM.toBytes()],
   webconfig.PROGRAM
 );
+const systemProgram = new PublicKey("11111111111111111111111111111111");
+
 export async function initProgram(conn, wallet) {
   try {
     if (program && walletAn?.publicKey) return program;

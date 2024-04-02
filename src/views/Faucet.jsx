@@ -1,8 +1,7 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from "react";
-import * as solana from "../services/solana";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { faucet } from "../services/faucet";
+import { DISTFaucet, SOLFaucet } from "../services/faucet";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
@@ -10,53 +9,45 @@ import { LoadingButton } from "@mui/lab";
 function Home({ className }) {
   document.title = "Faucet";
   const [loading, setLoading] = useState(false);
-  const [newAddr, setNewAddr] = useState("");
+  const [publicKey, setPublicKey] = useState("");
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
-    setNewAddr(wallet?.publicKey.toString());
+    setPublicKey(wallet?.publicKey.toString());
   }, [wallet]);
-  const onInput = (e) => {
-    let v = e.target.value;
-    setNewAddr(v);
-  };
   const onSubmit = async () => {
-    if (!newAddr) {
+    if (!publicKey) {
       return enqueueSnackbar("Please Enter Your Wallet Address.", {
         variant: "info",
       });
     }
     setLoading(true);
-    let t = await solana.faucet(newAddr);
-    setLoading(false);
-    if (t.msg === "ok") {
+    const res = await SOLFaucet(publicKey);
+    if (res.msg === "ok") {
       enqueueSnackbar("1 SOL has sent to your wallet", { variant: "success" });
     } else {
-      enqueueSnackbar(t.msg, { variant: "error" });
+      enqueueSnackbar(res.msg, { variant: "error" });
     }
+    setLoading(false);
   };
   const onSendDIST = async () => {
-    if (!newAddr) {
+    if (!publicKey) {
       return enqueueSnackbar("Please Enter Your Wallet Address.", {
         variant: "info",
       });
     }
     setLoading(true);
     try {
-      let res = await faucet(newAddr);
-      setLoading(false);
-      if (res?.Msg?.includes("too many airdrops")) {
-        return enqueueSnackbar(res.Msg, { variant: "info" });
-      }
-      return enqueueSnackbar("5 DIST have sent to your wallet", {
+      await DISTFaucet(publicKey);
+      enqueueSnackbar("5 DIST have sent to your wallet", {
         variant: "success",
       });
-    } catch (e) {
-      return enqueueSnackbar(
-        "Failed to claim airdrop. Please try again later",
-        { variant: "error" }
-      );
+    } catch (error) {
+      enqueueSnackbar(error.message, {
+        variant: "error",
+      });
     }
+    setLoading(false);
   };
 
   return (
@@ -76,10 +67,9 @@ function Home({ className }) {
               2. Create a new wallet OR import an existing wallet.
             </div>
             <TextField
-              data-name="taskName"
-              onChange={onInput}
+              onChange={(e) => setPublicKey(e.target.value)}
               disabled={loading}
-              value={newAddr || ""}
+              value={publicKey}
               placeholder="Enter Your Wallet Address"
             />
           </div>
@@ -116,7 +106,7 @@ export default styled(Home)`
   .myform {
     width: 800px;
     background-color: #222;
-    padding: 46px;
+    padding: 48px;
     display: block;
     overflow: hidden;
     margin: 40px auto;

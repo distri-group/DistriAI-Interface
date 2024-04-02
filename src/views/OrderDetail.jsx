@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { getDetailByUuid } from "../services/order";
+import { getOrderDetail } from "../services/order";
 import { useSnackbar } from "notistack";
 import {
   Button,
@@ -28,13 +28,12 @@ function Home({ className }) {
 
   useEffect(() => {
     const loadDetail = async () => {
-      const res = await getDetailByUuid(id, wallet.publicKey.toString());
+      setLoading(true);
+      try {
+        const res = await getOrderDetail(id);
+        setRecord(res);
+      } catch (error) {}
       setLoading(false);
-      if (res.Status === 1) {
-        setRecord(res.Detail);
-      } else {
-        return enqueueSnackbar(res.Msg, { variant: "error" });
-      }
     };
     if (wallet?.publicKey) {
       loadDetail();

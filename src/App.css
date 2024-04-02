@@ -120,3 +120,6 @@ a{
   color: black!important;
   padding: 4px 12px!important;
 }
+.markdown-body{
+  padding: 24px;
+}

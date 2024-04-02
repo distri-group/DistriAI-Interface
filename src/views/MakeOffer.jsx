@@ -1,18 +1,19 @@
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { useSnackbar } from "notistack";
 import { TextField, Grid, InputAdornment } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
-import { getMachineDetailByUuid } from "../services/machine";
 import SolanaAction from "../components/SolanaAction";
 import webconfig from "../webconfig";
+import { getMachineDetail } from "../services/machine";
 
 function MakeOffer({ className }) {
   document.title = "Make Offer";
   const { id } = useParams();
+  const { state } = useLocation();
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
@@ -62,19 +63,18 @@ function MakeOffer({ className }) {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const detail = await getMachineDetailByUuid(
-        id,
-        wallet.publicKey.toString()
-      );
-      if (detail) {
-        setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
-      }
+      try {
+        const detail = await getMachineDetail(state.Owner, id);
+        if (detail) {
+          setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
+        }
+      } catch (error) {}
       setLoading(false);
     };
     if (wallet?.publicKey) {
       init();
     }
-  }, [id, wallet?.publicKey]);
+  }, [id, wallet?.publicKey, state]);
 
   return (
     <div className={className}>

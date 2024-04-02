@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Table from "../components/Table";
 import moment from "moment";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Pager from "../components/pager";
@@ -15,13 +15,10 @@ import {
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import SolanaAction from "../components/SolanaAction";
 import { LoadingButton } from "@mui/lab";
-import * as anchor from "@project-serum/anchor";
-import webconfig from "../webconfig";
 
 function Rewards({ className }) {
   document.title = "My Rewards";
   const wallet = useAnchorWallet();
-  const { connection } = useConnection();
   const childRef = useRef();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -34,7 +31,7 @@ function Rewards({ className }) {
   const loadList = async (curr) => {
     setLoading(true);
     try {
-      const res = await getRewardList(curr, wallet.publicKey.toString());
+      const res = await getRewardList(curr, 10, wallet.publicKey.toString());
       setLoading(false);
       if (!res) {
         return enqueueSnackbar("Reward List Not Found", { variant: "error" });
@@ -46,40 +43,28 @@ function Rewards({ className }) {
     }
   };
   const getClaimableList = async () => {
-    const res = await getClaimableReward(null, 1, wallet.publicKey.toString());
+    const res = await getClaimableReward(
+      null,
+      1,
+      10,
+      wallet.publicKey.toString()
+    );
     if (res) {
-      let rewards = [];
+      let claimableList = [];
       let total = 0;
       for (let item of res.List) {
         if (item.Period) {
-          rewards.push(item);
+          claimableList.push(item);
           total += item.PeriodicRewards;
         }
       }
-      return { rewards, total };
+      return { claimableList, total };
     }
   };
   const claimButchRewards = async () => {
     setClaiming(true);
-    const { rewards: claimableList, total } = await getClaimableList();
-    const machineSet = new Set(claimableList.map((item) => item.MachineId));
-    machineSet.forEach(async (key, value, set) => {
-      const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          anchor.utils.bytes.utf8.encode("machine"),
-          wallet.publicKey.toBytes(),
-          anchor.utils.bytes.hex.decode(value),
-        ],
-        webconfig.PROGRAM
-      );
-      if (!(await connection.getParsedAccountInfo(machinePublicKey)).value) {
-        set.delete(key);
-      }
-    });
-    const filterList = claimableList.filter((item) =>
-      machineSet.has(item.MachineId)
-    );
-    const res = await childRef.current.claimRewards(filterList);
+    const { rewards, total } = await getClaimableList();
+    const res = await childRef.current.claimRewards(rewards);
     setTimeout(() => {
       if (res?.msg === "ok") {
         enqueueSnackbar(

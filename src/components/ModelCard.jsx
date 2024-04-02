@@ -9,7 +9,7 @@ function ModelCard({ model, className }) {
     <div
       className={className}
       onClick={() => {
-        navigate(`/models/${model.Id}`);
+        navigate(`/models/${model.Owner}/${model.Name}`);
       }}>
       <h3>{model.Name}</h3>
       <Stack direction="row" spacing={1} style={{ padding: 10 }}>
@@ -52,11 +52,11 @@ function ModelCard({ model, className }) {
         <span>Distri.AI</span>
         <Stack direction="row" alignItems="end">
           <Favorite sx={{ width: 20, height: 20 }} />
-          <span>1.2k</span>
+          <span>{model.likes}</span>
         </Stack>
         <Stack direction="row" alignItems="end">
           <ArrowDownward sx={{ width: 20, height: 20 }} />
-          <span>19k</span>
+          <span>{model.downloads}</span>
         </Stack>
       </Stack>
     </div>

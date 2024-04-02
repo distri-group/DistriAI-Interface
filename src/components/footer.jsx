@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-function Header({ className }) {
+function Footer({ className }) {
   return (
     <div className={className}>
       <div className="container">
@@ -35,7 +35,7 @@ function Header({ className }) {
   );
 }
 
-export default styled(Header)`
+export default styled(Footer)`
   display: block;
   overflow: hidden;
   clear: both;

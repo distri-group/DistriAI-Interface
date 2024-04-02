@@ -1,87 +1,92 @@
-import request from "../utils/request";
+import axios from "../utils/axios";
 import types from "../services/types.json";
+import { utils } from "@project-serum/anchor";
 
-export const getModelList = async (pageIndex, filter) => {
-  try {
-    let apiUrl = "/index-api/model/list";
-    let options = {
-      data: {
-        Page: pageIndex,
-        PageSize: 10,
-      },
-    };
-    if (filter) {
-      for (let k in filter) {
-        let v = filter[k];
-        if (v !== "all") {
-          options.data[k] = v;
-        }
+const baseUrl = "/model";
+
+export const getModelList = async (pageIndex, pageSize, filter) => {
+  const apiUrl = baseUrl + "/list";
+  const body = {
+    Page: pageIndex,
+    PageSize: pageSize,
+  };
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== "all") {
+        body[key] = value;
       }
+    });
+  }
+  try {
+    const res = await axios.post(apiUrl, body);
+    for (let model of res.List) {
+      model = formatModel(model);
     }
-    let ret = await request.post(apiUrl, options);
-    if (ret.Msg !== "success") {
-      return null;
-    }
-    let list = ret.Data.List;
-    for (let model of list) {
-      formatTags(model);
-    }
-    return { list: ret.Data.List, total: ret.Data.Total };
-  } catch (e) {
-    throw e;
+    return res;
+  } catch (error) {
+    throw error;
   }
 };
 
-export const getModelDetail = async (id) => {
+export const getModelDetail = async (owner, name) => {
+  const apiUrl = baseUrl + `/${owner}/${name}`;
   try {
-    let apiUrl = `/index-api/model/${id}`;
-    let ret = await request.get(apiUrl);
-    if (ret.Msg !== "success") {
-      return null;
-    }
-    return formatTags(ret.Data);
-  } catch (e) {
-    throw e;
+    const res = await axios.get(apiUrl);
+    return formatModel(res);
+  } catch (error) {
+    throw error;
   }
 };
 
-export const createModel = async (model) => {
+export const createModel = async (model, publicKey) => {
+  const apiUrl = baseUrl + "/create";
+  const token = await login(publicKey);
+  const headers = {
+    Authorization: token,
+  };
   try {
-    let apiUrl = "/index-api/model/create";
-    let options = {
-      data: {},
-    };
-    for (let k in model) {
-      let v = model[k];
-      options.data[k] = v;
-    }
-    let ret = await request.post(apiUrl, options);
-    if (ret.Msg !== "success") {
-      return null;
-    }
-    return ret;
-  } catch (e) {
-    throw e;
+    const res = await axios.post(apiUrl, model, { headers });
+    return res;
+  } catch (error) {
+    throw error;
   }
 };
 
-export const generatePresignUrl = async (id, path) => {
+export const generatePresignUrl = async (Id, FilePath, publicKey) => {
+  const apiUrl = baseUrl + "/presign";
+  const token = await login(publicKey);
+  const body = {
+    Id,
+    FilePath,
+    Method: "PUT",
+  };
+  const headers = {
+    Authorization: token,
+  };
   try {
-    let apiUrl = "/index-api/model/presign";
-    let options = {
-      data: {
-        Id: id,
-        FilePath: path,
-        Method: "PUT",
-      },
-    };
-    let ret = await request.post(apiUrl, options);
-    if (ret.Msg !== "success") {
-      return null;
-    }
-    return ret.Data;
-  } catch (e) {
-    throw e;
+    const res = await axios.post(apiUrl, body, { headers });
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const login = async (publicKey) => {
+  if (localStorage.getItem("token")) return localStorage.getItem("token");
+  const apiUrl = "/user/login";
+  const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
+  const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
+  const Signature = utils.bytes.bs58.encode(sign.signature);
+  const body = {
+    Account: publicKey,
+    Signature,
+  };
+  try {
+    const res = await axios.post(apiUrl, body);
+    localStorage.setItem("token", res);
+    return res;
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -106,7 +111,7 @@ export const fileUpload = async (url, file) => {
   }
 };
 
-const formatTags = (model) => {
+const formatModel = (model) => {
   if (model.Tags.includes(",")) {
     model.Tags = model.Tags.split(",");
   } else if (!model.Tags.length) model.Tags = null;
@@ -117,7 +122,23 @@ const formatTags = (model) => {
   model.type1 = types[model.Type1 - 1].title;
   model.type2 = types[model.Type1 - 1].items[model.Type2 - 1];
   model.expanded = false;
+  const [likes, downloads] = generateNumbers(model.Name);
+  model.likes = likes;
+  model.downloads = downloads;
   return model;
+};
+
+const hashString = (input) => {
+  const hash = utils.sha256.hash(input);
+  const hashedNumber = parseInt(hash, 16);
+  const numberInRange = (hashedNumber % (30001 - 3000)) + 3000;
+  return Math.round(numberInRange / 100) / 10 + "k";
+};
+
+const generateNumbers = (name) => {
+  const number1 = hashString(name);
+  const number2 = hashString(name + "salt");
+  return [number1, number2];
 };
 
 export const frameworks = [

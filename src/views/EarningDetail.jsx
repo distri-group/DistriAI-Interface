@@ -2,12 +2,12 @@ import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { getDetailByUuid } from "../services/order";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import DurationProgress from "../components/DurationProgress";
 import Countdown from "../components/Countdown";
 import DeviceCard from "../components/DeviceCard";
+import { getOrderDetail } from "../services/order";
 
 function Home({ className }) {
   const { id } = useParams();
@@ -18,13 +18,14 @@ function Home({ className }) {
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     const loadDetail = async () => {
-      const res = await getDetailByUuid(id, wallet.publicKey.toString());
-      setLoading(false);
-      if (res.Status === 1) {
-        setRecord(res.Detail);
-      } else {
-        return enqueueSnackbar(res.Msg, { variant: "error" });
+      setLoading(true);
+      try {
+        const res = await getOrderDetail(id);
+        setRecord(res);
+      } catch (error) {
+        enqueueSnackbar(error.message, { variant: "error" });
       }
+      setLoading(false);
     };
     if (wallet?.publicKey) {
       loadDetail();

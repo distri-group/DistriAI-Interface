@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
-import { getDetailByUuid } from "../services/order";
+// import { getDetailByUuid } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -13,6 +13,7 @@ import DurationProgress from "../components/DurationProgress";
 import DurationToggle from "../components/DurationToggle";
 import * as anchor from "@project-serum/anchor";
 import Countdown from "../components/Countdown";
+import { getOrderDetail } from "../services/order";
 
 function ExtendDuration({ className }) {
   const { id } = useParams();
@@ -60,14 +61,10 @@ function ExtendDuration({ className }) {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const res = await getDetailByUuid(id, wallet.publicKey.toString());
-      if (res.Status === 1) {
-        setOrderDetail(res.Detail);
-        if (res.Detail.Metadata?.MachineInfo) {
-          setDeviceDetail(res.Detail.Metadata.MachineInfo);
-        }
-      } else {
-        return enqueueSnackbar(res.Msg, { variant: "error" });
+      const res = await getOrderDetail(id);
+      setOrderDetail(res);
+      if (res.Metadata?.MachineInfo) {
+        setDeviceDetail(res.Detail.Metadata.MachineInfo);
       }
       await getTokenBalance(webconfig.MINT_PROGRAM, wallet.publicKey);
       setLoading(false);

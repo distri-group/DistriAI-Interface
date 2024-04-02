@@ -30,7 +30,6 @@ import Datasets from "./views/Datasets";
 import CreateModel from "./views/CreateModel";
 import ModelDetail from "./views/ModelDetail";
 import Test from "./views/Test";
-import { connectToSolana } from "./services/solana";
 
 function App() {
   window.Buffer = Buffer;
@@ -175,10 +174,7 @@ function App() {
       window.removeEventListener("resize", setViewportContent);
     };
   }, []);
-  useEffect(() => {
-    if (!window.localStorage.getItem("token") && window.solana.publicKey)
-      connectToSolana();
-  }, [window.solana?.publicKey]);
+  useEffect(() => {}, []);
   return (
     <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
       <WalletProvider wallets={[]} autoConnect={true}>
@@ -208,7 +204,10 @@ function App() {
                   <Route path="/earning" element={<Earning />} />
                   <Route path="/earning/:id" element={<EarningDetail />} />
                   <Route path="/models" element={<Models />} />
-                  <Route path="/models/:id" element={<ModelDetail />} />
+                  <Route
+                    path="/models/:owner/:name"
+                    element={<ModelDetail />}
+                  />
                   <Route path="/models/create" element={<CreateModel />} />
                   <Route path="/datasets" element={<Datasets />} />
                   <Route path="/test" element={<Test />} />

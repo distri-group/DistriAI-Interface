@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { InputAdornment, OutlinedInput } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { useState } from "react";
 import { useSnackbar } from "notistack";
 import { motion } from "framer-motion";
@@ -7,8 +8,9 @@ import { subscribe } from "../../services/mailbox";
 import Footer from "../footer";
 
 const ContactUs = ({ className }) => {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const [email, setEmail] = useState();
+  const { enqueueSnackbar } = useSnackbar();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onInputEmail = (e) => {
     setEmail(e.target.value);
@@ -17,16 +19,17 @@ const ContactUs = ({ className }) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
-  const onSubmitEmail = () => {
+  const onSubmitEmail = async () => {
     if (!validateEmail(email)) {
       return enqueueSnackbar("Email error", { variant: "error" });
     }
-    enqueueSnackbar("Loading...", { variant: "info" });
-    let data = { mailbox: email };
-    subscribe(data).then((t) => {
-      closeSnackbar();
+    const data = { mailbox: email };
+    setLoading(true);
+    try {
+      await subscribe(data);
       enqueueSnackbar("Email Subscribed", { variant: "success" });
-    });
+    } catch (error) {}
+    setLoading(false);
   };
   return (
     <section id="contact-us" className={className}>
@@ -78,13 +81,15 @@ const ContactUs = ({ className }) => {
             placeholder="email@your.domain"
             className="email-input"
             type="email"
-            inputProps={{}}
             fullWidth
             endAdornment={
               <InputAdornment position="end">
-                <button className="email-submit" onClick={onSubmitEmail}>
-                  <span>Subscribe</span>
-                </button>
+                <LoadingButton
+                  loading={loading}
+                  className="email-submit"
+                  onClick={onSubmitEmail}>
+                  Subscribe
+                </LoadingButton>
               </InputAdornment>
             }
           />
@@ -133,12 +138,9 @@ export default styled(ContactUs)`
         border-radius: 25px;
         cursor: pointer;
         background-image: linear-gradient(to right, #20ae98, #0aab50);
-        span {
-          display: block;
-          color: white;
-          font-size: 16px;
-          padding: 12px 20px;
-        }
+        color: white;
+        font-size: 16px;
+        padding: 12px 20px;
         :focus-within {
           border-color: #0aab50;
         }
@@ -168,9 +170,7 @@ export default styled(ContactUs)`
       .sub-box {
         width: 100%;
         .email-submit {
-          span {
-            font-size: 14pt;
-          }
+          font-size: 14pt;
         }
       }
     }

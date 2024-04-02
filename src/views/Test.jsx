@@ -1,10 +1,21 @@
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { getMachineDetail } from "../services/machine";
 
 export default function Test() {
-  const { state } = useLocation();
-  return (
-    <div>
-      <span>{state.words}</span>
-    </div>
-  );
+  useEffect(() => {
+    const getMachine = async () => {
+      try {
+        const machine = await getMachineDetail(
+          "AxBoDKGYKBa54qkDusWWYgf8QXufvBKTJTQBaKyEiEzF",
+          "0x105fc89c16980c81fd642af19eacbb18"
+        );
+        console.log(machine);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getMachine();
+  }, []);
+
+  return <div></div>;
 }

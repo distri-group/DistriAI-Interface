@@ -41,7 +41,7 @@ function ModelDetail({ className }) {
   const [metadata, setMetadata] = useState("");
   const [signing, setSigning] = useState(false);
   const [dialog, setDialog] = useState("");
-  const { id } = useParams();
+  const { owner, name } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const handleTabChange = (e, newValue) => {
     setTabValue(newValue);
@@ -66,11 +66,11 @@ function ModelDetail({ className }) {
   useEffect(() => {
     const loadDetail = async () => {
       setLoading(true);
-      const order = await getOrderList(1, [], wallet.publicKey);
-      const orderUsing = order.list.find(
+      const order = await getOrderList(1, 10, {}, wallet.publicKey);
+      const orderUsing = order.List.find(
         (item) =>
           item.Metadata.OrderInfo?.Model &&
-          item.Metadata.OrderInfo.Model == id &&
+          item.Metadata.OrderInfo.Model === model.Id &&
           item.Status === 1
       );
       if (orderUsing) {
@@ -82,14 +82,14 @@ function ModelDetail({ className }) {
       }
       setLoading(false);
     };
-    if (wallet?.publicKey) {
+    if (wallet?.publicKey && Object.keys(model).length > 0) {
       loadDetail();
     }
-  }, [wallet, id]);
+  }, [wallet, model]);
   useEffect(() => {
     const loadModel = async () => {
       setLoading(true);
-      const res = await getModelDetail(id);
+      const res = await getModelDetail(owner, name);
       setModel(res);
       setPrefix(`model/${res.Owner}/${res.Name}/`);
       fetch(
@@ -105,9 +105,7 @@ function ModelDetail({ className }) {
             setMetadata(match[1]);
           })
         )
-        .catch((e) => {
-          console.log(e);
-        });
+        .catch((e) => {});
       setLoading(false);
     };
     loadModel();
@@ -129,7 +127,7 @@ function ModelDetail({ className }) {
                   <h1>{model.Name}</h1>
                   <Stack direction="row" alignItems="center">
                     <Favorite sx={{ width: 20, height: 20 }} />
-                    <span>1.2k</span>
+                    <span>{model.likes}</span>
                   </Stack>
                 </Stack>
                 <Stack direction="row" spacing={2}>
@@ -137,7 +135,7 @@ function ModelDetail({ className }) {
                     Updated {new Date(model.UpdatedAt).toLocaleString()}
                   </span>
                   <span>From Distri.AI</span>
-                  <span>Downloads 19k</span>
+                  <span>Downloads {model.downloads}</span>
                 </Stack>
               </div>
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
@@ -221,7 +219,11 @@ function ModelDetail({ className }) {
                   value="files"
                 />
               </TabList>
-              <TabPanel value="model-card">
+              <TabPanel
+                value="model-card"
+                style={{
+                  backgroundColor: "#0d1117",
+                }}>
                 {markdown && metadata ? (
                   <>
                     <div>
@@ -271,7 +273,7 @@ function ModelDetail({ className }) {
                 <FileList
                   prefix={prefix}
                   setPrefix={setPrefix}
-                  id={id}
+                  id={model.Id}
                   upload={model.Owner === wallet?.publicKey?.toString()}
                 />
               </TabPanel>
@@ -299,7 +301,7 @@ function ModelDetail({ className }) {
               className="default-btn"
               onClick={() => {
                 navigate("/market", {
-                  state: { modelId: id, intent: dialog },
+                  state: { modelId: model.Id, intent: dialog },
                 });
                 setDialog("");
               }}>

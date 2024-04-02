@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import React, { useState, useEffect, useRef } from "react";
-import { getMachineDetailByUuid } from "../services/machine";
 import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
@@ -21,6 +20,7 @@ import DurationToggle from "../components/DurationToggle";
 import DeviceCard from "../components/DeviceCard";
 import * as anchor from "@project-serum/anchor";
 import FileList from "../components/FileList";
+import { getMachineDetail } from "../services/machine";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -125,36 +125,43 @@ function Buy({ className }) {
         ],
       }));
     }
-  }, [formValue, deviceDetail]);
+  }, [formValue, deviceDetail, selectedModel]);
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const amount = await childRef.current.getTokenAccountBalance(
-        webconfig.MINT_PROGRAM,
-        wallet.publicKey
-      );
-      const res = await getOrderList(1, [], wallet.publicKey.toString());
-      const models = await getModelList(1, []);
-      setModels(models.list);
-      if (state) {
+      try {
+        const balance = await childRef.current.getTokenAccountBalance(
+          webconfig.MINT_PROGRAM,
+          wallet.publicKey
+        );
+        setBalance(balance / LAMPORTS_PER_SOL);
+        const res = await getOrderList(
+          1,
+          10,
+          { Direction: "buy" },
+          wallet.publicKey.toString()
+        );
         setFormValue((prevState) => ({
           ...prevState,
-          usage: state.intent,
-          model: state.modelId,
+          taskName: `Computing Task-${res.Total}`,
         }));
-        setSelectedModel(
-          models.list.find((model) => model.Id == state.modelId)
-        );
-      }
-      setFormValue((prevState) => ({
-        ...prevState,
-        taskName: `Computing Task-${res.total}`,
-      }));
-      setBalance(amount / LAMPORTS_PER_SOL);
-      const detail = await getMachineDetailByUuid(id);
-      if (detail) {
-        setDeviceDetail(detail);
-      }
+        const models = await getModelList(1, 10);
+        setModels(models.List);
+        if (state.model) {
+          setFormValue((prevState) => ({
+            ...prevState,
+            usage: state.model.intent,
+            model: state.model.modelId,
+          }));
+          setSelectedModel(
+            models.List.find(
+              (model) => model.Id === parseInt(state.model.modelId)
+            )
+          );
+        }
+        const device = await getMachineDetail(state.Owner, id);
+        setDeviceDetail(device);
+      } catch (error) {}
       setLoading(false);
     };
     if (wallet?.publicKey) {

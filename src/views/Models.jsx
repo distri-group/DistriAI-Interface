@@ -43,8 +43,8 @@ function Models({ className }) {
   };
   const loadList = async () => {
     setLoading(true);
-    const res = await getModelList(1, filterValue);
-    setList(res.list);
+    const res = await getModelList(1, 10, filterValue);
+    setList(res.List);
     setLoading(false);
   };
   useEffect(() => {

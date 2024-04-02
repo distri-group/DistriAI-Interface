@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { getDetailByUuid } from "../services/order";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { CircularProgress, Popover } from "@mui/material";
@@ -12,6 +11,7 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import * as anchor from "@project-serum/anchor";
 import Countdown from "../components/Countdown";
+import { getOrderDetail } from "../services/order";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
@@ -63,27 +63,20 @@ function EndDuration({ className }) {
   useEffect(() => {
     const loadDetail = async () => {
       setLoading(true);
-      const res = await getDetailByUuid(id, wallet.publicKey.toString());
-      setLoading(false);
-      if (res.Status === 1) {
-        setDetail(res.Detail);
-        let remains =
-          new Date(res.Detail.EndTime).getTime() - new Date().getTime();
+      try {
+        const res = await getOrderDetail(id);
+        setDetail(res);
+        const remains = new Date(res.EndTime).getTime() - new Date().getTime();
         setRemainingTime(remains);
-      } else {
-        return enqueueSnackbar(res.Msg, { variant: "error" });
-      }
-    };
-    const getBalance = async () => {
-      setLoading(true);
-      const amount = await childRef.current.getTokenAccountBalance(
-        webconfig.MINT_PROGRAM,
-        wallet.publicKey
-      );
-      setBalance(amount / LAMPORTS_PER_SOL);
+        const amount = await childRef.current.getTokenAccountBalance(
+          webconfig.MINT_PROGRAM,
+          wallet.publicKey
+        );
+        setBalance(amount / LAMPORTS_PER_SOL);
+      } catch (error) {}
+      setLoading(false);
     };
     if (wallet?.publicKey) {
-      getBalance();
       loadDetail();
     }
     // eslint-disable-next-line

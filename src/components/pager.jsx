@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Pagination from "rc-pagination";
 
-function Header({ className, current, total, pageSize, onChange }) {
+function Pager({ className, current, total, pageSize, onChange }) {
   const [curr, setCurr] = useState(current);
   const onPagerChange = (c) => {
     setCurr(c);
@@ -25,7 +25,7 @@ function Header({ className, current, total, pageSize, onChange }) {
   );
 }
 
-export default styled(Header)`
+export default styled(Pager)`
   .pager-bar {
     display: flex;
     justify-content: center;

@@ -2,36 +2,26 @@ import styled from "styled-components";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { useSnackbar } from "notistack";
 import Table from "./Table";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Backdrop, CircularProgress } from "@mui/material";
-import { getMachineList } from "../services/machine";
+import { getMachineDetail } from "../services/machine";
 import { signToken } from "../services/order";
 
 function Header({ className, list, loading }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
-  const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
   const handleConsole = async (uuid, deploy) => {
+    const machine = await getMachineDetail(uuid);
     setSigning(true);
-    const res = await getMachineList(1);
-    const machineList = res.list;
-    const machine = machineList.find((machine) => machine.UUID === uuid);
-    if (machine) {
-      try {
-        const href = await signToken(
-          machine.IP,
-          machine.Port,
-          wallet.publicKey.toString()
-        );
-        window.open(href);
-      } catch (e) {
-        enqueueSnackbar(e, { variant: "error" });
-      }
-    }
+    const href = await signToken(
+      machine.IP,
+      machine.Port,
+      wallet.publicKey.toString()
+    );
+    window.open(href);
     setSigning(false);
   };
   useEffect(() => {
@@ -112,26 +102,20 @@ function Header({ className, list, loading }) {
       key: "Uuid",
       render: (text, record, index) => (
         <div className="btns">
-          {record.Metadata.OrderInfo?.Intent &&
-          record.Metadata.OrderInfo.Intent === "deploy" ? (
+          {record.Metadata.OrderInfo?.Intent && (
             <span
               onClick={() => {
-                handleConsole(record.Metadata.MachineInfo.UUID, true);
+                handleConsole(
+                  record.Metadata.MachineInfo.UUID,
+                  record.Metadata.OrderInfo.Intent === "deploy"
+                );
               }}
               className={`mini-btn ${
                 record.StatusName !== "Available" && "disabled"
               }`}>
-              Deployment
-            </span>
-          ) : (
-            <span
-              onClick={() => {
-                handleConsole(record.Metadata.MachineInfo.UUID, false);
-              }}
-              className={`mini-btn ${
-                record.StatusName !== "Available" && "disabled"
-              }`}>
-              Console
+              {record.Metadata.OrderInfo.Intent === "deploy"
+                ? "Deployment"
+                : "Console"}
             </span>
           )}
           <span

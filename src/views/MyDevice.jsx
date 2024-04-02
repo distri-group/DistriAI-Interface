@@ -1,54 +1,145 @@
 import styled from "styled-components";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getMachineList } from "../services/machine";
 import DeviceList from "../components/DeviceList";
+import Pager from "../components/pager";
+import SolanaAction from "../components/SolanaAction";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useSnackbar } from "notistack";
+import { Modal, Box } from "@mui/material";
+import * as anchor from "@project-serum/anchor";
+import webconfig from "../webconfig";
+import { LoadingButton } from "@mui/lab";
 
 function Home({ className }) {
   document.title = "Market";
   const wallet = useAnchorWallet();
   const [list, setList] = useState([]);
+  const [current, setCurrent] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const loadList = async () => {
+  const [deviceToCancel, setDeviceToCancel] = useState(null);
+  const [canceling, setCanceling] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const childRef = useRef();
+
+  // Load Machine List
+  const loadList = async (curr) => {
     setLoading(true);
     try {
-      let res = await getMachineList(1, [], wallet.publicKey.toString());
-      res.list.map((item) => (item.loading = false));
-      setList(res.list);
-    } catch (e) {
-      setList([]);
+      const res = await getMachineList(
+        curr,
+        10,
+        [],
+        wallet.publicKey.toString()
+      );
+      setList(res.List);
+      setTotal(res.Total);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
   };
 
+  // Cancel Offer
+  const handleCancel = async () => {
+    setCanceling(true);
+    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        anchor.utils.bytes.utf8.encode("machine"),
+        wallet.publicKey.toBytes(),
+        anchor.utils.bytes.hex.decode(deviceToCancel.Uuid),
+      ],
+      webconfig.PROGRAM
+    );
+    const res = await childRef.current.cancelOffer(machinePublicKey);
+    if (res.msg === "ok") {
+      enqueueSnackbar("Cancel offer success", { variant: "success" });
+    } else {
+      enqueueSnackbar(res.msg, { variant: "error" });
+    }
+    setTimeout(() => {
+      setDeviceToCancel(null);
+      setCanceling(false);
+      loadList(current);
+    }, 500);
+  };
+
+  // Reload List
   useEffect(() => {
-    const loadList = async () => {
-      setLoading(true);
-      try {
-        let res = await getMachineList(1, [], wallet.publicKey.toString());
-        res.list.map((item) => (item.loading = false));
-        setList(res.list);
-      } catch (e) {
-        setList([]);
-      }
-      setLoading(false);
-    };
-    loadList();
-  }, [wallet?.publicKey]);
+    if (current && wallet?.publicKey) {
+      loadList(current);
+    }
+  }, [current, wallet]);
+
   return (
     <div className={className}>
+      <SolanaAction ref={childRef}></SolanaAction>
       <div className="con">
         <h1 className="title">Share My Device</h1>
         <div className="con-table">
           <DeviceList
             list={list}
-            setList={setList}
-            isMyDevice={true}
             loading={loading}
-            reloadFunc={loadList}
+            onCancel={(device) => setDeviceToCancel(device)}
           />
+          {total > 10 && (
+            <Pager
+              current={current}
+              total={total}
+              pageSize={10}
+              onChange={(page) => setCurrent(page)}
+              className="pager"
+            />
+          )}
         </div>
       </div>
+      <Modal
+        open={Boolean(deviceToCancel)}
+        onClose={() => {
+          if (!canceling) {
+            setDeviceToCancel(null);
+          }
+        }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 1000,
+            bgcolor: "#00000b",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: "8px",
+            color: "#fff",
+          }}>
+          <h1 style={{ fontSize: "72px", textAlign: "center" }}>
+            Unlist The Offer
+          </h1>
+          <div style={{ fontSize: "16px", textAlign: "center" }}>
+            <p style={{ margin: 0, lineHeight: "19px" }}>
+              This will cancel your listing.
+            </p>
+            <p style={{ margin: 0, lineHeight: "19px" }}>
+              You will also be asked to confirm this cancelation from your
+              wallet.
+            </p>
+          </div>
+          <LoadingButton
+            loading={canceling}
+            style={{
+              width: 100,
+              margin: "0 auto",
+              display: "block",
+              marginTop: "150px",
+            }}
+            onClick={handleCancel}
+            className="cbtn">
+            {!canceling && "Confirm"}
+          </LoadingButton>
+        </Box>
+      </Modal>
     </div>
   );
 }

@@ -1,20 +1,10 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from "react";
 import OrderList from "../components/OrderList";
-import { getOrderList } from "../services/order";
+import { getOrderList, filterData } from "../services/order";
 import Pager from "../components/pager";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useSnackbar } from "notistack";
-import { MenuItem, Select } from "@mui/material";
-
-const filterData = [
-  { label: "All Status", value: "all" },
-  { label: "Preparing", value: "0" },
-  { label: "Available", value: "1" },
-  { label: "Completed", value: "2" },
-  { label: "Failed", value: "3" },
-  { label: "Refunded", value: "4" },
-];
+import { MenuItem, Select, Stack } from "@mui/material";
 
 function Home({ className }) {
   document.title = "My Order";
@@ -24,13 +14,15 @@ function Home({ className }) {
   const [total, setTotal] = useState(0);
   const [filterValue, setFilterValue] = useState({
     Direction: "buy",
+    Status: "all",
   });
   const wallet = useAnchorWallet();
-  const { enqueueSnackbar } = useSnackbar();
 
-  const onFilter = (e) => {
-    const { value, name } = e.target;
-    setFilterValue((prevState) => ({ ...prevState, [name]: value }));
+  const onFilter = (event) => {
+    setFilterValue((prevState) => ({
+      ...prevState,
+      Status: parseInt(event.target.value),
+    }));
     setCurrent(1);
   };
   useEffect(() => {
@@ -39,50 +31,43 @@ function Home({ className }) {
       try {
         const res = await getOrderList(
           curr,
+          10,
           filterValue,
           wallet.publicKey.toString()
         );
-        setLoading(false);
-        if (!res) {
-          return enqueueSnackbar("Order List Not Found", { variant: "error" });
-        }
-        setTotal(res.total);
-        setList(res.list);
-      } catch (e) {
-        return enqueueSnackbar(e.message, { variant: "error" });
-      }
+        setTotal(res.Total);
+        setList(res.List);
+      } catch (error) {}
+      setLoading(false);
     };
     if (wallet?.publicKey) {
       loadList(current);
     }
-  }, [wallet?.publicKey, filterValue, current]);
+  }, [wallet, filterValue, current]);
 
   return (
     <div className={className}>
       <div className="con">
         <h1 className="title">My Orders</h1>
-        <div className="filter">
+        <Stack direction="row" spacing={2} className="filter">
           <span className="txt">Filter</span>
-          <span className="sel">
-            <Select
-              className="select"
-              defaultValue="all"
-              name="Status"
-              value={filterValue.Status}
-              onChange={onFilter}>
-              {filterData.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </span>
+          {Object.entries(filterData).map(([key, value]) => (
+            <span key={key}>
+              <Select value={filterValue[key]} onChange={onFilter}>
+                {value.map((item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </span>
+          ))}
           <span
             className="btn-txt"
-            onClick={() => setFilterValue({ Direction: "buy" })}>
+            onClick={() => setFilterValue({ Direction: "buy", Status: "all" })}>
             reset
           </span>
-        </div>
+        </Stack>
         <div className="con-table">
           <OrderList list={list} loading={loading} />
           {total > 10 && (
@@ -93,7 +78,6 @@ function Home({ className }) {
               onChange={(curr) => {
                 setCurrent(curr);
               }}
-              className="pager"
             />
           )}
         </div>

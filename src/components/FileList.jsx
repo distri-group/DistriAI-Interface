@@ -23,7 +23,7 @@ import { useEffect, useState, useRef } from "react";
 import { fileUpload, generatePresignUrl } from "../services/model";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
-function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
+function FileList({ className, prefix, id, onSelect, upload }) {
   const { enqueueSnackbar } = useSnackbar();
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(false);
@@ -33,6 +33,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
   const [folderName, setFolderName] = useState("");
   const [downloadLinks, setLinks] = useState([]);
   const [initialPrefix] = useState(prefix);
+  const [currentPrefix, setPrefix] = useState(prefix);
   const fileInputRef = useRef(null);
   const S3client = new S3Client({
     region: "ap-northeast-2",
@@ -43,8 +44,9 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
     try {
       const path = await generatePresignUrl(
         parseInt(id),
-        (prefix !== initialPrefix ? prefix.replace(initialPrefix, "") : "") +
-          file.name,
+        (currentPrefix !== initialPrefix
+          ? currentPrefix.replace(initialPrefix, "")
+          : "") + file.name,
         wallet.publicKey.toString()
       );
       await fileUpload(path, file);
@@ -75,7 +77,9 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
     const file = new File([blob], "empty.txt", { type: "text/plain" });
     const path = await generatePresignUrl(
       parseInt(id),
-      (prefix !== initialPrefix ? prefix.replace(initialPrefix, "") : "") +
+      (currentPrefix !== initialPrefix
+        ? currentPrefix.replace(initialPrefix, "")
+        : "") +
         folderName +
         "/",
       wallet.publicKey.toString()
@@ -94,7 +98,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
     setLoading(true);
     const command = new ListObjectsV2Command({
       Bucket: "distriai",
-      Prefix: prefix,
+      Prefix: currentPrefix,
       Delimiter: "/",
     });
     S3client.send(command)
@@ -126,7 +130,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
   }, [onSelect, downloadLinks]);
   useEffect(() => {
     loadFileList();
-  }, [prefix]);
+  }, [currentPrefix]);
   return (
     <div className={className}>
       <Stack direction="column">
@@ -162,13 +166,13 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
           <TableContainer>
             <Table>
               <TableBody>
-                {prefix !== initialPrefix && (
+                {currentPrefix !== initialPrefix && (
                   <TableRow>
                     <TableCell width="20%">
                       <Folder />
                       <span
                         onClick={() => {
-                          setPrefix(getParentPrefix(prefix));
+                          setPrefix(getParentPrefix(currentPrefix));
                         }}
                         style={{ marginLeft: 8, cursor: "pointer" }}>
                         ..
@@ -185,7 +189,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
                       <span
                         onClick={() => setPrefix(folder.Prefix)}
                         style={{ marginLeft: 8, cursor: "pointer" }}>
-                        {folder.Prefix.replace(prefix, "")}
+                        {folder.Prefix.replace(currentPrefix, "")}
                       </span>
                     </TableCell>
                     <TableCell />
@@ -194,7 +198,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
                 ))}
                 {files.map(
                   (file) =>
-                    file.Key !== prefix && (
+                    file.Key !== currentPrefix && (
                       <TableRow key={file.Key}>
                         {onSelect && (
                           <TableCell width="5%">
@@ -209,7 +213,7 @@ function FileList({ className, prefix, setPrefix, id, onSelect, upload }) {
                         <TableCell width="20%">
                           <InsertDriveFile />
                           <span style={{ marginLeft: 8 }}>
-                            {file.Key.replace(prefix, "")}
+                            {file.Key.replace(currentPrefix, "")}
                           </span>
                         </TableCell>
                         <TableCell align="right">

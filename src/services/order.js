@@ -1,46 +1,62 @@
 import moment from "moment";
-import { formatBalance } from "../utils";
 import { getTimeDiff } from "time-difference-js";
-import request from "../utils/request";
-import * as anchor from "@project-serum/anchor";
+import { utils } from "@project-serum/anchor";
+import { formatBalance } from "../utils";
+import axios from "../utils/axios";
 
-export async function getOrderList(pageIndex, filter, publicKey) {
-  try {
-    const apiUrl = "/index-api/order/mine";
-    let options = {
-      data: {
-        Page: pageIndex,
-        PageSize: 10,
-      },
-    };
-    if (filter) {
-      for (let k in filter) {
-        let v = filter[k];
-        if (v && v !== "all") {
-          if (k === "Status") v = parseInt(v);
-          options.data[k] = v;
-        }
+const baseUrl = "/order";
+
+export async function getOrderList(pageIndex, pageSize, filter, publicKey) {
+  const apiUrl = baseUrl + "/mine";
+  const body = {
+    Page: pageIndex,
+    PageSize: pageSize,
+  };
+  const headers = {
+    Account: publicKey ?? "",
+  };
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== "all") {
+        body[key] = value;
       }
+    });
+  }
+  try {
+    const res = await axios.post(apiUrl, body, {
+      headers,
+    });
+    for (let order of res.List) {
+      order = formatOrder(order);
     }
-    if (publicKey) {
-      options.headers = {
-        Account: publicKey,
-      };
-    }
-    const ret = await request.post(apiUrl, options);
-    if (ret.Msg !== "success") {
-      return null;
-    }
-    const total = ret.Data.Total;
-    let list = ret.Data.List;
-    for (let item of list) {
-      formatOrder(item, publicKey);
-    }
-    return { list, total };
-  } catch (e) {
-    throw e;
+    return res;
+  } catch (error) {
+    throw error;
   }
 }
+
+export async function getOrderDetail(Id) {
+  const apiUrl = baseUrl + `/${Id}`;
+  try {
+    const res = await axios.get(apiUrl);
+    return formatOrder(res);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const filterData = {
+  Status: [
+    { label: "All Status", value: "all" },
+    { label: "Preparing", value: "0" },
+    { label: "Available", value: "1" },
+    { label: "Completed", value: "2" },
+    { label: "Failed", value: "3" },
+    { label: "Refunded", value: "4" },
+  ],
+};
+
+// Format Order Info
 function formatOrder(item) {
   if (item.Metadata) {
     item.Metadata = JSON.parse(item.Metadata);
@@ -75,21 +91,7 @@ function formatOrder(item) {
         (new Date(item.RefundTime) - new Date(item.OrderTime)) / 3600000
       );
   }
-}
-export function getFilterData() {
-  let list = [];
-  list.push({
-    name: "Status",
-    arr: [
-      { label: "All Status", value: "all" },
-      { label: "Preparing", value: "0" },
-      { label: "Available", value: "1" },
-      { label: "Completed", value: "2" },
-      { label: "Failed", value: "3" },
-      { label: "Refunded", value: "4" },
-    ],
-  });
-  return list;
+  return item;
 }
 
 export const signToken = async (ip, port, publicKey, deploy) => {
@@ -98,21 +100,9 @@ export const signToken = async (ip, port, publicKey, deploy) => {
   const encodeMsg = new TextEncoder().encode(msg);
   try {
     const sign = await provider.signMessage(encodeMsg, "utf8");
-    const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+    const signature = utils.bytes.bs58.encode(sign.signature);
     return `http://${ip}:${port}/distri/workspace/debugToken/${signature}`;
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    throw error;
   }
 };
-
-export async function getDetailByUuid(uuid, publicKey) {
-  const obj = await getOrderList(1, [], publicKey);
-  if (!obj) {
-    return { Status: 0, Msg: "Order list not found" };
-  }
-  const orderDetail = obj.list.find((t) => t.Uuid === uuid);
-  if (!orderDetail) {
-    return { Status: 0, Msg: "Order detail of " + uuid + " not found." };
-  }
-  return { Status: 1, Detail: orderDetail };
-}
