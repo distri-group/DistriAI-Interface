@@ -8,6 +8,7 @@ import {
 } from "@solana/spl-token";
 import * as anchor from "@project-serum/anchor";
 import webconfig from "../webconfig";
+import { formatBalance } from "../utils";
 
 function SolanaAction(props, ref) {
   const { connection } = useConnection();
@@ -135,7 +136,7 @@ function SolanaAction(props, ref) {
     );
     try {
       let token = await connection.getTokenAccountBalance(tokenAddress);
-      return token.value.amount;
+      return formatBalance(token.value.amount);
     } catch (e) {
       throw e;
     }

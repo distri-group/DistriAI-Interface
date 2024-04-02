@@ -113,9 +113,11 @@ function Header({ className }) {
                 </a>
                 <span
                   className="menu-item"
-                  onClick={() => {
-                    setVideoModal(true);
-                  }}>
+                  style={{ cursor: "default" }}
+                  // onClick={() => {
+                  //   setVideoModal(true);
+                  // }}
+                >
                   <img
                     src="/img/navbar/Icon_Demo Video.png"
                     className="icon"
@@ -130,7 +132,7 @@ function Header({ className }) {
           <span className="navbtn" onClick={() => setNavbarOpen(true)} />
         )}
       </div>
-      <Modal open={videoModal} onClose={() => setVideoModal(false)}>
+      {/* <Modal open={videoModal} onClose={() => setVideoModal(false)}>
         <Box sx={{ width: "1236px", margin: "0 auto", marginTop: "100px" }}>
           <iframe
             width="1236"
@@ -141,7 +143,7 @@ function Header({ className }) {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen></iframe>
         </Box>
-      </Modal>
+      </Modal> */}
       <Backdrop
         open={navbarOpen}
         sx={{

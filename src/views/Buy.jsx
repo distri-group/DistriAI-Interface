@@ -4,7 +4,7 @@ import { LoadingButton } from "@mui/lab";
 import React, { useState, useEffect, useRef } from "react";
 import { getOrderList } from "../services/order";
 import SolanaAction from "../components/SolanaAction";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import webconfig from "../webconfig";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
@@ -36,7 +36,7 @@ function Buy({ className }) {
   const [formValue, setFormValue] = useState({
     duration: 0,
     taskName: "",
-    usage: "",
+    usage: "train",
     model: "",
     downloadLinks: [],
   });
@@ -77,7 +77,7 @@ function Buy({ className }) {
     };
     const OrderInfo = {
       Model: formValue.model,
-      Intent: formValue.usage,
+      Intent: formValue.usage || "train",
       DownloadURL: formValue.downloadLinks,
     };
     const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -134,7 +134,7 @@ function Buy({ className }) {
           webconfig.MINT_PROGRAM,
           wallet.publicKey
         );
-        setBalance(balance / LAMPORTS_PER_SOL);
+        setBalance(balance);
         const res = await getOrderList(
           1,
           10,

@@ -1,18 +1,6 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-export { formdataify, formatBalance, formatAddress };
-
-function formdataify(params) {
-  const formData = new FormData();
-  Object.keys(params).forEach((key) => {
-    if (typeof params[key] == "object") {
-      formData.append(key, JSON.stringify(params[key]));
-    } else {
-      formData.append(key, params[key]);
-    }
-  });
-  return formData;
-}
+export { formatBalance, formatAddress };
 
 function formatBalance(balance) {
   if (!balance) {

@@ -27,6 +27,8 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { signToken } from "../services/order";
 import { useSnackbar } from "notistack";
 import { AccountBalance } from "@mui/icons-material";
+import axios from "axios";
+import { formatAddress } from "../utils";
 
 function ModelDetail({ className }) {
   document.title = "Model Detail";
@@ -92,21 +94,23 @@ function ModelDetail({ className }) {
       const res = await getModelDetail(owner, name);
       setModel(res);
       setPrefix(`model/${res.Owner}/${res.Name}/`);
-      fetch(
-        "https://distriai.s3.ap-northeast-2.amazonaws.com/" +
-          `model/${res.Owner}/${res.Name}/` +
-          "README.md"
-      )
-        .then((res) =>
-          res.text().then((text) => {
-            const match = text.match(/^---\n([\s\S]+?)\n---/);
-            const result = metadataParser(text);
-            setMarkdown(result.content);
-            setMetadata(match[1]);
-          })
+      axios
+        .get(
+          `https://distriai.s3.ap-northeast-2.amazonaws.com/model/${res.Owner}/${res.Name}/README.md`
         )
-        .catch((e) => {});
-      setLoading(false);
+        .then((response) => {
+          const text = response.data;
+          const match = text.match(/^---\n([\s\S]+?)\n---/);
+          const result = metadataParser(text);
+          setMarkdown(result.content);
+          setMetadata(match[1]);
+        })
+        .catch((error) => {
+          if (error.response.status === 404) {
+          } else {
+            console.log(error);
+          }
+        });
     };
     loadModel();
   }, []);
@@ -124,7 +128,9 @@ function ModelDetail({ className }) {
               style={{ justifyContent: "space-between" }}>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <h1>{model.Name}</h1>
+                  <h1>
+                    {formatAddress(model.Owner)}/{model.Name}
+                  </h1>
                   <Stack direction="row" alignItems="center">
                     <Favorite sx={{ width: 20, height: 20 }} />
                     <span>{model.likes}</span>
