@@ -49,7 +49,8 @@ function Buy({ className }) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
     if (name === "model") {
-      setSelectedModel(models.find((model) => model.Id == value));
+      setFormValue((prevState) => ({ ...prevState, model: parseInt(value) }));
+      setSelectedModel(models.find((model) => model.Id === parseInt(value)));
     }
   };
   const handleFileSelect = (files) => {
