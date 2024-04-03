@@ -1,5 +1,5 @@
-import { Modal, Box, Backdrop } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { Backdrop } from "@mui/material";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import DropdownMenu from "./DropdownMenu";
@@ -9,7 +9,6 @@ import MobileNavbar from "./home/MobileNavbar";
 function Header({ className }) {
   const { width } = useContext(Context);
   const navigate = useNavigate();
-  const [videoModal, setVideoModal] = useState(false);
   const [navbarOpen, setNavbarOpen] = useState(false);
   return (
     <div className={className}>
@@ -111,13 +110,7 @@ function Header({ className }) {
                   />
                   <span className="subtitle">Getting Started</span>
                 </a>
-                <span
-                  className="menu-item"
-                  style={{ cursor: "default" }}
-                  // onClick={() => {
-                  //   setVideoModal(true);
-                  // }}
-                >
+                <span className="menu-item" style={{ cursor: "default" }}>
                   <img
                     src="/img/navbar/Icon_Demo Video.png"
                     className="icon"
@@ -132,18 +125,6 @@ function Header({ className }) {
           <span className="navbtn" onClick={() => setNavbarOpen(true)} />
         )}
       </div>
-      {/* <Modal open={videoModal} onClose={() => setVideoModal(false)}>
-        <Box sx={{ width: "1236px", margin: "0 auto", marginTop: "100px" }}>
-          <iframe
-            width="1236"
-            height="695"
-            src="https://www.youtube.com/embed/SKa_HxFgHp8"
-            title="Distri.AI Video of User Guide"
-            frameBorder={0}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen></iframe>
-        </Box>
-      </Modal> */}
       <Backdrop
         open={navbarOpen}
         sx={{
@@ -152,10 +133,7 @@ function Header({ className }) {
           background: "rgba(0, 0, 0, 0.12)",
           backdropFilter: "blur(50px)",
         }}>
-        <MobileNavbar
-          onClose={() => setNavbarOpen(false)}
-          onVideoOpen={() => setVideoModal(true)}
-        />
+        <MobileNavbar onClose={() => setNavbarOpen(false)} />
       </Backdrop>
     </div>
   );

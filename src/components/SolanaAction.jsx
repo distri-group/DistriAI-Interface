@@ -90,7 +90,6 @@ function SolanaAction(props, ref) {
   const claimRewards = async (rewards) => {
     try {
       await solanaProgram.initProgram(connection, wallet);
-      // const transaction = new Transaction();
       const transactions = [];
       const blockhash = (await connection.getLatestBlockhash("finalized"))
         .blockhash;

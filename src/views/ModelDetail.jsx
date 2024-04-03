@@ -105,12 +105,8 @@ function ModelDetail({ className }) {
           setMarkdown(result.content);
           setMetadata(match[1]);
         })
-        .catch((error) => {
-          if (error.response.status === 404) {
-          } else {
-            console.log(error);
-          }
-        });
+        .catch((error) => {});
+      setLoading(false);
     };
     loadModel();
   }, []);
