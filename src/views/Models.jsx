@@ -15,6 +15,7 @@ import ModelCard from "../components/ModelCard";
 import { getModelList } from "../services/model";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import ConnectToWallet from "../components/ConnectToWallet";
+import Pager from "../components/pager";
 
 function Models({ className }) {
   document.title = "Models";
@@ -25,6 +26,8 @@ function Models({ className }) {
   });
   const [filterType, setType] = useState("");
   const [list, setList] = useState([]);
+  const [current, setCurrent] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [connectModal, setConnectModal] = useState(false);
   const wallet = useAnchorWallet();
@@ -41,15 +44,16 @@ function Models({ className }) {
     setType(e.target.value);
     setFilterValue({ ...filterValue, Type1: e.target.value });
   };
-  const loadList = async () => {
+  const loadList = async (current) => {
     setLoading(true);
-    const res = await getModelList(1, 10, filterValue);
+    const res = await getModelList(current, 10, filterValue);
     setList(res.List);
+    setTotal(res.Total);
     setLoading(false);
   };
   useEffect(() => {
-    loadList();
-  }, [filterValue]);
+    loadList(current);
+  }, [filterValue, current]);
   return (
     <div className={className}>
       <h1>Models</h1>
@@ -166,7 +170,20 @@ function Models({ className }) {
                 <CircularProgress />
               </div>
             ) : list.length > 0 ? (
-              list.map((model) => <ModelCard model={model} key={model.Id} />)
+              <>
+                {list.map((model) => (
+                  <ModelCard model={model} key={model.Id} />
+                ))}
+                {total > 10 && (
+                  <Pager
+                    current={current}
+                    total={total}
+                    pageSize={10}
+                    onChange={(page) => setCurrent(page)}
+                    className="pager"
+                  />
+                )}
+              </>
             ) : (
               <div className="empty">
                 <p>No model found</p>
