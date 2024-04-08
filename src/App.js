@@ -174,7 +174,6 @@ function App() {
       window.removeEventListener("resize", setViewportContent);
     };
   }, []);
-  useEffect(() => {}, []);
   return (
     <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
       <WalletProvider wallets={[]} autoConnect={true}>

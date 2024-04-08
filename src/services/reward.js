@@ -22,9 +22,11 @@ export const getRewardList = async (pageIndex, pageSize, publicKey) => {
 
 export const getRewardTotal = async (period, publicKey) => {
   const apiUrl = baseUrl + "/total";
-  const body = {
-    Period: period ?? "",
-  };
+  const body = !isNaN(period)
+    ? {
+        Period: period,
+      }
+    : {};
   const headers = {
     Account: publicKey,
   };

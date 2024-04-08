@@ -1,9 +1,10 @@
 import styled from "styled-components";
+import { formatAddress } from "../utils";
 
 function DeviceCard({ className, device }) {
   return (
     <div className={className}>
-      <h3># {(device.Uuid || device.UUID).slice(-10)}</h3>
+      <h3># {formatAddress(device.Uuid || device.UUID)}</h3>
       <div className="card-container">
         <div className="info-box vertical">
           <div className="box-item">
@@ -55,11 +56,11 @@ function DeviceCard({ className, device }) {
                   style={{ transform: "rotate(180deg)" }}
                   alt=""
                 />
-                {device.Speed.Upload || "-- Mbps"}
+                {device.Speed?.Upload || "-- Mbps"}
               </div>
               <div className="speed">
                 <img src="/img/market/download.svg" alt="" />
-                {device.Speed.Download || "-- Mbps"}
+                {device.Speed?.Download || "-- Mbps"}
               </div>
             </span>
           </div>
