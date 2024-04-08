@@ -1,5 +1,5 @@
 import axios from "../utils/axios";
-let apiUrl = "/mailbox/subscribe";
+const apiUrl = "/mailbox/subscribe";
 
 export async function subscribe(data) {
   try {

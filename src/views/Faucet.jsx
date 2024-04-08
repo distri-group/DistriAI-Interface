@@ -6,7 +6,7 @@ import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
-function Home({ className }) {
+function Faucet({ className }) {
   document.title = "Faucet";
   const [loading, setLoading] = useState(false);
   const [publicKey, setPublicKey] = useState("");
@@ -97,7 +97,7 @@ function Home({ className }) {
   );
 }
 
-export default styled(Home)`
+export default styled(Faucet)`
   display: block;
   overflow: hidden;
   width: 100%;

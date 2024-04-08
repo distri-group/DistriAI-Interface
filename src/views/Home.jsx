@@ -17,7 +17,7 @@ function Home({ className }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [width, setWidth] = useState(0);
   useEffect(() => {
-    const handleScroll = () => {
+    function handleScroll() {
       const scrollableElement = ref.current;
       if (!scrollableElement) return;
       const scrollTop = scrollableElement.scrollTop;
@@ -26,12 +26,12 @@ function Home({ className }) {
       const totalScroll = scrollHeight - clientHeight;
       const currentScrollProgress = (scrollTop / totalScroll) * 100;
       setScrollProgress(currentScrollProgress);
-    };
-    const handleResize = () => {
+    }
+    function handleResize() {
       if (ref.current) {
         setWidth(ref.current.offsetWidth);
       }
-    };
+    }
     handleResize();
     window.addEventListener("resize", handleResize);
     const scrollableElement = ref.current;

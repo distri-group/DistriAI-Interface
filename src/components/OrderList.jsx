@@ -8,7 +8,7 @@ import { Backdrop, CircularProgress } from "@mui/material";
 import { getMachineDetail } from "../services/machine";
 import { signToken } from "../services/order";
 
-function Header({ className, list, loading }) {
+function OrderList({ className, list, loading }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const [isLoading, setIsLoading] = useState(loading);
@@ -150,7 +150,7 @@ function Header({ className, list, loading }) {
   );
 }
 
-export default styled(Header)`
+export default styled(OrderList)`
   .order-table {
     tr td {
       padding: 20px 10px !important;
