@@ -99,7 +99,7 @@ function MobileNavbar({ className, onClose, onVideoOpen }) {
                   />
                   <Typography className="item">Need</Typography>
                 </ListItemButton>
-                <ListItemButton onClick={() => navigate("/market")} key={2}>
+                <ListItemButton onClick={() => navigate("/device")} key={2}>
                   <img
                     src="/img/navbar/Icon_Share.png"
                     className="icon"

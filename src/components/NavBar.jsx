@@ -14,17 +14,17 @@ function NavBar({ className }) {
   useEffect(() => {
     if (
       location.pathname === "/market" ||
-      location.pathname.includes("/buy") ||
-      location.pathname.includes("/order") ||
-      location.pathname.includes("/extend-duration") ||
-      location.pathname.includes("/end-duration")
+      location.pathname.includes("buy") ||
+      location.pathname.includes("order") ||
+      location.pathname.includes("extend") ||
+      location.pathname.includes("end")
     ) {
       setUser("buyer");
     } else if (
       location.pathname === "/device" ||
-      location.pathname.includes("/reward") ||
-      location.pathname.includes("/earning") ||
-      location.pathname.includes("/makeoffer")
+      location.pathname.includes("reward") ||
+      location.pathname.includes("earning") ||
+      location.pathname.includes("list")
     ) {
       setUser("seller");
     }
@@ -78,8 +78,8 @@ function NavBar({ className }) {
           {user === "buyer" && (
             <>
               <span onClick={() => navigate("/market")}>Market</span>
-              <span onClick={() => navigate("/models")}>Models</span>
-              <span style={{ cursor: "default" }}>Datasets</span>
+              <span onClick={() => navigate("/model")}>Models</span>
+              <span onClick={() => navigate("/dataset")}>Datasets</span>
               <span onClick={() => navigate("/order")}>My Orders</span>
             </>
           )}

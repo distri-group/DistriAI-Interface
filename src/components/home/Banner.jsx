@@ -66,7 +66,7 @@ const Banner = ({ className }) => {
           </motion.span>
           <motion.span
             className="trans-btn"
-            onClick={() => navigate("/models")}
+            onClick={() => navigate("/model")}
             initial={initial}
             animate={{
               opacity: 1,

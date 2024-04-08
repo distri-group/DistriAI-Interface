@@ -25,6 +25,7 @@ function DeviceList({
     if (priceSort) {
       onPriceSort(priceSort);
     }
+    // eslint-disable-next-line
   }, [priceSort]);
   let columns = [
     {
@@ -201,14 +202,17 @@ function DeviceList({
                 return setConnectModal(true);
               }
               if (onPriceSort) {
-                return navigate("/buy/" + record.Uuid, {
+                return navigate("/device/" + record.Uuid + "/buy", {
                   state: { model, Owner: record.Owner },
                 });
               }
               if (record.Status === 0) {
-                return navigate("/makeoffer/" + record.Uuid, {
-                  state: { Owner: record.Owner },
-                });
+                return navigate(
+                  "/device/" + record.Uuid + "/list" + record.Uuid,
+                  {
+                    state: { Owner: record.Owner },
+                  }
+                );
               }
               if (record.Status === 1) {
                 return onCancel(record);
