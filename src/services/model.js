@@ -1,5 +1,5 @@
-import axios from "../utils/axios";
-import types from "../services/types.json";
+import axios from "@/utils/axios";
+import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
 
 const baseUrl = "/model";
@@ -20,7 +20,7 @@ export const getModelList = async (pageIndex, pageSize, filter) => {
   try {
     const res = await axios.post(apiUrl, body);
     for (let model of res.List) {
-      model = formatModel(model);
+      model = formatItem(model);
     }
     return res;
   } catch (error) {
@@ -32,7 +32,7 @@ export const getModelDetail = async (owner, name) => {
   const apiUrl = baseUrl + `/${owner}/${name}`;
   try {
     const res = await axios.get(apiUrl);
-    return formatModel(res);
+    return formatItem(res);
   } catch (error) {
     throw error;
   }
@@ -71,7 +71,7 @@ export const generatePresignUrl = async (Id, FilePath, publicKey) => {
   }
 };
 
-const login = async (publicKey) => {
+export const login = async (publicKey) => {
   if (localStorage.getItem("token")) return localStorage.getItem("token");
   const apiUrl = "/user/login";
   const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
@@ -111,7 +111,7 @@ export const fileUpload = async (url, file) => {
   }
 };
 
-const formatModel = (model) => {
+export const formatItem = (model) => {
   if (model.Tags.includes(",")) {
     model.Tags = model.Tags.split(",");
   } else if (!model.Tags.length) model.Tags = null;
@@ -119,6 +119,7 @@ const formatModel = (model) => {
     model.Tags = [model.Tags];
   }
   model.license = licenses[model.License - 1];
+  if (model.Framework) model.framework = frameworks[model.Framework - 1];
   model.type1 = types[model.Type1 - 1].title;
   model.type2 = types[model.Type1 - 1].items[model.Type2 - 1];
   model.expanded = false;

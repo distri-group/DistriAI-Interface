@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import DurationProgress from "../components/DurationProgress";
-import DurationToggle from "../components/DurationToggle";
-import Countdown from "../components/Countdown";
-import { getOrderDetail } from "../services/order";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import DurationProgress from "../../components/DurationProgress";
+import DurationToggle from "../../components/DurationToggle";
+import Countdown from "../../components/Countdown";
+import { getOrderDetail } from "../../services/order";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 import { PublicKey } from "@solana/web3.js";
 
 function ExtendDuration({ className }) {
@@ -25,7 +25,7 @@ function ExtendDuration({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
 
-  const onSubmit = async () => {
+  async function onSubmit() {
     const machinePublicKey = methods.getMachinePublicKey(
       deviceDetail.Uuid,
       new PublicKey(deviceDetail.Provider)
@@ -39,9 +39,9 @@ function ExtendDuration({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setExtending(false);
-  };
+  }
   useEffect(() => {
-    const init = async () => {
+    async function init() {
       setLoading(true);
       const res = await getOrderDetail(id);
       setOrderDetail(res);
@@ -51,7 +51,7 @@ function ExtendDuration({ className }) {
       const balance = await methods.getTokenBalance(wallet.publicKey);
       setBalance(balance);
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       init();
     }

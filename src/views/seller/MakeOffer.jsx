@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { TextField, Grid, InputAdornment } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { getMachineDetail } from "../services/machine";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import { getMachineDetail } from "../../services/machine";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 
 function MakeOffer({ className }) {
   document.title = "Make Offer";
@@ -21,11 +21,11 @@ function MakeOffer({ className }) {
     duration: 0,
     disk: 0,
   });
-  const handleChange = (e) => {
+  function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: parseFloat(value) }));
-  };
-  const onSubmit = async (e) => {
+  }
+  async function onSubmit(e) {
     e.preventDefault();
     setLoading(true);
     try {
@@ -41,9 +41,9 @@ function MakeOffer({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
-  };
+  }
   useEffect(() => {
-    const init = async () => {
+    async function init() {
       setLoading(true);
       try {
         const detail = await getMachineDetail(state.Owner, id);
@@ -52,7 +52,7 @@ function MakeOffer({ className }) {
         }
       } catch (error) {}
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       init();
     }

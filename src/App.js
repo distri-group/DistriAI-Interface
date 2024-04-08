@@ -10,26 +10,24 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Buffer } from "buffer";
-import Home from "./views/Home";
-import Buy from "./views/Buy";
-import Market from "./views/Market";
-import MakeOffer from "./views/MakeOffer";
-import OrderDetail from "./views/OrderDetail";
-import MyDevice from "./views/MyDevice";
-import MyOrder from "./views/MyOrder";
-import Faucet from "./views/Faucet";
-import ExtendDuration from "./views/ExtendDuration";
-import NavBar from "./components/NavBar";
-import Rewards from "./views/Rewards";
-import EndDuration from "./views/EndDuration";
-import Earning from "./views/Earning";
-import EarningDetail from "./views/EarningDetail";
-import RewardDetail from "./views/RewardDetail";
-import Models from "./views/Models";
-import Datasets from "./views/Datasets";
-import CreateModel from "./views/CreateModel";
-import ModelDetail from "./views/ModelDetail";
-import Test from "./views/Test";
+import NavBar from "@/components/NavBar";
+import Home from "@/views/Home";
+import Faucet from "@/views/Faucet";
+import Market from "@/views/buyer/Market";
+import Buy from "@/views/buyer/Buy";
+import MyOrder from "@/views/buyer/MyOrder";
+import OrderDetail from "@/views/buyer/OrderDetail";
+import ExtendDuration from "@/views/buyer/ExtendDuration";
+import EndDuration from "@/views/buyer/EndDuration";
+import MyDevice from "@/views/seller/MyDevice";
+import MakeOffer from "@/views/seller/MakeOffer";
+import Reward from "@/views/seller/Reward";
+import RewardDetail from "@/views/seller/RewardDetail";
+import Earning from "@/views/seller/Earning";
+import EarningDetail from "@/views/seller/EarningDetail";
+import Contents from "@/views/model&dataset/Contents";
+import Create from "@/views/model&dataset/Create";
+import Detail from "@/views/model&dataset/Detail";
 
 function App() {
   window.Buffer = Buffer;
@@ -185,31 +183,48 @@ function App() {
                 autoHideDuration={3000}>
                 {!isHome && <NavBar className="page-header" />}
                 <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/market" element={<Market />} />
-                  <Route path="/device" element={<MyDevice />} />
-                  <Route path="/order" element={<MyOrder />} />
-                  <Route path="/order/:id" element={<OrderDetail />} />
-                  <Route path="/buy/:id" element={<Buy />} />
-                  <Route path="/makeoffer/:id" element={<MakeOffer />} />
-                  <Route
-                    path="/extend-duration/:id"
-                    element={<ExtendDuration />}
-                  />
-                  <Route path="/end-duration/:id" element={<EndDuration />} />
-                  <Route path="/faucet" element={<Faucet />} />
-                  <Route path="/reward" element={<Rewards />} />
-                  <Route path="/reward/:period" element={<RewardDetail />} />
-                  <Route path="/earning" element={<Earning />} />
-                  <Route path="/earning/:id" element={<EarningDetail />} />
-                  <Route path="/models" element={<Models />} />
-                  <Route
-                    path="/models/:owner/:name"
-                    element={<ModelDetail />}
-                  />
-                  <Route path="/models/create" element={<CreateModel />} />
-                  <Route path="/datasets" element={<Datasets />} />
-                  <Route path="/test" element={<Test />} />
+                  <Route index element={<Home />} />
+                  <Route path="market" element={<Market />} />
+                  <Route path="device">
+                    <Route index element={<MyDevice />} />
+                    <Route path=":id">
+                      <Route path="buy" element={<Buy />} />
+                      <Route path="list" element={<MakeOffer />} />
+                    </Route>
+                  </Route>
+                  <Route path="order">
+                    <Route index element={<MyOrder />} />
+                    <Route path=":id">
+                      <Route index element={<OrderDetail />} />
+                      <Route path="extend" element={<ExtendDuration />} />
+                      <Route path="end" element={<EndDuration />} />
+                    </Route>
+                  </Route>
+                  <Route path="reward">
+                    <Route index element={<Reward />} />
+                    <Route path=":period" element={<RewardDetail />} />
+                  </Route>
+                  <Route path="earning">
+                    <Route index element={<Earning />} />
+                    <Route path=":id" element={<EarningDetail />} />
+                  </Route>
+                  <Route path="model">
+                    <Route index element={<Contents type="model" />} />
+                    <Route
+                      path=":owner/:name"
+                      element={<Detail type="model" />}
+                    />
+                    <Route path="add" element={<Create type="model" />} />
+                  </Route>
+                  <Route path="dataset">
+                    <Route index element={<Contents type="dataset" />} />
+                    <Route
+                      path=":owner/:name"
+                      element={<Detail type="dataset" />}
+                    />
+                    <Route path="add" element={<Create type="dataset" />} />
+                  </Route>
+                  <Route path="faucet" element={<Faucet />} />
                 </Routes>
               </SnackbarProvider>
             </ThemeProvider>

@@ -8,17 +8,19 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import types from "../services/types.json";
+import types from "../../services/types.json";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import ModelCard from "../components/ModelCard";
-import { getModelList } from "../services/model";
+import ItemCard from "./ItemCard";
+import { getModelList } from "../../services/model";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import ConnectToWallet from "../components/ConnectToWallet";
-import Pager from "../components/pager";
+import ConnectToWallet from "../../components/ConnectToWallet";
+import Pager from "../../components/pager";
+import { capitalize } from "lodash";
+import { getDatasetList } from "../../services/dataset";
 
-function Models({ className }) {
-  document.title = "Models";
+function Contents({ className, type }) {
+  document.title = capitalize(type + "s");
   const navigate = useNavigate();
   const [filterValue, setFilterValue] = useState({
     Name: "",
@@ -32,31 +34,39 @@ function Models({ className }) {
   const [connectModal, setConnectModal] = useState(false);
   const wallet = useAnchorWallet();
   let inputTimer;
-  const onFilter = (e) => {
+  function onFilter(e) {
     const { name, value } = e.target;
     setFilterValue({ ...filterValue, [name]: value });
-  };
-  const clearFilter = () => {
+  }
+  function clearFilter() {
     setFilterValue({ Name: "", OrderBy: "Updated Time" });
     setType("");
-  };
-  const onTypeFilter = (e) => {
+  }
+  function onTypeFilter(e) {
     setType(e.target.value);
     setFilterValue({ ...filterValue, Type1: e.target.value });
-  };
-  const loadList = async (current) => {
+  }
+  async function loadList(current) {
     setLoading(true);
-    const res = await getModelList(current, 10, filterValue);
-    setList(res.List);
-    setTotal(res.Total);
+    let res;
+    try {
+      if (type === "model") {
+        res = await getModelList(current, 10, filterValue);
+      } else if (type === "dataset") {
+        res = await getDatasetList(current, 10, filterValue);
+      }
+      setList(res.List);
+      setTotal(res.Total);
+    } catch (error) {}
     setLoading(false);
-  };
+  }
   useEffect(() => {
     loadList(current);
-  }, [filterValue, current]);
+    // eslint-disable-next-line
+  }, [filterValue, current, type]);
   return (
     <div className={className}>
-      <h1>Models</h1>
+      <h1>{capitalize(type + "s")}</h1>
       <div className="container">
         <div className="left">
           <Select
@@ -157,11 +167,11 @@ function Models({ className }) {
             </Stack>
             <Button
               onClick={() => {
-                if (wallet?.publicKey) navigate("/models/create");
+                if (wallet?.publicKey) navigate(`/${type}/add`);
                 else setConnectModal(true);
               }}
               className="cbtn">
-              Create Model
+              Create {capitalize(type)}
             </Button>
           </div>
           <div className="list">
@@ -171,8 +181,8 @@ function Models({ className }) {
               </div>
             ) : list.length > 0 ? (
               <>
-                {list.map((model) => (
-                  <ModelCard model={model} key={model.Id} />
+                {list.map((item) => (
+                  <ItemCard item={item} key={item.Id} type={type} />
                 ))}
                 {total > 10 && (
                   <Pager
@@ -186,7 +196,7 @@ function Models({ className }) {
               </>
             ) : (
               <div className="empty">
-                <p>No model found</p>
+                <p>No {type} found</p>
               </div>
             )}
           </div>
@@ -200,12 +210,12 @@ function Models({ className }) {
   );
 }
 
-export default styled(Models)`
+export default styled(Contents)`
   width: 1200px;
   margin: 0 auto;
   h1 {
     padding-left: 40px;
-    background-image: url(/img/market/model.svg);
+    background-image: ${(props) => `url(/img/market/${props.type}.svg)`};
     background-size: 28px;
     background-position: left;
     background-repeat: no-repeat;

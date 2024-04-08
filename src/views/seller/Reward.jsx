@@ -1,21 +1,21 @@
 import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import Table from "../components/Table";
+import Table from "../../components/Table";
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
-import Pager from "../components/pager";
+import Pager from "../../components/pager";
 import {
   getRewardList,
   getRewardTotal,
   getClaimableReward,
-} from "../services/reward";
+} from "../../services/reward";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { LoadingButton } from "@mui/lab";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 
-function Rewards({ className }) {
+function Reward({ className }) {
   document.title = "My Rewards";
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
@@ -26,7 +26,7 @@ function Rewards({ className }) {
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [rewards, setRewards] = useState(null);
-  const loadList = async (curr) => {
+  async function loadList(curr) {
     setLoading(true);
     try {
       const res = await getRewardList(curr, 10, wallet.publicKey.toString());
@@ -39,8 +39,8 @@ function Rewards({ className }) {
     } catch (e) {
       return enqueueSnackbar(e.message, { variant: "error" });
     }
-  };
-  const getClaimableList = async () => {
+  }
+  async function getClaimableList() {
     const res = await getClaimableReward(
       null,
       1,
@@ -58,8 +58,8 @@ function Rewards({ className }) {
       }
       return { claimableList, total };
     }
-  };
-  const claimButchRewards = async () => {
+  }
+  async function claimButchRewards() {
     setClaiming(true);
     const { claimableList, total } = await getClaimableList();
     try {
@@ -71,19 +71,19 @@ function Rewards({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setClaiming(false);
-  };
-  const getTotal = async () => {
+  }
+  async function getTotal() {
     try {
       const res = await getRewardTotal(null, wallet.publicKey.toString());
       setRewards(res);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
-  };
-  const onPageChange = (curr) => {
+  }
+  function onPageChange(curr) {
     setCurrent(curr);
     loadList(curr);
-  };
+  }
   const columns = [
     {
       title: "Period",
@@ -347,7 +347,7 @@ function Rewards({ className }) {
   );
 }
 
-export default styled(Rewards)`
+export default styled(Reward)`
   color: white;
   width: 1200px;
   margin: 10px auto;

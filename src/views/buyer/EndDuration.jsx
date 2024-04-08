@@ -4,11 +4,11 @@ import styled from "styled-components";
 import { useSnackbar } from "notistack";
 import { CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import DurationProgress from "../components/DurationProgress";
+import DurationProgress from "../../components/DurationProgress";
 import { PublicKey } from "@solana/web3.js";
-import Countdown from "../components/Countdown";
-import { getOrderDetail } from "../services/order";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import Countdown from "../../components/Countdown";
+import { getOrderDetail } from "../../services/order";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
@@ -23,7 +23,8 @@ function EndDuration({ className }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [remainingTime, setRemainingTime] = useState();
   const open = Boolean(anchorEl);
-  const onSubmit = async () => {
+
+  async function onSubmit() {
     if (remainingTime < 3600000) {
       return enqueueSnackbar("Remaining duration less than 1 hour.", {
         variant: "info",
@@ -50,9 +51,9 @@ function EndDuration({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setEnding(false);
-  };
+  }
   useEffect(() => {
-    const loadDetail = async () => {
+    async function loadDetail() {
       setLoading(true);
       try {
         const res = await getOrderDetail(id);
@@ -63,7 +64,7 @@ function EndDuration({ className }) {
         setBalance(amount);
       } catch (error) {}
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       loadDetail();
     }

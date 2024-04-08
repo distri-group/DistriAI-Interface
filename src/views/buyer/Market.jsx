@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { MenuItem, Select, Stack } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import DeviceList from "../components/DeviceList";
-import Pager from "../components/pager";
-import { getMachineList, getFilterData } from "../services/machine";
+import DeviceList from "../../components/DeviceList";
+import Pager from "../../components/pager";
+import { getMachineList, getFilterData } from "../../services/machine";
 
-function Home({ className }) {
+function Market({ className }) {
   document.title = "Market";
   const { state } = useLocation();
   const [list, setList] = useState([]);
@@ -19,7 +19,7 @@ function Home({ className }) {
   const { enqueueSnackbar } = useSnackbar();
 
   // Load Machine List
-  const loadList = async (curr) => {
+  async function loadList(curr) {
     setLoading(true);
     try {
       const res = await getMachineList(curr, 10, filterValue);
@@ -29,15 +29,15 @@ function Home({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
-  };
+  }
 
   // Machine Filter Change
-  const onFilter = (key, value) => {
+  function onFilter(key, value) {
     setFilterValue((prevState) => ({ ...prevState, [key]: value }));
-  };
+  }
 
   // Reset Machine Filter
-  const resetFilter = () => {
+  function resetFilter() {
     setFilterValue((prevState) => {
       const resetState = {};
       Object.keys(prevState).forEach((key) => {
@@ -45,11 +45,11 @@ function Home({ className }) {
       });
       return resetState;
     });
-  };
+  }
 
   // Initialize Filter
   useEffect(() => {
-    const loadFilterData = async () => {
+    async function loadFilterData() {
       try {
         const res = await getFilterData();
         setFilterData(res);
@@ -59,7 +59,7 @@ function Home({ className }) {
         });
         setFilterValue(filter);
       } catch (error) {}
-    };
+    }
     loadFilterData();
   }, []);
 
@@ -68,6 +68,7 @@ function Home({ className }) {
     if (filterValue && current && Object.keys(filterValue).length > 0) {
       loadList(current);
     }
+    // eslint-disable-next-line
   }, [filterValue, current]);
 
   return (
@@ -113,7 +114,7 @@ function Home({ className }) {
   );
 }
 
-export default styled(Home)`
+export default styled(Market)`
   width: 1200px;
   margin: 10px auto;
   padding: 0 20px;

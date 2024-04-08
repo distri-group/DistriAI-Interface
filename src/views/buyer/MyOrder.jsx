@@ -1,12 +1,12 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from "react";
-import OrderList from "../components/OrderList";
-import { getOrderList, filterData } from "../services/order";
-import Pager from "../components/pager";
+import OrderList from "../../components/OrderList";
+import { getOrderList, filterData } from "../../services/order";
+import Pager from "../../components/pager";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { MenuItem, Select, Stack } from "@mui/material";
 
-function Home({ className }) {
+function MyOrder({ className }) {
   document.title = "My Order";
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,15 +18,15 @@ function Home({ className }) {
   });
   const wallet = useAnchorWallet();
 
-  const onFilter = (event) => {
+  function onFilter(event) {
     setFilterValue((prevState) => ({
       ...prevState,
       Status: parseInt(event.target.value),
     }));
     setCurrent(1);
-  };
+  }
   useEffect(() => {
-    const loadList = async (curr) => {
+    async function loadList(curr) {
       setLoading(true);
       try {
         const res = await getOrderList(
@@ -39,7 +39,7 @@ function Home({ className }) {
         setList(res.List);
       } catch (error) {}
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       loadList(current);
     }
@@ -86,7 +86,7 @@ function Home({ className }) {
   );
 }
 
-export default styled(Home)`
+export default styled(MyOrder)`
   display: block;
   width: 100%;
   min-height: calc(100% - 160px);

@@ -1,13 +1,17 @@
 import { MenuItem, Select, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getOrderList, filterData, getTotalEarnings } from "../services/order";
+import {
+  getOrderList,
+  filterData,
+  getTotalEarnings,
+} from "../../services/order";
 import styled from "styled-components";
-import Table from "../components/Table";
+import Table from "../../components/Table";
 import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useNavigate } from "react-router-dom";
-import Pager from "../components/pager";
-import { formatBalance } from "../utils";
+import Pager from "../../components/pager";
+import { formatBalance } from "../../utils";
 
 function Earning({ className }) {
   document.title = "My Earnings";
@@ -24,15 +28,15 @@ function Earning({ className }) {
   const [pending, setPending] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const onFilter = (event) => {
+  function onFilter(event) {
     setFilterValue((prevState) => ({
       ...prevState,
       Status: parseInt(event.target.value),
     }));
     setCurrent(1);
-  };
+  }
   useEffect(() => {
-    const loadList = async (curr) => {
+    async function loadList(curr) {
       setLoading(true);
       try {
         const res = await getOrderList(
@@ -51,7 +55,7 @@ function Earning({ className }) {
         setReceived(formatBalance(received));
       } catch (error) {}
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       loadList(current);
     }

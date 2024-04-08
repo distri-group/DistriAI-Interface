@@ -3,27 +3,32 @@ import { Chip, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-function ModelCard({ model, className }) {
+function ItemCard({ item, className, type }) {
   const navigate = useNavigate();
   return (
     <div
       className={className}
       onClick={() => {
-        navigate(`/models/${model.Owner}/${model.Name}`);
+        navigate(`/${type}/${item.Owner}/${item.Name}`);
       }}>
-      <h3>{model.Name}</h3>
+      <h3>{item.Name}</h3>
       <Stack direction="row" spacing={1} style={{ padding: 10 }}>
-        <Chip color="success" size="small" label={model.type1} />
-        {model.type1 !== "Others" && (
+        <Chip
+          color="warning"
+          size="small"
+          label={item.framework || item.size}
+        />
+        <Chip color="success" size="small" label={item.type1} />
+        {item.type1 !== "Others" && (
           <Chip
             size="small"
             variant="outlined"
             color="success"
-            label={model.type2}
+            label={item.type2}
           />
         )}
-        {model.Tags &&
-          model.Tags.map((tag) => (
+        {item.Tags &&
+          item.Tags.map((tag) => (
             <Chip
               color="primary"
               size="small"
@@ -40,7 +45,7 @@ function ModelCard({ model, className }) {
           }
           color="info"
           size="small"
-          label={model.license}
+          label={item.license}
         />
       </Stack>
       <Stack
@@ -48,22 +53,22 @@ function ModelCard({ model, className }) {
         spacing={2}
         justifyContent="end"
         style={{ padding: 10 }}>
-        <span>{new Date(model.CreatedAt).toLocaleString()}</span>
+        <span>{new Date(item.CreatedAt).toLocaleString()}</span>
         <span>Distri.AI</span>
         <Stack direction="row" alignItems="end">
           <Favorite sx={{ width: 20, height: 20 }} />
-          <span>{model.likes}</span>
+          <span>{item.likes}</span>
         </Stack>
         <Stack direction="row" alignItems="end">
           <ArrowDownward sx={{ width: 20, height: 20 }} />
-          <span>{model.downloads}</span>
+          <span>{item.downloads}</span>
         </Stack>
       </Stack>
     </div>
   );
 }
 
-export default styled(ModelCard)`
+export default styled(ItemCard)`
   width: 100%;
   background-color: #1a1a1a;
   margin: 6px 0;

@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import React, { useState, useEffect } from "react";
-import { getOrderList } from "../services/order";
+import { getOrderList } from "../../services/order";
 import { PublicKey } from "@solana/web3.js";
 import { useSnackbar } from "notistack";
 import {
@@ -12,12 +12,12 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { getModelList } from "../services/model";
-import DurationToggle from "../components/DurationToggle";
-import DeviceCard from "../components/DeviceCard";
-import FileList from "../components/FileList";
-import { getMachineDetail } from "../services/machine";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import { getModelList } from "../../services/model";
+import DurationToggle from "../../components/DurationToggle";
+import DeviceCard from "../../components/DeviceCard";
+import FileList from "../../components/FileList";
+import { getMachineDetail } from "../../services/machine";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -41,18 +41,18 @@ function Buy({ className }) {
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState({});
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
     if (name === "model") {
       setFormValue((prevState) => ({ ...prevState, model: parseInt(value) }));
       setSelectedModel(models.find((model) => model.Id === parseInt(value)));
     }
-  };
-  const handleFileSelect = (files) => {
+  }
+  function handleFileSelect(files) {
     setFormValue((prevState) => ({ ...prevState, downloadLinks: files }));
-  };
-  const onSubmit = async (e) => {
+  }
+  async function onSubmit(e) {
     e.preventDefault();
     const MachineInfo = {
       Uuid: deviceDetail.Uuid,
@@ -98,7 +98,7 @@ function Buy({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setSubmitting(false);
-  };
+  }
 
   useEffect(() => {
     if (formValue.duration && deviceDetail.Price) {
@@ -114,7 +114,7 @@ function Buy({ className }) {
     }
   }, [formValue, deviceDetail, selectedModel]);
   useEffect(() => {
-    const init = async () => {
+    async function init() {
       setLoading(true);
       try {
         const balance = await methods.getTokenBalance(wallet.publicKey);
@@ -147,7 +147,7 @@ function Buy({ className }) {
         setDeviceDetail(device);
       } catch (error) {}
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       init();
     }

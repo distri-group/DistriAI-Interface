@@ -5,15 +5,15 @@ import {
   getClaimableReward,
   getPeriodMachine,
   getRewardTotal,
-} from "../services/reward";
+} from "../../services/reward";
 import { useSnackbar } from "notistack";
 import { Button, CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import DeviceCard from "../components/DeviceCard";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import DeviceCard from "../../components/DeviceCard";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 
-function Home({ className }) {
+function RewardDetail({ className }) {
   const { period } = useParams();
   document.title = "Order detail";
   const [periodInfo, setPeriodInfo] = useState({});
@@ -25,7 +25,7 @@ function Home({ className }) {
   const open = Boolean(anchorEl);
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
-  const getClaimableList = async () => {
+  async function getClaimableList() {
     const res = await getClaimableReward(
       Number(period),
       1,
@@ -43,8 +43,8 @@ function Home({ className }) {
       }
       return { claimableList, total };
     }
-  };
-  const claimButchRewards = async () => {
+  }
+  async function claimButchRewards() {
     setClaiming(true);
     const { claimableList, total } = await getClaimableList();
     try {
@@ -56,9 +56,9 @@ function Home({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setClaiming(false);
-  };
+  }
   useEffect(() => {
-    const loadDetail = async () => {
+    async function loadDetail() {
       const machines = await getPeriodMachine(
         Number(period),
         1,
@@ -82,7 +82,7 @@ function Home({ className }) {
         setTotal(total);
       }
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       loadDetail();
     }
@@ -241,7 +241,7 @@ function Home({ className }) {
   );
 }
 
-export default styled(Home)`
+export default styled(RewardDetail)`
   min-height: calc(100% - 160px);
   .con {
     width: 1160px;

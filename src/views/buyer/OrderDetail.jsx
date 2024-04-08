@@ -1,37 +1,58 @@
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { getOrderDetail } from "../../services/order";
 import { useSnackbar } from "notistack";
-import { CircularProgress } from "@mui/material";
-import DurationProgress from "../components/DurationProgress";
-import Countdown from "../components/Countdown";
-import DeviceCard from "../components/DeviceCard";
-import { getOrderDetail } from "../services/order";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
+import DurationProgress from "../../components/DurationProgress";
+import Countdown from "../../components/Countdown";
+import DeviceCard from "../../components/DeviceCard";
 
-function Home({ className }) {
+function OrderDetail({ className }) {
   const { id } = useParams();
-  document.title = "Earning Detail";
+  document.title = "Order detail";
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
+  const [endDialog, setEndDialog] = useState(false);
   const wallet = useAnchorWallet();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+
   useEffect(() => {
-    const loadDetail = async () => {
+    async function loadDetail() {
       setLoading(true);
       try {
         const res = await getOrderDetail(id);
         setRecord(res);
-      } catch (error) {
-        enqueueSnackbar(error.message, { variant: "error" });
-      }
+      } catch (error) {}
       setLoading(false);
-    };
+    }
     if (wallet?.publicKey) {
       loadDetail();
     }
     // eslint-disable-next-line
   }, [id, wallet]);
+  function handleEndDuration() {
+    if (record.StatusName !== "Available") {
+      return enqueueSnackbar("Order not in training", { variant: "info" });
+    }
+    if (
+      new Date(record.EndTime).getTime() > new Date().getTime() &&
+      new Date(record.EndTime).getTime() - new Date().getTime() > 3600000
+    ) {
+      navigate(`/order/${id}/end`);
+    } else {
+      return setEndDialog(true);
+    }
+  }
   return (
     <div className={className}>
       <div className="con">
@@ -39,17 +60,36 @@ function Home({ className }) {
           <CircularProgress />
         ) : (
           <>
-            <p>
-              <b>For: </b>
-              {record.Buyer}
-            </p>
+            <h1>{record.Metadata.formData.taskName}</h1>
             <h2 className={record.StatusName}>{record.StatusName}</h2>
             {record.Metadata.MachineInfo ? (
-              <div style={{ width: "64%" }}>
+              <div style={{ width: 720 }}>
                 <div className="detail">
                   <div className="info-box">
                     <div className="info-box-title">
-                      <span>Order Info</span>
+                      <span>Task Info</span>
+                      {record.StatusName === "Available" && (
+                        <div>
+                          <Button
+                            className="extend-duration cbtn"
+                            onClick={() => navigate(`/order/${id}/extend`)}>
+                            Extend Duration
+                          </Button>
+                          <Button
+                            className="end-duration"
+                            sx={{
+                              backgroundColor: "#fff",
+                              color: "black",
+                              "&:hover": {
+                                backgroundColor: "#fff",
+                                color: "black",
+                              },
+                            }}
+                            onClick={handleEndDuration}>
+                            End Duration
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div className="info-box-body">
                       <div className="time">
@@ -96,9 +136,7 @@ function Home({ className }) {
                       <div className="price">
                         <div className="price-box">
                           <label>Price</label>
-                          <span>
-                            {record.Metadata.MachineInfo.Price} DIST / h
-                          </span>
+                          <span>{record.Price} DIST / h</span>
                         </div>
                         {record.RefundDuration && (
                           <div className="price-box">
@@ -119,10 +157,7 @@ function Home({ className }) {
                           </span>
                         </div>
                         <div className="price-box">
-                          <label>
-                            {record.StatusName === "Available" && "Expected "}
-                            Total Earnings
-                          </label>
+                          <label>Total Price</label>
                           <span>
                             {record.Price *
                               (record.RefundDuration
@@ -151,6 +186,18 @@ function Home({ className }) {
                           <span>{record.Uuid}</span>
                         </div>
                       </div>
+                      <div className="line">
+                        <div className="f">
+                          <span>From</span>
+                          <span>{record.Seller}</span>
+                        </div>
+                      </div>
+                      <div className="line">
+                        <div className="f">
+                          <span>To</span>
+                          <span>{record.Buyer}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -161,13 +208,34 @@ function Home({ className }) {
           </>
         )}
       </div>
+      <Dialog open={endDialog} onClose={() => setEndDialog(false)}>
+        <DialogTitle style={{ textAlign: "center" }}>
+          Refund Unavailable.
+        </DialogTitle>
+        <DialogContent style={{ textAlign: "center" }}>
+          Remaining rental time is less than 1 hour.
+        </DialogContent>
+        <DialogActions>
+          <Button
+            style={{
+              backgroundColor: "#94d6e2",
+              borderRadius: "3px",
+              color: "black",
+              padding: "4px 12px",
+            }}
+            onClick={() => setEndDialog(false)}
+            autoFocus>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
 
-export default styled(Home)`
+export default styled(OrderDetail)`
   color: #fff;
-  height: calc(100% - 140px);
+  min-height: calc(100% - 160px);
   .con {
     width: 1160px;
     margin: 10px auto;
@@ -198,13 +266,8 @@ export default styled(Home)`
         line-height: 48px;
       }
       .extend-duration {
-        background-color: #94d6e2;
-        color: black;
-        margin-right: 20px;
-        :hover {
-          background-color: #94d6e2;
-          color: black;
-        }
+        height: 36px;
+        margin-right: 8px;
       }
       .end-duration {
         background-color: white;

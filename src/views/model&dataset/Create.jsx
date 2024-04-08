@@ -7,17 +7,21 @@ import {
   Stack,
 } from "@mui/material";
 import styled from "styled-components";
-import types from "../services/types.json";
+import types from "../../services/types.json";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
-import { licenses, frameworks, createModel } from "../services/model";
+import { licenses, frameworks, createModel } from "../../services/model";
 import { useSnackbar } from "notistack";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { LoadingButton } from "@mui/lab";
+import { CloudUpload } from "@mui/icons-material";
+import { capitalize } from "lodash";
+import { sizes } from "../../services/dataset";
+import prettyBytes from "pretty-bytes";
 
-function CreateModel({ className }) {
-  document.title = "Create Model";
+function Create({ className, type }) {
+  document.title = `Create ${capitalize(type)}`;
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
@@ -31,16 +35,17 @@ function CreateModel({ className }) {
   });
   const [chips, setChips] = useState([]);
   const [loading, setLoading] = useState(false);
-  const handleChange = (e) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
-  };
-  const handleChipsChange = (newChips) => {
+  }
+  function handleChipsChange(newChips) {
     const uniqueArr = Array.from(new Set(newChips));
     setChips(uniqueArr);
     setFormValue((prevState) => ({ ...prevState, Tags: newChips }));
-  };
-  const onSubmit = async (e) => {
+  }
+  async function onSubmit(e) {
     e.preventDefault();
     setLoading(true);
     try {
@@ -52,49 +57,64 @@ function CreateModel({ className }) {
         wallet.publicKey.toString()
       );
       if (res.Msg === "success") {
-        enqueueSnackbar("Create Model Success.", { variant: "success" });
+        enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
         setTimeout(() => {
-          navigate("/models");
+          navigate(`/${type}`);
         }, 300);
       }
     } catch (e) {
       console.log(e);
     }
     setLoading(false);
-  };
+  }
   return (
     <div className={className}>
-      <h1>Create a new model</h1>
+      <h1>Create a new {type}</h1>
       <form onSubmit={onSubmit}>
         <Grid container spacing={2}>
           <Grid item md={12}>
-            <label>Model name</label>
+            <label>{capitalize(type)} name</label>
           </Grid>
           <Grid item md={12}>
             <TextField
+              required
               name="Name"
               placeholder="Maximum 50 characters"
               onChange={handleChange}
             />
           </Grid>
           <Grid item md={6}>
-            <label>Frameworks</label>
+            <label>{type === "model" ? "Frameworks" : "Dataset size"}</label>
           </Grid>
           <Grid item md={6}>
             <label>License</label>
           </Grid>
           <Grid item md={6}>
-            <Select
-              name="Framework"
-              defaultValue=""
-              onChange={handleChange}
-              fullWidth>
-              {frameworks.map((framework, index) => (
-                <MenuItem key={framework} value={index + 1}>
-                  {framework}
-                </MenuItem>
-              ))}
-            </Select>
+            {type === "model" ? (
+              <Select
+                name="Framework"
+                defaultValue=""
+                onChange={handleChange}
+                fullWidth>
+                {frameworks.map((framework, index) => (
+                  <MenuItem key={framework} value={index + 1}>
+                    {framework}
+                  </MenuItem>
+                ))}
+              </Select>
+            ) : (
+              <Select
+                name="Size"
+                defaultValue=""
+                onChange={handleChange}
+                fullWidth>
+                {sizes.map((size, index) => (
+                  <MenuItem key={size} value={index + 1}>
+                    {size}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
           </Grid>
           <Grid item md={6}>
             <Select
@@ -110,7 +130,7 @@ function CreateModel({ className }) {
             </Select>
           </Grid>
           <Grid item md={12}>
-            <label>Model tag</label>
+            <label>{capitalize(type)} tag</label>
           </Grid>
           <Grid item md={6}>
             <Select
@@ -152,6 +172,50 @@ function CreateModel({ className }) {
               onChange={handleChipsChange}
             />
           </Grid>
+          <Grid item md={12}>
+            <label>Readme</label>
+          </Grid>
+          <Grid item md={12}>
+            <Button
+              className="default-btn"
+              style={{ display: "inline-flex" }}
+              component="label"
+              role={undefined}
+              tabIndex={-1}
+              startIcon={<CloudUpload />}>
+              Select file
+              <input
+                type="file"
+                id="fileInput"
+                style={{ display: "none" }}
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+              />
+            </Button>
+            {selectedFile && (
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                style={{ margin: "10px 0" }}>
+                <span>
+                  {selectedFile.name === "README.md" ? (
+                    <>
+                      <span>README.md</span>
+                      <span style={{ marginLeft: 20 }}>
+                        {prettyBytes(selectedFile.size)}
+                      </span>
+                    </>
+                  ) : (
+                    "Not README.md.Please upload again."
+                  )}
+                </span>
+                <Button
+                  className="default-btn"
+                  onClick={() => setSelectedFile(null)}>
+                  Clear
+                </Button>
+              </Stack>
+            )}
+          </Grid>
           <Grid item md={8} />
           <Grid item md={4}>
             <Stack spacing={2} direction="row">
@@ -168,7 +232,7 @@ function CreateModel({ className }) {
                 className="cbtn"
                 onClick={() => {
                   setFormValue({});
-                  navigate("/models");
+                  navigate(`/${type}`);
                 }}>
                 Cancel
               </Button>
@@ -180,7 +244,7 @@ function CreateModel({ className }) {
   );
 }
 
-export default styled(CreateModel)`
+export default styled(Create)`
   width: 1200px;
   margin: 0 auto;
   form {

@@ -16,40 +16,41 @@ import styled from "styled-components";
 import metadataParser from "markdown-yaml-metadata-parser";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
-import FileList from "../components/FileList";
+import FileList from "../../components/FileList";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { Favorite } from "@mui/icons-material";
-import "../dark.css";
-import { getModelDetail } from "../services/model";
-import { getOrderList } from "../services/order";
+import "@/dark.css";
+import { getModelDetail } from "../../services/model";
+import { getOrderList } from "../../services/order";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { signToken } from "../services/order";
+import { signToken } from "../../services/order";
 import { useSnackbar } from "notistack";
 import { AccountBalance } from "@mui/icons-material";
 import axios from "axios";
-import { formatAddress } from "../utils";
+import { getDatasetDetail } from "../../services/dataset";
+import { capitalize } from "lodash";
 
-function ModelDetail({ className }) {
-  document.title = "Model Detail";
+function Detail({ className, type }) {
+  document.title = `${capitalize(type)} Detail`;
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
+  const { owner, name } = useParams();
+  const prefix = `${type}/${owner}/${name}/`;
   const [loading, setLoading] = useState(false);
-  const [model, setModel] = useState({});
+  const [item, setItem] = useState({});
   const [machine, setMachine] = useState("");
-  const [prefix, setPrefix] = useState("");
-  const [tabValue, setTabValue] = useState("model-card");
+  const [tabValue, setTabValue] = useState("readme");
   const [markdown, setMarkdown] = useState("");
   const [metadata, setMetadata] = useState("");
   const [signing, setSigning] = useState(false);
   const [dialog, setDialog] = useState("");
-  const { owner, name } = useParams();
   const { enqueueSnackbar } = useSnackbar();
-  const handleTabChange = (e, newValue) => {
-    setTabValue(newValue);
-  };
 
-  const handleConsole = async (machine, deploy) => {
+  function handleTabChange(e, newValue) {
+    setTabValue(newValue);
+  }
+  async function handleConsole(machine, deploy) {
     setSigning(true);
     try {
       const href = await signToken(
@@ -63,53 +64,60 @@ function ModelDetail({ className }) {
       enqueueSnackbar(e, { variant: "error" });
     }
     setSigning(false);
-  };
+  }
 
   useEffect(() => {
-    const loadDetail = async () => {
+    async function loadDetail() {
       setLoading(true);
-      const order = await getOrderList(1, 10, {}, wallet.publicKey);
+      const order = await getOrderList(1, 10, {}, wallet.publicKey.toString());
       const orderUsing = order.List.find(
         (item) =>
           item.Metadata.OrderInfo?.Model &&
-          item.Metadata.OrderInfo.Model === model.Id &&
+          item.Metadata.OrderInfo.Model === item.Id &&
           item.Status === 1
       );
       if (orderUsing) {
-        setModel((prevState) => ({
+        setItem((prevState) => ({
           ...prevState,
           Intent: orderUsing.Metadata.OrderInfo.Intent,
         }));
         setMachine(orderUsing.Metadata.MachineInfo);
       }
       setLoading(false);
-    };
-    if (wallet?.publicKey && Object.keys(model).length > 0) {
+    }
+    if (wallet?.publicKey && Object.keys(item).length > 0 && type === "model") {
       loadDetail();
     }
-  }, [wallet, model]);
+  }, [wallet, item, type]);
   useEffect(() => {
-    const loadModel = async () => {
+    async function loadItem() {
       setLoading(true);
-      const res = await getModelDetail(owner, name);
-      setModel(res);
-      setPrefix(`model/${res.Owner}/${res.Name}/`);
+      let res;
+      if (type === "model") {
+        res = await getModelDetail(owner, name);
+      } else {
+        res = await getDatasetDetail(owner, name);
+      }
+      setItem(res);
       axios
         .get(
-          `https://distriai.s3.ap-northeast-2.amazonaws.com/model/${res.Owner}/${res.Name}/README.md`
+          `https://distriai.s3.ap-northeast-2.amazonaws.com/${type}/${owner}/${name}/README.md`
         )
         .then((response) => {
           const text = response.data;
-          const match = text.match(/^---\n([\s\S]+?)\n---/);
-          const result = metadataParser(text);
-          setMarkdown(result.content);
-          setMetadata(match[1]);
+          if (type === "model") {
+            const match = text.match(/^---\n([\s\S]+?)\n---/);
+            const result = metadataParser(text);
+            setMarkdown(result.content);
+            setMetadata(match[1]);
+          } else setMarkdown(text);
         })
         .catch((error) => {});
       setLoading(false);
-    };
-    loadModel();
-  }, []);
+    }
+    loadItem();
+    // eslint-disable-next-line
+  }, [type]);
 
   return (
     <div className={className}>
@@ -124,73 +132,77 @@ function ModelDetail({ className }) {
               style={{ justifyContent: "space-between" }}>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <h1>
-                    {formatAddress(model.Owner)}/{model.Name}
-                  </h1>
+                  <h1>{item.Name}</h1>
                   <Stack direction="row" alignItems="center">
                     <Favorite sx={{ width: 20, height: 20 }} />
-                    <span>{model.likes}</span>
+                    <span>{item.likes}</span>
                   </Stack>
                 </Stack>
                 <Stack direction="row" spacing={2}>
                   <span>
-                    Updated {new Date(model.UpdatedAt).toLocaleString()}
+                    Updated {new Date(item.UpdatedAt).toLocaleString()}
                   </span>
-                  <span>From Distri.AI</span>
-                  <span>Downloads {model.downloads}</span>
+                  <span>Downloads {item.downloads}</span>
+                  <span>From: {owner}</span>
                 </Stack>
               </div>
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
-                {model.Intent ? (
-                  model.Intent === "train" ? (
-                    <Button
-                      className="cbtn"
-                      style={{ width: 100 }}
-                      onClick={() => {
-                        handleConsole(machine, false);
-                      }}>
-                      Notebook
-                    </Button>
+                {type === "model" &&
+                  (item.Intent ? (
+                    item.Intent === "train" ? (
+                      <Button
+                        className="cbtn"
+                        style={{ width: 100 }}
+                        onClick={() => {
+                          handleConsole(machine, false);
+                        }}>
+                        Notebook
+                      </Button>
+                    ) : (
+                      <Button
+                        className="cbtn"
+                        style={{ width: 100 }}
+                        onClick={() => {
+                          handleConsole(machine, true);
+                        }}>
+                        Deployment
+                      </Button>
+                    )
                   ) : (
-                    <Button
-                      className="cbtn"
-                      style={{ width: 100 }}
-                      onClick={() => {
-                        handleConsole(machine, true);
-                      }}>
-                      Deployment
-                    </Button>
-                  )
-                ) : (
-                  <>
-                    <Button
-                      className="cbtn"
-                      style={{ width: 100 }}
-                      onClick={() => setDialog("train")}>
-                      Train
-                    </Button>
-                    <Button
-                      className="cbtn"
-                      style={{ width: 100 }}
-                      onClick={() => setDialog("deploy")}>
-                      Deploy
-                    </Button>
-                  </>
-                )}
+                    <>
+                      <Button
+                        className="cbtn"
+                        style={{ width: 100 }}
+                        onClick={() => setDialog("train")}>
+                        Train
+                      </Button>
+                      <Button
+                        className="cbtn"
+                        style={{ width: 100 }}
+                        onClick={() => setDialog("deploy")}>
+                        Deploy
+                      </Button>
+                    </>
+                  ))}
               </Stack>
             </Stack>
             <Stack direction="row" spacing={2} style={{ margin: "10px 0" }}>
-              <Chip color="success" size="small" label={model.type1} />
-              {model.type1 !== "Others" && (
+              <Chip
+                color="warning"
+                size="small"
+                label={item.framework || item.size}
+              />
+              <Chip color="success" size="small" label={item.type1} />
+              {item.type1 !== "Others" && (
                 <Chip
                   size="small"
                   variant="outlined"
                   color="success"
-                  label={model.type2}
+                  label={item.type2}
                 />
               )}
-              {model.Tags &&
-                model.Tags.map((tag) => (
+              {item.Tags &&
+                item.Tags.map((tag) => (
                   <Chip
                     color="primary"
                     size="small"
@@ -207,40 +219,46 @@ function ModelDetail({ className }) {
                 }
                 color="info"
                 size="small"
-                label={model.license}
+                label={item.license}
               />
             </Stack>
             <hr style={{ margin: "32px 0" }} />
             <TabContext value={tabValue}>
               <TabList onChange={handleTabChange}>
-                <Tab className="tab" label="Model Card" value="model-card" />
+                <Tab
+                  className="tab"
+                  label={type === "model" ? "Model Card" : "README"}
+                  value="readme"
+                />
                 <Tab
                   className="tab"
                   style={{ margin: "0 20px" }}
-                  label="Model Files"
+                  label={`${capitalize(type)} Files`}
                   value="files"
                 />
               </TabList>
               <TabPanel
-                value="model-card"
+                value="readme"
                 style={{
                   backgroundColor: "#0d1117",
                 }}>
-                {markdown && metadata ? (
+                {markdown ? (
                   <>
-                    <div>
-                      <Chip
-                        label="metadata"
-                        style={{
-                          background: "gray",
-                          color: "white",
-                          marginLeft: 16,
-                        }}
-                      />
-                      <SyntaxHighlighter language="yaml" style={tomorrow}>
-                        {metadata}
-                      </SyntaxHighlighter>
-                    </div>
+                    {metadata && (
+                      <div>
+                        <Chip
+                          label="metadata"
+                          style={{
+                            background: "gray",
+                            color: "white",
+                            marginLeft: 16,
+                          }}
+                        />
+                        <SyntaxHighlighter language="yaml" style={tomorrow}>
+                          {metadata}
+                        </SyntaxHighlighter>
+                      </div>
+                    )}
                     <Markdown
                       className="markdown-body"
                       children={markdown}
@@ -267,22 +285,20 @@ function ModelDetail({ className }) {
                   </>
                 ) : (
                   <div className="empty">
-                    <span>There is no detailed model introduction yet</span>
+                    <span>There is no detailed {type} introduction yet</span>
                   </div>
                 )}
               </TabPanel>
               <TabPanel value="files">
                 <FileList
                   prefix={prefix}
-                  setPrefix={setPrefix}
-                  id={model.Id}
-                  upload={model.Owner === wallet?.publicKey?.toString()}
+                  id={item.Id}
+                  upload={item.Owner === wallet?.publicKey?.toString()}
                 />
               </TabPanel>
             </TabContext>
           </>
         )}
-
         <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={signing}>
@@ -303,7 +319,7 @@ function ModelDetail({ className }) {
               className="default-btn"
               onClick={() => {
                 navigate("/market", {
-                  state: { modelId: model.Id, intent: dialog },
+                  state: { modelId: item.Id, intent: dialog },
                 });
                 setDialog("");
               }}>
@@ -316,7 +332,7 @@ function ModelDetail({ className }) {
   );
 }
 
-export default styled(ModelDetail)`
+export default styled(Detail)`
   width: 1600px;
   margin: 0 auto;
   .container {

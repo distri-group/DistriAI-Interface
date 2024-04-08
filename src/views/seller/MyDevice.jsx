@@ -1,14 +1,14 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
-import { getMachineList } from "../services/machine";
-import DeviceList from "../components/DeviceList";
-import Pager from "../components/pager";
+import { getMachineList } from "../../services/machine";
+import DeviceList from "../../components/DeviceList";
+import Pager from "../../components/pager";
 import { useSnackbar } from "notistack";
 import { Modal, Box } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import useSolanaMethod from "../utils/useSolanaMethod";
+import useSolanaMethod from "../../utils/useSolanaMethod";
 
-function Home({ className }) {
+function MyDevice({ className }) {
   document.title = "Market";
   const { wallet, methods } = useSolanaMethod();
   const [list, setList] = useState([]);
@@ -20,7 +20,7 @@ function Home({ className }) {
   const { enqueueSnackbar } = useSnackbar();
 
   // Load Machine List
-  const loadList = async (curr) => {
+  async function loadList(curr) {
     setLoading(true);
     try {
       const res = await getMachineList(
@@ -35,10 +35,10 @@ function Home({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
-  };
+  }
 
   // Cancel Offer
-  const handleCancel = async () => {
+  async function handleCancel() {
     setCanceling(true);
     try {
       await methods.cancelOffer(deviceToCancel.Uuid);
@@ -50,13 +50,14 @@ function Home({ className }) {
       setCanceling(false);
       loadList(current);
     }, 500);
-  };
+  }
 
   // Reload List
   useEffect(() => {
     if (current && wallet?.publicKey) {
       loadList(current);
     }
+    // eslint-disable-next-line
   }, [current, wallet]);
 
   return (
@@ -130,7 +131,7 @@ function Home({ className }) {
   );
 }
 
-export default styled(Home)`
+export default styled(MyDevice)`
   display: block;
   width: 100%;
   min-height: calc(100% - 160px);
