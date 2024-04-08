@@ -13,7 +13,7 @@ export async function getOrderList(pageIndex, pageSize, filter, publicKey) {
     PageSize: pageSize,
   };
   const headers = {
-    Account: publicKey ?? "",
+    Account: publicKey,
   };
   if (filter) {
     Object.entries(filter).forEach(([key, value]) => {
@@ -30,6 +30,34 @@ export async function getOrderList(pageIndex, pageSize, filter, publicKey) {
       order = formatOrder(order);
     }
     return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getTotalEarnings(total, publicKey) {
+  const apiUrl = baseUrl + "/mine";
+  const body = {
+    Page: 1,
+    PageSize: total,
+  };
+  const headers = {
+    Account: publicKey,
+  };
+  try {
+    const res = await axios.post(apiUrl, body, {
+      headers,
+    });
+    let pending = 0;
+    let received = 0;
+    res.List.forEach((currentValue) => {
+      if (currentValue.Status === 0 || currentValue.Status === 1) {
+        pending += currentValue.Total;
+      } else if (currentValue.Status === 2) {
+        received += currentValue.Total;
+      }
+    });
+    return { pending, received };
   } catch (error) {
     throw error;
   }

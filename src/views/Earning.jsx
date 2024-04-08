@@ -1,12 +1,13 @@
 import { MenuItem, Select, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getOrderList, filterData } from "../services/order";
+import { getOrderList, filterData, getTotalEarnings } from "../services/order";
 import styled from "styled-components";
 import Table from "../components/Table";
 import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useNavigate } from "react-router-dom";
 import Pager from "../components/pager";
+import { formatBalance } from "../utils";
 
 function Earning({ className }) {
   document.title = "My Earnings";
@@ -42,18 +43,12 @@ function Earning({ className }) {
         );
         setTotal(res.Total);
         setList(res.List);
-        let totalReceived = 0;
-        let totalPending = 0;
-        for (let item of res.List) {
-          if (item.Status === 0) {
-            totalPending += item.Duration * item.Price;
-          } else {
-            totalReceived +=
-              (item.Duration - (item.RefundDuration || 0)) * item.Price;
-          }
-        }
-        setPending(totalPending);
-        setReceived(totalReceived);
+        const { pending, received } = await getTotalEarnings(
+          res.Total,
+          wallet.publicKey.toString()
+        );
+        setPending(formatBalance(pending));
+        setReceived(formatBalance(received));
       } catch (error) {}
       setLoading(false);
     };
