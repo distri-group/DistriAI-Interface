@@ -1,12 +1,9 @@
 import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { getOrderList } from "../services/order";
-import SolanaAction from "../components/SolanaAction";
 import { PublicKey } from "@solana/web3.js";
-import webconfig from "../webconfig";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import {
   CircularProgress,
@@ -18,16 +15,16 @@ import {
 import { getModelList } from "../services/model";
 import DurationToggle from "../components/DurationToggle";
 import DeviceCard from "../components/DeviceCard";
-import * as anchor from "@project-serum/anchor";
 import FileList from "../components/FileList";
 import { getMachineDetail } from "../services/machine";
+import useSolanaMethod from "../utils/useSolanaMethod";
 
 function Buy({ className }) {
   document.title = "Edit model";
   const { id } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
-  const wallet = useAnchorWallet();
+  const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +40,6 @@ function Buy({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState({});
-  const childRef = useRef();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,10 +53,9 @@ function Buy({ className }) {
     setFormValue((prevState) => ({ ...prevState, downloadLinks: files }));
   };
   const onSubmit = async (e) => {
-    const orderId = new Date().valueOf().toString();
     e.preventDefault();
     const MachineInfo = {
-      UUID: deviceDetail.UUID,
+      Uuid: deviceDetail.Uuid,
       Provider: deviceDetail.Provider,
       Region: deviceDetail.Region,
       GPU: deviceDetail.GPU,
@@ -81,37 +76,28 @@ function Buy({ className }) {
       Intent: formValue.usage || "train",
       DownloadURL: formValue.downloadLinks,
     };
-    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("machine"),
-        new PublicKey(deviceDetail.Metadata.Addr).toBytes(),
-        anchor.utils.bytes.hex.decode(deviceDetail.Uuid),
-      ],
-      webconfig.PROGRAM
+    const machinePublicKey = methods.getMachinePublicKey(
+      deviceDetail.Uuid,
+      new PublicKey(deviceDetail.Metadata.Addr)
     );
     setSubmitting(true);
-    const res = await childRef.current.placeOrder(
-      machinePublicKey,
-      orderId,
-      formValue.duration,
-      {
+    try {
+      await methods.placeOrder(machinePublicKey, formValue.duration, {
         formData: {
           duration: formValue.duration,
           taskName: formValue.taskName,
         },
         MachineInfo,
         OrderInfo,
-      }
-    );
-    if (res.msg !== "ok") {
-      setSubmitting(false);
-      return enqueueSnackbar(res.msg, { variant: "error" });
+      });
+      enqueueSnackbar("Purchase success.", { variant: "success" });
+      setTimeout(() => {
+        navigate("/order");
+      }, 500);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
-    enqueueSnackbar("Purchase Successfully.", { variant: "success" });
-    setTimeout(() => {
-      setSubmitting(false);
-      navigate("/order");
-    }, 300);
+    setSubmitting(false);
   };
 
   useEffect(() => {
@@ -131,10 +117,7 @@ function Buy({ className }) {
     const init = async () => {
       setLoading(true);
       try {
-        const balance = await childRef.current.getTokenAccountBalance(
-          webconfig.MINT_PROGRAM,
-          wallet.publicKey
-        );
+        const balance = await methods.getTokenBalance(wallet.publicKey);
         setBalance(balance);
         const res = await getOrderList(
           1,
@@ -168,10 +151,10 @@ function Buy({ className }) {
     if (wallet?.publicKey) {
       init();
     }
+    // eslint-disable-next-line
   }, [wallet, id, state]);
   return (
     <div className={className}>
-      <SolanaAction ref={childRef}></SolanaAction>
       {loading ? (
         <CircularProgress />
       ) : (

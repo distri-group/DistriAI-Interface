@@ -1,24 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import DurationProgress from "../components/DurationProgress";
-import SolanaAction from "../components/SolanaAction";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import webconfig from "../webconfig";
-import * as anchor from "@project-serum/anchor";
+import { PublicKey } from "@solana/web3.js";
 import Countdown from "../components/Countdown";
 import { getOrderDetail } from "../services/order";
+import useSolanaMethod from "../utils/useSolanaMethod";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
   const { id } = useParams();
-  const wallet = useAnchorWallet();
+  const { wallet, methods } = useSolanaMethod();
   const navigate = useNavigate();
-  const childRef = useRef();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [ending, setEnding] = useState(false);
@@ -37,28 +33,23 @@ function EndDuration({ className }) {
       return enqueueSnackbar("Order not in training", { variant: "info" });
     }
     setEnding(true);
-    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("machine"),
-        new PublicKey(detail.Metadata.MachineInfo.Provider).toBytes(),
-        anchor.utils.bytes.hex.decode(detail.Metadata.MachineInfo.UUID),
-      ],
-      webconfig.PROGRAM
+    const machinePublicKey = methods.getMachinePublicKey(
+      detail.Metadata.MachineInfo.Uuid
     );
-    const res = await childRef.current.refundOrder(
-      machinePublicKey,
-      id,
-      detail.Seller
-    );
-    setEnding(false);
-    if (res?.msg === "ok") {
-      enqueueSnackbar("Refund Order Success", {
-        variant: "success",
-      });
-      navigate("/order");
-    } else {
-      enqueueSnackbar(res.msg, { variant: "error" });
+    try {
+      await methods.refundOrder(
+        machinePublicKey,
+        id,
+        new PublicKey(detail.Seller)
+      );
+      enqueueSnackbar("Refund order success.", { variant: "success" });
+      setTimeout(() => {
+        navigate("/order");
+      }, 500);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
+    setEnding(false);
   };
   useEffect(() => {
     const loadDetail = async () => {
@@ -68,11 +59,8 @@ function EndDuration({ className }) {
         setDetail(res);
         const remains = new Date(res.EndTime).getTime() - new Date().getTime();
         setRemainingTime(remains);
-        const amount = await childRef.current.getTokenAccountBalance(
-          webconfig.MINT_PROGRAM,
-          wallet.publicKey
-        );
-        setBalance(amount / LAMPORTS_PER_SOL);
+        const amount = await methods.getTokenBalance(wallet.publicKey);
+        setBalance(amount);
       } catch (error) {}
       setLoading(false);
     };
@@ -83,7 +71,6 @@ function EndDuration({ className }) {
   }, [id, wallet]);
   return (
     <div className={className}>
-      <SolanaAction ref={childRef}></SolanaAction>
       <div className="container">
         <h1>End Duration</h1>
         <div className="form">

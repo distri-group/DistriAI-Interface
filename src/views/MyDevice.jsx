@@ -1,19 +1,16 @@
 import styled from "styled-components";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { getMachineList } from "../services/machine";
 import DeviceList from "../components/DeviceList";
 import Pager from "../components/pager";
-import SolanaAction from "../components/SolanaAction";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { Modal, Box } from "@mui/material";
-import * as anchor from "@project-serum/anchor";
-import webconfig from "../webconfig";
 import { LoadingButton } from "@mui/lab";
+import useSolanaMethod from "../utils/useSolanaMethod";
 
 function Home({ className }) {
   document.title = "Market";
-  const wallet = useAnchorWallet();
+  const { wallet, methods } = useSolanaMethod();
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
@@ -21,7 +18,6 @@ function Home({ className }) {
   const [deviceToCancel, setDeviceToCancel] = useState(null);
   const [canceling, setCanceling] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
-  const childRef = useRef();
 
   // Load Machine List
   const loadList = async (curr) => {
@@ -44,19 +40,10 @@ function Home({ className }) {
   // Cancel Offer
   const handleCancel = async () => {
     setCanceling(true);
-    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("machine"),
-        wallet.publicKey.toBytes(),
-        anchor.utils.bytes.hex.decode(deviceToCancel.Uuid),
-      ],
-      webconfig.PROGRAM
-    );
-    const res = await childRef.current.cancelOffer(machinePublicKey);
-    if (res.msg === "ok") {
-      enqueueSnackbar("Cancel offer success", { variant: "success" });
-    } else {
-      enqueueSnackbar(res.msg, { variant: "error" });
+    try {
+      await methods.cancelOffer(deviceToCancel.Uuid);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
     setTimeout(() => {
       setDeviceToCancel(null);
@@ -74,7 +61,6 @@ function Home({ className }) {
 
   return (
     <div className={className}>
-      <SolanaAction ref={childRef}></SolanaAction>
       <div className="con">
         <h1 className="title">Share My Device</h1>
         <div className="con-table">

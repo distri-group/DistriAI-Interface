@@ -1,9 +1,8 @@
 import { Button } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Table from "../components/Table";
 import moment from "moment";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Pager from "../components/pager";
@@ -13,13 +12,12 @@ import {
   getClaimableReward,
 } from "../services/reward";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import SolanaAction from "../components/SolanaAction";
 import { LoadingButton } from "@mui/lab";
+import useSolanaMethod from "../utils/useSolanaMethod";
 
 function Rewards({ className }) {
   document.title = "My Rewards";
-  const wallet = useAnchorWallet();
-  const childRef = useRef();
+  const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -63,34 +61,23 @@ function Rewards({ className }) {
   };
   const claimButchRewards = async () => {
     setClaiming(true);
-    const { rewards, total } = await getClaimableList();
-    const res = await childRef.current.claimRewards(rewards);
-    setTimeout(() => {
-      if (res?.msg === "ok") {
-        enqueueSnackbar(
-          `Successfully claimed ${(total / LAMPORTS_PER_SOL).toFixed(2)} DIST`,
-          {
-            variant: "success",
-          }
-        );
-      } else {
-        enqueueSnackbar(res.msg, { variant: "error" });
-      }
-      setClaiming(false);
-    }, 300);
+    const { claimableList, total } = await getClaimableList();
+    try {
+      await methods.claimButchRewards(claimableList);
+      enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
+        variant: "success",
+      });
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    setClaiming(false);
   };
   const getTotal = async () => {
     try {
-      const res = await getRewardTotal(0, wallet.publicKey.toString());
-      if (res) {
-        setRewards(res);
-        return null;
-      }
-      return enqueueSnackbar("Failed fetching total rewards", {
-        variant: "error",
-      });
-    } catch (e) {
-      return enqueueSnackbar(e.message, { variant: "error" });
+      const res = await getRewardTotal(null, wallet.publicKey.toString());
+      setRewards(res);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
   };
   const onPageChange = (curr) => {
@@ -205,7 +192,6 @@ function Rewards({ className }) {
   }, [wallet?.publicKey]);
   return (
     <div className={className}>
-      <SolanaAction ref={childRef} />
       <h1>My DAO Rewards</h1>
       {rewards ? (
         <>

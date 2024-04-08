@@ -1,26 +1,21 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useState, useEffect, useRef } from "react";
-// import { getDetailByUuid } from "../services/order";
-import SolanaAction from "../components/SolanaAction";
-import webconfig from "../webconfig";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import DurationProgress from "../components/DurationProgress";
 import DurationToggle from "../components/DurationToggle";
-import * as anchor from "@project-serum/anchor";
 import Countdown from "../components/Countdown";
 import { getOrderDetail } from "../services/order";
+import useSolanaMethod from "../utils/useSolanaMethod";
+import { PublicKey } from "@solana/web3.js";
 
 function ExtendDuration({ className }) {
   const { id } = useParams();
   document.title = "Edit model";
   const navigate = useNavigate();
-  const childRef = useRef();
-  const wallet = useAnchorWallet();
+  const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [extending, setExtending] = useState(false);
@@ -30,33 +25,20 @@ function ExtendDuration({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
 
-  const getTokenBalance = async (mint, address) => {
-    let res = await childRef.current.getTokenAccountBalance(mint, address);
-    setBalance(res / LAMPORTS_PER_SOL);
-    return res;
-  };
   const onSubmit = async () => {
-    setExtending(true);
-    const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        anchor.utils.bytes.utf8.encode("machine"),
-        new PublicKey(deviceDetail.Provider).toBytes(),
-        anchor.utils.bytes.hex.decode(deviceDetail.UUID),
-      ],
-      webconfig.PROGRAM
+    const machinePublicKey = methods.getMachinePublicKey(
+      deviceDetail.Uuid,
+      new PublicKey(deviceDetail.Provider)
     );
-    let res = await childRef.current.renewOrder(machinePublicKey, id, duration);
-    setTimeout(() => {
-      if (res?.msg === "ok") {
-        enqueueSnackbar(`Order extended ${duration} h.`, {
-          variant: "success",
-        });
-        navigate("/order");
-      } else {
-        enqueueSnackbar(res.msg, { variant: "error" });
-      }
-      setExtending(false);
-    }, 300);
+    setExtending(true);
+    try {
+      await methods.renewOrder(machinePublicKey, id, duration);
+      enqueueSnackbar(`Order extended ${duration} h.`, { variant: "success" });
+      navigate("/order");
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    setExtending(false);
   };
   useEffect(() => {
     const init = async () => {
@@ -64,9 +46,10 @@ function ExtendDuration({ className }) {
       const res = await getOrderDetail(id);
       setOrderDetail(res);
       if (res.Metadata?.MachineInfo) {
-        setDeviceDetail(res.Detail.Metadata.MachineInfo);
+        setDeviceDetail(res.Metadata.MachineInfo);
       }
-      await getTokenBalance(webconfig.MINT_PROGRAM, wallet.publicKey);
+      const balance = await methods.getTokenBalance(wallet.publicKey);
+      setBalance(balance);
       setLoading(false);
     };
     if (wallet?.publicKey) {
@@ -79,7 +62,6 @@ function ExtendDuration({ className }) {
   }, [duration, deviceDetail]);
   return (
     <div className={className}>
-      <SolanaAction ref={childRef}></SolanaAction>
       <div className="con">
         <h1 className="title">Extend Duration</h1>
         {loading ? (

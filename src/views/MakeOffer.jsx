@@ -1,21 +1,18 @@
 import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { TextField, Grid, InputAdornment } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import * as anchor from "@project-serum/anchor";
-import SolanaAction from "../components/SolanaAction";
-import webconfig from "../webconfig";
 import { getMachineDetail } from "../services/machine";
+import useSolanaMethod from "../utils/useSolanaMethod";
 
 function MakeOffer({ className }) {
   document.title = "Make Offer";
   const { id } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
-  const wallet = useAnchorWallet();
+  const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [maxStorage, setMaxStorage] = useState(0);
@@ -24,7 +21,6 @@ function MakeOffer({ className }) {
     duration: 0,
     disk: 0,
   });
-  const childRef = useRef();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: parseFloat(value) }));
@@ -33,32 +29,18 @@ function MakeOffer({ className }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const [machinePublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
-        [
-          anchor.utils.bytes.utf8.encode("machine"),
-          wallet.publicKey.toBytes(),
-          anchor.utils.bytes.hex.decode(id),
-        ],
-        webconfig.PROGRAM
-      );
-      let result = await childRef.current.makeOffer(
-        machinePublicKey,
-        formValue.price,
-        formValue.duration,
-        formValue.disk
-      );
-      setLoading(false);
-      if (result?.msg === "ok") {
-        enqueueSnackbar("Make Offer Success.", { variant: "success" });
-        setTimeout(() => {
-          navigate("/device");
-        }, 300);
-      } else {
-        enqueueSnackbar(result?.msg, { variant: "error" });
-      }
-    } catch (e) {
-      enqueueSnackbar(e.message, { variant: "error" });
+      await methods.makeOffer({
+        uuid: id,
+        ...formValue,
+      });
+      enqueueSnackbar("Make offer success.", { variant: "success" });
+      setTimeout(() => {
+        navigate("/device");
+      }, 300);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
+    setLoading(false);
   };
   useEffect(() => {
     const init = async () => {
@@ -78,7 +60,6 @@ function MakeOffer({ className }) {
 
   return (
     <div className={className}>
-      <SolanaAction ref={childRef}></SolanaAction>
       <h1>Make Offer</h1>
       <form onSubmit={onSubmit}>
         <Grid className="container" container spacing={2}>

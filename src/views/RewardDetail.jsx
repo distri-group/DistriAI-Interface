@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
-import React, { useState, useEffect, useRef } from "react";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import React, { useState, useEffect } from "react";
 import {
   getClaimableReward,
   getPeriodMachine,
@@ -10,14 +9,13 @@ import {
 import { useSnackbar } from "notistack";
 import { Button, CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import SolanaAction from "../components/SolanaAction";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import DeviceCard from "../components/DeviceCard";
+import useSolanaMethod from "../utils/useSolanaMethod";
 
 function Home({ className }) {
   const { period } = useParams();
   document.title = "Order detail";
-  const childRef = useRef();
   const [periodInfo, setPeriodInfo] = useState({});
   const [machineList, setMachineList] = useState();
   const [total, setTotal] = useState();
@@ -25,35 +23,8 @@ function Home({ className }) {
   const [claiming, setClaiming] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const wallet = useAnchorWallet();
+  const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
-  const claimButchRewards = async () => {
-    setClaiming(true);
-    const claimableList = await getClaimableList();
-    let rewards = [];
-    let total = 0;
-    for (let item of claimableList) {
-      rewards.push({
-        machineUuid: item.MachineId,
-        period,
-      });
-      total += item.PeriodicRewards;
-    }
-    const res = await childRef.current.claimRewards(rewards);
-    setTimeout(() => {
-      if (res?.msg === "ok") {
-        enqueueSnackbar(
-          `Successfully claimed ${total / LAMPORTS_PER_SOL} DIST`,
-          {
-            variant: "success",
-          }
-        );
-      } else {
-        enqueueSnackbar(res.msg, { variant: "error" });
-      }
-      setClaiming(false);
-    }, 300);
-  };
   const getClaimableList = async () => {
     const res = await getClaimableReward(
       Number(period),
@@ -62,8 +33,29 @@ function Home({ className }) {
       wallet.publicKey.toString()
     );
     if (res) {
-      return res.List;
+      let claimableList = [];
+      let total = 0;
+      for (let item of res.List) {
+        if (item.Period === Number(period)) {
+          claimableList.push(item);
+          total += item.PeriodicRewards;
+        }
+      }
+      return { claimableList, total };
     }
+  };
+  const claimButchRewards = async () => {
+    setClaiming(true);
+    const { claimableList, total } = await getClaimableList();
+    try {
+      await methods.claimButchRewards(claimableList);
+      enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
+        variant: "success",
+      });
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    setClaiming(false);
   };
   useEffect(() => {
     const loadDetail = async () => {
@@ -74,6 +66,7 @@ function Home({ className }) {
         wallet.publicKey.toString()
       );
       if (machines) {
+        console.log(machines);
         setMachineList(machines.List);
         setPeriodInfo({
           StartTime: machines.List[0].StartTime,
@@ -97,7 +90,6 @@ function Home({ className }) {
   }, [period, wallet]);
   return (
     <div className={className}>
-      <SolanaAction ref={childRef} />
       <div className="con">
         {loading ? (
           <CircularProgress />
@@ -239,9 +231,9 @@ function Home({ className }) {
             </div>
             <h2>Nodes Info</h2>
             <hr />
-            {machineList.map(
-              (device) => device.Metadata && <DeviceCard device={device} />
-            )}
+            {machineList.map((device) => (
+              <DeviceCard device={device} />
+            ))}
           </>
         )}
       </div>
