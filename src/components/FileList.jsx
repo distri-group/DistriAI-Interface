@@ -94,11 +94,11 @@ function FileList({ className, prefix, id, onSelect, upload }) {
       console.log(e);
     }
   };
-  const loadFileList = () => {
+  const loadFileList = (prefix) => {
     setLoading(true);
     const command = new ListObjectsV2Command({
       Bucket: "distriai",
-      Prefix: currentPrefix,
+      Prefix: prefix,
       Delimiter: "/",
     });
     S3client.send(command)
@@ -129,7 +129,8 @@ function FileList({ className, prefix, id, onSelect, upload }) {
     }
   }, [onSelect, downloadLinks]);
   useEffect(() => {
-    loadFileList();
+    loadFileList(currentPrefix);
+    // eslint-disable-next-line
   }, [currentPrefix]);
   return (
     <div className={className}>
