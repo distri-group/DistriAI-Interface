@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import {
   WalletProvider,
@@ -28,10 +28,12 @@ import EarningDetail from "@/views/seller/EarningDetail";
 import Contents from "@/views/model&dataset/Contents";
 import Create from "@/views/model&dataset/Create";
 import Detail from "@/views/model&dataset/Detail";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   window.Buffer = Buffer;
   const [isHome, setIsHome] = useState(true);
+  const navigate = useNavigate();
   const Mtheme = createTheme({
     palette: {
       white: {
@@ -146,7 +148,7 @@ function App() {
   });
   useEffect(() => {
     const tout = setInterval(function () {
-      let tmp = window.location.pathname === "/";
+      let tmp = window.location.pathname === "/home";
       if (tmp !== isHome) {
         setIsHome(tmp);
       }
@@ -172,63 +174,72 @@ function App() {
       window.removeEventListener("resize", setViewportContent);
     };
   }, []);
+  useEffect(() => {
+    const handleNavigate = ({ detail }) => {
+      if (detail.type === "routeChange") {
+        navigate(detail.path);
+      }
+    };
+    window.addEventListener("qiankunRouter", handleNavigate);
+    return () => {
+      window.removeEventListener("routeChange", handleNavigate);
+    };
+  }, []);
   return (
     <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
       <WalletProvider wallets={[]} autoConnect={true}>
         <WalletModalProvider>
-          <BrowserRouter>
-            <ThemeProvider theme={Mtheme}>
-              <SnackbarProvider
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                autoHideDuration={3000}>
-                {!isHome && <NavBar className="page-header" />}
-                <Routes>
-                  <Route index element={<Home />} />
-                  <Route path="market" element={<Market />} />
-                  <Route path="device">
-                    <Route index element={<MyDevice />} />
-                    <Route path=":id">
-                      <Route path="buy" element={<Buy />} />
-                      <Route path="list" element={<MakeOffer />} />
-                    </Route>
+          <ThemeProvider theme={Mtheme}>
+            <SnackbarProvider
+              anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              autoHideDuration={3000}>
+              {!isHome && <NavBar className="page-header" />}
+              <Routes>
+                <Route path="home" element={<div id="home" />} />
+                <Route path="market" element={<Market />} />
+                <Route path="device">
+                  <Route index element={<MyDevice />} />
+                  <Route path=":id">
+                    <Route path="buy" element={<Buy />} />
+                    <Route path="list" element={<MakeOffer />} />
                   </Route>
-                  <Route path="order">
-                    <Route index element={<MyOrder />} />
-                    <Route path=":id">
-                      <Route index element={<OrderDetail />} />
-                      <Route path="extend" element={<ExtendDuration />} />
-                      <Route path="end" element={<EndDuration />} />
-                    </Route>
+                </Route>
+                <Route path="order">
+                  <Route index element={<MyOrder />} />
+                  <Route path=":id">
+                    <Route index element={<OrderDetail />} />
+                    <Route path="extend" element={<ExtendDuration />} />
+                    <Route path="end" element={<EndDuration />} />
                   </Route>
-                  <Route path="reward">
-                    <Route index element={<Reward />} />
-                    <Route path=":period" element={<RewardDetail />} />
-                  </Route>
-                  <Route path="earning">
-                    <Route index element={<Earning />} />
-                    <Route path=":id" element={<EarningDetail />} />
-                  </Route>
-                  <Route path="model">
-                    <Route index element={<Contents type="model" />} />
-                    <Route
-                      path=":owner/:name"
-                      element={<Detail type="model" />}
-                    />
-                    <Route path="add" element={<Create type="model" />} />
-                  </Route>
-                  <Route path="dataset">
-                    <Route index element={<Contents type="dataset" />} />
-                    <Route
-                      path=":owner/:name"
-                      element={<Detail type="dataset" />}
-                    />
-                    <Route path="add" element={<Create type="dataset" />} />
-                  </Route>
-                  <Route path="faucet" element={<Faucet />} />
-                </Routes>
-              </SnackbarProvider>
-            </ThemeProvider>
-          </BrowserRouter>
+                </Route>
+                <Route path="reward">
+                  <Route index element={<Reward />} />
+                  <Route path=":period" element={<RewardDetail />} />
+                </Route>
+                <Route path="earning">
+                  <Route index element={<Earning />} />
+                  <Route path=":id" element={<EarningDetail />} />
+                </Route>
+                <Route path="model">
+                  <Route index element={<Contents type="model" />} />
+                  <Route
+                    path=":owner/:name"
+                    element={<Detail type="model" />}
+                  />
+                  <Route path="add" element={<Create type="model" />} />
+                </Route>
+                <Route path="dataset">
+                  <Route index element={<Contents type="dataset" />} />
+                  <Route
+                    path=":owner/:name"
+                    element={<Detail type="dataset" />}
+                  />
+                  <Route path="add" element={<Create type="dataset" />} />
+                </Route>
+                <Route path="faucet" element={<Faucet />} />
+              </Routes>
+            </SnackbarProvider>
+          </ThemeProvider>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
