@@ -167,15 +167,13 @@ function App() {
   }, []);
   useEffect(() => {
     if (
+      pathname.includes("home") ||
       pathname.includes("market") ||
       pathname.includes("faucet") ||
-      pathname.includes("models")
+      pathname.includes("model")
     ) {
       setOpen(false);
     } else {
-      setOpen(true);
-    }
-    if (pathname.includes("create")) {
       setOpen(true);
     }
   }, [pathname]);

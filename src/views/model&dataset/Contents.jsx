@@ -31,6 +31,7 @@ function Contents({ className, type }) {
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [connectModal, setModal] = useState(false);
   const wallet = useAnchorWallet();
   let inputTimer;
   function onFilter(e) {
@@ -167,6 +168,7 @@ function Contents({ className, type }) {
             <Button
               onClick={() => {
                 if (wallet?.publicKey) navigate(`/${type}/add`);
+                else setModal(true);
               }}
               className="cbtn">
               Create {capitalize(type)}
@@ -200,6 +202,7 @@ function Contents({ className, type }) {
           </div>
         </div>
       </div>
+      <ConnectToWallet open={connectModal} />
     </div>
   );
 }

@@ -251,10 +251,7 @@ function DeviceList({
           )
         }
       />
-      <ConnectToWallet
-        modal={connectModal}
-        onClose={() => setConnectModal(false)}
-      />
+      <ConnectToWallet open={connectModal} />
     </div>
   );
 }
