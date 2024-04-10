@@ -1,6 +1,7 @@
 import axios from "@/utils/axios";
 import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
+import { getProvider } from "../utils";
 
 const baseUrl = "/model";
 
@@ -75,7 +76,8 @@ export const login = async (publicKey) => {
   if (localStorage.getItem("token")) return localStorage.getItem("token");
   const apiUrl = "/user/login";
   const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
-  const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
+  const provider = getProvider();
+  const sign = await provider.signMessage(encodeMsg, "utf8");
   const Signature = utils.bytes.bs58.encode(sign.signature);
   const body = {
     Account: publicKey,

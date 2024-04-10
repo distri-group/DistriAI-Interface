@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Button, Chip, Stack } from "@mui/material";
-import { formatAddress } from "../utils";
+import { formatAddress, getProvider } from "../utils";
 import Table from "./Table";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import ConnectToWallet from "./ConnectToWallet";
@@ -100,7 +100,7 @@ function DeviceList({
         return (
           <div className="configuration">
             <div className="gpu">
-              {record.GPU} {record.GPUMemory}
+              {record.GPU} {record.GPUMemory || ""}
             </div>
             <div className="graphicsCoprocessor">#{record.CPU}</div>
             <div className="more">
@@ -198,7 +198,7 @@ function DeviceList({
                 : "mini-btn mini-btn2"
             }
             onClick={() => {
-              if (!window.solana || !window.phantom || !wallet?.publicKey) {
+              if (!getProvider() || !wallet?.publicKey) {
                 return setConnectModal(true);
               }
               if (onPriceSort) {
@@ -207,12 +207,9 @@ function DeviceList({
                 });
               }
               if (record.Status === 0) {
-                return navigate(
-                  "/device/" + record.Uuid + "/list" + record.Uuid,
-                  {
-                    state: { Owner: record.Owner },
-                  }
-                );
+                return navigate("/device/" + record.Uuid + "/list", {
+                  state: { Owner: record.Owner },
+                });
               }
               if (record.Status === 1) {
                 return onCancel(record);

@@ -106,8 +106,15 @@ export function formatMachine(item) {
       Download: item.Metadata.SpeedInfo.Download,
     };
     item.GPUMemory = item.Metadata.GPUInfo.Memory;
-    item.From =
-      item.CPS > 75 ? "Distri.AI" : item.CPS > 70 ? "Render" : "io.net";
+    if (item.Metadata.GPUInfo?.Memory) {
+      const memory = parseInt(item.Metadata.GPUInfo.Memory.match(/\d+/)[0]);
+      item.GPUMemory = `${
+        memory > 1024
+          ? Math.floor((memory / 1024) * 100) / 100 + "GiB"
+          : memory + " MiB"
+      }`;
+    }
+    item.From = "Distri.AI";
   }
   return item;
 }

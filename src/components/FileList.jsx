@@ -110,10 +110,7 @@ function FileList({ className, prefix, id, onSelect, upload }) {
   };
   const handleSelection = (e, key) => {
     if (e.target.checked) {
-      setLinks([
-        ...downloadLinks,
-        `https://distriai.s3.ap-northeast-2.amazonaws.com/${key}`,
-      ]);
+      setLinks([`https://distriai.s3.ap-northeast-2.amazonaws.com/${key}`]);
     } else {
       setLinks(
         downloadLinks.filter(
@@ -128,6 +125,13 @@ function FileList({ className, prefix, id, onSelect, upload }) {
       onSelect(downloadLinks);
     }
   }, [onSelect, downloadLinks]);
+  useEffect(() => {
+    setPrefix(prefix);
+    if (onSelect) {
+      setLinks([]);
+    }
+    // eslint-disable-next-line
+  }, [prefix]);
   useEffect(() => {
     loadFileList(currentPrefix);
     // eslint-disable-next-line

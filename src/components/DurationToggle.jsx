@@ -16,6 +16,7 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
   const onSelect = (e, value) => {
     if (value !== null) {
       setType(value);
+      setCount(1);
     }
   };
   const onCountInput = (e) => {

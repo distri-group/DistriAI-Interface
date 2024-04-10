@@ -15,6 +15,7 @@ import {
 import idl from "../services/idl.json";
 import webconfig from "../webconfig";
 import { formatBalance } from ".";
+import { enqueueSnackbar } from "notistack";
 
 const { PROGRAM, MINT_PROGRAM } = webconfig;
 
@@ -49,7 +50,7 @@ export default function useSolanaMethod() {
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -66,7 +67,7 @@ export default function useSolanaMethod() {
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -102,7 +103,7 @@ export default function useSolanaMethod() {
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -134,7 +135,7 @@ export default function useSolanaMethod() {
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -167,7 +168,7 @@ export default function useSolanaMethod() {
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -199,7 +200,7 @@ export default function useSolanaMethod() {
       }
       return sentTransactions;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -239,7 +240,7 @@ export default function useSolanaMethod() {
         .instruction();
       return instruction;
     } catch (error) {
-      throw error;
+      throw handleError(error);
     }
   };
 
@@ -267,15 +268,19 @@ export default function useSolanaMethod() {
 
   // Get User's Associated-Token-Address
   const findAssociatedTokenAddress = (publicKey) => {
-    const [associatedTokenAddress] = PublicKey.findProgramAddressSync(
-      [
-        publicKey.toBuffer(),
-        TOKEN_PROGRAM_ID.toBuffer(),
-        MINT_PROGRAM.toBuffer(),
-      ],
-      ASSOCIATED_TOKEN_PROGRAM_ID
-    );
-    return associatedTokenAddress;
+    try {
+      const [associatedTokenAddress] = PublicKey.findProgramAddressSync(
+        [
+          publicKey.toBuffer(),
+          TOKEN_PROGRAM_ID.toBuffer(),
+          MINT_PROGRAM.toBuffer(),
+        ],
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      );
+      return associatedTokenAddress;
+    } catch (error) {
+      throw error;
+    }
   };
 
   // Get Machine's PublicKey
@@ -293,13 +298,31 @@ export default function useSolanaMethod() {
 
   // Get User's DIST Balance
   const getTokenBalance = async (publicKey) => {
-    const tokenAccount = findAssociatedTokenAddress(publicKey);
     try {
+      const tokenAccount = findAssociatedTokenAddress(publicKey);
       const token = await connection.getTokenAccountBalance(tokenAccount);
       return formatBalance(token.value.amount);
     } catch (error) {
-      throw error;
+      const err = handleError(error);
+      if (err.message.includes("could not find account")) {
+        enqueueSnackbar(
+          "Token account not initialzed. Please go to Faucet and claim DIST before operating.",
+          { variant: "warning" }
+        );
+        return 0;
+      }
     }
+  };
+
+  const handleError = (error) => {
+    if (error.message.includes("found no record of a prior credit.")) {
+      return new Error(
+        "Token account not initialzed. Please go to Faucet and claim DIST before operating."
+      );
+    } else if (error.message.includes("custom program error: 0x1")) {
+      return new Error("Insufficient token balance.");
+    }
+    return error;
   };
 
   const methods = {

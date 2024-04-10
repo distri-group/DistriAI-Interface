@@ -6,12 +6,11 @@ import {
   ConnectionProvider,
 } from "@solana/wallet-adapter-react";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { WalletModalProvider } from "./components/wallet/WalletModalProvider";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Buffer } from "buffer";
 import NavBar from "@/components/NavBar";
-import Home from "@/views/Home";
 import Faucet from "@/views/Faucet";
 import Market from "@/views/buyer/Market";
 import Buy from "@/views/buyer/Buy";
@@ -28,11 +27,14 @@ import EarningDetail from "@/views/seller/EarningDetail";
 import Contents from "@/views/model&dataset/Contents";
 import Create from "@/views/model&dataset/Create";
 import Detail from "@/views/model&dataset/Detail";
-import { useNavigate } from "react-router-dom";
+import ConnectToWallet from "@/components/ConnectToWallet";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 
 function App() {
   window.Buffer = Buffer;
   const [isHome, setIsHome] = useState(true);
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const Mtheme = createTheme({
     palette: {
@@ -147,17 +149,6 @@ function App() {
     },
   });
   useEffect(() => {
-    const tout = setInterval(function () {
-      let tmp = window.location.pathname === "/home";
-      if (tmp !== isHome) {
-        setIsHome(tmp);
-      }
-    }, 100);
-    return () => {
-      clearInterval(tout);
-    };
-  });
-  useEffect(() => {
     const setViewportContent = () => {
       const screenWidth = window.screen.width;
       const isSmallScreen = screenWidth > 500;
@@ -174,6 +165,20 @@ function App() {
       window.removeEventListener("resize", setViewportContent);
     };
   }, []);
+  useEffect(() => {
+    if (
+      pathname.includes("market") ||
+      pathname.includes("faucet") ||
+      pathname.includes("models")
+    ) {
+      setOpen(false);
+    } else {
+      setOpen(true);
+    }
+    if (pathname.includes("create")) {
+      setOpen(true);
+    }
+  }, [pathname]);
   useEffect(() => {
     const handleNavigate = ({ detail }) => {
       if (detail.type === "routeChange") {
@@ -193,8 +198,9 @@ function App() {
             <SnackbarProvider
               anchorOrigin={{ vertical: "top", horizontal: "center" }}
               autoHideDuration={3000}>
-              {!isHome && <NavBar className="page-header" />}
+              {pathname !== "/home" && <NavBar className="page-header" />}
               <Routes>
+                <Route index element={<Navigate to="home" />} />
                 <Route path="home" element={<div id="home" />} />
                 <Route path="market" element={<Market />} />
                 <Route path="device">
@@ -238,6 +244,7 @@ function App() {
                 </Route>
                 <Route path="faucet" element={<Faucet />} />
               </Routes>
+              <ConnectToWallet open={open} />
             </SnackbarProvider>
           </ThemeProvider>
         </WalletModalProvider>

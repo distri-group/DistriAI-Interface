@@ -40,6 +40,7 @@ function Buy({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState({});
+  const [prefix, setPrefix] = useState("");
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -116,36 +117,34 @@ function Buy({ className }) {
   useEffect(() => {
     async function init() {
       setLoading(true);
-      try {
-        const balance = await methods.getTokenBalance(wallet.publicKey);
-        setBalance(balance);
-        const res = await getOrderList(
-          1,
-          10,
-          { Direction: "buy" },
-          wallet.publicKey.toString()
-        );
+      const balance = await methods.getTokenBalance(wallet.publicKey);
+      setBalance(balance);
+      const res = await getOrderList(
+        1,
+        10,
+        { Direction: "buy" },
+        wallet.publicKey.toString()
+      );
+      setFormValue((prevState) => ({
+        ...prevState,
+        taskName: `Computing Task-${res.Total}`,
+      }));
+      const models = await getModelList(1, 10);
+      setModels(models.List);
+      if (state.model) {
         setFormValue((prevState) => ({
           ...prevState,
-          taskName: `Computing Task-${res.Total}`,
+          usage: state.model.intent,
+          model: state.model.modelId,
         }));
-        const models = await getModelList(1, 10);
-        setModels(models.List);
-        if (state.model) {
-          setFormValue((prevState) => ({
-            ...prevState,
-            usage: state.model.intent,
-            model: state.model.modelId,
-          }));
-          setSelectedModel(
-            models.List.find(
-              (model) => model.Id === parseInt(state.model.modelId)
-            )
-          );
-        }
-        const device = await getMachineDetail(state.Owner, id);
-        setDeviceDetail(device);
-      } catch (error) {}
+        setSelectedModel(
+          models.List.find(
+            (model) => model.Id === parseInt(state.model.modelId)
+          )
+        );
+      }
+      const device = await getMachineDetail(state.Owner, id);
+      setDeviceDetail(device);
       setLoading(false);
     }
     if (wallet?.publicKey) {
@@ -153,6 +152,9 @@ function Buy({ className }) {
     }
     // eslint-disable-next-line
   }, [wallet, id, state]);
+  useEffect(() => {
+    setPrefix(`model/${selectedModel.Owner}/${selectedModel.Name}/`);
+  }, [selectedModel]);
   return (
     <div className={className}>
       {loading ? (
@@ -235,7 +237,7 @@ function Buy({ className }) {
                     <Grid item md={12}>
                       {selectedModel && (
                         <FileList
-                          prefix={`model/${selectedModel.Owner}/${selectedModel.Name}/`}
+                          prefix={prefix}
                           id={formValue.model}
                           onSelect={handleFileSelect}
                         />

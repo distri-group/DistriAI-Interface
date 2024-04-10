@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletMultiButton } from "./wallet/WalletMultiButton";
 import { useEffect, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
 import { KeyboardDoubleArrowDown } from "@mui/icons-material";
@@ -17,7 +17,8 @@ function NavBar({ className }) {
       location.pathname.includes("buy") ||
       location.pathname.includes("order") ||
       location.pathname.includes("extend") ||
-      location.pathname.includes("end")
+      location.pathname.includes("end") ||
+      location.pathname.includes("model")
     ) {
       setUser("buyer");
     } else if (
@@ -36,7 +37,7 @@ function NavBar({ className }) {
           <img
             className="logo"
             src="/img/logo.png"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/home")}
             alt="Distri.AI"
           />
           <Button
@@ -56,14 +57,14 @@ function NavBar({ className }) {
                 navigate("/market");
                 setAnchorEl(null);
               }}>
-              NEED
+              Need
             </MenuItem>
             <MenuItem
               onClick={() => {
                 navigate("/device");
                 setAnchorEl(null);
               }}>
-              SHARE
+              Share
             </MenuItem>
             <MenuItem
               onClick={() => {

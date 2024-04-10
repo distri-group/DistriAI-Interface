@@ -1,7 +1,7 @@
 import moment from "moment";
 import { getTimeDiff } from "time-difference-js";
 import { utils } from "@project-serum/anchor";
-import { formatBalance } from "../utils";
+import { formatBalance, getProvider } from "../utils";
 import axios from "../utils/axios";
 
 const baseUrl = "/order";
@@ -123,7 +123,7 @@ function formatOrder(item) {
 }
 
 export const signToken = async (ip, port, publicKey, deploy) => {
-  const provider = window.phantom.solana;
+  const provider = getProvider();
   const msg = (deploy ? "deploy" : "workspace") + "/token/" + publicKey;
   const encodeMsg = new TextEncoder().encode(msg);
   try {
