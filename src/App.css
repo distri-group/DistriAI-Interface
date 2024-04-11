@@ -15,24 +15,6 @@ body {
   background-image: linear-gradient(to right, #20ae98, #0aab50);
   color:white!important;
 }
-.trans-btn{
-  width:240px;
-  background: rgba(39,206,181,0.12);
-  border: 1px solid #09E98D;
-  color: white;
-  height: 60px;
-  line-height: 60px;
-  border-radius: 30px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.trans-btn:hover{
-  background: #ffffff;
-  color: black;
-  border: 1px solid transparent;
-  box-shadow: rgba(6, 241, 10, 0.686) 0px 0px 70px 4px;
-}
 .big-title {
   font-weight: 700;
   font-style: normal;
@@ -91,25 +73,6 @@ body {
 }
 .Refunded {
   color: #ffb9b9;
-}
-.menu-item{
-  display: flex;
-  align-items: center;
-  padding:12px 0px!important;
-  text-decoration: none;
-  cursor: pointer;
-}
-.icon{
-  width: 24px;
-  height: 24px;
-  margin-right: 4px;
-}
-.subtitle {
-  height: 28px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #898989;
-  line-height: 28px;
 }
 a{
   text-decoration: none;
