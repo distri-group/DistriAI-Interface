@@ -1,7 +1,7 @@
 import { WalletReadyState } from "@solana/wallet-adapter-base";
 import React from "react";
-import { Button } from "./Button";
-import { WalletIcon } from "./WalletIcon";
+import { Button } from "./Button.jsx";
+import { WalletIcon } from "./WalletIcon.jsx";
 
 export const WalletListItem = ({ handleClick, tabIndex, wallet }) => {
   return (

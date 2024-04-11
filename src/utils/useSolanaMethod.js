@@ -12,9 +12,9 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import idl from "../services/idl.json";
-import webconfig from "../webconfig";
-import { formatBalance } from ".";
+import idl from "@/services/idl.json";
+import webconfig from "@/webconfig.js";
+import { formatBalance } from "./index.js";
 import { enqueueSnackbar } from "notistack";
 
 const { PROGRAM, MINT_PROGRAM } = webconfig;

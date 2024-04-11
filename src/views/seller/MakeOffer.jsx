@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { TextField, Grid, InputAdornment } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { getMachineDetail } from "../../services/machine";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import { getMachineDetail } from "@/services/machine.js";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function MakeOffer({ className }) {
   document.title = "Make Offer";

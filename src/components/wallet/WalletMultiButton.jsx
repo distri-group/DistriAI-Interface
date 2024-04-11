@@ -1,5 +1,5 @@
 import React from "react";
-import { BaseWalletMultiButton } from "./BaseWalletMultiButton";
+import { BaseWalletMultiButton } from "./BaseWalletMultiButton.jsx";
 
 const LABELS = {
   "change-wallet": "Change wallet",

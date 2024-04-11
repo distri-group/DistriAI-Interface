@@ -8,10 +8,10 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { Collapse } from "./Collapse";
-import { WalletListItem } from "./WalletListItem";
-import { WalletSVG } from "./WalletSVG";
-import { useWalletModal } from "./useWalletModal";
+import { Collapse } from "./Collapse.jsx";
+import { WalletListItem } from "./WalletListItem.jsx";
+import { WalletSVG } from "./WalletSVG.jsx";
+import { useWalletModal } from "./useWalletModal.jsx";
 
 export const WalletModal = ({ className = "", container = "body" }) => {
   const ref = useRef(null);

@@ -1,5 +1,5 @@
 import axios from "axios";
-import webconfig from "../webconfig";
+import webconfig from "@/webconfig.js";
 import { enqueueSnackbar } from "notistack";
 
 const instance = axios.create({

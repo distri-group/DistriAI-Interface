@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { formatAddress } from "../utils";
+import { formatAddress } from "@/utils/index.js";
 
 function DeviceCard({ className, device }) {
   return (

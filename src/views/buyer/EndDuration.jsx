@@ -4,11 +4,11 @@ import styled from "styled-components";
 import { useSnackbar } from "notistack";
 import { CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import DurationProgress from "../../components/DurationProgress";
+import DurationProgress from "@/components/DurationProgress.jsx";
 import { PublicKey } from "@solana/web3.js";
-import Countdown from "../../components/Countdown";
-import { getOrderDetail } from "../../services/order";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import Countdown from "@/components/Countdown.jsx";
+import { getOrderDetail } from "@/services/order.js";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function EndDuration({ className }) {
   document.title = "End Duration";

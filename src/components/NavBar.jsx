@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
-import { WalletMultiButton } from "./wallet/WalletMultiButton";
+import { WalletMultiButton } from "./wallet/WalletMultiButton.jsx";
 import { useEffect, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
 import { KeyboardDoubleArrowDown } from "@mui/icons-material";

@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import DurationProgress from "../../components/DurationProgress";
-import DurationToggle from "../../components/DurationToggle";
-import Countdown from "../../components/Countdown";
-import { getOrderDetail } from "../../services/order";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import DurationProgress from "@/components/DurationProgress.jsx";
+import DurationToggle from "@/components/DurationToggle.jsx";
+import Countdown from "@/components/Countdown.jsx";
+import { getOrderDetail } from "@/services/order.js";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { PublicKey } from "@solana/web3.js";
 
 function ExtendDuration({ className }) {

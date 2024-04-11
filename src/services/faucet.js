@@ -1,4 +1,4 @@
-import axios from "../utils/axios";
+import axios from "@/utils/axios.js";
 import {
   Connection,
   LAMPORTS_PER_SOL,

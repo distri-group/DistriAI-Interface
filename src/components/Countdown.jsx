@@ -1,5 +1,5 @@
 import React from "react";
-import useCountDown from "../utils/useCountDown";
+import useCountDown from "@/utils/useCountDown.js";
 
 export default function Countdown({ deadlineTime }) {
   const timeInfo = useCountDown(deadlineTime);

@@ -124,7 +124,7 @@ export default styled(MyOrder)`
       font-size: 28px;
       color: #ffffff;
       padding-left: 36px;
-      background-image: url(/img/market/2.png);
+      background-image: url(/img/market/seller.png);
       background-repeat: no-repeat;
       background-size: 26px;
       background-position: left;

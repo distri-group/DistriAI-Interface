@@ -1,11 +1,11 @@
-import axios from "@/utils/axios";
+import axios from "@/utils/axios.js";
 import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
-import { getProvider } from "../utils";
+import { getProvider } from "@/utils/index.js";
 
 const baseUrl = "/model";
 
-export const getModelList = async (pageIndex, pageSize, filter) => {
+export async function getModelList(pageIndex, pageSize, filter) {
   const apiUrl = baseUrl + "/list";
   const body = {
     Page: pageIndex,
@@ -27,9 +27,9 @@ export const getModelList = async (pageIndex, pageSize, filter) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const getModelDetail = async (owner, name) => {
+export async function getModelDetail(owner, name) {
   const apiUrl = baseUrl + `/${owner}/${name}`;
   try {
     const res = await axios.get(apiUrl);
@@ -37,9 +37,9 @@ export const getModelDetail = async (owner, name) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const createModel = async (model, publicKey) => {
+export async function createModel(model, publicKey) {
   const apiUrl = baseUrl + "/create";
   const token = await login(publicKey);
   const headers = {
@@ -51,9 +51,9 @@ export const createModel = async (model, publicKey) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const generatePresignUrl = async (Id, FilePath, publicKey) => {
+export async function generatePresignUrl(Id, FilePath, publicKey) {
   const apiUrl = baseUrl + "/presign";
   const token = await login(publicKey);
   const body = {
@@ -70,9 +70,9 @@ export const generatePresignUrl = async (Id, FilePath, publicKey) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const login = async (publicKey) => {
+export async function login(publicKey) {
   if (localStorage.getItem("token")) return localStorage.getItem("token");
   const apiUrl = "/user/login";
   const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
@@ -90,9 +90,9 @@ export const login = async (publicKey) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const fileUpload = async (url, file) => {
+export async function fileUpload(url, file) {
   try {
     const response = await fetch(url, {
       method: "PUT",
@@ -111,9 +111,9 @@ export const fileUpload = async (url, file) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const formatItem = (model) => {
+export async function formatItem(model) {
   if (model.Tags.includes(",")) {
     model.Tags = model.Tags.split(",");
   } else if (!model.Tags.length) model.Tags = null;
@@ -129,20 +129,20 @@ export const formatItem = (model) => {
   model.likes = likes;
   model.downloads = downloads;
   return model;
-};
+}
 
-const hashString = (input) => {
+function hashString(input) {
   const hash = utils.sha256.hash(input);
   const hashedNumber = parseInt(hash, 16);
   const numberInRange = (hashedNumber % (30001 - 3000)) + 3000;
   return Math.round(numberInRange / 100) / 10 + "k";
-};
+}
 
-const generateNumbers = (name) => {
+function generateNumbers(name) {
   const number1 = hashString(name);
   const number2 = hashString(name + "salt");
   return [number1, number2];
-};
+}
 
 export const frameworks = [
   "Pytorch",

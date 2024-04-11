@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { DISTFaucet, SOLFaucet } from "../services/faucet";
+import { DISTFaucet, SOLFaucet } from "@/services/faucet.js";
 import { useSnackbar } from "notistack";
 import { TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";

@@ -123,7 +123,7 @@ export default styled(Market)`
     font-style: normal;
     font-size: 28px;
     padding-left: 36px;
-    background-image: url(/img/market/1.png);
+    background-image: url(/img/market/market.png);
     background-repeat: no-repeat;
     background-size: 20px;
     background-position: left;

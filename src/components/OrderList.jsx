@@ -2,11 +2,11 @@ import styled from "styled-components";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import Table from "./Table";
+import Table from "./Table.jsx";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Backdrop, CircularProgress } from "@mui/material";
-import { getMachineDetail } from "../services/machine";
-import { signToken } from "../services/order";
+import { getMachineDetail } from "@/services/machine.js";
+import { signToken } from "@/services/order.js";
 
 function OrderList({ className, list, loading }) {
   const navigate = useNavigate();
@@ -203,13 +203,6 @@ export default styled(OrderList)`
   .btns {
     display: flex;
     justify-content: space-between;
-  }
-  .key {
-    padding: 5px 15px;
-    background-image: url("/img/key.png");
-    background-position: center;
-    background-size: 70%;
-    background-repeat: no-repeat;
   }
   .disabled {
     opacity: 0.5;

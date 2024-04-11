@@ -8,16 +8,16 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import types from "../../services/types.json";
+import types from "@/services/types.json";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import ItemCard from "./ItemCard";
-import { getModelList } from "../../services/model";
+import ItemCard from "./ItemCard.jsx";
+import { getModelList } from "@/services/model.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import ConnectToWallet from "../../components/ConnectToWallet";
-import Pager from "../../components/pager";
+import ConnectToWallet from "@/components/ConnectToWallet.jsx";
+import Pager from "@/components/pager.jsx";
 import { capitalize } from "lodash";
-import { getDatasetList } from "../../services/dataset";
+import { getDatasetList } from "@/services/dataset.js";
 
 function Contents({ className, type }) {
   document.title = capitalize(type + "s");

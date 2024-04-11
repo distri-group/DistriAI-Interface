@@ -1,7 +1,7 @@
 import { useWalletMultiButton } from "@solana/wallet-adapter-base-ui";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BaseWalletConnectionButton } from "./BaseWalletConnectionButton";
-import { useWalletModal } from "./useWalletModal";
+import { BaseWalletConnectionButton } from "./BaseWalletConnectionButton.jsx";
+import { useWalletModal } from "./useWalletModal.jsx";
 
 export function BaseWalletMultiButton({ children, labels, ...props }) {
   const { setVisible: setModalVisible } = useWalletModal();

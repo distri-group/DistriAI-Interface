@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
-import DurationProgress from "../../components/DurationProgress";
-import Countdown from "../../components/Countdown";
-import DeviceCard from "../../components/DeviceCard";
-import { getOrderDetail } from "../../services/order";
+import DurationProgress from "@/components/DurationProgress.jsx";
+import Countdown from "@/components/Countdown.jsx";
+import DeviceCard from "@/components/DeviceCard.jsx";
+import { getOrderDetail } from "@/services/order.js";
 
 function EarningDetail({ className }) {
   const { id } = useParams();

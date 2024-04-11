@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import React, { useState, useEffect } from "react";
-import { getOrderList } from "../../services/order";
+import { getOrderList } from "@/services/order.js";
 import { PublicKey } from "@solana/web3.js";
 import { useSnackbar } from "notistack";
 import {
@@ -12,12 +12,12 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { getModelList } from "../../services/model";
-import DurationToggle from "../../components/DurationToggle";
-import DeviceCard from "../../components/DeviceCard";
-import FileList from "../../components/FileList";
-import { getMachineDetail } from "../../services/machine";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import { getModelList } from "@/services/model.js";
+import DurationToggle from "@/components/DurationToggle.jsx";
+import DeviceCard from "@/components/DeviceCard.jsx";
+import FileList from "@/components/FileList.jsx";
+import { getMachineDetail } from "@/services/machine.js";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function Buy({ className }) {
   document.title = "Edit model";

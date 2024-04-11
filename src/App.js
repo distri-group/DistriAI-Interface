@@ -6,29 +6,30 @@ import {
   ConnectionProvider,
 } from "@solana/wallet-adapter-react";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import { WalletModalProvider } from "./components/wallet/WalletModalProvider";
+import { WalletModalProvider } from "./components/wallet/WalletModalProvider.jsx";
 import { SnackbarProvider } from "notistack";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme } from "@mui/material/styles/index.js";
 import { Buffer } from "buffer";
-import NavBar from "@/components/NavBar";
-import Faucet from "@/views/Faucet";
-import Market from "@/views/buyer/Market";
-import Buy from "@/views/buyer/Buy";
-import MyOrder from "@/views/buyer/MyOrder";
-import OrderDetail from "@/views/buyer/OrderDetail";
-import ExtendDuration from "@/views/buyer/ExtendDuration";
-import EndDuration from "@/views/buyer/EndDuration";
-import MyDevice from "@/views/seller/MyDevice";
-import MakeOffer from "@/views/seller/MakeOffer";
-import Reward from "@/views/seller/Reward";
-import RewardDetail from "@/views/seller/RewardDetail";
-import Earning from "@/views/seller/Earning";
-import EarningDetail from "@/views/seller/EarningDetail";
-import Contents from "@/views/model&dataset/Contents";
-import Create from "@/views/model&dataset/Create";
-import Detail from "@/views/model&dataset/Detail";
-import ConnectToWallet from "@/components/ConnectToWallet";
+import NavBar from "@/components/NavBar.jsx";
+import Faucet from "@/views/Faucet.jsx";
+import Market from "@/views/buyer/Market.jsx";
+import Buy from "@/views/buyer/Buy.jsx";
+import MyOrder from "@/views/buyer/MyOrder.jsx";
+import OrderDetail from "@/views/buyer/OrderDetail.jsx";
+import ExtendDuration from "@/views/buyer/ExtendDuration.jsx";
+import EndDuration from "@/views/buyer/EndDuration.jsx";
+import MyDevice from "@/views/seller/MyDevice.jsx";
+import MakeOffer from "@/views/seller/MakeOffer.jsx";
+import Reward from "@/views/seller/Reward.jsx";
+import RewardDetail from "@/views/seller/RewardDetail.jsx";
+import Earning from "@/views/seller/Earning.jsx";
+import EarningDetail from "@/views/seller/EarningDetail.jsx";
+import Contents from "@/views/model&dataset/Contents.jsx";
+import Create from "@/views/model&dataset/Create.jsx";
+import Detail from "@/views/model&dataset/Detail.jsx";
+import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import Test from "@/views/Test.jsx";
 
 function App() {
   window.Buffer = Buffer;
@@ -167,6 +168,7 @@ function App() {
   }, []);
   useEffect(() => {
     if (
+      pathname === "/" ||
       pathname.includes("home") ||
       pathname.includes("market") ||
       pathname.includes("faucet") ||
@@ -174,6 +176,9 @@ function App() {
     ) {
       setOpen(false);
     } else {
+      setOpen(true);
+    }
+    if (pathname.includes("add")) {
       setOpen(true);
     }
   }, [pathname]);
@@ -241,6 +246,7 @@ function App() {
                   <Route path="add" element={<Create type="dataset" />} />
                 </Route>
                 <Route path="faucet" element={<Faucet />} />
+                <Route path="test" element={<Test />} />
               </Routes>
               <ConnectToWallet open={open} />
             </SnackbarProvider>

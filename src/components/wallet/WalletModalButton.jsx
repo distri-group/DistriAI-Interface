@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
-import { Button as BaseWalletConnectionButton } from "./Button";
-import { useWalletModal } from "./useWalletModal";
+import { Button as BaseWalletConnectionButton } from "./Button.jsx";
+import { useWalletModal } from "./useWalletModal.jsx";
 
 export const WalletModalButton = ({
   children = "Select Wallet",

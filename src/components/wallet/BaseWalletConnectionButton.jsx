@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "./Button";
-import { WalletIcon } from "./WalletIcon";
+import { Button } from "./Button.jsx";
+import { WalletIcon } from "./WalletIcon.jsx";
 
 export function BaseWalletConnectionButton({
   walletIcon,

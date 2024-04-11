@@ -16,19 +16,19 @@ import styled from "styled-components";
 import metadataParser from "markdown-yaml-metadata-parser";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
-import FileList from "../../components/FileList";
+import FileList from "@/components/FileList.jsx";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { Favorite } from "@mui/icons-material";
 import "@/dark.css";
-import { getModelDetail } from "../../services/model";
-import { getOrderList } from "../../services/order";
+import { getModelDetail } from "@/services/model.js";
+import { getOrderList } from "@/services/order.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { signToken } from "../../services/order";
+import { signToken } from "@/services/order.js";
 import { useSnackbar } from "notistack";
 import { AccountBalance } from "@mui/icons-material";
 import axios from "axios";
-import { getDatasetDetail } from "../../services/dataset";
+import { getDatasetDetail } from "@/services/dataset";
 import { capitalize } from "lodash";
 
 function Detail({ className, type }) {

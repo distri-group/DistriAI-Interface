@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { getOrderDetail } from "../../services/order";
+import { getOrderDetail } from "@/services/order.js";
 import { useSnackbar } from "notistack";
 import {
   Button,
@@ -12,9 +12,9 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import DurationProgress from "../../components/DurationProgress";
-import Countdown from "../../components/Countdown";
-import DeviceCard from "../../components/DeviceCard";
+import DurationProgress from "@/components/DurationProgress.jsx";
+import Countdown from "@/components/Countdown.jsx";
+import DeviceCard from "@/components/DeviceCard.jsx";
 
 function OrderDetail({ className }) {
   const { id } = useParams();

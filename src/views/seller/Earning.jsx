@@ -4,14 +4,14 @@ import {
   getOrderList,
   filterData,
   getTotalEarnings,
-} from "../../services/order";
+} from "@/services/order.js";
 import styled from "styled-components";
-import Table from "../../components/Table";
+import Table from "@/components/Table.jsx";
 import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useNavigate } from "react-router-dom";
-import Pager from "../../components/pager";
-import { formatBalance } from "../../utils";
+import Pager from "@/components/pager.jsx";
+import { formatBalance } from "@/utils/index.js";
 
 function Earning({ className }) {
   document.title = "My Earnings";
@@ -205,7 +205,7 @@ export default styled(Earning)`
     font-style: normal;
     font-size: 28px;
     padding-left: 36px;
-    background-image: url(/img/market/2.png);
+    background-image: url(/img/market/seller.png);
     background-repeat: no-repeat;
     background-size: 32px;
     background-position: left;

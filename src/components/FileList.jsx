@@ -20,7 +20,7 @@ import styled from "styled-components";
 import prettyBytes from "pretty-bytes";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { useEffect, useState, useRef } from "react";
-import { fileUpload, generatePresignUrl } from "../services/model";
+import { fileUpload, generatePresignUrl } from "@/services/model.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 function FileList({ className, prefix, id, onSelect, upload }) {

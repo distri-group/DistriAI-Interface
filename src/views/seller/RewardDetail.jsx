@@ -5,13 +5,13 @@ import {
   getClaimableReward,
   getPeriodMachine,
   getRewardTotal,
-} from "../../services/reward";
+} from "@/services/reward.js";
 import { useSnackbar } from "notistack";
 import { Button, CircularProgress, Popover } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import DeviceCard from "../../components/DeviceCard";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import DeviceCard from "@/components/DeviceCard.jsx";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function RewardDetail({ className }) {
   const { period } = useParams();

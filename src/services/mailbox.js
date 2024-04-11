@@ -1,4 +1,4 @@
-import axios from "../utils/axios";
+import axios from "@/utils/axios.js";
 const apiUrl = "/mailbox/subscribe";
 
 export async function subscribe(data) {

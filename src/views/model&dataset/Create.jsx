@@ -7,17 +7,17 @@ import {
   Stack,
 } from "@mui/material";
 import styled from "styled-components";
-import types from "../../services/types.json";
+import types from "@/services/types.json";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
-import { licenses, frameworks, createModel } from "../../services/model";
+import { licenses, frameworks, createModel } from "@/services/model.js";
 import { useSnackbar } from "notistack";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { LoadingButton } from "@mui/lab";
 import { CloudUpload } from "@mui/icons-material";
 import { capitalize } from "lodash";
-import { sizes } from "../../services/dataset";
+import { sizes } from "@/services/dataset.js";
 import prettyBytes from "pretty-bytes";
 
 function Create({ className, type }) {

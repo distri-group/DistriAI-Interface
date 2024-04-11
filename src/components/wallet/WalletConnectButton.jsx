@@ -1,5 +1,5 @@
 import React from "react";
-import { BaseWalletConnectButton } from "./BaseWalletConnectButton";
+import { BaseWalletConnectButton } from "./BaseWalletConnectButton.jsx";
 
 const LABELS = {
   connecting: "Connecting ...",

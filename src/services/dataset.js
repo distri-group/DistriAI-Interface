@@ -1,5 +1,5 @@
-import axios from "@/utils/axios";
-import { login, formatItem } from "./model";
+import axios from "@/utils/axios.js";
+import { login, formatItem } from "./model.js";
 
 const baseUrl = "/dataset";
 

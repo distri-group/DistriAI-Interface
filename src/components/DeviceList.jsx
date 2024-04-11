@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Button, Chip, Stack } from "@mui/material";
-import { formatAddress, getProvider } from "../utils";
-import Table from "./Table";
+import { formatAddress, getProvider } from "@/utils/index.js";
+import Table from "./Table.jsx";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
-import ConnectToWallet from "./ConnectToWallet";
+import ConnectToWallet from "./ConnectToWallet.jsx";
 
 function DeviceList({
   className,

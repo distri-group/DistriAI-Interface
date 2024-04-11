@@ -1,8 +1,8 @@
 import moment from "moment";
 import { getTimeDiff } from "time-difference-js";
 import { utils } from "@project-serum/anchor";
-import { formatBalance, getProvider } from "../utils";
-import axios from "../utils/axios";
+import { formatBalance, getProvider } from "@/utils/index.js";
+import axios from "@/utils/axios.js";
 
 const baseUrl = "/order";
 
@@ -122,7 +122,7 @@ function formatOrder(item) {
   return item;
 }
 
-export const signToken = async (ip, port, publicKey, deploy) => {
+export async function signToken(ip, port, publicKey, deploy) {
   const provider = getProvider();
   const msg = (deploy ? "deploy" : "workspace") + "/token/" + publicKey;
   const encodeMsg = new TextEncoder().encode(msg);
@@ -133,4 +133,4 @@ export const signToken = async (ip, port, publicKey, deploy) => {
   } catch (error) {
     throw error;
   }
-};
+}

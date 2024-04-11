@@ -2,6 +2,7 @@
   "name": "ui",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.537.0",
     "@craco/craco": "^7.1.0",
@@ -31,6 +32,7 @@
     "dotenv-cli": "^7.4.1",
     "framer-motion": "^11.0.3",
     "github-markdown-css": "^5.5.1",
+    "kubo-rpc-client": "^3.0.4",
     "lodash": "^4.17.21",
     "markdown-yaml-metadata-parser": "^3.0.0",
     "moment": "^2.29.4",

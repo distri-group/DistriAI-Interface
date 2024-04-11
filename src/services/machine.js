@@ -1,8 +1,9 @@
-import { formatBalance } from "../utils";
-import axios from "../utils/axios";
+import { formatBalance } from "@/utils/index.js";
+import axios from "@/utils/axios.js";
 
 const baseUrl = "/machine";
 
+// Get market listed machines or user's owned machines.
 export async function getMachineList(pageIndex, pageSize, filter, publicKey) {
   const apiUrl = baseUrl + (publicKey ? "/mine" : "/market");
   const body = {

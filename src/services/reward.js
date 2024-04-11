@@ -1,9 +1,9 @@
-import axios from "../utils/axios";
-import { formatMachine } from "./machine";
+import axios from "@/utils/axios.js";
+import { formatMachine } from "./machine.js";
 
 const baseUrl = "/reward";
 
-export const getRewardList = async (pageIndex, pageSize, publicKey) => {
+export async function getRewardList(pageIndex, pageSize, publicKey) {
   const apiUrl = baseUrl + "/period/list";
   const body = {
     Page: pageIndex,
@@ -18,9 +18,9 @@ export const getRewardList = async (pageIndex, pageSize, publicKey) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const getRewardTotal = async (period, publicKey) => {
+export async function getRewardTotal(period, publicKey) {
   const apiUrl = baseUrl + "/total";
   const body = !isNaN(period)
     ? {
@@ -36,14 +36,14 @@ export const getRewardTotal = async (period, publicKey) => {
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const getClaimableReward = async (
+export async function getClaimableReward(
   period,
   pageIndex,
   pageSize,
   publicKey
-) => {
+) {
   const apiUrl = baseUrl + "/claimable/list";
   const body = {
     Period: period ?? "",
@@ -59,14 +59,9 @@ export const getClaimableReward = async (
   } catch (error) {
     throw error;
   }
-};
+}
 
-export const getPeriodMachine = async (
-  period,
-  pageIndex,
-  pageSize,
-  publicKey
-) => {
+export async function getPeriodMachine(period, pageIndex, pageSize, publicKey) {
   const apiUrl = baseUrl + "/machine/list";
   const body = {
     Page: pageIndex,
@@ -85,4 +80,4 @@ export const getPeriodMachine = async (
   } catch (error) {
     throw error;
   }
-};
+}

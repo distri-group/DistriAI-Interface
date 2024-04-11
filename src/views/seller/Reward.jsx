@@ -1,19 +1,19 @@
 import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import Table from "../../components/Table";
+import Table from "@/components/Table.jsx";
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
-import Pager from "../../components/pager";
+import Pager from "@/components/pager.jsx";
 import {
   getRewardList,
   getRewardTotal,
   getClaimableReward,
-} from "../../services/reward";
+} from "@/services/reward.js";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { LoadingButton } from "@mui/lab";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function Reward({ className }) {
   document.title = "My Rewards";
@@ -358,7 +358,7 @@ export default styled(Reward)`
     font-style: normal;
     font-size: 28px;
     padding-left: 36px;
-    background-image: url(/img/market/2.png);
+    background-image: url(/img/market/seller.png);
     background-repeat: no-repeat;
     background-size: 32px;
     background-position: left;

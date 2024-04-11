@@ -1,12 +1,12 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
-import { getMachineList } from "../../services/machine";
-import DeviceList from "../../components/DeviceList";
-import Pager from "../../components/pager";
+import { getMachineList } from "@/services/machine.js";
+import DeviceList from "@/components/DeviceList.jsx";
+import Pager from "@/components/pager.jsx";
 import { useSnackbar } from "notistack";
 import { Modal, Box } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import useSolanaMethod from "../../utils/useSolanaMethod";
+import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function MyDevice({ className }) {
   document.title = "Market";
@@ -147,7 +147,7 @@ export default styled(MyDevice)`
       font-size: 28px;
       color: #ffffff;
       padding-left: 36px;
-      background-image: url(/img/market/2.png);
+      background-image: url(/img/market/seller.png);
       background-repeat: no-repeat;
       background-size: 32px;
       background-position: left;

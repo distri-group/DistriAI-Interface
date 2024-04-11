@@ -1,6 +1,6 @@
 import { useWalletConnectButton } from "@solana/wallet-adapter-base-ui";
 import React from "react";
-import { BaseWalletConnectionButton } from "./BaseWalletConnectionButton";
+import { BaseWalletConnectionButton } from "./BaseWalletConnectionButton.jsx";
 
 export function BaseWalletConnectButton({
   children,
