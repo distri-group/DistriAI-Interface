@@ -1,8 +1,7 @@
-import { useEffect } from "react";
-import { create } from "kubo-rpc-client";
+import useIpfs from "@/utils/useIpfs";
 
 export default function Test() {
-  const client = create({ url: "https://distri.ai/ipfs-rpc/api/v0" });
-  console.log(client);
+  const client = useIpfs();
+  const uploadFolder = async (event) => {};
   return <div>Hello World</div>;
 }
