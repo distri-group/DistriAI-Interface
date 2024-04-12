@@ -34,8 +34,8 @@ export async function getMachineList(pageIndex, pageSize, filter, publicKey) {
 }
 
 // Retrieve the detailed information of the machine from the storage based on the provided id.
-export async function getMachineDetail(Owner, Id) {
-  const apiUrl = baseUrl + `/${Owner}/${Id}`;
+export async function getMachineDetail(Owner, Uuid) {
+  const apiUrl = baseUrl + `/${Owner}/${Uuid}`;
   try {
     const res = await axios.get(apiUrl);
     return formatMachine(res);
@@ -91,7 +91,6 @@ export function formatMachine(item) {
   if (item.Metadata && typeof item.Metadata == "string") {
     item.Metadata = JSON.parse(item.Metadata);
     item.Provider = item.Metadata.Addr;
-    item.UUID = item.Metadata.MachineUUID || "";
     item.CPS = item.Metadata.Score?.toFixed(2) || 0;
     item.CPU = item.Metadata.CPUInfo?.ModelName || "";
     item.GPU = item.GpuCount + "x" + item.Gpu;

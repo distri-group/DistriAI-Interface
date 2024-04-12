@@ -13,13 +13,17 @@ function OrderList({ className, list, loading }) {
   const wallet = useAnchorWallet();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
-  const handleConsole = async (uuid, deploy) => {
-    const machine = await getMachineDetail(uuid);
+  const handleConsole = async (order, deploy) => {
+    const machine = await getMachineDetail(
+      order.Metadata.MachineInfo.Provider,
+      order.Metadata.MachineInfo.Uuid || order.Metadata.MachineInfo.UUID
+    );
     setSigning(true);
     const href = await signToken(
       machine.IP,
       machine.Port,
-      wallet.publicKey.toString()
+      wallet.publicKey.toString(),
+      deploy
     );
     window.open(href);
     setSigning(false);
@@ -102,26 +106,25 @@ function OrderList({ className, list, loading }) {
       key: "Uuid",
       render: (text, record, index) => (
         <div className="btns">
-          {record.Metadata.OrderInfo?.Intent && (
-            <span
-              onClick={() => {
-                handleConsole(
-                  record.Metadata.MachineInfo.UUID,
-                  record.Metadata.OrderInfo.Intent === "deploy"
-                );
-              }}
-              className={`mini-btn ${
-                record.StatusName !== "Available" && "disabled"
-              }`}>
-              {record.Metadata.OrderInfo.Intent === "deploy"
-                ? "Deployment"
-                : "Console"}
-            </span>
-          )}
+          <span
+            onClick={() => {
+              handleConsole(
+                record.Metadata.MachineInfo.UUID,
+                record.Metadata.OrderInfo.Intent === "deploy"
+              );
+            }}
+            className={`mini-btn ${
+              record.StatusName !== "Available" && "disabled"
+            }`}>
+            {record.Metadata.OrderInfo?.Intent &&
+            record.Metadata.OrderInfo.Intent === "deploy"
+              ? "Deployment"
+              : "Console"}
+          </span>
           <span
             onClick={() => navigate("/order/" + text)}
-            className={`mini-btn ${
-              record.StatusName === "Preparing" && "disabled"
+            className={`mini-btn${
+              record.StatusName === "Preparing" ? " disabled" : ""
             }`}>
             Detail
           </span>

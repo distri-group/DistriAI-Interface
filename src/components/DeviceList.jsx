@@ -71,7 +71,7 @@ function DeviceList({
               style={{ textDecoration: "none" }}>
               {formatAddress(record.Owner)}
             </a>
-            <div className="id"># {record.UUID.slice(-10)}</div>
+            <div className="id"># {record.Uuid.slice(-10)}</div>
             <div className="reliability">
               <span className="l">
                 <label>{record.Reliability}</label>
