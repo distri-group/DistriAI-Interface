@@ -48,6 +48,8 @@ function Contents({ className, type }) {
   }
   async function loadList(current) {
     setLoading(true);
+    setList([]);
+    setTotal(0);
     let res;
     try {
       if (type === "model") {
