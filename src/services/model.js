@@ -83,11 +83,11 @@ export async function login(publicKey) {
         return token.value;
       } else {
         localStorage.removeItem("token");
-        login(publicKey);
+        return login(publicKey);
       }
     } catch (error) {
       localStorage.removeItem("token");
-      login(publicKey);
+      return login(publicKey);
     }
   } else {
     const apiUrl = "/user/login";

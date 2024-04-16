@@ -113,6 +113,8 @@ function FileList({ className, item, type, onSelect }) {
         const suffix = currentPrefix.split(initialPrefix)[1];
         const items = suffix.split("/").slice(1);
         setBreadcrumbs(items);
+      } else {
+        setBreadcrumbs([]);
       }
     }
   }, [currentPrefix]);
