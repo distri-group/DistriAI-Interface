@@ -4,7 +4,7 @@ import { login, formatItem } from "./model.js";
 const baseUrl = "/dataset";
 
 export const getDatasetList = async (pageIndex, pageSize, filter) => {
-  const apiUrl = baseUrl + "/list";
+  const apiUrl = baseUrl + "info/list";
   const body = {
     Page: pageIndex,
     PageSize: pageSize,
@@ -20,7 +20,6 @@ export const getDatasetList = async (pageIndex, pageSize, filter) => {
     const res = await axios.post(apiUrl, body);
     for (let dataset of res.List) {
       dataset = formatItem(dataset);
-      dataset.size = sizes[dataset.size - 1];
     }
     return res;
   } catch (error) {
@@ -29,7 +28,7 @@ export const getDatasetList = async (pageIndex, pageSize, filter) => {
 };
 
 export const getDatasetDetail = async (owner, name) => {
-  const apiUrl = baseUrl + `/${owner}/${name}`;
+  const apiUrl = baseUrl + `info/${owner}/${name}`;
   try {
     const res = await axios.get(apiUrl);
     return formatItem(res);
@@ -52,4 +51,4 @@ export const createDataset = async (dataset, publicKey) => {
   }
 };
 
-export const sizes = ["<1k", "1k-10k", "10k-100k", "100k-1M", ">1M"];
+export const scales = ["<1k", "1k-10k", "10k-100k", "100k-1M", ">1M"];
