@@ -13,7 +13,9 @@ function Faucet({ className }) {
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
-    setPublicKey(wallet?.publicKey.toString());
+    if (wallet?.publicKey) {
+      setPublicKey(wallet?.publicKey.toString());
+    }
   }, [wallet]);
   const onSubmit = async () => {
     if (!publicKey) {

@@ -16,7 +16,7 @@ function ItemCard({ item, className, type }) {
         <Chip
           color="warning"
           size="small"
-          label={item.framework || item.size}
+          label={item.framework || item.scale}
         />
         <Chip color="success" size="small" label={item.type1} />
         {item.type1 !== "Others" && (
@@ -54,7 +54,6 @@ function ItemCard({ item, className, type }) {
         justifyContent="end"
         style={{ padding: 10 }}>
         <span>{new Date(item.CreatedAt).toLocaleString()}</span>
-        <span>Distri.AI</span>
         <Stack direction="row" alignItems="end">
           <Favorite sx={{ width: 20, height: 20 }} />
           <span>{item.likes}</span>

@@ -262,7 +262,7 @@ export default function useSolanaMethod() {
         } catch (error) {
           reject(error);
         }
-      }, 3000);
+      }, 3500);
     });
   };
 

@@ -82,6 +82,7 @@ a{
   border-radius: 3px!important;
   color: black!important;
   padding: 4px 12px!important;
+  height: 32px;
 }
 .markdown-body{
   padding: 24px;

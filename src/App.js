@@ -33,7 +33,6 @@ import Test from "@/views/Test.jsx";
 
 function App() {
   window.Buffer = Buffer;
-  const [isHome, setIsHome] = useState(true);
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -149,23 +148,6 @@ function App() {
       },
     },
   });
-  useEffect(() => {
-    const setViewportContent = () => {
-      const screenWidth = window.screen.width;
-      const isSmallScreen = screenWidth > 500;
-      const metaViewport = document.querySelector('meta[name="viewport"]');
-      if (isSmallScreen) {
-        metaViewport.setAttribute("content", "width=1920");
-      } else {
-        metaViewport.setAttribute("content", "width=500");
-      }
-    };
-    setViewportContent();
-    window.addEventListener("resize", setViewportContent);
-    return () => {
-      window.removeEventListener("resize", setViewportContent);
-    };
-  }, []);
   useEffect(() => {
     if (
       pathname === "/" ||

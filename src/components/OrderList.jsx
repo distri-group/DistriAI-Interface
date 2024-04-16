@@ -109,7 +109,7 @@ function OrderList({ className, list, loading }) {
           <span
             onClick={() => {
               handleConsole(
-                record.Metadata.MachineInfo.UUID,
+                record,
                 record.Metadata.OrderInfo.Intent === "deploy"
               );
             }}
