@@ -28,15 +28,16 @@ import { signToken } from "@/services/order.js";
 import { useSnackbar } from "notistack";
 import { AccountBalance } from "@mui/icons-material";
 import axios from "axios";
-import { getDatasetDetail } from "@/services/dataset";
+import { getDatasetDetail } from "@/services/dataset.js";
 import { capitalize } from "lodash";
+import useIpfs from "@/utils/useIpfs.js";
+import { create } from "kubo-rpc-client";
 
 function Detail({ className, type }) {
   document.title = `${capitalize(type)} Detail`;
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { owner, name } = useParams();
-  const prefix = `${type}/${owner}/${name}/`;
   const [loading, setLoading] = useState(false);
   const [item, setItem] = useState({});
   const [machine, setMachine] = useState("");
@@ -45,6 +46,7 @@ function Detail({ className, type }) {
   const [metadata, setMetadata] = useState("");
   const [signing, setSigning] = useState(false);
   const [dialog, setDialog] = useState("");
+  const client = create({ url: "https://ipfs.distri.ai/rpc/api/v0" });
   const { enqueueSnackbar } = useSnackbar();
 
   function handleTabChange(e, newValue) {
@@ -98,21 +100,22 @@ function Detail({ className, type }) {
       } else {
         res = await getDatasetDetail(owner, name);
       }
-      setItem(res);
-      axios
-        .get(
-          `https://distriai.s3.ap-northeast-2.amazonaws.com/${type}/${owner}/${name}/README.md`
-        )
-        .then((response) => {
-          const text = response.data;
+      try {
+        for await (const item of client.files.read(
+          `/distri.ai/${type}/${owner}/${name}/README.md`
+        )) {
+          const text = new TextDecoder().decode(item);
           if (type === "model") {
             const match = text.match(/^---\n([\s\S]+?)\n---/);
             const result = metadataParser(text);
             setMarkdown(result.content);
-            setMetadata(match[1]);
+            if (match) {
+              setMetadata(match[1]);
+            }
           } else setMarkdown(text);
-        })
-        .catch((error) => {});
+        }
+      } catch (error) {}
+      setItem(res);
       setLoading(false);
     }
     loadItem();
@@ -190,7 +193,7 @@ function Detail({ className, type }) {
               <Chip
                 color="warning"
                 size="small"
-                label={item.framework || item.size}
+                label={item.framework || item.scale}
               />
               <Chip color="success" size="small" label={item.type1} />
               {item.type1 !== "Others" && (
@@ -290,11 +293,7 @@ function Detail({ className, type }) {
                 )}
               </TabPanel>
               <TabPanel value="files">
-                <FileList
-                  prefix={prefix}
-                  id={item.Id}
-                  upload={item.Owner === wallet?.publicKey?.toString()}
-                />
+                <FileList item={item} type={type} />
               </TabPanel>
             </TabContext>
           </>
@@ -361,10 +360,6 @@ export default styled(Detail)`
     border: none;
   }
   .default-btn {
-    background-color: rgb(148, 214, 226);
-    border-radius: 3px;
-    color: black;
-    padding: 4px 12px;
     margin-left: 8px;
   }
 `;

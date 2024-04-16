@@ -1,6 +1,7 @@
 import { ArrowDownward, Folder, InsertDriveFile } from "@mui/icons-material";
 import {
   Button,
+  Breadcrumbs,
   Checkbox,
   CircularProgress,
   Dialog,
@@ -15,165 +16,217 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { useSnackbar } from "notistack";
+import { LoadingButton } from "@mui/lab";
 import styled from "styled-components";
 import prettyBytes from "pretty-bytes";
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { useEffect, useState, useRef } from "react";
-import { fileUpload, generatePresignUrl } from "@/services/model.js";
+import { useEffect, useState } from "react";
+import { create } from "kubo-rpc-client";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import useIpfs from "@/utils/useIpfs.js";
+import { uniq, uniqBy } from "lodash";
 
-function FileList({ className, prefix, id, onSelect, upload }) {
-  const { enqueueSnackbar } = useSnackbar();
+function FileList({ className, item, type, onSelect }) {
+  const initialPrefix = `/distri.ai/${type}/${item.Owner}/${item.Name}`;
   const wallet = useAnchorWallet();
-  const [loading, setLoading] = useState(false);
-  const [files, setFiles] = useState([]);
-  const [folders, setFolders] = useState([]);
-  const [createFolderDialog, setCreateFolderDialog] = useState(false);
-  const [folderName, setFolderName] = useState("");
-  const [downloadLinks, setLinks] = useState([]);
-  const [initialPrefix] = useState(prefix);
-  const [currentPrefix, setPrefix] = useState(prefix);
-  const fileInputRef = useRef(null);
-  const S3client = new S3Client({
-    region: "ap-northeast-2",
-    signer: { sign: async (request) => request },
-  });
-  const handleUpload = async (file) => {
-    enqueueSnackbar("File uploading...", { variant: "info" });
-    try {
-      const path = await generatePresignUrl(
-        parseInt(id),
-        (currentPrefix !== initialPrefix
-          ? currentPrefix.replace(initialPrefix, "")
-          : "") + file.name,
-        wallet.publicKey.toString()
-      );
-      await fileUpload(path, file);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-  const handleFileInputChange = async (event) => {
-    try {
-      const file = event.target.files[0];
-      await handleUpload(file);
-      loadFileList();
-      enqueueSnackbar("Upload Success", { variant: "success" });
-    } catch (e) {
-      enqueueSnackbar(e, { variant: "error" });
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [list, setList] = useState([]);
+  const [createFolderDialog, setDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [folderName, setName] = useState("");
+  const [filesToUpload, setFiles] = useState([]);
+  const [selectedCid, setSelectedCid] = useState([]);
+  const [currentPrefix, setPrefix] = useState(null);
+  const [breadcrumbs, setBreadcrumbs] = useState([]);
+  const { client, methods } = useIpfs();
+
   const getParentPrefix = (prefix) => {
     const lastIndex = prefix.lastIndexOf("/", prefix.length - 2);
     if (lastIndex === -1) {
       return "";
     }
-    const parentPrefix = prefix.slice(0, lastIndex + 1);
+    const parentPrefix = prefix.slice(0, lastIndex);
     return parentPrefix;
   };
-  const handleFolderCreate = async () => {
-    const blob = new Blob([""], { type: "text/plain" });
-    const file = new File([blob], "empty.txt", { type: "text/plain" });
-    const path = await generatePresignUrl(
-      parseInt(id),
-      (currentPrefix !== initialPrefix
-        ? currentPrefix.replace(initialPrefix, "")
-        : "") +
-        folderName +
-        "/",
-      wallet.publicKey.toString()
-    );
-    setCreateFolderDialog(false);
-    enqueueSnackbar("Folder creating...", { variant: "info" });
-    try {
-      await fileUpload(path, file);
-      loadFileList();
-      enqueueSnackbar("Folder created", { variant: "success" });
-    } catch (e) {
-      console.log(e);
-    }
-  };
-  const loadFileList = (prefix) => {
+  const loadFiles = async (prefix) => {
     setLoading(true);
-    const command = new ListObjectsV2Command({
-      Bucket: "distriai",
-      Prefix: prefix,
-      Delimiter: "/",
+    const list = [];
+    try {
+      for await (const res of client.files.ls(prefix)) {
+        list.push(res);
+      }
+    } catch (error) {
+      if (error.message === "file does not exist" && prefix === initialPrefix) {
+        await methods.createFolder(prefix);
+      }
+    }
+    setList(list);
+    setLoading(false);
+  };
+  const handleFolderCreate = async () => {
+    setCreating(true);
+    await methods.createFolder(currentPrefix, folderName);
+    setCreating(false);
+    setName("");
+    setDialog(false);
+    await loadFiles(currentPrefix);
+  };
+  const handleDownload = async (item) => {
+    let concatenatedBuf = new Uint8Array();
+    for await (const buf of client.files.read(
+      currentPrefix + "/" + item.name
+    )) {
+      concatenatedBuf = new Uint8Array([...concatenatedBuf, ...buf]);
+    }
+    const blob = new Blob([concatenatedBuf], {
+      type: "application/octet-stream",
     });
-    S3client.send(command)
-      .then(({ Contents, CommonPrefixes }) => {
-        setFiles(Contents || []);
-        setFolders(CommonPrefixes || []);
-      })
-      .then(() => setLoading(false));
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = item.name;
+
+    link.click();
+    URL.revokeObjectURL(url);
   };
-  const handleSelection = (e, key) => {
-    if (e.target.checked) {
-      setLinks([`https://distriai.s3.ap-northeast-2.amazonaws.com/${key}`]);
+  const handleSelection = async (item) => {
+    const selectedIndex = selectedCid.indexOf(item.cid.toString());
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = [...selectedCid, item.cid.toString()];
     } else {
-      setLinks(
-        downloadLinks.filter(
-          (link) =>
-            link !== `https://distriai.s3.ap-northeast-2.amazonaws.com/${key}`
-        )
-      );
+      newSelected = selectedCid.filter((id) => id !== item.cid.toString());
     }
+    setSelectedCid(newSelected);
+  };
+  const handleFolderNavigate = (index) => {
+    let suffix;
+    if (index > 0) {
+      suffix = breadcrumbs.slice(0, index + 1).join("/");
+    } else suffix = breadcrumbs[index];
+    setPrefix(initialPrefix + "/" + suffix);
   };
   useEffect(() => {
-    if (onSelect) {
-      onSelect(downloadLinks);
+    if (currentPrefix) {
+      loadFiles(currentPrefix);
+      if (currentPrefix !== initialPrefix) {
+        const suffix = currentPrefix.split(initialPrefix)[1];
+        const items = suffix.split("/").slice(1);
+        setBreadcrumbs(items);
+      }
     }
-  }, [onSelect, downloadLinks]);
-  useEffect(() => {
-    setPrefix(prefix);
-    if (onSelect) {
-      setLinks([]);
-    }
-    // eslint-disable-next-line
-  }, [prefix]);
-  useEffect(() => {
-    loadFileList(currentPrefix);
-    // eslint-disable-next-line
   }, [currentPrefix]);
+  useEffect(() => {
+    if (onSelect) {
+      onSelect(selectedCid);
+    }
+  }, [onSelect, selectedCid]);
+  useEffect(() => {
+    try {
+      loadFiles(initialPrefix);
+      setPrefix(initialPrefix);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+  useEffect(() => {
+    const handleUpload = async () => {
+      const files = Array.from(filesToUpload).map((file) => ({
+        path: file.webkitRelativePath || file.name,
+        content: file,
+      }));
+      for await (const res of client.addAll(files, { parents: true })) {
+        // console.log(res);
+        try {
+          await client.files.cp(res.cid, currentPrefix + "/" + res.path, {
+            parents: true,
+          });
+        } catch (error) {}
+      }
+      await loadFiles(currentPrefix);
+    };
+    if (filesToUpload.length > 0) {
+      handleUpload();
+    }
+  }, [filesToUpload]);
   return (
     <div className={className}>
       <Stack direction="column">
-        {!onSelect && upload && (
-          <Stack direction="row" justifyContent="end" spacing={2}>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFileInputChange}
-            />
-            <Button
-              variant="contained"
-              className="cbtn"
-              style={{ width: 100, margin: "0 10px" }}
-              onClick={() => {
-                fileInputRef.current.click();
-              }}>
-              Add File
-            </Button>
-            <Button
-              variant="contained"
-              className="cbtn"
-              style={{ margin: "0 10px" }}
-              onClick={() => setCreateFolderDialog(true)}>
-              Create Folder
-            </Button>
-          </Stack>
-        )}
         {loading ? (
           <CircularProgress />
-        ) : files.length > 0 || folders.length > 0 ? (
+        ) : (
           <TableContainer>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="bottom"
+              style={{ padding: "0 16px" }}>
+              <span>
+                {breadcrumbs.length > 0 && (
+                  <Breadcrumbs
+                    separator={<span style={{ color: "white" }}>/</span>}>
+                    {breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
+                      <span
+                        key={index}
+                        className="breadcrumb avail"
+                        onClick={() => handleFolderNavigate(index)}>
+                        {breadcrumb}
+                      </span>
+                    ))}
+                    <span className="breadcrumb">
+                      {breadcrumbs.slice(-1)[0]}
+                    </span>
+                  </Breadcrumbs>
+                )}
+              </span>
+              {item.Owner === wallet.publicKey.toString() && !onSelect && (
+                <Stack direction="row" justifyContent="right" spacing={2}>
+                  <Button
+                    className="cbtn"
+                    style={{ width: 100 }}
+                    component="label"
+                    role={undefined}
+                    tabIndex={-1}>
+                    Upload File
+                    <input
+                      type="file"
+                      id="uploadFile"
+                      style={{ display: "none" }}
+                      onClick={(e) => (e.target.value = null)}
+                      onChange={(e) => setFiles(e.target.files)}
+                    />
+                  </Button>
+                  <Button
+                    className="cbtn"
+                    style={{ width: 120 }}
+                    component="label"
+                    role={undefined}
+                    tabIndex={-1}>
+                    Upload Folder
+                    <input
+                      type="file"
+                      id="uploadFolder"
+                      style={{ display: "none" }}
+                      onClick={(e) => (e.target.value = null)}
+                      onChange={(e) => setFiles(e.target.files)}
+                      webkitdirectory="true"
+                    />
+                  </Button>
+                  <Button
+                    className="cbtn"
+                    style={{ width: 120 }}
+                    onClick={() => setDialog(true)}>
+                    Create Folder
+                  </Button>
+                </Stack>
+              )}
+            </Stack>
             <Table>
               <TableBody>
-                {currentPrefix !== initialPrefix && (
+                {currentPrefix !== initialPrefix ? (
                   <TableRow>
-                    <TableCell width="20%">
+                    {onSelect && <TableCell width="5%" />}
+                    <TableCell>
                       <Folder />
                       <span
                         onClick={() => {
@@ -184,83 +237,83 @@ function FileList({ className, prefix, id, onSelect, upload }) {
                       </span>
                     </TableCell>
                     <TableCell />
-                    <TableCell />
                   </TableRow>
+                ) : (
+                  list.length === 0 && (
+                    <div className="empty">
+                      <span style={{ color: "#797979" }}>No item yet</span>
+                    </div>
+                  )
                 )}
-                {folders.map((folder) => (
-                  <TableRow key={folder.Prefix}>
-                    <TableCell width="20%">
-                      <Folder />
-                      <span
-                        onClick={() => setPrefix(folder.Prefix)}
-                        style={{ marginLeft: 8, cursor: "pointer" }}>
-                        {folder.Prefix.replace(currentPrefix, "")}
-                      </span>
-                    </TableCell>
-                    <TableCell />
-                    <TableCell />
-                  </TableRow>
-                ))}
-                {files.map(
-                  (file) =>
-                    file.Key !== currentPrefix && (
-                      <TableRow key={file.Key}>
+                {list
+                  .sort((a, b) => {
+                    if (!("size" in a) && !("size" in b)) {
+                      return 0;
+                    } else if (!("size" in a)) {
+                      return -1;
+                    } else if (!("size" in b)) {
+                      return 1;
+                    } else {
+                      return 0;
+                    }
+                  })
+                  .map((item) => {
+                    const isSelected =
+                      selectedCid.indexOf(item.cid.toString()) !== -1;
+                    return (
+                      <TableRow key={item.name} selected={isSelected}>
                         {onSelect && (
                           <TableCell width="5%">
                             <Checkbox
-                              checked={downloadLinks.includes(
-                                `https://distriai.s3.ap-northeast-2.amazonaws.com/${file.Key}`
-                              )}
-                              onChange={(e) => handleSelection(e, file.Key)}
+                              checked={isSelected}
+                              onChange={() => handleSelection(item)}
                             />
                           </TableCell>
                         )}
-                        <TableCell width="20%">
-                          <InsertDriveFile />
-                          <span style={{ marginLeft: 8 }}>
-                            {file.Key.replace(currentPrefix, "")}
-                          </span>
-                        </TableCell>
-                        <TableCell align="right">
-                          <a
+                        <TableCell>
+                          {item.type === "file" ? (
+                            <InsertDriveFile />
+                          ) : (
+                            item.type === "directory" && <Folder />
+                          )}
+                          <span
                             style={{
-                              display: "inline",
+                              marginLeft: 8,
+                              cursor: item.type === "directory" && "pointer",
                             }}
-                            href={`https://distriai.s3.ap-northeast-2.amazonaws.com/${file.Key}`}
-                            download>
-                            <ArrowDownward />
-                            <span className="size">
-                              {prettyBytes(file.Size)}
-                            </span>
-                          </a>
+                            onClick={() =>
+                              item.type === "directory" &&
+                              setPrefix(`${currentPrefix}/${item.name}`)
+                            }>
+                            {item.name}
+                          </span>
                         </TableCell>
-                        <TableCell align="right">
-                          <span className="date">
-                            {new Date(file.LastModified).toLocaleDateString()}
-                          </span>
-                          <span className="time">
-                            {new Date(file.LastModified).toLocaleTimeString()}
-                          </span>
+                        <TableCell>
+                          {item.size !== 0 && (
+                            <span
+                              style={{ cursor: "pointer" }}
+                              onClick={() => handleDownload(item)}>
+                              <ArrowDownward />
+                              <span className="size">
+                                {prettyBytes(item.size)}
+                              </span>
+                            </span>
+                          )}
                         </TableCell>
                       </TableRow>
-                    )
-                )}
+                    );
+                  })}
               </TableBody>
             </Table>
           </TableContainer>
-        ) : (
-          <div className="empty">
-            <span>No file uploaded yet</span>
-          </div>
         )}
       </Stack>
       <Dialog open={createFolderDialog} fullWidth maxWidth="sm">
         <DialogTitle>Input folder name here:</DialogTitle>
         <DialogContent>
           <TextField
-            onChange={(e) => {
-              setFolderName(e.target.value);
-            }}
+            value={folderName}
+            onChange={(e) => setName(e.target.value)}
             InputProps={{
               style: {
                 color: "black",
@@ -270,13 +323,20 @@ function FileList({ className, prefix, id, onSelect, upload }) {
         </DialogContent>
         <DialogActions>
           <Button
+            disabled={creating}
             className="default-btn"
-            onClick={() => setCreateFolderDialog(false)}>
+            onClick={() => {
+              setDialog(false);
+              setName("");
+            }}>
             Cancel
           </Button>
-          <Button className="default-btn" onClick={handleFolderCreate}>
-            Create
-          </Button>
+          <LoadingButton
+            loading={creating}
+            className="default-btn"
+            onClick={handleFolderCreate}>
+            {!creating && "Create"}
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </div>
@@ -289,16 +349,9 @@ export default styled(FileList)`
     display: block;
     height: 100%;
   }
-  .date,
-  .time {
-    display: block;
-  }
-  .time {
-    color: #aaa;
-  }
   .size {
     display: inline-block;
-    width: 64px;
+    margin-left: 8px;
   }
   .empty {
     width: 100%;
@@ -306,5 +359,16 @@ export default styled(FileList)`
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  .breadcrumb {
+    color: white;
+  }
+  .breadcrumb.avail {
+    color: #797979;
+    cursor: pointer;
+    &:hover {
+      color: white;
+      text-decoration: underline;
+    }
   }
 `;

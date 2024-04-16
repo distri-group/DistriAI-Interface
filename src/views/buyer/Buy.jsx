@@ -192,43 +192,47 @@ function Buy({ className }) {
                     placeholder="Must be 4-45 characters"
                   />
                 </Grid>
-                <Grid item md={6}>
-                  <label>Model</label>
-                </Grid>
-                <Grid item md={6}>
-                  <label>Usage</label>
-                </Grid>
-                <Grid item md={6}>
-                  <Select
-                    fullWidth
-                    onChange={(e) => {
-                      handleChange(e);
-                      setFormValue((prevState) => ({
-                        ...prevState,
-                        downloadLinks: [],
-                      }));
-                    }}
-                    name="model"
-                    value={formValue.model}>
-                    {models.map((model) => (
-                      <MenuItem value={model.Id} key={model.Id}>
-                        {model.Name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-                <Grid item md={6}>
-                  <Select
-                    disabled={!formValue.model}
-                    required={Boolean(formValue.model)}
-                    fullWidth
-                    value={formValue.usage}
-                    name="usage"
-                    onChange={handleChange}>
-                    <MenuItem value="train">Training</MenuItem>
-                    <MenuItem value="deploy">Deploy</MenuItem>
-                  </Select>
-                </Grid>
+                {state.model && (
+                  <>
+                    <Grid item md={6}>
+                      <label>Model</label>
+                    </Grid>
+                    <Grid item md={6}>
+                      <label>Usage</label>
+                    </Grid>
+                    <Grid item md={6}>
+                      <Select
+                        fullWidth
+                        onChange={(e) => {
+                          handleChange(e);
+                          setFormValue((prevState) => ({
+                            ...prevState,
+                            downloadLinks: [],
+                          }));
+                        }}
+                        name="model"
+                        value={formValue.model}>
+                        {models.map((model) => (
+                          <MenuItem value={model.Id} key={model.Id}>
+                            {model.Name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Grid>
+                    <Grid item md={6}>
+                      <Select
+                        disabled={!formValue.model}
+                        required={Boolean(formValue.model)}
+                        fullWidth
+                        value={formValue.usage}
+                        name="usage"
+                        onChange={handleChange}>
+                        <MenuItem value="train">Training</MenuItem>
+                        <MenuItem value="deploy">Deploy</MenuItem>
+                      </Select>
+                    </Grid>
+                  </>
+                )}
                 {formValue.usage === "train" && formValue.model && (
                   <>
                     <Grid item md={12}>
@@ -237,8 +241,8 @@ function Buy({ className }) {
                     <Grid item md={12}>
                       {selectedModel && (
                         <FileList
-                          prefix={prefix}
-                          id={formValue.model}
+                          item={selectedModel}
+                          type="model"
                           onSelect={handleFileSelect}
                         />
                       )}

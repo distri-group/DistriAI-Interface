@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import styled from "styled-components";
 import types from "@/services/types.json";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
 import { licenses, frameworks, createModel } from "@/services/model.js";
@@ -17,17 +17,19 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { LoadingButton } from "@mui/lab";
 import { CloudUpload } from "@mui/icons-material";
 import { capitalize } from "lodash";
-import { sizes } from "@/services/dataset.js";
+import { scales } from "@/services/dataset.js";
 import prettyBytes from "pretty-bytes";
+import { createDataset } from "@/services/dataset.js";
+import useIpfs from "@/utils/useIpfs.js";
 
 function Create({ className, type }) {
   document.title = `Create ${capitalize(type)}`;
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
+  const { client } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
   const [formValue, setFormValue] = useState({
     Name: "",
-    Framework: "",
     License: "",
     Type1: "",
     Type2: "",
@@ -49,24 +51,54 @@ function Create({ className, type }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await createModel(
-        {
-          ...formValue,
-          Tags: formValue.Tags.toString(),
-        },
-        wallet.publicKey.toString()
-      );
-      if (res.Msg === "success") {
-        enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
-        setTimeout(() => {
-          navigate(`/${type}`);
-        }, 300);
+      if (type === "model") {
+        await createModel(
+          {
+            ...formValue,
+            Tags: formValue.Tags.toString(),
+          },
+          wallet.publicKey.toString()
+        );
+      } else {
+        await createDataset(
+          {
+            ...formValue,
+            Tags: formValue.Tags.toString(),
+          },
+          wallet.publicKey.toString()
+        );
       }
-    } catch (e) {
-      console.log(e);
+      if (selectedFile) {
+        const file = await client.add(selectedFile);
+        await client.files.cp(
+          file.cid,
+          `/distri.ai/${type}/${wallet.publicKey.toString()}/${
+            formValue.Name
+          }/README.md`,
+          { parents: true }
+        );
+      } else {
+        await client.files.mkdir(
+          `/distri.ai/${type}/${wallet.publicKey.toString()}/${formValue.Name}`,
+          { parents: true }
+        );
+      }
+      enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
+      setTimeout(() => {
+        navigate(`/${type}`);
+      }, 300);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
   }
+  useEffect(() => {
+    if (type === "model") {
+      setFormValue((prevState) => ({ ...prevState, Framework: "" }));
+    } else {
+      setFormValue((prevState) => ({ ...prevState, Scale: "" }));
+    }
+  }, [type]);
   return (
     <div className={className}>
       <h1>Create a new {type}</h1>
@@ -104,13 +136,13 @@ function Create({ className, type }) {
               </Select>
             ) : (
               <Select
-                name="Size"
+                name="Scale"
                 defaultValue=""
                 onChange={handleChange}
                 fullWidth>
-                {sizes.map((size, index) => (
-                  <MenuItem key={size} value={index + 1}>
-                    {size}
+                {scales.map((scale, index) => (
+                  <MenuItem key={scale} value={index + 1}>
+                    {scale}
                   </MenuItem>
                 ))}
               </Select>
@@ -188,6 +220,7 @@ function Create({ className, type }) {
                 type="file"
                 id="fileInput"
                 style={{ display: "none" }}
+                onClick={(e) => (e.target.value = null)}
                 onChange={(e) => setSelectedFile(e.target.files[0])}
               />
             </Button>
