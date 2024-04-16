@@ -2,6 +2,7 @@ import axios from "@/utils/axios.js";
 import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
 import { getProvider } from "@/utils/index.js";
+import { scales } from "./dataset.js";
 
 const baseUrl = "/model";
 
@@ -42,6 +43,7 @@ export async function getModelDetail(owner, name) {
 export async function createModel(model, publicKey) {
   const apiUrl = baseUrl + "/create";
   const token = await login(publicKey);
+  console.log(token);
   const headers = {
     Authorization: token,
   };
@@ -73,22 +75,45 @@ export async function generatePresignUrl(Id, FilePath, publicKey) {
 }
 
 export async function login(publicKey) {
-  if (localStorage.getItem("token")) return localStorage.getItem("token");
-  const apiUrl = "/user/login";
-  const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
-  const provider = getProvider();
-  const sign = await provider.signMessage(encodeMsg, "utf8");
-  const Signature = utils.bytes.bs58.encode(sign.signature);
-  const body = {
-    Account: publicKey,
-    Signature,
-  };
-  try {
-    const res = await axios.post(apiUrl, body);
-    localStorage.setItem("token", res);
-    return res;
-  } catch (error) {
-    throw error;
+  if (localStorage.getItem("token")) {
+    let token;
+    try {
+      token = JSON.parse(localStorage.getItem("token"));
+      if (token.expired > Date.now()) {
+        return token.value;
+      } else {
+        localStorage.removeItem("token");
+        login(publicKey);
+      }
+    } catch (error) {
+      localStorage.removeItem("token");
+      login(publicKey);
+    }
+  } else {
+    const apiUrl = "/user/login";
+    const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
+    const provider = getProvider();
+    const sign = await provider.signMessage(encodeMsg, "utf8");
+    const Signature = utils.bytes.bs58.encode(sign.signature);
+    const body = {
+      Account: publicKey,
+      Signature,
+    };
+    try {
+      const res = await axios.post(apiUrl, body);
+      const now = new Date();
+      const expirationTime = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
+      localStorage.setItem(
+        "token",
+        JSON.stringify({
+          value: res,
+          expired: new Date(expirationTime).getTime(),
+        })
+      );
+      return res;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
@@ -113,22 +138,23 @@ export async function fileUpload(url, file) {
   }
 }
 
-export async function formatItem(model) {
-  if (model.Tags.includes(",")) {
-    model.Tags = model.Tags.split(",");
-  } else if (!model.Tags.length) model.Tags = null;
+export async function formatItem(item) {
+  if (item.Tags.includes(",")) {
+    item.Tags = item.Tags.split(",");
+  } else if (!item.Tags.length) item.Tags = null;
   else {
-    model.Tags = [model.Tags];
+    item.Tags = [item.Tags];
   }
-  model.license = licenses[model.License - 1];
-  if (model.Framework) model.framework = frameworks[model.Framework - 1];
-  model.type1 = types[model.Type1 - 1].title;
-  model.type2 = types[model.Type1 - 1].items[model.Type2 - 1];
-  model.expanded = false;
-  const [likes, downloads] = generateNumbers(model.Name);
-  model.likes = likes;
-  model.downloads = downloads;
-  return model;
+  item.license = licenses[item.License - 1];
+  if (item.Framework) item.framework = frameworks[item.Framework - 1];
+  if (item.Scale) item.scale = scales[item.Scale - 1];
+  item.type1 = types[item.Type1 - 1].title;
+  item.type2 = types[item.Type1 - 1].items[item.Type2 - 1];
+  item.expanded = false;
+  const [likes, downloads] = generateNumbers(item.Name);
+  item.likes = likes;
+  item.downloads = downloads;
+  return item;
 }
 
 function hashString(input) {
