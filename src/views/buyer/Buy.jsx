@@ -18,6 +18,7 @@ import DeviceCard from "@/components/DeviceCard.jsx";
 import FileList from "@/components/FileList.jsx";
 import { getMachineDetail } from "@/services/machine.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
+import useIpfs from "@/utils/useIpfs.js";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -35,12 +36,12 @@ function Buy({ className }) {
     taskName: "",
     usage: "train",
     model: "",
-    downloadLinks: [],
   });
+  const [filesToUpload, setFiles] = useState([]);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState({});
-  const [prefix, setPrefix] = useState("");
+  const { methods: ipfsMethods } = useIpfs();
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -50,11 +51,9 @@ function Buy({ className }) {
       setSelectedModel(models.find((model) => model.Id === parseInt(value)));
     }
   }
-  function handleFileSelect(files) {
-    setFormValue((prevState) => ({ ...prevState, downloadLinks: files }));
-  }
   async function onSubmit(e) {
     e.preventDefault();
+    const res = await ipfsMethods.jsonUpload(filesToUpload);
     const MachineInfo = {
       Uuid: deviceDetail.Uuid,
       Provider: deviceDetail.Provider,
@@ -75,7 +74,7 @@ function Buy({ className }) {
     const OrderInfo = {
       Model: formValue.model,
       Intent: formValue.usage || "train",
-      DownloadURL: formValue.downloadLinks,
+      DownloadURL: [res.cid.toString()],
     };
     const machinePublicKey = methods.getMachinePublicKey(
       deviceDetail.Uuid,
@@ -152,9 +151,6 @@ function Buy({ className }) {
     }
     // eslint-disable-next-line
   }, [wallet, id, state]);
-  useEffect(() => {
-    setPrefix(`model/${selectedModel.Owner}/${selectedModel.Name}/`);
-  }, [selectedModel]);
   return (
     <div className={className}>
       {loading ? (
@@ -243,7 +239,7 @@ function Buy({ className }) {
                         <FileList
                           item={selectedModel}
                           type="model"
-                          onSelect={handleFileSelect}
+                          // onSelect={(files) => setFiles(files)}
                         />
                       )}
                     </Grid>
@@ -281,10 +277,8 @@ function Buy({ className }) {
 }
 
 export default styled(Buy)`
-  width: 1200px;
-  margin: 0 auto;
   .container {
-    width: 750px;
+    width: 100%;
     h1 {
       font-weight: 700;
       font-style: normal;

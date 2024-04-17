@@ -27,11 +27,9 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { signToken } from "@/services/order.js";
 import { useSnackbar } from "notistack";
 import { AccountBalance } from "@mui/icons-material";
-import axios from "axios";
 import { getDatasetDetail } from "@/services/dataset.js";
 import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
-import { create } from "kubo-rpc-client";
 
 function Detail({ className, type }) {
   document.title = `${capitalize(type)} Detail`;
@@ -46,7 +44,7 @@ function Detail({ className, type }) {
   const [metadata, setMetadata] = useState("");
   const [signing, setSigning] = useState(false);
   const [dialog, setDialog] = useState("");
-  const client = create({ url: "https://ipfs.distri.ai/rpc/api/v0" });
+  const { client } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
 
   function handleTabChange(e, newValue) {

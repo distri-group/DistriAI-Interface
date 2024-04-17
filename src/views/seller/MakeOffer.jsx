@@ -155,9 +155,6 @@ function MakeOffer({ className }) {
 }
 
 export default styled(MakeOffer)`
-  display: block;
-  width: 1200px;
-  margin: 0 auto;
   .container {
     width: 750px;
     label {

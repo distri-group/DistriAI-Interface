@@ -33,7 +33,12 @@ function NavBar({ className }) {
   return (
     <div className={className}>
       <div className="con">
-        <div style={{ display: "flex", height: "28px" }}>
+        <div
+          style={{
+            display: "flex",
+            height: "28px",
+            justifyContent: "space-between",
+          }}>
           <img
             className="logo"
             src="/img/logo.png"
@@ -105,13 +110,14 @@ export default styled(NavBar)`
   width: 100%;
   height: 56px;
   line-height: 56px;
+  margin-bottom: 40px;
+  padding: 32px 0;
   display: block;
   .wallet-adapter-button-trigger {
     background-color: transparent !important;
     margin-top: 8px !important;
   }
   .con {
-    width: 1200px;
     background-color: transparent;
     display: flex;
     justify-content: space-between;
@@ -121,7 +127,6 @@ export default styled(NavBar)`
     height: 56px;
     .logo {
       width: 120px;
-      margin-left: 20px;
       cursor: pointer;
     }
     .content-nav {
@@ -139,7 +144,6 @@ export default styled(NavBar)`
       }
     }
     .right-btn {
-      margin-right: 20px;
       position: relative;
       top: 0;
     }

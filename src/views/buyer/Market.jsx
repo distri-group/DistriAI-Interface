@@ -115,22 +115,17 @@ function Market({ className }) {
 }
 
 export default styled(Market)`
-  width: 1200px;
-  margin: 10px auto;
-  padding: 0 20px;
+  width: 100%;
   .title {
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 44px;
+    text-align: left;
     font-style: normal;
-    font-size: 28px;
-    padding-left: 36px;
-    background-image: url(/img/market/market.png);
-    background-repeat: no-repeat;
-    background-size: 20px;
-    background-position: left;
-    margin-top: 25px;
+    margin: 0;
   }
   .filter {
-    padding: 11px 0;
+    padding: 24px 0;
     display: flex;
     flex-direction: row;
     line-height: 30px;

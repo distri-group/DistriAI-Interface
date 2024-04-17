@@ -114,10 +114,6 @@ export default styled(MyOrder)`
     }
   }
   .con {
-    width: 1200px;
-    padding: 0 20px;
-    margin: 10px auto;
-    display: block;
     .title {
       font-weight: 700;
       font-style: normal;

@@ -26,7 +26,7 @@ function Create({ className, type }) {
   document.title = `Create ${capitalize(type)}`;
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
-  const { client } = useIpfs();
+  const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
   const [formValue, setFormValue] = useState({
     Name: "",
@@ -69,18 +69,14 @@ function Create({ className, type }) {
         );
       }
       if (selectedFile) {
-        const file = await client.add(selectedFile);
-        await client.files.cp(
-          file.cid,
-          `/distri.ai/${type}/${wallet.publicKey.toString()}/${
-            formValue.Name
-          }/README.md`,
-          { parents: true }
+        await methods.fileUpload(
+          `/distri.ai/${type}/${wallet.publicKey.toString()}/${formValue.Name}`,
+          selectedFile
         );
       } else {
-        await client.files.mkdir(
-          `/distri.ai/${type}/${wallet.publicKey.toString()}/${formValue.Name}`,
-          { parents: true }
+        await methods.createFolder(
+          `/distri.ai/${type}`,
+          `${wallet.publicKey.toString()}/${formValue.Name}`
         );
       }
       enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
@@ -278,8 +274,6 @@ function Create({ className, type }) {
 }
 
 export default styled(Create)`
-  width: 1200px;
-  margin: 0 auto;
   form {
     width: 50%;
   }

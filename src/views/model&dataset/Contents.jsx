@@ -32,6 +32,7 @@ function Contents({ className, type }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [connectModal, setModal] = useState(false);
+  const [search, setSearch] = useState("");
   const wallet = useAnchorWallet();
   let inputTimer;
   function onFilter(e) {
@@ -138,12 +139,8 @@ function Contents({ className, type }) {
             <Stack direction="row" alignItems="end" spacing={2}>
               <span>Filter</span>
               <TextField
-                onChange={(e) => {
-                  clearTimeout(inputTimer);
-                  inputTimer = setTimeout(() => {
-                    onFilter(e);
-                  }, 1000);
-                }}
+                onChange={onFilter}
+                value={filterValue.Name}
                 name="Name"
                 size="small"
                 placeholder="Search By Name"
@@ -210,8 +207,6 @@ function Contents({ className, type }) {
 }
 
 export default styled(Contents)`
-  width: 1200px;
-  margin: 0 auto;
   h1 {
     padding-left: 40px;
     background-image: ${(props) => `url(/img/market/${props.type}.svg)`};
@@ -223,13 +218,13 @@ export default styled(Contents)`
     display: flex;
     justify-content: space-between;
     .left {
-      width: 250px;
+      width: 340px;
       h2 {
         font-size: 20px;
       }
     }
     .right {
-      width: 800px;
+      width: 1200px;
     }
   }
   .reset {

@@ -132,15 +132,8 @@ function MyDevice({ className }) {
 }
 
 export default styled(MyDevice)`
-  display: block;
-  width: 100%;
-  min-height: calc(100% - 160px);
-  color: #fff;
   .con {
-    width: 1200px;
-    margin: 10px auto;
-    display: block;
-    padding: 0 20px;
+    width: 100%;
     .title {
       font-weight: 700;
       font-style: normal;

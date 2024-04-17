@@ -195,11 +195,6 @@ function Earning({ className }) {
 }
 
 export default styled(Earning)`
-  color: white;
-  width: 1200px;
-  min-height: calc(100% - 162px);
-  margin: 10px auto;
-  padding: 0 20px;
   h1 {
     font-weight: 700;
     font-style: normal;
@@ -275,9 +270,8 @@ export default styled(Earning)`
     display: block;
     margin: 0;
     border-radius: 100%;
-    background-color: white;
     background-image: url(/img/token.png);
-    background-size: 70%;
+    background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
     width: 24px;

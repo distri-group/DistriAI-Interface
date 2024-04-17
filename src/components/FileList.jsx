@@ -1,6 +1,7 @@
 import { ArrowDownward, Folder, InsertDriveFile } from "@mui/icons-material";
 import {
   Button,
+  Box,
   Breadcrumbs,
   Checkbox,
   CircularProgress,
@@ -8,6 +9,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
+  LinearProgress,
+  Modal,
   Stack,
   Table,
   TableBody,
@@ -19,25 +23,27 @@ import {
 import { LoadingButton } from "@mui/lab";
 import styled from "styled-components";
 import prettyBytes from "pretty-bytes";
-import { useEffect, useState } from "react";
-import { create } from "kubo-rpc-client";
+import React, { useEffect, useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import useIpfs from "@/utils/useIpfs.js";
-import { uniq, uniqBy } from "lodash";
+import { useSnackbar } from "notistack";
 
 function FileList({ className, item, type, onSelect }) {
   const initialPrefix = `/distri.ai/${type}/${item.Owner}/${item.Name}`;
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState([]);
+  const [folderCid, setFolderCid] = useState("");
   const [createFolderDialog, setDialog] = useState(false);
   const [creating, setCreating] = useState(false);
   const [folderName, setName] = useState("");
   const [filesToUpload, setFiles] = useState([]);
-  const [selectedCid, setSelectedCid] = useState([]);
+  const [uploadProgress, setProgress] = useState([]);
+  const [selectedItems, setItems] = useState([]);
   const [currentPrefix, setPrefix] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
-  const { client, methods } = useIpfs();
+  const { methods } = useIpfs();
+  const { enqueueSnackbar } = useSnackbar();
 
   const getParentPrefix = (prefix) => {
     const lastIndex = prefix.lastIndexOf("/", prefix.length - 2);
@@ -47,57 +53,52 @@ function FileList({ className, item, type, onSelect }) {
     const parentPrefix = prefix.slice(0, lastIndex);
     return parentPrefix;
   };
+
   const loadFiles = async (prefix) => {
     setLoading(true);
-    const list = [];
     try {
-      for await (const res of client.files.ls(prefix)) {
-        list.push(res);
-      }
+      const { files: list, cid } = await methods.getFolderList(prefix);
+      setList(list);
+      setFolderCid(cid);
     } catch (error) {
       if (error.message === "file does not exist" && prefix === initialPrefix) {
         await methods.createFolder(prefix);
       }
     }
-    setList(list);
     setLoading(false);
   };
+
+  // Create folder
   const handleFolderCreate = async () => {
     setCreating(true);
-    await methods.createFolder(currentPrefix, folderName);
+    try {
+      await methods.createFolder(currentPrefix, folderName);
+      setName("");
+      setDialog(false);
+      await loadFiles(currentPrefix);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
     setCreating(false);
-    setName("");
-    setDialog(false);
-    await loadFiles(currentPrefix);
   };
-  const handleDownload = async (item) => {
-    let concatenatedBuf = new Uint8Array();
-    for await (const buf of client.files.read(
-      currentPrefix + "/" + item.name
-    )) {
-      concatenatedBuf = new Uint8Array([...concatenatedBuf, ...buf]);
-    }
-    const blob = new Blob([concatenatedBuf], {
-      type: "application/octet-stream",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = item.name;
 
-    link.click();
-    URL.revokeObjectURL(url);
-  };
   const handleSelection = async (item) => {
-    const selectedIndex = selectedCid.indexOf(item.cid.toString());
+    const selectedIndex = selectedItems.findIndex(
+      (selectedItem) => selectedItem.cid === item.cid.toString()
+    );
+    const selectedItem = {
+      name: item.name,
+      cid: item.cid.toString(),
+    };
     let newSelected = [];
-
     if (selectedIndex === -1) {
-      newSelected = [...selectedCid, item.cid.toString()];
+      newSelected = [...selectedItems, selectedItem];
     } else {
-      newSelected = selectedCid.filter((id) => id !== item.cid.toString());
+      newSelected = selectedItems.filter(
+        (selectedItem) => selectedItem.cid !== item.cid.toString()
+      );
     }
-    setSelectedCid(newSelected);
+    setItems(newSelected);
   };
   const handleFolderNavigate = (index) => {
     let suffix;
@@ -106,10 +107,14 @@ function FileList({ className, item, type, onSelect }) {
     } else suffix = breadcrumbs[index];
     setPrefix(initialPrefix + "/" + suffix);
   };
+  const handleUploadProgress = (bytes, total) => {
+    const progress = Math.floor((bytes / total) * 100 * 100) / 100;
+    return progress;
+  };
   useEffect(() => {
     if (currentPrefix) {
-      loadFiles(currentPrefix);
       if (currentPrefix !== initialPrefix) {
+        loadFiles(currentPrefix);
         const suffix = currentPrefix.split(initialPrefix)[1];
         const items = suffix.split("/").slice(1);
         setBreadcrumbs(items);
@@ -117,12 +122,14 @@ function FileList({ className, item, type, onSelect }) {
         setBreadcrumbs([]);
       }
     }
+    // eslint-disable-next-line
   }, [currentPrefix]);
   useEffect(() => {
     if (onSelect) {
-      onSelect(selectedCid);
+      onSelect(selectedItems);
     }
-  }, [onSelect, selectedCid]);
+    // eslint-disable-next-line
+  }, [selectedItems]);
   useEffect(() => {
     try {
       loadFiles(initialPrefix);
@@ -130,27 +137,61 @@ function FileList({ className, item, type, onSelect }) {
     } catch (error) {
       console.log(error);
     }
+    // eslint-disable-next-line
   }, []);
   useEffect(() => {
     const handleUpload = async () => {
-      const files = Array.from(filesToUpload).map((file) => ({
-        path: file.webkitRelativePath || file.name,
-        content: file,
-      }));
-      for await (const res of client.addAll(files, { parents: true })) {
-        // console.log(res);
-        try {
-          await client.files.cp(res.cid, currentPrefix + "/" + res.path, {
-            parents: true,
+      enqueueSnackbar("Start uploading", { variant: "info" });
+      try {
+        if (filesToUpload.length > 1) {
+          await methods.folderUpload(
+            currentPrefix,
+            filesToUpload,
+            (bytes, path) => {
+              setProgress((prevState) => {
+                const newProgress = prevState.map((item) => {
+                  if (item.path === path) {
+                    return {
+                      ...item,
+                      progress: handleUploadProgress(bytes, item.size),
+                    };
+                  }
+                  return item;
+                });
+                return newProgress;
+              });
+            }
+          );
+        } else {
+          await methods.fileUpload(currentPrefix, filesToUpload[0], (bytes) => {
+            const progress = handleUploadProgress(bytes, filesToUpload[0].size);
+            setProgress((prevState) => {
+              const newProgress = [...prevState];
+              newProgress[0].progress = progress;
+              return newProgress;
+            });
           });
-        } catch (error) {}
+        }
+        enqueueSnackbar("Upload success", { variant: "success" });
+      } catch (error) {
+        enqueueSnackbar(error.message, { variant: "error" });
       }
+      setFiles([]);
       await loadFiles(currentPrefix);
     };
     if (filesToUpload.length > 0) {
+      setProgress(
+        Array.from(filesToUpload).map((file) => ({
+          path: file.webkitRelativePath || file.name,
+          size: file.size,
+          progress: 0,
+        }))
+      );
       handleUpload();
     }
+    // eslint-disable-next-line
   }, [filesToUpload]);
+
   return (
     <div className={className}>
       <Stack direction="column">
@@ -181,7 +222,7 @@ function FileList({ className, item, type, onSelect }) {
                   </Breadcrumbs>
                 )}
               </span>
-              {item.Owner === wallet.publicKey.toString() && !onSelect && (
+              {item.Owner === wallet.publicKey.toString() && (
                 <Stack direction="row" justifyContent="right" spacing={2}>
                   <Button
                     className="cbtn"
@@ -247,64 +288,56 @@ function FileList({ className, item, type, onSelect }) {
                     </div>
                   )
                 )}
-                {list
-                  .sort((a, b) => {
-                    if (!("size" in a) && !("size" in b)) {
-                      return 0;
-                    } else if (!("size" in a)) {
-                      return -1;
-                    } else if (!("size" in b)) {
-                      return 1;
-                    } else {
-                      return 0;
-                    }
-                  })
-                  .map((item) => {
-                    const isSelected =
-                      selectedCid.indexOf(item.cid.toString()) !== -1;
-                    return (
-                      <TableRow key={item.name} selected={isSelected}>
-                        {onSelect && (
-                          <TableCell width="5%">
+                {list.map((item) => {
+                  const isSelected =
+                    selectedItems.findIndex(
+                      (selectedItem) => item.cid.toString() === selectedItem.cid
+                    ) !== -1;
+                  return (
+                    <TableRow key={item.name} selected={isSelected}>
+                      {onSelect && (
+                        <TableCell width="5%">
+                          {item.type === "file" && (
                             <Checkbox
                               checked={isSelected}
                               onChange={() => handleSelection(item)}
                             />
-                          </TableCell>
+                          )}
+                        </TableCell>
+                      )}
+                      <TableCell>
+                        {item.type === "file" ? (
+                          <InsertDriveFile />
+                        ) : (
+                          item.type === "directory" && <Folder />
                         )}
-                        <TableCell>
-                          {item.type === "file" ? (
-                            <InsertDriveFile />
-                          ) : (
-                            item.type === "directory" && <Folder />
-                          )}
-                          <span
-                            style={{
-                              marginLeft: 8,
-                              cursor: item.type === "directory" && "pointer",
-                            }}
-                            onClick={() =>
-                              item.type === "directory" &&
-                              setPrefix(`${currentPrefix}/${item.name}`)
-                            }>
-                            {item.name}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {item.size !== 0 && (
-                            <span
-                              style={{ cursor: "pointer" }}
-                              onClick={() => handleDownload(item)}>
-                              <ArrowDownward />
-                              <span className="size">
-                                {prettyBytes(item.size)}
-                              </span>
+                        <span
+                          style={{
+                            marginLeft: 8,
+                            cursor: item.type === "directory" && "pointer",
+                          }}
+                          onClick={() =>
+                            item.type === "directory" &&
+                            setPrefix(`${currentPrefix}/${item.name}`)
+                          }>
+                          {item.name}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {item.size !== 0 && (
+                          <a
+                            href={`https://ipfs.distri.ai/ipfs/${folderCid}/${item.name}`}
+                            download={item.name}>
+                            <span className="size">
+                              {prettyBytes(item.size)}
                             </span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                            <ArrowDownward />
+                          </a>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -341,19 +374,57 @@ function FileList({ className, item, type, onSelect }) {
           </LoadingButton>
         </DialogActions>
       </Dialog>
+      <Modal open={true}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 1000,
+            bgcolor: "#00000b",
+            p: 4,
+            zIndex: 300,
+            borderRadius: "8px",
+          }}>
+          <h2 style={{ textAlign: "center" }}>File uploading...</h2>
+          {Array.from(uploadProgress).map((item) => (
+            <React.Fragment key={item.cid}>
+              <h3>{item.path}</h3>
+              <Stack direction="row" spacing={2}>
+                <LinearProgress
+                  variant="determinate"
+                  value={item.progress}
+                  sx={{
+                    width: "80%",
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: "#fff",
+                    "& .MuiLinearProgress-bar": {
+                      backgroundColor: "#bdff95",
+                    },
+                  }}
+                />
+                <span>{item.progress}%</span>
+              </Stack>
+            </React.Fragment>
+          ))}
+        </Box>
+      </Modal>
     </div>
   );
 }
 export default styled(FileList)`
-  width: 100%;
   a {
     color: white;
-    display: block;
+    display: flex;
+    width: 15%;
     height: 100%;
+    align-items: center;
   }
   .size {
     display: inline-block;
-    margin-left: 8px;
+    margin-right: 8px;
   }
   .empty {
     width: 100%;

@@ -64,8 +64,6 @@ function Table({ className, columns, list, loading, empty }) {
 export default styled(Table)`
   .mytable {
     display: table;
-    background-color: #222;
-    border-radius: 10px;
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
@@ -79,19 +77,28 @@ export default styled(Table)`
       cursor: pointer;
       text-decoration: underline;
     }
+    .table-thead {
+      background: rgba(149, 157, 165, 0.16);
+      height: 28px;
+    }
     th {
-      background-color: #151515;
-      color: #fff;
-      height: 40px;
-      line-height: 40px;
+      padding: 18px 40px;
       text-align: left;
-      padding: 0 10px;
-      font-weight: normal;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
+      text-align: left;
+      font-style: normal;
+    }
+    th:first-child {
+      border-radius: 6px 0 0 6px;
+    }
+    th:last-child {
+      border-radius: 0 6px 6px 0;
     }
     tr td {
-      border-bottom: 1px solid #1a1a1a;
+      border-bottom: 1px solid #898989;
       border-collapse: collapse;
-      padding: 0 10px;
       overflow: hidden;
     }
     tr:last-children {

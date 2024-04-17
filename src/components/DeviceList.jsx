@@ -36,20 +36,11 @@ function DeviceList({
         return (
           <div className="provider">
             <Stack direction="row" alignItems="end">
-              <Chip
-                style={{
-                  height: 20,
-                }}
-                size="small"
-                label={`level ${record?.SecurityLevel}`}
-                color={
-                  record.SecurityLevel === 0
-                    ? "primary"
-                    : record.SecurityLevel === 1
-                    ? "success"
-                    : record.SecurityLevel === 2 && "info"
-                }
-              />
+              {(record?.SecurityLevel || record?.SecurityLevel === 0) && (
+                <span className={`level level-${record.SecurityLevel}`}>
+                  Level {record.SecurityLevel}
+                </span>
+              )}
               {onPriceSort ? (
                 <span style={{ marginLeft: 5, lineHeight: "20px" }}>
                   From{" "}
@@ -137,7 +128,7 @@ function DeviceList({
     },
     {
       title: (
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <span>DIST / hr</span>
           {onPriceSort && (
             <div
@@ -271,20 +262,30 @@ export default styled(DeviceList)`
     color: #ffffff;
   }
   .level {
-    margin-bottom: 5px;
-    border-radius: 5px;
-    line-height: 20px;
-    height: 20px;
-    font-size: 12px;
-    padding: 0 15px;
-    color: #333;
+    width: 56px;
+    height: 24px;
+    border-radius: 6px;
+    font-family: AvenirNext, AvenirNext;
+    font-weight: 400;
+    font-size: 16px;
+    color: #0f1d35;
+    line-height: 22px;
+    text-align: left;
+    font-style: normal;
+    padding: 0 11px;
+  }
+  .level-0 {
+    background: #898989;
+  }
+  .level-1,
+  .level-2 {
+    background: #09e98d;
   }
   .token {
     margin: 0;
     border-radius: 100%;
-    background-color: white;
     background-image: url(/img/token.png);
-    background-size: 70%;
+    background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
     width: 24px;

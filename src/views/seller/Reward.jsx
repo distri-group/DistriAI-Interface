@@ -348,11 +348,6 @@ function Reward({ className }) {
 }
 
 export default styled(Reward)`
-  color: white;
-  width: 1200px;
-  margin: 10px auto;
-  min-height: calc(100% - 162px);
-  padding: 0 20px;
   h1 {
     font-weight: 700;
     font-style: normal;
