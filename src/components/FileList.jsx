@@ -30,7 +30,9 @@ import { useSnackbar } from "notistack";
 import { checkDeployable } from "@/services/model.js";
 
 function FileList({ className, item, type, onSelect, onReload }) {
-  const initialPrefix = `/distri.ai/${type}/${item.Owner}/${item.Name}`;
+  const [initialPrefix, setInitialPrefix] = useState(
+    `/distri.ai/${type}/${item.Owner}/${item.Name}`
+  );
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState([]);
@@ -249,6 +251,10 @@ function FileList({ className, item, type, onSelect, onReload }) {
       handleDeploymentFile();
     }
   }, [deployFile]);
+  useEffect(() => {
+    setInitialPrefix(`/distri.ai/${type}/${item.Owner}/${item.Name}`);
+    setPrefix(`/distri.ai/${type}/${item.Owner}/${item.Name}`);
+  }, [item]);
 
   return (
     <div className={className}>

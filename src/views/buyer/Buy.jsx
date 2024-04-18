@@ -44,6 +44,7 @@ function Buy({ className }) {
   const [deployable, setDeployable] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
 
+  // form value changed. Get the model user selected to know if this model is deployable.
   function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
@@ -52,6 +53,7 @@ function Buy({ className }) {
       setSelectedModel(models.find((model) => model.Id === parseInt(value)));
     }
   }
+
   async function onSubmit(e) {
     e.preventDefault();
     const MachineInfo = {
@@ -76,6 +78,7 @@ function Buy({ className }) {
       Intent: formValue.usage || "train",
       DownloadURL: [],
     };
+    // generate files for client to donwload list json from filesToUpload.
     if (filesToUpload.length > 0) {
       const res = await ipfsMethods.jsonUpload(filesToUpload);
       OrderInfo.DownloadURL.push(res.cid.toString());
@@ -111,40 +114,12 @@ function Buy({ className }) {
     }
     setSubmitting(false);
   }
-
+  // update filesToUpload if order intent is deploy which includes the deployment scripts
   useEffect(() => {
     if (formValue.duration && deviceDetail.Price) {
-      setAmount(formValue.duration * deviceDetail.Price);
+      setAmount(parseFloat(formValue.duration) * deviceDetail.Price);
     }
-    const getDeployFile = async () => {
-      const { files } = await ipfsMethods.getFolderList(
-        `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
-      );
-      setFiles([
-        {
-          name: files[0].name,
-          cid: files[0].cid.toString(),
-        },
-      ]);
-    };
-    if (formValue.usage === "deploy") {
-      // setFiles([
-      //   {
-      //     name: "deploy-stabilityai.py",
-      //     cid: "QmQwiAt4EmsT5Eb8aAk7bBFJEZwqFe9TrWB2ZvTfDJXQ2J",
-      //   },
-      //   {
-      //     name: "deploy-stabilityai.py",
-      //     cid: "QmQwiAt4EmsT5Eb8aAk7bBFJEZwqFe9TrWB2ZvTfDJXQ2J",
-      //   },
-      //   {
-      //     name: "deploy-stabilityai.py",
-      //     cid: "QmQwiAt4EmsT5Eb8aAk7bBFJEZwqFe9TrWB2ZvTfDJXQ2J",
-      //   },
-      // ]);
-      getDeployFile();
-    }
-  }, [formValue, deviceDetail, selectedModel]);
+  }, [formValue, deviceDetail]);
   useEffect(() => {
     async function init() {
       setLoading(true);
@@ -184,17 +159,34 @@ function Buy({ className }) {
     // eslint-disable-next-line
   }, [wallet, id, state]);
   useEffect(() => {
-    const isDeployable = async () => {
-      const deployable = await checkDeployable(selectedModel);
-      setDeployable(deployable);
-      if (!deployable) {
-        setFormValue((prevState) => ({ ...prevState, usage: "train" }));
+    const handleModelChange = async () => {
+      // Check if selectedModel is empty
+      if (JSON.stringify(selectedModel) !== "{}") {
+        // Check deployability
+        const deployable = await checkDeployable(selectedModel);
+        setDeployable(deployable);
+
+        // Update formValue.usage if not deployable
+        if (!deployable) {
+          setFormValue((prevState) => ({ ...prevState, usage: "train" }));
+        }
+
+        // Fetch deployment files if usage is deploy
+        if (formValue.usage === "deploy" && deployable) {
+          const { files } = await ipfsMethods.getFolderList(
+            `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
+          );
+          setFiles([
+            {
+              name: files[0].name,
+              cid: files[0].cid.toString(),
+            },
+          ]);
+        }
       }
     };
-    if (JSON.stringify(selectedModel) !== "{}") {
-      isDeployable();
-    }
-    // eslint-disable-next-line
+    handleModelChange();
+    // Dependency array: Only runs when selectedModel changes
   }, [selectedModel]);
   return (
     <div className={className}>
