@@ -177,6 +177,23 @@ function Buy({ className }) {
                   />
                 </Grid>
                 <Grid item md={12}>
+                  <div className="gray-item">
+                    <label>Max Duration</label>
+                    <span>
+                      {deviceDetail.MaxDuration > 24
+                        ? `${Math.floor(deviceDetail.MaxDuration / 24)}d ${
+                            deviceDetail.MaxDuration % 24
+                          }`
+                        : deviceDetail.MaxDuration}
+                      h
+                    </span>
+                  </div>
+                  <div className="gray-item">
+                    <label>Price(per hour)</label>
+                    <span>{deviceDetail.Price} DIST</span>
+                  </div>
+                </Grid>
+                <Grid item md={12}>
                   <label>Task Name</label>
                 </Grid>
                 <Grid item md={12}>
@@ -239,7 +256,7 @@ function Buy({ className }) {
                         <FileList
                           item={selectedModel}
                           type="model"
-                          // onSelect={(files) => setFiles(files)}
+                          onSelect={(files) => setFiles(files)}
                         />
                       )}
                     </Grid>
@@ -316,6 +333,15 @@ export default styled(Buy)`
           font-weight: 600;
           text-align: right;
         }
+      }
+    }
+    .gray-item {
+      display: flex;
+      padding: 8px 0;
+      color: #898989;
+      label {
+        display: block;
+        width: 200px;
       }
     }
   }
