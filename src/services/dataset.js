@@ -4,7 +4,7 @@ import { login, formatItem } from "./model.js";
 const baseUrl = "/dataset";
 
 export const getDatasetList = async (pageIndex, pageSize, filter) => {
-  const apiUrl = baseUrl + "info/list";
+  const apiUrl = baseUrl + "/list";
   const body = {
     Page: pageIndex,
     PageSize: pageSize,
@@ -28,7 +28,7 @@ export const getDatasetList = async (pageIndex, pageSize, filter) => {
 };
 
 export const getDatasetDetail = async (owner, name) => {
-  const apiUrl = baseUrl + `info/${owner}/${name}`;
+  const apiUrl = baseUrl + `/${owner}/${name}`;
   try {
     const res = await axios.get(apiUrl);
     return formatItem(res);
