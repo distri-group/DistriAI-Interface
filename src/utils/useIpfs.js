@@ -90,9 +90,9 @@ export default function useIpfs() {
   };
 
   // Delete file from folder
-  const fileDelete = async (path) => {
+  const fileDelete = async (path, recursive) => {
     try {
-      const res = await client.files.rm(path);
+      const res = await client.files.rm(path, { recursive });
       return res;
     } catch (error) {
       throw error;

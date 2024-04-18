@@ -27,6 +27,7 @@ import React, { useEffect, useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
+import { checkDeployable } from "@/services/model.js";
 
 function FileList({ className, item, type, onSelect }) {
   const initialPrefix = `/distri.ai/${type}/${item.Owner}/${item.Name}`;
@@ -42,6 +43,8 @@ function FileList({ className, item, type, onSelect }) {
   const [selectedItems, setItems] = useState([]);
   const [currentPrefix, setPrefix] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
+  const [deployFile, setDeployFile] = useState(null);
+  const [existedDialog, setExistedDialog] = useState(false);
   const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -121,6 +124,32 @@ function FileList({ className, item, type, onSelect }) {
     const progress = Math.floor((bytes / total) * 100 * 100) / 100;
     return progress;
   };
+  const handleDeploymentFileUpload = async (existed) => {
+    if (existed) {
+      await methods.fileDelete(initialPrefix + "/deployment", true);
+    }
+    enqueueSnackbar("Start uploading", { variant: "info" });
+    try {
+      await methods.fileUpload(
+        initialPrefix + "/deployment",
+        deployFile,
+        (bytes) => {
+          const progress = handleUploadProgress(bytes, deployFile.size);
+          setProgress((prevState) => {
+            const newProgress = [...prevState];
+            newProgress[0].progress = progress;
+            return newProgress;
+          });
+        }
+      );
+      enqueueSnackbar("Upload success", { variant: "success" });
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    if (existedDialog) {
+      setExistedDialog(false);
+    }
+  };
   useEffect(() => {
     if (currentPrefix) {
       loadFiles(currentPrefix);
@@ -196,6 +225,26 @@ function FileList({ className, item, type, onSelect }) {
     }
     // eslint-disable-next-line
   }, [filesToUpload]);
+  useEffect(() => {
+    const handleDeploymentFile = async () => {
+      const deployable = await checkDeployable(item);
+      if (deployable) {
+        setExistedDialog(true);
+      } else {
+        handleDeploymentFileUpload();
+      }
+    };
+    if (deployFile) {
+      setProgress([
+        {
+          path: deployFile.name,
+          size: deployFile.size,
+          progress: 0,
+        },
+      ]);
+      handleDeploymentFile();
+    }
+  }, [deployFile]);
 
   return (
     <div className={className}>
@@ -260,6 +309,23 @@ function FileList({ className, item, type, onSelect }) {
                       webkitdirectory="true"
                     />
                   </Button>
+                  {type === "model" && (
+                    <Button
+                      className="cbtn"
+                      style={{ width: 160 }}
+                      component="label"
+                      role={undefined}
+                      tabIndex={-1}>
+                      Upload Deployment Script
+                      <input
+                        type="file"
+                        id="uploadDeployment"
+                        style={{ display: "none" }}
+                        onClick={(e) => (e.target.value = null)}
+                        onChange={(e) => setDeployFile(e.target.files[0])}
+                      />
+                    </Button>
+                  )}
                   <Button
                     className="cbtn"
                     style={{ width: 120 }}
@@ -288,74 +354,83 @@ function FileList({ className, item, type, onSelect }) {
                     <TableCell />
                   </TableRow>
                 ) : (
-                  list.length === 0 && (
+                  list.filter(
+                    (item) =>
+                      !(item.name === "deployment" && item.type === "directory")
+                  ).length === 0 && (
                     <div className="empty">
                       <span style={{ color: "#797979" }}>No item yet</span>
                     </div>
                   )
                 )}
-                {list.map((item) => {
-                  const isSelected =
-                    selectedItems.findIndex(
-                      (selectedItem) => item.cid.toString() === selectedItem.cid
-                    ) !== -1;
-                  return (
-                    <TableRow key={item.name} selected={isSelected}>
-                      {onSelect && (
-                        <TableCell width="5%">
-                          {item.type === "file" && (
-                            <Checkbox
-                              checked={isSelected}
-                              onChange={() => handleSelection(item)}
-                            />
+                {list
+                  .filter(
+                    (item) =>
+                      !(item.name === "deployment" && item.type === "directory")
+                  )
+                  .map((item) => {
+                    const isSelected =
+                      selectedItems.findIndex(
+                        (selectedItem) =>
+                          item.cid.toString() === selectedItem.cid
+                      ) !== -1;
+                    return (
+                      <TableRow key={item.name} selected={isSelected}>
+                        {onSelect && (
+                          <TableCell width="5%">
+                            {item.type === "file" && (
+                              <Checkbox
+                                checked={isSelected}
+                                onChange={() => handleSelection(item)}
+                              />
+                            )}
+                          </TableCell>
+                        )}
+                        <TableCell>
+                          {item.type === "file" ? (
+                            <InsertDriveFile />
+                          ) : (
+                            item.type === "directory" && <Folder />
+                          )}
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              cursor: item.type === "directory" && "pointer",
+                            }}
+                            onClick={() =>
+                              item.type === "directory" &&
+                              setPrefix(`${currentPrefix}/${item.name}`)
+                            }>
+                            {item.name}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {item.size !== 0 && (
+                            <a
+                              href={`https://ipfs.distri.ai/ipfs/${folderCid}/${item.name}`}
+                              download={item.name}>
+                              <span className="size">
+                                {prettyBytes(item.size)}
+                              </span>
+                              <ArrowDownward />
+                            </a>
                           )}
                         </TableCell>
-                      )}
-                      <TableCell>
-                        {item.type === "file" ? (
-                          <InsertDriveFile />
-                        ) : (
-                          item.type === "directory" && <Folder />
-                        )}
-                        <span
-                          style={{
-                            marginLeft: 8,
-                            cursor: item.type === "directory" && "pointer",
-                          }}
-                          onClick={() =>
-                            item.type === "directory" &&
-                            setPrefix(`${currentPrefix}/${item.name}`)
-                          }>
-                          {item.name}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {item.size !== 0 && (
-                          <a
-                            href={`https://ipfs.distri.ai/ipfs/${folderCid}/${item.name}`}
-                            download={item.name}>
-                            <span className="size">
-                              {prettyBytes(item.size)}
-                            </span>
-                            <ArrowDownward />
-                          </a>
-                        )}
-                      </TableCell>
-                      <TableCell align="right">
-                        {item.Owner === wallet.publicKey.toString() &&
-                          !onSelect && (
-                            <Button
-                              className="default-btn"
-                              onClick={() =>
-                                handleDelete(currentPrefix + "/" + item.name)
-                              }>
-                              Delete
-                            </Button>
-                          )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        <TableCell align="right">
+                          {item.Owner === wallet.publicKey.toString() &&
+                            !onSelect && (
+                              <Button
+                                className="default-btn"
+                                onClick={() =>
+                                  handleDelete(currentPrefix + "/" + item.name)
+                                }>
+                                Delete
+                              </Button>
+                            )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -429,6 +504,33 @@ function FileList({ className, item, type, onSelect }) {
           ))}
         </Box>
       </Modal>
+      <Dialog open={existedDialog} fullWidth maxWidth="sm">
+        <DialogTitle>Deployment script already existed</DialogTitle>
+        <DialogContent>
+          <p>
+            You have uploaded a deployment script for your model.
+            <br /> Are you willing to replace it with the file you uploaded just
+            now?
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            className="default-btn"
+            onClick={() => {
+              setExistedDialog(false);
+              setDeployFile(null);
+            }}>
+            Cancel
+          </Button>
+          <Button
+            className="default-btn"
+            onClick={() => {
+              handleDeploymentFileUpload(true);
+            }}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

@@ -130,14 +130,6 @@ function Buy({ className }) {
     if (formValue.duration && deviceDetail.Price) {
       setAmount(formValue.duration * deviceDetail.Price);
     }
-    if (formValue.usage === "deploy") {
-      setFormValue((prevState) => ({
-        ...prevState,
-        downloadLinks: [
-          `https://distriai.s3.ap-northeast-2.amazonaws.com/model/${selectedModel.Owner}/${selectedModel.Name}/deploy-stabilityai.py`,
-        ],
-      }));
-    }
   }, [formValue, deviceDetail, selectedModel]);
   useEffect(() => {
     async function init() {
@@ -187,9 +179,7 @@ function Buy({ className }) {
       }
     };
     if (JSON.stringify(selectedModel) !== "{}") {
-      if (formValue.usage === "deploy") {
-        isDeployable();
-      }
+      isDeployable();
     }
     // eslint-disable-next-line
   }, [selectedModel]);
