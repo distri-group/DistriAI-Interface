@@ -176,67 +176,69 @@ function App() {
     };
   }, []);
   return (
-    <div className="App">
-      <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
-        <WalletProvider wallets={[]} autoConnect={true}>
-          <WalletModalProvider>
-            <ThemeProvider theme={Mtheme}>
-              <SnackbarProvider
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                autoHideDuration={3000}>
-                {pathname !== "/home" && <NavBar className="page-header" />}
-                <Routes>
-                  <Route index element={<Navigate to="home" />} />
-                  <Route path="home" element={<div id="home" />} />
-                  <Route path="market" element={<Market />} />
-                  <Route path="device">
-                    <Route index element={<MyDevice />} />
-                    <Route path=":id">
-                      <Route path="buy" element={<Buy />} />
-                      <Route path="list" element={<MakeOffer />} />
-                    </Route>
-                  </Route>
-                  <Route path="order">
-                    <Route index element={<MyOrder />} />
-                    <Route path=":id">
-                      <Route index element={<OrderDetail />} />
-                      <Route path="extend" element={<ExtendDuration />} />
-                      <Route path="end" element={<EndDuration />} />
-                    </Route>
-                  </Route>
-                  <Route path="reward">
-                    <Route index element={<Reward />} />
-                    <Route path=":period" element={<RewardDetail />} />
-                  </Route>
-                  <Route path="earning">
-                    <Route index element={<Earning />} />
-                    <Route path=":id" element={<EarningDetail />} />
-                  </Route>
-                  <Route path="model">
-                    <Route index element={<Contents type="model" />} />
-                    <Route
-                      path=":owner/:name"
-                      element={<Detail type="model" />}
-                    />
-                    <Route path="add" element={<Create type="model" />} />
-                  </Route>
-                  <Route path="dataset">
-                    <Route index element={<Contents type="dataset" />} />
-                    <Route
-                      path=":owner/:name"
-                      element={<Detail type="dataset" />}
-                    />
-                    <Route path="add" element={<Create type="dataset" />} />
-                  </Route>
-                  <Route path="faucet" element={<Faucet />} />
-                  <Route path="test" element={<Test />} />
-                </Routes>
-                <ConnectToWallet open={open} />
-              </SnackbarProvider>
-            </ThemeProvider>
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
+    <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
+      <WalletProvider wallets={[]} autoConnect={true}>
+        <WalletModalProvider>
+          <ThemeProvider theme={Mtheme}>
+            <SnackbarProvider
+              anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              autoHideDuration={3000}>
+              <Routes>
+                <Route index element={<Navigate to="home" />} />
+                <Route path="home" element={<div id="home" />} />
+                <Route path="/*" element={<AppRoutes />} />
+              </Routes>
+              <ConnectToWallet open={open} />
+            </SnackbarProvider>
+          </ThemeProvider>
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <div id="App">
+      <NavBar className="page-header" />
+      <Routes>
+        <Route path="market" element={<Market />} />
+        <Route path="device">
+          <Route index element={<MyDevice />} />
+          <Route path=":id">
+            <Route path="buy" element={<Buy />} />
+            <Route path="list" element={<MakeOffer />} />
+          </Route>
+        </Route>
+        <Route path="order">
+          <Route index element={<MyOrder />} />
+          <Route path=":id">
+            <Route index element={<OrderDetail />} />
+            <Route path="extend" element={<ExtendDuration />} />
+            <Route path="end" element={<EndDuration />} />
+          </Route>
+        </Route>
+        <Route path="reward">
+          <Route index element={<Reward />} />
+          <Route path=":period" element={<RewardDetail />} />
+        </Route>
+        <Route path="earning">
+          <Route index element={<Earning />} />
+          <Route path=":id" element={<EarningDetail />} />
+        </Route>
+        <Route path="model">
+          <Route index element={<Contents type="model" />} />
+          <Route path=":owner/:name" element={<Detail type="model" />} />
+          <Route path="add" element={<Create type="model" />} />
+        </Route>
+        <Route path="dataset">
+          <Route index element={<Contents type="dataset" />} />
+          <Route path=":owner/:name" element={<Detail type="dataset" />} />
+          <Route path="add" element={<Create type="dataset" />} />
+        </Route>
+        <Route path="faucet" element={<Faucet />} />
+        <Route path="test" element={<Test />} />
+      </Routes>
     </div>
   );
 }
