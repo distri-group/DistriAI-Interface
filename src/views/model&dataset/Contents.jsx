@@ -66,7 +66,20 @@ function Contents({ className, type }) {
   useEffect(() => {
     loadList(current);
     // eslint-disable-next-line
-  }, [filterValue, current, type]);
+  }, [current, type]);
+  useEffect(() => {
+    const currentName = filterValue.Name;
+    if (search !== currentName) {
+      clearTimeout(inputTimer);
+      inputTimer = setTimeout(() => {
+        loadList(current);
+      }, 1000);
+      setSearch(currentName);
+    } else {
+      loadList(current);
+    }
+    return () => clearTimeout(inputTimer);
+  }, [filterValue]);
   return (
     <div className={className}>
       <h1>{capitalize(type + "s")}</h1>
