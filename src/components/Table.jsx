@@ -97,6 +97,7 @@ export default styled(Table)`
       border-radius: 0 6px 6px 0;
     }
     tr td {
+      padding: 0 40px;
       border-bottom: 1px solid #898989;
       border-collapse: collapse;
       overflow: hidden;
