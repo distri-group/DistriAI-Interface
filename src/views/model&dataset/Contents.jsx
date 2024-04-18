@@ -7,7 +7,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import types from "@/services/types.json";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ function Contents({ className, type }) {
     Name: "",
     OrderBy: "Updated Time",
   });
-  const [filterType, setType] = useState("");
+  const [filterType, setType] = useState(0);
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
@@ -34,14 +34,21 @@ function Contents({ className, type }) {
   const [connectModal, setModal] = useState(false);
   const [search, setSearch] = useState("");
   const wallet = useAnchorWallet();
-  let inputTimer;
+  const inputTimer = useRef(null);
+  const chipStyle = {
+    borderRadius: "8px",
+    margin: "6px",
+    background: "rgba(39,206,181,0.16)",
+    border: "1px solid #09E98D",
+    color: "#fff",
+  };
   function onFilter(e) {
     const { name, value } = e.target;
     setFilterValue({ ...filterValue, [name]: value });
   }
   function clearFilter() {
     setFilterValue({ Name: "", OrderBy: "Updated Time" });
-    setType("");
+    setType(0);
   }
   function onTypeFilter(e) {
     setType(e.target.value);
@@ -70,15 +77,16 @@ function Contents({ className, type }) {
   useEffect(() => {
     const currentName = filterValue.Name;
     if (search !== currentName) {
-      clearTimeout(inputTimer);
-      inputTimer = setTimeout(() => {
+      clearTimeout(inputTimer.current);
+      inputTimer.current = setTimeout(() => {
         loadList(current);
       }, 1000);
       setSearch(currentName);
     } else {
       loadList(current);
     }
-    return () => clearTimeout(inputTimer);
+    return () => clearTimeout(inputTimer.current);
+    // eslint-disable-next-line
   }, [filterValue]);
   return (
     <div className={className}>
@@ -89,8 +97,10 @@ function Contents({ className, type }) {
             sx={{
               width: "100%",
             }}
+            defaultValue={0}
             value={filterType}
             onChange={onTypeFilter}>
+            <MenuItem value={0}>Any type</MenuItem>
             {types.map((type, index) => (
               <MenuItem key={type.title} value={index + 1}>
                 {type.title}
@@ -103,10 +113,8 @@ function Contents({ className, type }) {
               <div>
                 {types[filterType - 1].items.map((item, index) => (
                   <Chip
-                    sx={{
-                      margin: "2px",
-                    }}
-                    color="success"
+                    variant="outlined"
+                    sx={chipStyle}
                     label={item}
                     key={item}
                     onClick={() =>
@@ -127,10 +135,8 @@ function Contents({ className, type }) {
                   {type.items.map((item, itemIndex) => (
                     <Chip
                       key={item}
-                      sx={{
-                        margin: "2px",
-                      }}
-                      color="success"
+                      sx={chipStyle}
+                      variant="outlined"
                       label={item}
                       onClick={() => {
                         setType(index + 1);
@@ -182,6 +188,7 @@ function Contents({ className, type }) {
                 if (wallet?.publicKey) navigate(`/${type}/add`);
                 else setModal(true);
               }}
+              style={{ width: 160 }}
               className="cbtn">
               Create {capitalize(type)}
             </Button>
@@ -221,11 +228,9 @@ function Contents({ className, type }) {
 
 export default styled(Contents)`
   h1 {
-    padding-left: 40px;
-    background-image: ${(props) => `url(/img/market/${props.type}.svg)`};
-    background-size: 28px;
-    background-position: left;
-    background-repeat: no-repeat;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 44px;
   }
   .container {
     display: flex;

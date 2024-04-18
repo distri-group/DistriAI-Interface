@@ -21,7 +21,7 @@ import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { Favorite } from "@mui/icons-material";
 import "@/dark.css";
-import { getModelDetail } from "@/services/model.js";
+import { getModelDetail, checkDeployable } from "@/services/model.js";
 import { getOrderList } from "@/services/order.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { signToken } from "@/services/order.js";
@@ -44,6 +44,7 @@ function Detail({ className, type }) {
   const [metadata, setMetadata] = useState("");
   const [signing, setSigning] = useState(false);
   const [dialog, setDialog] = useState("");
+  const [deployable, setDeployable] = useState(false);
   const { client } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -95,6 +96,8 @@ function Detail({ className, type }) {
       let res;
       if (type === "model") {
         res = await getModelDetail(owner, name);
+        const isDeployable = await checkDeployable(res);
+        setDeployable(isDeployable);
       } else {
         res = await getDatasetDetail(owner, name);
       }
@@ -178,6 +181,7 @@ function Detail({ className, type }) {
                         Train
                       </Button>
                       <Button
+                        disabled={!deployable}
                         className="cbtn"
                         style={{ width: 100 }}
                         onClick={() => setDialog("deploy")}>

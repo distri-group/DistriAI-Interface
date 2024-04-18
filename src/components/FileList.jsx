@@ -82,6 +82,16 @@ function FileList({ className, item, type, onSelect }) {
     setCreating(false);
   };
 
+  // Delete file/folder
+  const handleDelete = async (path) => {
+    try {
+      await methods.fileDelete(path);
+      await loadFiles(currentPrefix);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+  };
+
   const handleSelection = async (item) => {
     const selectedIndex = selectedItems.findIndex(
       (selectedItem) => selectedItem.cid === item.cid.toString()
@@ -113,8 +123,8 @@ function FileList({ className, item, type, onSelect }) {
   };
   useEffect(() => {
     if (currentPrefix) {
+      loadFiles(currentPrefix);
       if (currentPrefix !== initialPrefix) {
-        loadFiles(currentPrefix);
         const suffix = currentPrefix.split(initialPrefix)[1];
         const items = suffix.split("/").slice(1);
         setBreadcrumbs(items);
@@ -131,12 +141,7 @@ function FileList({ className, item, type, onSelect }) {
     // eslint-disable-next-line
   }, [selectedItems]);
   useEffect(() => {
-    try {
-      loadFiles(initialPrefix);
-      setPrefix(initialPrefix);
-    } catch (error) {
-      console.log(error);
-    }
+    setPrefix(initialPrefix);
     // eslint-disable-next-line
   }, []);
   useEffect(() => {
@@ -222,7 +227,7 @@ function FileList({ className, item, type, onSelect }) {
                   </Breadcrumbs>
                 )}
               </span>
-              {item.Owner === wallet.publicKey.toString() && (
+              {item.Owner === wallet.publicKey.toString() && !onSelect && (
                 <Stack direction="row" justifyContent="right" spacing={2}>
                   <Button
                     className="cbtn"
@@ -280,6 +285,7 @@ function FileList({ className, item, type, onSelect }) {
                       </span>
                     </TableCell>
                     <TableCell />
+                    <TableCell />
                   </TableRow>
                 ) : (
                   list.length === 0 && (
@@ -334,6 +340,18 @@ function FileList({ className, item, type, onSelect }) {
                             <ArrowDownward />
                           </a>
                         )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {item.Owner === wallet.publicKey.toString() &&
+                          !onSelect && (
+                            <Button
+                              className="default-btn"
+                              onClick={() =>
+                                handleDelete(currentPrefix + "/" + item.name)
+                              }>
+                              Delete
+                            </Button>
+                          )}
                       </TableCell>
                     </TableRow>
                   );
@@ -418,7 +436,7 @@ export default styled(FileList)`
   a {
     color: white;
     display: flex;
-    width: 15%;
+    width: 100px;
     height: 100%;
     align-items: center;
   }

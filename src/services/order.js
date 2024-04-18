@@ -124,9 +124,9 @@ function formatOrder(item) {
 
 export async function signToken(ip, port, publicKey, deploy) {
   const provider = getProvider();
-  const msg = `${deploy ? "deploy" : "workspace"}/token/${parseInt(
-    Date.now() / 100000
-  )}/${publicKey}`;
+  const msg = `${deploy ? "deploy" : "workspace"}/token${
+    !deploy ? "/" + parseInt(Date.now() / 100000) : ""
+  }/${publicKey}`;
   const encodeMsg = new TextEncoder().encode(msg);
   try {
     const sign = await provider.signMessage(encodeMsg, "utf8");

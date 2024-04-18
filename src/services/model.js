@@ -3,6 +3,7 @@ import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
 import { getProvider } from "@/utils/index.js";
 import { scales } from "./dataset.js";
+import { create } from "kubo-rpc-client";
 
 const baseUrl = "/model";
 
@@ -40,10 +41,36 @@ export async function getModelDetail(owner, name) {
   }
 }
 
+export async function checkDeployable(model) {
+  const client = create({ url: "https://ipfs.distri.ai/rpc/api/v0" });
+  try {
+    for await (const file of client.files.ls(
+      `/distri.ai/model/${model.Owner}/${model.Name}`
+    )) {
+      if (file.name === "deployment" && file.type === "directory") {
+        try {
+          const list = [];
+          for await (const item of client.files.ls(
+            `/distri.ai/model/${model.Owner}/${model.Name}/deployment`
+          )) {
+            list.push(item);
+          }
+          if (list.length > 0) return true;
+        } catch (error) {
+          return false;
+        }
+        return false;
+      }
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function createModel(model, publicKey) {
   const apiUrl = baseUrl + "/create";
   const token = await login(publicKey);
-  console.log(token);
   const headers = {
     Authorization: token,
   };

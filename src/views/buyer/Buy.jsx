@@ -12,7 +12,7 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { getModelList } from "@/services/model.js";
+import { getModelList, checkDeployable } from "@/services/model.js";
 import DurationToggle from "@/components/DurationToggle.jsx";
 import DeviceCard from "@/components/DeviceCard.jsx";
 import FileList from "@/components/FileList.jsx";
@@ -41,6 +41,7 @@ function Buy({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState({});
+  const [deployable, setDeployable] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
 
   function handleChange(e) {
@@ -53,7 +54,20 @@ function Buy({ className }) {
   }
   async function onSubmit(e) {
     e.preventDefault();
-    const res = await ipfsMethods.jsonUpload(filesToUpload);
+    if (formValue.usage === "deploy") {
+      try {
+        const { files: deployment } = await ipfsMethods.getFolderList(
+          `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
+        );
+        filesToUpload.push({
+          name: deployment[0].name,
+          cid: deployment[0].cid.toString(),
+        });
+      } catch (error) {
+        console.log(error);
+        enqueueSnackbar("Deployment file not found", { variant: "error" });
+      }
+    }
     const MachineInfo = {
       Uuid: deviceDetail.Uuid,
       Provider: deviceDetail.Provider,
@@ -74,13 +88,25 @@ function Buy({ className }) {
     const OrderInfo = {
       Model: formValue.model,
       Intent: formValue.usage || "train",
-      DownloadURL: [res.cid.toString()],
+      DownloadURL: [],
     };
+    if (filesToUpload.length > 0) {
+      const res = await ipfsMethods.jsonUpload(filesToUpload);
+      OrderInfo.DownloadURL.push(res.cid.toString());
+    }
     const machinePublicKey = methods.getMachinePublicKey(
       deviceDetail.Uuid,
       new PublicKey(deviceDetail.Metadata.Addr)
     );
     setSubmitting(true);
+    console.log({
+      formData: {
+        duration: formValue.duration,
+        taskName: formValue.taskName,
+      },
+      MachineInfo,
+      OrderInfo,
+    });
     try {
       await methods.placeOrder(machinePublicKey, formValue.duration, {
         formData: {
@@ -151,6 +177,22 @@ function Buy({ className }) {
     }
     // eslint-disable-next-line
   }, [wallet, id, state]);
+  useEffect(() => {
+    const isDeployable = async () => {
+      const deployable = await checkDeployable(selectedModel);
+      console.log(deployable);
+      setDeployable(deployable);
+      if (!deployable) {
+        setFormValue((prevState) => ({ ...prevState, usage: "train" }));
+      }
+    };
+    if (JSON.stringify(selectedModel) !== "{}") {
+      if (formValue.usage === "deploy") {
+        isDeployable();
+      }
+    }
+    // eslint-disable-next-line
+  }, [selectedModel]);
   return (
     <div className={className}>
       {loading ? (
@@ -241,7 +283,9 @@ function Buy({ className }) {
                         name="usage"
                         onChange={handleChange}>
                         <MenuItem value="train">Training</MenuItem>
-                        <MenuItem value="deploy">Deploy</MenuItem>
+                        <MenuItem disabled={!deployable} value="deploy">
+                          Deploy
+                        </MenuItem>
                       </Select>
                     </Grid>
                   </>

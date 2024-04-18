@@ -38,6 +38,7 @@ function Create({ className, type }) {
   const [chips, setChips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [deployFile, setDeployFile] = useState(null);
   function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
@@ -77,6 +78,14 @@ function Create({ className, type }) {
         await methods.createFolder(
           `/distri.ai/${type}`,
           `${wallet.publicKey.toString()}/${formValue.Name}`
+        );
+      }
+      if (deployFile) {
+        await methods.fileUpload(
+          `/distri.ai/${type}/${wallet.publicKey.toString()}/${
+            formValue.Name
+          }/deployment`,
+          deployFile
         );
       }
       enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
@@ -245,6 +254,49 @@ function Create({ className, type }) {
               </Stack>
             )}
           </Grid>
+          {type === "model" && (
+            <>
+              <Grid item md={12}>
+                <label>Deployment file(Optional)</label>
+              </Grid>
+              <Grid item md={12}>
+                <Button
+                  className="default-btn"
+                  style={{ display: "inline-flex" }}
+                  component="label"
+                  role={undefined}
+                  tabIndex={-1}
+                  startIcon={<CloudUpload />}>
+                  Select file
+                  <input
+                    type="file"
+                    id="deployInput"
+                    style={{ display: "none" }}
+                    onClick={(e) => (e.target.value = null)}
+                    onChange={(e) => setDeployFile(e.target.files[0])}
+                  />
+                </Button>
+                {deployFile && (
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    style={{ margin: "10px 0" }}>
+                    <span>
+                      <span>{deployFile.name}</span>
+                      <span style={{ marginLeft: 20 }}>
+                        {prettyBytes(deployFile.size)}
+                      </span>
+                    </span>
+                    <Button
+                      className="default-btn"
+                      onClick={() => setDeployFile(null)}>
+                      Clear
+                    </Button>
+                  </Stack>
+                )}
+              </Grid>
+            </>
+          )}
           <Grid item md={8} />
           <Grid item md={4}>
             <Stack spacing={2} direction="row">

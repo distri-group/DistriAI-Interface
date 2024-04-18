@@ -89,6 +89,16 @@ export default function useIpfs() {
     }
   };
 
+  // Delete file from folder
+  const fileDelete = async (path) => {
+    try {
+      const res = await client.files.rm(path);
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // JSON upload
   const jsonUpload = async (object) => {
     try {
@@ -101,6 +111,7 @@ export default function useIpfs() {
 
   const methods = {
     fileUpload,
+    fileDelete,
     folderUpload,
     getFolderList,
     createFolder,
