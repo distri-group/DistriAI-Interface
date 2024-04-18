@@ -374,7 +374,7 @@ function FileList({ className, item, type, onSelect }) {
           </LoadingButton>
         </DialogActions>
       </Dialog>
-      <Modal open={true}>
+      <Modal open={Boolean(filesToUpload.length)}>
         <Box
           sx={{
             position: "absolute",
