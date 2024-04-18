@@ -55,25 +55,6 @@ export async function createModel(model, publicKey) {
   }
 }
 
-export async function generatePresignUrl(Id, FilePath, publicKey) {
-  const apiUrl = baseUrl + "/presign";
-  const token = await login(publicKey);
-  const body = {
-    Id,
-    FilePath,
-    Method: "PUT",
-  };
-  const headers = {
-    Authorization: token,
-  };
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    return res;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export async function login(publicKey) {
   if (localStorage.getItem("token")) {
     let token;
@@ -114,27 +95,6 @@ export async function login(publicKey) {
     } catch (error) {
       throw error;
     }
-  }
-}
-
-export async function fileUpload(url, file) {
-  try {
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Length": file.size,
-      },
-      body: file,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to upload file (${response.status})`);
-    }
-
-    const responseBody = await response.text();
-    return responseBody;
-  } catch (error) {
-    throw error;
   }
 }
 
