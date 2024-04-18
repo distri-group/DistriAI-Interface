@@ -29,7 +29,7 @@ import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
 import { checkDeployable } from "@/services/model.js";
 
-function FileList({ className, item, type, onSelect }) {
+function FileList({ className, item, type, onSelect, onReload }) {
   const initialPrefix = `/distri.ai/${type}/${item.Owner}/${item.Name}`;
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(true);
@@ -145,6 +145,9 @@ function FileList({ className, item, type, onSelect }) {
       enqueueSnackbar("Upload success", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
+    }
+    if (!existed) {
+      await onReload();
     }
     if (existedDialog) {
       setExistedDialog(false);

@@ -90,35 +90,35 @@ function Detail({ className, type }) {
       loadDetail();
     }
   }, [wallet, item, type]);
-  useEffect(() => {
-    async function loadItem() {
-      setLoading(true);
-      let res;
-      if (type === "model") {
-        res = await getModelDetail(owner, name);
-        const isDeployable = await checkDeployable(res);
-        setDeployable(isDeployable);
-      } else {
-        res = await getDatasetDetail(owner, name);
-      }
-      try {
-        for await (const item of client.files.read(
-          `/distri.ai/${type}/${owner}/${name}/README.md`
-        )) {
-          const text = new TextDecoder().decode(item);
-          if (type === "model") {
-            const match = text.match(/^---\n([\s\S]+?)\n---/);
-            const result = metadataParser(text);
-            setMarkdown(result.content);
-            if (match) {
-              setMetadata(match[1]);
-            }
-          } else setMarkdown(text);
-        }
-      } catch (error) {}
-      setItem(res);
-      setLoading(false);
+  async function loadItem() {
+    setLoading(true);
+    let res;
+    if (type === "model") {
+      res = await getModelDetail(owner, name);
+      const isDeployable = await checkDeployable(res);
+      setDeployable(isDeployable);
+    } else {
+      res = await getDatasetDetail(owner, name);
     }
+    try {
+      for await (const item of client.files.read(
+        `/distri.ai/${type}/${owner}/${name}/README.md`
+      )) {
+        const text = new TextDecoder().decode(item);
+        if (type === "model") {
+          const match = text.match(/^---\n([\s\S]+?)\n---/);
+          const result = metadataParser(text);
+          setMarkdown(result.content);
+          if (match) {
+            setMetadata(match[1]);
+          }
+        } else setMarkdown(text);
+      }
+    } catch (error) {}
+    setItem(res);
+    setLoading(false);
+  }
+  useEffect(() => {
     loadItem();
     // eslint-disable-next-line
   }, [type]);
@@ -295,7 +295,7 @@ function Detail({ className, type }) {
                 )}
               </TabPanel>
               <TabPanel value="files">
-                <FileList item={item} type={type} />
+                <FileList item={item} type={type} onReload={loadItem} />
               </TabPanel>
             </TabContext>
           </>

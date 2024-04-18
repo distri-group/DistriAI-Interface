@@ -172,7 +172,6 @@ function Buy({ className }) {
   useEffect(() => {
     const isDeployable = async () => {
       const deployable = await checkDeployable(selectedModel);
-      console.log(deployable);
       setDeployable(deployable);
       if (!deployable) {
         setFormValue((prevState) => ({ ...prevState, usage: "train" }));
