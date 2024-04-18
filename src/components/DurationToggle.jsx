@@ -45,8 +45,14 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
     }
   }, [duration, max]);
   useEffect(() => {
-    setDuration(count * num);
-  }, [count, num, setDuration]);
+    const calcDuration = count * num;
+    if (calcDuration > max) {
+      setDuration(max);
+    } else {
+      setDuration(calcDuration);
+    }
+    // eslint-disable-next-line
+  }, [count, num, max]);
   useEffect(() => {
     switch (type) {
       case "hour": {
