@@ -130,7 +130,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
     }
     enqueueSnackbar("Start uploading", { variant: "info" });
     try {
-      await methods.fileUpload(
+      const res = await methods.fileUpload(
         initialPrefix + "/deployment",
         deployFile,
         (bytes) => {
@@ -142,6 +142,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
           });
         }
       );
+      console.log(res.cid.toString());
       enqueueSnackbar("Upload success", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });

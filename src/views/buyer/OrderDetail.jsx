@@ -31,6 +31,7 @@ function OrderDetail({ className }) {
       setLoading(true);
       try {
         const res = await getOrderDetail(id);
+        console.log(res);
         setRecord(res);
       } catch (error) {}
       setLoading(false);

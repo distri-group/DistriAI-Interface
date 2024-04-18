@@ -54,20 +54,6 @@ function Buy({ className }) {
   }
   async function onSubmit(e) {
     e.preventDefault();
-    if (formValue.usage === "deploy") {
-      try {
-        const { files: deployment } = await ipfsMethods.getFolderList(
-          `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
-        );
-        filesToUpload.push({
-          name: deployment[0].name,
-          cid: deployment[0].cid.toString(),
-        });
-      } catch (error) {
-        console.log(error);
-        enqueueSnackbar("Deployment file not found", { variant: "error" });
-      }
-    }
     const MachineInfo = {
       Uuid: deviceDetail.Uuid,
       Provider: deviceDetail.Provider,
@@ -129,6 +115,34 @@ function Buy({ className }) {
   useEffect(() => {
     if (formValue.duration && deviceDetail.Price) {
       setAmount(formValue.duration * deviceDetail.Price);
+    }
+    const getDeployFile = async () => {
+      const { files } = await ipfsMethods.getFolderList(
+        `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
+      );
+      setFiles([
+        {
+          name: files[0].name,
+          cid: files[0].cid.toString(),
+        },
+      ]);
+    };
+    if (formValue.usage === "deploy") {
+      // setFiles([
+      //   {
+      //     name: "deploy-stabilityai.py",
+      //     cid: "QmQwiAt4EmsT5Eb8aAk7bBFJEZwqFe9TrWB2ZvTfDJXQ2J",
+      //   },
+      //   {
+      //     name: "deploy-stabilityai.py",
+      //     cid: "QmQwiAt4EmsT5Eb8aAk7bBFJEZwqFe9TrWB2ZvTfDJXQ2J",
+      //   },
+      //   {
+      //     name: "deploy-stabilityai.py",
+      //     cid: "QmQwiAt4EmsT5Eb8aAk7bBFJEZwqFe9TrWB2ZvTfDJXQ2J",
+      //   },
+      // ]);
+      getDeployFile();
     }
   }, [formValue, deviceDetail, selectedModel]);
   useEffect(() => {
