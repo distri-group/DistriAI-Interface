@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   WalletProvider,
   ConnectionProvider,
@@ -30,10 +30,12 @@ import Detail from "@/views/model&dataset/Detail.jsx";
 import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import Test from "@/views/Test.jsx";
+import { clusterApiUrl } from "@solana/web3.js";
 
 function App() {
   window.Buffer = Buffer;
   const [open, setOpen] = useState(false);
+  const endPoint = clusterApiUrl("testnet");
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const Mtheme = createTheme({
@@ -176,7 +178,7 @@ function App() {
     };
   }, []);
   return (
-    <ConnectionProvider endpoint={"https://api.devnet.solana.com"}>
+    <ConnectionProvider endpoint={endPoint}>
       <WalletProvider wallets={[]} autoConnect={true}>
         <WalletModalProvider>
           <ThemeProvider theme={Mtheme}>
