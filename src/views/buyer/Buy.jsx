@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { getOrderList } from "@/services/order.js";
 import { PublicKey } from "@solana/web3.js";
 import { useSnackbar } from "notistack";
@@ -29,7 +29,6 @@ function Buy({ className }) {
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
   const [formValue, setFormValue] = useState({
     duration: 0,
@@ -43,8 +42,13 @@ function Buy({ className }) {
   const [selectedModel, setSelectedModel] = useState({});
   const [deployable, setDeployable] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
+  const amount = useMemo(() => {
+    if (deviceDetail.Price) {
+      return parseFloat(formValue.duration) * deviceDetail.Price;
+    }
+    return 0;
+  }, [formValue.duration, deviceDetail]);
 
-  // form value changed. Get the model user selected to know if this model is deployable.
   function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
@@ -78,7 +82,6 @@ function Buy({ className }) {
       Intent: formValue.usage || "train",
       DownloadURL: [],
     };
-    // generate files for client to donwload list json from filesToUpload.
     if (filesToUpload.length > 0) {
       const res = await ipfsMethods.jsonUpload(filesToUpload);
       OrderInfo.DownloadURL.push(res.cid.toString());
@@ -114,12 +117,6 @@ function Buy({ className }) {
     }
     setSubmitting(false);
   }
-  // update filesToUpload if order intent is deploy which includes the deployment scripts
-  useEffect(() => {
-    if (formValue.duration && deviceDetail.Price) {
-      setAmount(parseFloat(formValue.duration) * deviceDetail.Price);
-    }
-  }, [formValue, deviceDetail]);
   useEffect(() => {
     async function init() {
       setLoading(true);
@@ -160,18 +157,12 @@ function Buy({ className }) {
   }, [wallet, id, state]);
   useEffect(() => {
     const handleModelChange = async () => {
-      // Check if selectedModel is empty
       if (JSON.stringify(selectedModel) !== "{}") {
-        // Check deployability
         const deployable = await checkDeployable(selectedModel);
         setDeployable(deployable);
-
-        // Update formValue.usage if not deployable
         if (!deployable) {
           setFormValue((prevState) => ({ ...prevState, usage: "train" }));
         }
-
-        // Fetch deployment files if usage is deploy
         if (formValue.usage === "deploy" && deployable) {
           const { files } = await ipfsMethods.getFolderList(
             `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
@@ -186,7 +177,6 @@ function Buy({ className }) {
       }
     };
     handleModelChange();
-    // Dependency array: Only runs when selectedModel changes
   }, [selectedModel]);
   return (
     <div className={className}>

@@ -450,7 +450,7 @@ export default styled(Reward)`
     border-radius: 100%;
     background-color: white;
     background-image: url(/img/token.png);
-    background-size: 70%;
+    background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
     width: 24px;
