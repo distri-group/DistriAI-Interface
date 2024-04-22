@@ -68,14 +68,12 @@ function Detail({ className, type }) {
           order.Metadata.OrderInfo?.Model &&
           order.Metadata.OrderInfo.Model === item.Id
       );
-      console.log("OrderUsing", orderUsing);
       if (orderUsing) {
         setIntent(orderUsing.Metadata.OrderInfo.Intent);
       } else {
         const orderEmpty = orders.List.find(
           (order) => order.Metadata.OrderInfo?.Model === ""
         );
-        console.log("OrderEmpty", orderEmpty);
         if (orderEmpty) {
           setIntent("train");
         }
