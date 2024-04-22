@@ -5,7 +5,6 @@ import {
   CircularProgress,
   Stack,
   Tab,
-  Backdrop,
   Dialog,
   DialogContent,
   DialogActions,
@@ -24,8 +23,6 @@ import "@/dark.css";
 import { getModelDetail, checkDeployable } from "@/services/model.js";
 import { getOrderList } from "@/services/order.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { signToken } from "@/services/order.js";
-import { useSnackbar } from "notistack";
 import { AccountBalance } from "@mui/icons-material";
 import { getDatasetDetail } from "@/services/dataset.js";
 import { capitalize } from "lodash";
@@ -38,51 +35,37 @@ function Detail({ className, type }) {
   const { owner, name } = useParams();
   const [loading, setLoading] = useState(false);
   const [item, setItem] = useState({});
-  const [machine, setMachine] = useState("");
   const [tabValue, setTabValue] = useState("readme");
   const [markdown, setMarkdown] = useState("");
   const [metadata, setMetadata] = useState("");
-  const [signing, setSigning] = useState(false);
   const [dialog, setDialog] = useState("");
+  const [orderDialog, setOrderDialog] = useState(false);
   const [deployable, setDeployable] = useState(false);
   const { client } = useIpfs();
-  const { enqueueSnackbar } = useSnackbar();
 
   function handleTabChange(e, newValue) {
     setTabValue(newValue);
-  }
-  async function handleConsole(machine, deploy) {
-    setSigning(true);
-    try {
-      const href = await signToken(
-        machine.IP,
-        machine.Port,
-        wallet.publicKey.toString(),
-        deploy
-      );
-      window.open(href);
-    } catch (e) {
-      enqueueSnackbar(e, { variant: "error" });
-    }
-    setSigning(false);
   }
 
   useEffect(() => {
     async function loadDetail() {
       setLoading(true);
-      const order = await getOrderList(1, 10, {}, wallet.publicKey.toString());
+      const order = await getOrderList(
+        1,
+        10,
+        { Status: 1 },
+        wallet.publicKey.toString()
+      );
       const orderUsing = order.List.find(
         (item) =>
           item.Metadata.OrderInfo?.Model &&
-          item.Metadata.OrderInfo.Model === item.Id &&
-          item.Status === 1
+          item.Metadata.OrderInfo.Model === item.Id
       );
       if (orderUsing) {
         setItem((prevState) => ({
           ...prevState,
           Intent: orderUsing.Metadata.OrderInfo.Intent,
         }));
-        setMachine(orderUsing.Metadata.MachineInfo);
       }
       setLoading(false);
     }
@@ -115,6 +98,7 @@ function Detail({ className, type }) {
         } else setMarkdown(text);
       }
     } catch (error) {}
+    console.log(res);
     setItem(res);
     setLoading(false);
   }
@@ -153,25 +137,12 @@ function Detail({ className, type }) {
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
                 {type === "model" &&
                   (item.Intent ? (
-                    item.Intent === "train" ? (
-                      <Button
-                        className="cbtn"
-                        style={{ width: 100 }}
-                        onClick={() => {
-                          handleConsole(machine, false);
-                        }}>
-                        Notebook
-                      </Button>
-                    ) : (
-                      <Button
-                        className="cbtn"
-                        style={{ width: 100 }}
-                        onClick={() => {
-                          handleConsole(machine, true);
-                        }}>
-                        Deployment
-                      </Button>
-                    )
+                    <Button
+                      className="cbtn"
+                      onClick={() => setOrderDialog(true)}
+                      style={{ width: 100 }}>
+                      {item.Intent}
+                    </Button>
                   ) : (
                     <>
                       <Button
@@ -300,11 +271,6 @@ function Detail({ className, type }) {
             </TabContext>
           </>
         )}
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={signing}>
-          <CircularProgress />
-        </Backdrop>
         <Dialog open={Boolean(dialog)}>
           <DialogContent>
             <p>
@@ -325,6 +291,29 @@ function Detail({ className, type }) {
                 setDialog("");
               }}>
               Go to Market
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={orderDialog}>
+          <DialogContent>
+            <p>
+              You can find example code in the model card, then select the GPU
+              you have purchased for use.
+            </p>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              className="default-btn"
+              onClick={() => setOrderDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="default-btn"
+              onClick={() => {
+                navigate("/order");
+                setOrderDialog(false);
+              }}>
+              Go to GPUs
             </Button>
           </DialogActions>
         </Dialog>
