@@ -19,7 +19,7 @@ export async function DISTFaucet(publicKey) {
 // Get SOL Faucet
 export async function SOLFaucet(publicKey) {
   try {
-    const connection = new Connection(clusterApiUrl("testnet"), "confirmed");
+    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
     const signature = await connection.requestAirdrop(
       new PublicKey(publicKey),
       LAMPORTS_PER_SOL
