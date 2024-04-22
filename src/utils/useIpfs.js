@@ -102,7 +102,6 @@ export default function useIpfs() {
   // JSON upload
   const jsonUpload = async (object) => {
     try {
-      console.log(JSON.stringify(object));
       const res = await client.add(JSON.stringify(object));
       return res;
     } catch (error) {

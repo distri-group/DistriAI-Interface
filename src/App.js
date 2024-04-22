@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   WalletProvider,
   ConnectionProvider,
@@ -176,6 +176,7 @@ function App() {
     return () => {
       window.removeEventListener("routeChange", handleNavigate);
     };
+    // eslint-disable-next-line
   }, []);
   return (
     <ConnectionProvider endpoint={endPoint}>

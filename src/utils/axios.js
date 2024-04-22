@@ -4,7 +4,7 @@ import { enqueueSnackbar } from "notistack";
 
 const instance = axios.create({
   baseURL: webconfig.apiUrl + "/index-api",
-  timeout: 10000,
+  timeout: 20000,
 });
 instance.interceptors.response.use(
   (response) => {

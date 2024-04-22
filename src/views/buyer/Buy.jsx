@@ -91,14 +91,6 @@ function Buy({ className }) {
       new PublicKey(deviceDetail.Metadata.Addr)
     );
     setSubmitting(true);
-    console.log({
-      formData: {
-        duration: formValue.duration,
-        taskName: formValue.taskName,
-      },
-      MachineInfo,
-      OrderInfo,
-    });
     try {
       await methods.placeOrder(machinePublicKey, formValue.duration, {
         formData: {

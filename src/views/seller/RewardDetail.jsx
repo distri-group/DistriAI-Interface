@@ -66,7 +66,6 @@ function RewardDetail({ className }) {
         wallet.publicKey.toString()
       );
       if (machines) {
-        console.log(machines);
         setMachineList(machines.List);
         setPeriodInfo({
           StartTime: machines.List[0].StartTime,
