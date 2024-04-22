@@ -9,7 +9,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   LinearProgress,
   Modal,
   Stack,
@@ -90,7 +89,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
   // Delete file/folder
   const handleDelete = async (path) => {
     try {
-      await methods.fileDelete(path);
+      await methods.fileDelete(path, true);
       await loadFiles(currentPrefix);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
@@ -132,7 +131,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
     }
     enqueueSnackbar("Start uploading", { variant: "info" });
     try {
-      const res = await methods.fileUpload(
+      await methods.fileUpload(
         initialPrefix + "/deployment",
         deployFile,
         (bytes) => {
@@ -144,7 +143,6 @@ function FileList({ className, item, type, onSelect, onReload }) {
           });
         }
       );
-      console.log(res.cid.toString());
       enqueueSnackbar("Upload success", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
@@ -254,7 +252,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
   useEffect(() => {
     setInitialPrefix(`/distri.ai/${type}/${item.Owner}/${item.Name}`);
     setPrefix(`/distri.ai/${type}/${item.Owner}/${item.Name}`);
-  }, [item]);
+  }, [item, type]);
 
   return (
     <div className={className}>
@@ -322,7 +320,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
                   {type === "model" && (
                     <Button
                       className="cbtn"
-                      style={{ width: 160 }}
+                      style={{ width: 200 }}
                       component="label"
                       role={undefined}
                       tabIndex={-1}>
@@ -375,52 +373,52 @@ function FileList({ className, item, type, onSelect, onReload }) {
                 )}
                 {list
                   .filter(
-                    (item) =>
-                      !(item.name === "deployment" && item.type === "directory")
+                    (file) =>
+                      !(file.name === "deployment" && file.type === "directory")
                   )
-                  .map((item) => {
+                  .map((file) => {
                     const isSelected =
                       selectedItems.findIndex(
                         (selectedItem) =>
-                          item.cid.toString() === selectedItem.cid
+                          file.cid.toString() === selectedItem.cid
                       ) !== -1;
                     return (
-                      <TableRow key={item.name} selected={isSelected}>
+                      <TableRow key={file.name} selected={isSelected}>
                         {onSelect && (
                           <TableCell width="5%">
-                            {item.type === "file" && (
+                            {file.type === "file" && (
                               <Checkbox
                                 checked={isSelected}
-                                onChange={() => handleSelection(item)}
+                                onChange={() => handleSelection(file)}
                               />
                             )}
                           </TableCell>
                         )}
                         <TableCell>
-                          {item.type === "file" ? (
+                          {file.type === "file" ? (
                             <InsertDriveFile />
                           ) : (
-                            item.type === "directory" && <Folder />
+                            file.type === "directory" && <Folder />
                           )}
                           <span
                             style={{
                               marginLeft: 8,
-                              cursor: item.type === "directory" && "pointer",
+                              cursor: file.type === "directory" && "pointer",
                             }}
                             onClick={() =>
-                              item.type === "directory" &&
-                              setPrefix(`${currentPrefix}/${item.name}`)
+                              file.type === "directory" &&
+                              setPrefix(`${currentPrefix}/${file.name}`)
                             }>
-                            {item.name}
+                            {file.name}
                           </span>
                         </TableCell>
                         <TableCell>
-                          {item.size !== 0 && (
+                          {file.size !== 0 && (
                             <a
-                              href={`https://ipfs.distri.ai/ipfs/${folderCid}/${item.name}`}
-                              download={item.name}>
+                              href={`https://ipfs.distri.ai/ipfs/${folderCid}/${file.name}`}
+                              download={file.name}>
                               <span className="size">
-                                {prettyBytes(item.size)}
+                                {prettyBytes(file.size)}
                               </span>
                               <ArrowDownward />
                             </a>
@@ -432,7 +430,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
                               <Button
                                 className="default-btn"
                                 onClick={() =>
-                                  handleDelete(currentPrefix + "/" + item.name)
+                                  handleDelete(currentPrefix + "/" + file.name)
                                 }>
                                 Delete
                               </Button>
@@ -485,6 +483,8 @@ function FileList({ className, item, type, onSelect, onReload }) {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 1000,
+            maxHeight: 600,
+            overflow: "scroll",
             bgcolor: "#00000b",
             p: 4,
             zIndex: 300,
