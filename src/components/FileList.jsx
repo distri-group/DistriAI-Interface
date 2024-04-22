@@ -61,7 +61,12 @@ function FileList({ className, item, type, onSelect, onReload }) {
   const loadFiles = async (prefix) => {
     setLoading(true);
     try {
-      const { files: list, cid } = await methods.getFolderList(prefix);
+      let { files: list, cid } = await methods.getFolderList(prefix);
+      if (wallet.publicKey.toString() !== item.Owner) {
+        list = list.filter(
+          (file) => !(file.type === "directory" && file.name === "deployment")
+        );
+      }
       setList(list);
       setFolderCid(cid);
     } catch (error) {
@@ -144,6 +149,8 @@ function FileList({ className, item, type, onSelect, onReload }) {
         }
       );
       enqueueSnackbar("Upload success", { variant: "success" });
+      await loadFiles(currentPrefix);
+      setDeployFile(null);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
@@ -298,12 +305,19 @@ function FileList({ className, item, type, onSelect, onReload }) {
                       id="uploadFile"
                       style={{ display: "none" }}
                       onClick={(e) => (e.target.value = null)}
-                      onChange={(e) => setFiles(e.target.files)}
+                      onChange={(e) => {
+                        if (currentPrefix === initialPrefix + "/deployment") {
+                          setDeployFile(e.target.files[0]);
+                        } else {
+                          setFiles(e.target.files);
+                        }
+                      }}
                     />
                   </Button>
                   <Button
                     className="cbtn"
                     style={{ width: 120 }}
+                    disabled={currentPrefix === initialPrefix + "/deployment"}
                     component="label"
                     role={undefined}
                     tabIndex={-1}>
@@ -362,83 +376,78 @@ function FileList({ className, item, type, onSelect, onReload }) {
                     <TableCell />
                   </TableRow>
                 ) : (
-                  list.filter(
-                    (item) =>
-                      !(item.name === "deployment" && item.type === "directory")
-                  ).length === 0 && (
+                  list.length === 0 && (
                     <div className="empty">
                       <span style={{ color: "#797979" }}>No item yet</span>
                     </div>
                   )
                 )}
-                {list
-                  .filter(
-                    (file) =>
-                      !(file.name === "deployment" && file.type === "directory")
-                  )
-                  .map((file) => {
-                    const isSelected =
-                      selectedItems.findIndex(
-                        (selectedItem) =>
-                          file.cid.toString() === selectedItem.cid
-                      ) !== -1;
-                    return (
-                      <TableRow key={file.name} selected={isSelected}>
-                        {onSelect && (
-                          <TableCell width="5%">
-                            {file.type === "file" && (
-                              <Checkbox
-                                checked={isSelected}
-                                onChange={() => handleSelection(file)}
-                              />
-                            )}
-                          </TableCell>
+                {list.map((file) => {
+                  const isSelected =
+                    selectedItems.findIndex(
+                      (selectedItem) => file.cid.toString() === selectedItem.cid
+                    ) !== -1;
+                  return (
+                    <TableRow key={file.name} selected={isSelected}>
+                      {onSelect && (
+                        <TableCell width="5%">
+                          {file.type === "file" && (
+                            <Checkbox
+                              checked={isSelected}
+                              onChange={() => handleSelection(file)}
+                            />
+                          )}
+                        </TableCell>
+                      )}
+                      <TableCell>
+                        {file.type === "file" ? (
+                          <InsertDriveFile />
+                        ) : (
+                          file.type === "directory" && <Folder />
                         )}
-                        <TableCell>
-                          {file.type === "file" ? (
-                            <InsertDriveFile />
-                          ) : (
-                            file.type === "directory" && <Folder />
+                        <span
+                          style={{
+                            marginLeft: 8,
+                            cursor: file.type === "directory" && "pointer",
+                          }}
+                          onClick={() =>
+                            file.type === "directory" &&
+                            setPrefix(`${currentPrefix}/${file.name}`)
+                          }>
+                          {file.name}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {file.size !== 0 && (
+                          <a
+                            href={`https://ipfs.distri.ai/ipfs/${folderCid}/${file.name}`}
+                            download={file.name}>
+                            <span className="size">
+                              {prettyBytes(file.size)}
+                            </span>
+                            <ArrowDownward />
+                          </a>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {item.Owner === wallet.publicKey.toString() &&
+                          !onSelect &&
+                          !(
+                            file.type === "directory" &&
+                            file.name === "deployment"
+                          ) && (
+                            <Button
+                              className="default-btn"
+                              onClick={() =>
+                                handleDelete(currentPrefix + "/" + file.name)
+                              }>
+                              Delete
+                            </Button>
                           )}
-                          <span
-                            style={{
-                              marginLeft: 8,
-                              cursor: file.type === "directory" && "pointer",
-                            }}
-                            onClick={() =>
-                              file.type === "directory" &&
-                              setPrefix(`${currentPrefix}/${file.name}`)
-                            }>
-                            {file.name}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {file.size !== 0 && (
-                            <a
-                              href={`https://ipfs.distri.ai/ipfs/${folderCid}/${file.name}`}
-                              download={file.name}>
-                              <span className="size">
-                                {prettyBytes(file.size)}
-                              </span>
-                              <ArrowDownward />
-                            </a>
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          {item.Owner === wallet.publicKey.toString() &&
-                            !onSelect && (
-                              <Button
-                                className="default-btn"
-                                onClick={() =>
-                                  handleDelete(currentPrefix + "/" + file.name)
-                                }>
-                                Delete
-                              </Button>
-                            )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
