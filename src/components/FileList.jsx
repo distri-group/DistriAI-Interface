@@ -28,7 +28,14 @@ import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
 import { checkDeployable } from "@/services/model.js";
 
-function FileList({ className, item, type, onSelect, onReload }) {
+function FileList({
+  className,
+  item,
+  type,
+  onSelect,
+  onReload,
+  disableUpload,
+}) {
   const [initialPrefix, setInitialPrefix] = useState(
     `/distri.ai/${type}/${item.Owner}/${item.Name}`
   );
@@ -291,71 +298,72 @@ function FileList({ className, item, type, onSelect, onReload }) {
                   </Breadcrumbs>
                 )}
               </span>
-              {item.Owner === wallet.publicKey.toString() && !onSelect && (
-                <Stack direction="row" justifyContent="right" spacing={2}>
-                  <Button
-                    className="cbtn"
-                    style={{ width: 100 }}
-                    component="label"
-                    role={undefined}
-                    tabIndex={-1}>
-                    Upload File
-                    <input
-                      type="file"
-                      id="uploadFile"
-                      style={{ display: "none" }}
-                      onClick={(e) => (e.target.value = null)}
-                      onChange={(e) => {
-                        if (currentPrefix === initialPrefix + "/deployment") {
-                          setDeployFile(e.target.files[0]);
-                        } else {
-                          setFiles(e.target.files);
-                        }
-                      }}
-                    />
-                  </Button>
-                  <Button
-                    className="cbtn"
-                    style={{ width: 120 }}
-                    disabled={currentPrefix === initialPrefix + "/deployment"}
-                    component="label"
-                    role={undefined}
-                    tabIndex={-1}>
-                    Upload Folder
-                    <input
-                      type="file"
-                      id="uploadFolder"
-                      style={{ display: "none" }}
-                      onClick={(e) => (e.target.value = null)}
-                      onChange={(e) => setFiles(e.target.files)}
-                      webkitdirectory="true"
-                    />
-                  </Button>
-                  {type === "model" && (
+              {item.Owner === wallet.publicKey.toString() &&
+                !(onSelect || disableUpload) && (
+                  <Stack direction="row" justifyContent="right" spacing={2}>
                     <Button
                       className="cbtn"
-                      style={{ width: 200 }}
+                      style={{ width: 100 }}
                       component="label"
                       role={undefined}
                       tabIndex={-1}>
-                      Upload Deployment Script
+                      Upload File
                       <input
                         type="file"
-                        id="uploadDeployment"
+                        id="uploadFile"
                         style={{ display: "none" }}
                         onClick={(e) => (e.target.value = null)}
-                        onChange={(e) => setDeployFile(e.target.files[0])}
+                        onChange={(e) => {
+                          if (currentPrefix === initialPrefix + "/deployment") {
+                            setDeployFile(e.target.files[0]);
+                          } else {
+                            setFiles(e.target.files);
+                          }
+                        }}
                       />
                     </Button>
-                  )}
-                  <Button
-                    className="cbtn"
-                    style={{ width: 120 }}
-                    onClick={() => setDialog(true)}>
-                    Create Folder
-                  </Button>
-                </Stack>
-              )}
+                    <Button
+                      className="cbtn"
+                      style={{ width: 120 }}
+                      disabled={currentPrefix === initialPrefix + "/deployment"}
+                      component="label"
+                      role={undefined}
+                      tabIndex={-1}>
+                      Upload Folder
+                      <input
+                        type="file"
+                        id="uploadFolder"
+                        style={{ display: "none" }}
+                        onClick={(e) => (e.target.value = null)}
+                        onChange={(e) => setFiles(e.target.files)}
+                        webkitdirectory="true"
+                      />
+                    </Button>
+                    {type === "model" && (
+                      <Button
+                        className="cbtn"
+                        style={{ width: 200 }}
+                        component="label"
+                        role={undefined}
+                        tabIndex={-1}>
+                        Upload Deployment Script
+                        <input
+                          type="file"
+                          id="uploadDeployment"
+                          style={{ display: "none" }}
+                          onClick={(e) => (e.target.value = null)}
+                          onChange={(e) => setDeployFile(e.target.files[0])}
+                        />
+                      </Button>
+                    )}
+                    <Button
+                      className="cbtn"
+                      style={{ width: 120 }}
+                      onClick={() => setDialog(true)}>
+                      Create Folder
+                    </Button>
+                  </Stack>
+                )}
             </Stack>
             <Table>
               <TableBody>
@@ -431,7 +439,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
                       </TableCell>
                       <TableCell align="right">
                         {item.Owner === wallet.publicKey.toString() &&
-                          !onSelect &&
+                          !(onSelect || disableUpload) &&
                           !(
                             file.type === "directory" &&
                             file.name === "deployment"

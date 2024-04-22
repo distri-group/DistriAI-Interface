@@ -1,6 +1,6 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-export { formatBalance, formatAddress, getProvider, getTotal };
+export { formatBalance, formatAddress, getProvider, getTotal, copy };
 
 function formatBalance(balance) {
   if (!balance) {
@@ -46,4 +46,14 @@ function getTotal(price, duration) {
     (Number(s1.replace(".", "")) * Number(s2.replace(".", ""))) /
     Math.pow(10, m)
   );
+}
+function copy(text) {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      console.log("Text copied to clipboard");
+    })
+    .catch((error) => {
+      console.error("Error copying text: ", error);
+    });
 }

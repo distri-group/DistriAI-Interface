@@ -1,15 +1,17 @@
 import { TabList, TabPanel, TabContext } from "@mui/lab";
 import {
   Button,
+  Box,
   Chip,
   CircularProgress,
   Stack,
   Tab,
   Dialog,
+  DialogTitle,
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import metadataParser from "markdown-yaml-metadata-parser";
@@ -27,6 +29,8 @@ import { AccountBalance } from "@mui/icons-material";
 import { getDatasetDetail } from "@/services/dataset.js";
 import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
+import { copy } from "@/utils/index.js";
+import { useSnackbar } from "notistack";
 
 function Detail({ className, type }) {
   document.title = `${capitalize(type)} Detail`;
@@ -35,6 +39,8 @@ function Detail({ className, type }) {
   const { owner, name } = useParams();
   const [loading, setLoading] = useState(false);
   const [item, setItem] = useState({});
+  const [intent, setIntent] = useState("");
+  const [filesForTraining, setTrainingFiles] = useState([]);
   const [tabValue, setTabValue] = useState("readme");
   const [markdown, setMarkdown] = useState("");
   const [metadata, setMetadata] = useState("");
@@ -42,6 +48,7 @@ function Detail({ className, type }) {
   const [orderDialog, setOrderDialog] = useState(false);
   const [deployable, setDeployable] = useState(false);
   const { client } = useIpfs();
+  const { enqueueSnackbar } = useSnackbar();
 
   function handleTabChange(e, newValue) {
     setTabValue(newValue);
@@ -50,31 +57,27 @@ function Detail({ className, type }) {
   useEffect(() => {
     async function loadDetail() {
       setLoading(true);
-      const order = await getOrderList(
+      const orders = await getOrderList(
         1,
         10,
-        { Status: 1 },
+        { Status: 1, Direction: "buy" },
         wallet.publicKey.toString()
       );
-      const orderUsing = order.List.find(
-        (item) =>
-          item.Metadata.OrderInfo?.Model &&
-          item.Metadata.OrderInfo.Model === item.Id
+      const orderUsing = orders.List.find(
+        (order) =>
+          order.Metadata.OrderInfo?.Model &&
+          order.Metadata.OrderInfo.Model === item.Id
       );
+      console.log("OrderUsing", orderUsing);
       if (orderUsing) {
-        setItem((prevState) => ({
-          ...prevState,
-          Intent: orderUsing.Metadata.OrderInfo.Intent,
-        }));
+        setIntent(orderUsing.Metadata.OrderInfo.Intent);
       } else {
-        const orderEmpty = order.List.find(
-          (item) => item.Metadata.OrderInfo?.Model === ""
+        const orderEmpty = orders.List.find(
+          (order) => order.Metadata.OrderInfo?.Model === ""
         );
+        console.log("OrderEmpty", orderEmpty);
         if (orderEmpty) {
-          setItem((prevState) => ({
-            ...prevState,
-            Intent: "train",
-          }));
+          setIntent("train");
         }
       }
       setLoading(false);
@@ -108,7 +111,6 @@ function Detail({ className, type }) {
         } else setMarkdown(text);
       }
     } catch (error) {}
-    console.log(res);
     setItem(res);
     setLoading(false);
   }
@@ -116,6 +118,11 @@ function Detail({ className, type }) {
     loadItem();
     // eslint-disable-next-line
   }, [type]);
+  useEffect(() => {
+    if (!orderDialog && filesForTraining.length > 0) {
+      setTrainingFiles([]);
+    }
+  }, [orderDialog, filesForTraining]);
 
   return (
     <div className={className}>
@@ -146,12 +153,12 @@ function Detail({ className, type }) {
               </div>
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
                 {type === "model" &&
-                  (item.Intent ? (
+                  (intent.length > 0 ? (
                     <Button
                       className="cbtn"
                       onClick={() => setOrderDialog(true)}
                       style={{ width: 100 }}>
-                      {item.Intent}
+                      {intent}
                     </Button>
                   ) : (
                     <>
@@ -305,27 +312,91 @@ function Detail({ className, type }) {
           </DialogActions>
         </Dialog>
         <Dialog open={orderDialog}>
-          <DialogContent>
-            <p>
-              You can find example code in the model card, then select the GPU
-              you have purchased for use.
-            </p>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              className="default-btn"
-              onClick={() => setOrderDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              className="default-btn"
-              onClick={() => {
-                navigate("/order");
-                setOrderDialog(false);
-              }}>
-              Go to GPUs
-            </Button>
-          </DialogActions>
+          <Box
+            sx={{
+              bgcolor: "#00000b",
+              color: "#ffffff",
+              maxHeight: "1000px",
+              overflowY: "scroll",
+            }}>
+            <DialogTitle>
+              You have already rent a GPU for {intent}ing{" "}
+              {intent === "deploy" && "using this model"}
+            </DialogTitle>
+            <DialogContent>
+              <p>
+                You can find example code in the model card, then select the GPU
+                you have purchased for use.
+              </p>
+              <p>
+                Alternatively, you can select the file to obtain the
+                corresponding download code, and then download the model locally
+                for use.
+              </p>
+              {filesForTraining.length > 0 && (
+                <code
+                  style={{
+                    border: "1px solid white",
+                    position: "relative",
+                    display: "block",
+                    margin: "20px 0",
+                    padding: "16px 8px",
+                  }}>
+                  {filesForTraining.map((item, index) => (
+                    <React.Fragment key={index}>
+                      wget --no-check-certificate https://ipfs.distri.ai/ipfs/
+                      {item.cid} <br />
+                    </React.Fragment>
+                  ))}
+                  <Button
+                    className="default-btn"
+                    style={{
+                      position: "absolute",
+                      height: 24,
+                      top: 8,
+                      right: 8,
+                    }}
+                    onClick={() => {
+                      copy(
+                        filesForTraining
+                          .map(
+                            (item) =>
+                              `wget --no-check-certificate https://ipfs.distri.ai/ipfs/${item.cid}`
+                          )
+                          .join("\n")
+                      );
+                      enqueueSnackbar("Copied to clipboard", {
+                        variant: "success",
+                      });
+                    }}>
+                    Copy
+                  </Button>
+                </code>
+              )}
+              <FileList
+                item={item}
+                type={type}
+                onReload={loadItem}
+                onSelect={(files) => setTrainingFiles(files)}
+                disableUpload={true}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                className="default-btn"
+                onClick={() => setOrderDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="default-btn"
+                onClick={() => {
+                  navigate("/order");
+                  setOrderDialog(false);
+                }}>
+                Go to GPUs
+              </Button>
+            </DialogActions>
+          </Box>
         </Dialog>
       </div>
     </div>
