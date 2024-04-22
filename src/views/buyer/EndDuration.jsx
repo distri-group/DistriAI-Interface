@@ -35,7 +35,8 @@ function EndDuration({ className }) {
     }
     setEnding(true);
     const machinePublicKey = methods.getMachinePublicKey(
-      detail.Metadata.MachineInfo.Uuid
+      detail.Metadata.MachineInfo.Uuid,
+      new PublicKey(detail.Seller)
     );
     try {
       await methods.refundOrder(
