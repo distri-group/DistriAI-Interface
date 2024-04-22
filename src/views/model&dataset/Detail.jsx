@@ -66,6 +66,16 @@ function Detail({ className, type }) {
           ...prevState,
           Intent: orderUsing.Metadata.OrderInfo.Intent,
         }));
+      } else {
+        const orderEmpty = order.List.find(
+          (item) => item.Metadata.OrderInfo?.Model === ""
+        );
+        if (orderEmpty) {
+          setItem((prevState) => ({
+            ...prevState,
+            Intent: "train",
+          }));
+        }
       }
       setLoading(false);
     }
