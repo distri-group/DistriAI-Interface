@@ -484,7 +484,7 @@ function FileList({ className, item, type, onSelect, onReload }) {
             transform: "translate(-50%, -50%)",
             width: 1000,
             maxHeight: 600,
-            overflow: "scroll",
+            overflowY: "scroll",
             bgcolor: "#00000b",
             p: 4,
             zIndex: 300,
