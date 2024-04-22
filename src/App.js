@@ -35,7 +35,7 @@ import { clusterApiUrl } from "@solana/web3.js";
 function App() {
   window.Buffer = Buffer;
   const [open, setOpen] = useState(false);
-  const endPoint = clusterApiUrl("testnet");
+  const endPoint = clusterApiUrl("devnet");
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const Mtheme = createTheme({
