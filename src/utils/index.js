@@ -1,6 +1,6 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-export { formatBalance, formatAddress, getProvider };
+export { formatBalance, formatAddress, getProvider, getTotal };
 
 function formatBalance(balance) {
   if (!balance) {
@@ -31,4 +31,19 @@ function getProvider() {
     }
   }
   return null;
+}
+function getTotal(price, duration) {
+  var m = 0,
+    s1 = price.toString(),
+    s2 = duration.toString();
+  try {
+    m += s1.split(".")[1].length;
+  } catch (e) {}
+  try {
+    m += s2.split(".")[1].length;
+  } catch (e) {}
+  return (
+    (Number(s1.replace(".", "")) * Number(s2.replace(".", ""))) /
+    Math.pow(10, m)
+  );
 }

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSnackbar } from "notistack";
 import { CircularProgress } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
@@ -10,6 +10,7 @@ import Countdown from "@/components/Countdown.jsx";
 import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { PublicKey } from "@solana/web3.js";
+import { getTotal } from "@/utils/index.js";
 
 function ExtendDuration({ className }) {
   const { id } = useParams();
@@ -20,10 +21,15 @@ function ExtendDuration({ className }) {
   const [loading, setLoading] = useState(false);
   const [extending, setExtending] = useState(false);
   const [duration, setDuration] = useState(1);
-  const [amount, setAmount] = useState(0);
   const [balance, setBalance] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
+  const amount = useMemo(() => {
+    if (deviceDetail.Price) {
+      return getTotal(deviceDetail.Price, parseFloat(duration));
+    }
+    return 0;
+  }, [duration, deviceDetail]);
 
   async function onSubmit() {
     const machinePublicKey = methods.getMachinePublicKey(
@@ -57,9 +63,6 @@ function ExtendDuration({ className }) {
     }
     // eslint-disable-next-line
   }, [wallet, id]);
-  useEffect(() => {
-    setAmount(duration * deviceDetail.Price || 0);
-  }, [duration, deviceDetail]);
   return (
     <div className={className}>
       <div className="con">

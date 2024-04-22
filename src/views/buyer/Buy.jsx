@@ -19,6 +19,7 @@ import FileList from "@/components/FileList.jsx";
 import { getMachineDetail } from "@/services/machine.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import useIpfs from "@/utils/useIpfs.js";
+import { getTotal } from "@/utils/index.js";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -44,7 +45,7 @@ function Buy({ className }) {
   const { methods: ipfsMethods } = useIpfs();
   const amount = useMemo(() => {
     if (deviceDetail.Price) {
-      return parseFloat(formValue.duration) * deviceDetail.Price;
+      return getTotal(deviceDetail.Price, parseFloat(formValue.duration));
     }
     return 0;
   }, [formValue.duration, deviceDetail]);
