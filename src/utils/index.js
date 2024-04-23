@@ -50,10 +50,6 @@ function getTotal(price, duration) {
 function copy(text) {
   navigator.clipboard
     .writeText(text)
-    .then(() => {
-      console.log("Text copied to clipboard");
-    })
-    .catch((error) => {
-      console.error("Error copying text: ", error);
-    });
+    .then(() => {})
+    .catch((error) => {});
 }
