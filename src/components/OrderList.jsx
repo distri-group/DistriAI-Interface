@@ -28,76 +28,62 @@ function OrderList({ className, list, loading }) {
     window.open(href);
     setSigning(false);
   };
-  useEffect(() => {
-    for (let item of list) {
-      item.Loading = false;
-    }
-  }, [list]);
   let columns = [
     {
       title: "Time",
       width: "10%",
       key: "BuyTime",
-      render: (text, record, index) => {
-        return (
-          <div className="time">
-            <div className="y">
-              {moment(record.OrderTime).format("YYYY.MM.DD")}
-            </div>
-            <div className="h">
-              {moment(record.OrderTime).format("HH:mm:ss")}
-            </div>
+      render: (text, record, index) => (
+        <div className="time">
+          <div className="y">
+            {moment(record.OrderTime).format("YYYY.MM.DD")}
           </div>
-        );
-      },
+          <div className="h">{moment(record.OrderTime).format("HH:mm:ss")}</div>
+        </div>
+      ),
     },
     {
       title: "Task Name",
       width: "14%",
       key: "TaskName",
-      render: (text, record, index) => {
-        return record.Metadata?.formData?.taskName || "--";
-      },
+      render: (text, record, index) =>
+        record.Metadata?.formData?.taskName || "--",
     },
     {
       title: "DIST / hr",
       width: "10%",
       key: "Price",
-      render: (text, record, index) => {
-        return (
-          <div className="price">
-            <span className="token" />
-            <span>{record.Price}</span>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Remaining Time",
-      width: "14%",
-      key: "RemainingTime",
-      render: (text, record, index) => {
-        return <div>{record.RemainingTime}</div>;
-      },
+      render: (text, record, index) => (
+        <div className="price">
+          <span>{record.Price}</span>
+        </div>
+      ),
     },
     {
       title: "Total",
       width: "10%",
       key: "Total",
-      render: (text, record, index) => {
-        return (
-          <div className="total">
-            <label>{text}</label>
-          </div>
-        );
-      },
+      render: (text, record, index) => (
+        <div className="price">
+          <span className="token" />
+          <label>{text}</label>
+        </div>
+      ),
+    },
+    {
+      title: "Remaining Time",
+      width: "14%",
+      key: "RemainingTime",
     },
     {
       title: "Status",
       width: "10%",
       key: "StatusName",
       render: (text, record, index) => {
-        return <div className={record.StatusName}>{text}</div>;
+        if (text === "Preparing") {
+          return <CircularProgress />;
+        }
+        return <div className={text}>{text}</div>;
       },
     },
     {
@@ -178,7 +164,7 @@ export default styled(OrderList)`
     span {
       color: #ffffff;
       line-height: 20px;
-      margin-left: 8px;
+      margin-right: 8px;
     }
   }
   .total {
