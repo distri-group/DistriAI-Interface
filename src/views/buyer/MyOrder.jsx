@@ -25,21 +25,21 @@ function MyOrder({ className }) {
     }));
     setCurrent(1);
   }
+  async function loadList(curr) {
+    setLoading(true);
+    try {
+      const res = await getOrderList(
+        curr,
+        10,
+        filterValue,
+        wallet.publicKey.toString()
+      );
+      setTotal(res.Total);
+      setList(res.List);
+    } catch (error) {}
+    setLoading(false);
+  }
   useEffect(() => {
-    async function loadList(curr) {
-      setLoading(true);
-      try {
-        const res = await getOrderList(
-          curr,
-          10,
-          filterValue,
-          wallet.publicKey.toString()
-        );
-        setTotal(res.Total);
-        setList(res.List);
-      } catch (error) {}
-      setLoading(false);
-    }
     if (wallet?.publicKey) {
       loadList(current);
     }
@@ -69,7 +69,11 @@ function MyOrder({ className }) {
           </span>
         </Stack>
         <div className="con-table">
-          <OrderList list={list} loading={loading} />
+          <OrderList
+            list={list}
+            loading={loading}
+            reloadFunc={() => loadList(current)}
+          />
           {total > 10 && (
             <Pager
               current={current}

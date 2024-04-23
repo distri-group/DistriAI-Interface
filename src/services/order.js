@@ -73,6 +73,11 @@ export async function getOrderDetail(Id) {
   }
 }
 
+export async function checkIfPrepared(order) {
+  const res = await getOrderDetail(order.Uuid);
+  return res.StatusName === "Available" || "Failed";
+}
+
 export const filterData = {
   Status: [
     { label: "All Status", value: "all" },
@@ -103,10 +108,9 @@ function formatOrder(item) {
   if (item.StatusName === "Available") {
     if (new Date() < endTime) {
       const result = getTimeDiff(new Date(), endTime);
-      item.RemainingTime = result.value + " " + result.suffix;
       item.RemainingDuration = result.suffix.includes("hour")
         ? result.value
-        : 1;
+        : 0;
     }
   } else if (item.StatusName === "Failed") {
     item.Duration = 0;

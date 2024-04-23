@@ -40,7 +40,7 @@ function computeCountdownInfo(remainTime) {
   };
 }
 
-function useCountDown(deadlineTime) {
+function useCountDown(deadlineTime, onEnd) {
   const [timeInfo, setTimeInfo] = useState(clearCountdownInfo("pending"));
 
   useEffect(() => {
@@ -52,6 +52,10 @@ function useCountDown(deadlineTime) {
       setTimeInfo(data);
       if (remainTime > 0) {
         timer = setTimeout(countdown, 1000);
+      } else {
+        if (typeof onEnd === "function") {
+          onEnd();
+        }
       }
     }
     countdown();

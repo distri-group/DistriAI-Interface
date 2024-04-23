@@ -6,9 +6,10 @@ import Table from "./Table.jsx";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { getMachineDetail } from "@/services/machine.js";
-import { signToken } from "@/services/order.js";
+import { signToken, checkIfPrepared } from "@/services/order.js";
+import Countdown from "./Countdown.jsx";
 
-function OrderList({ className, list, loading }) {
+function OrderList({ className, list, loading, reloadFunc }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const [isLoading, setIsLoading] = useState(loading);
@@ -73,7 +74,24 @@ function OrderList({ className, list, loading }) {
     {
       title: "Remaining Time",
       width: "14%",
-      key: "RemainingTime",
+      key: "StartTime",
+      render: (text, record, index) => {
+        if (record.StatusName === "Available") {
+          return (
+            <Countdown
+              deadlineTime={new Date(record.EndTime).getTime()}
+              onEnd={() => {
+                console.log("Order ended.");
+                reloadFunc();
+              }}
+            />
+          );
+        } else if (record.StatusName !== "Preparing") {
+          return <span>00:00:00</span>;
+        } else {
+          return "";
+        }
+      },
     },
     {
       title: "Status",
@@ -81,7 +99,7 @@ function OrderList({ className, list, loading }) {
       key: "StatusName",
       render: (text, record, index) => {
         if (text === "Preparing") {
-          return <CircularProgress />;
+          return <CircularProgress sx={{ color: "#ffffff" }} />;
         }
         return <div className={text}>{text}</div>;
       },
@@ -121,6 +139,26 @@ function OrderList({ className, list, loading }) {
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
+  useEffect(() => {
+    const timers = [];
+
+    for (const item of list) {
+      if (item.StatusName === "Preparing") {
+        const timer = setInterval(async () => {
+          const prepared = await checkIfPrepared(item);
+          if (prepared) {
+            clearInterval(timer);
+            reloadFunc();
+          }
+        }, 3000);
+        timers.push(timer);
+      }
+    }
+
+    return () => {
+      timers.forEach((timer) => clearInterval(timer));
+    };
+  }, [list]);
   return (
     <div className={className}>
       <Table
