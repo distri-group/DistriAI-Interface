@@ -22,7 +22,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 import styled from "styled-components";
 import prettyBytes from "pretty-bytes";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
@@ -36,8 +36,9 @@ function FileList({
   onReload,
   disableUpload,
 }) {
-  const [initialPrefix, setInitialPrefix] = useState(
-    `/distri.ai/${type}/${item.Owner}/${item.Name}`
+  const initialPrefix = useMemo(
+    () => `/distri.ai/${type}/${item.Owner}/${item.Name}`,
+    [item, type]
   );
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState(true);
@@ -49,13 +50,14 @@ function FileList({
   const [filesToUpload, setFiles] = useState([]);
   const [uploadProgress, setProgress] = useState([]);
   const [selectedItems, setItems] = useState([]);
-  const [currentPrefix, setPrefix] = useState(null);
+  const [currentPrefix, setPrefix] = useState(initialPrefix);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [deployFile, setDeployFile] = useState(null);
   const [existedDialog, setExistedDialog] = useState(false);
   const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
 
+  // Go back to parent folder
   const getParentPrefix = (prefix) => {
     const lastIndex = prefix.lastIndexOf("/", prefix.length - 2);
     if (lastIndex === -1) {
@@ -65,6 +67,7 @@ function FileList({
     return parentPrefix;
   };
 
+  // Load file list
   const loadFiles = async (prefix) => {
     setLoading(true);
     try {
@@ -126,6 +129,8 @@ function FileList({
     }
     setItems(newSelected);
   };
+
+  // Change prefix
   const handleFolderNavigate = (index) => {
     let suffix;
     if (index > 0) {
@@ -133,10 +138,13 @@ function FileList({
     } else suffix = breadcrumbs[index];
     setPrefix(initialPrefix + "/" + suffix);
   };
+
   const handleUploadProgress = (bytes, total) => {
     const progress = Math.floor((bytes / total) * 100 * 100) / 100;
     return progress;
   };
+
+  // Deployment script upload
   const handleDeploymentFileUpload = async (existed) => {
     if (existed) {
       await methods.fileDelete(initialPrefix + "/deployment", true);
@@ -168,6 +176,10 @@ function FileList({
       setExistedDialog(false);
     }
   };
+
+  useEffect(() => {
+    setPrefix(initialPrefix);
+  }, [initialPrefix]);
   useEffect(() => {
     if (currentPrefix) {
       loadFiles(currentPrefix);
@@ -181,16 +193,13 @@ function FileList({
     }
     // eslint-disable-next-line
   }, [currentPrefix]);
+
   useEffect(() => {
     if (onSelect) {
       onSelect(selectedItems);
     }
     // eslint-disable-next-line
   }, [selectedItems]);
-  useEffect(() => {
-    setPrefix(initialPrefix);
-    // eslint-disable-next-line
-  }, []);
   useEffect(() => {
     const handleUpload = async () => {
       enqueueSnackbar("Start uploading", { variant: "info" });
@@ -263,10 +272,6 @@ function FileList({
       handleDeploymentFile();
     }
   }, [deployFile]);
-  useEffect(() => {
-    setInitialPrefix(`/distri.ai/${type}/${item.Owner}/${item.Name}`);
-    setPrefix(`/distri.ai/${type}/${item.Owner}/${item.Name}`);
-  }, [item, type]);
 
   return (
     <div className={className}>
