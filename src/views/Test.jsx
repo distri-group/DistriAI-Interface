@@ -1,12 +1,8 @@
-import useIpfs from "@/utils/useIpfs.js";
+import Countdown from "../components/Countdown";
 
 export default function Test() {
-  const { methods } = useIpfs();
-  const test = async () => {
-    const res = await methods.getFolderList(
-      `/distri.ai/model/4F1fmZAmZ7bwQF3vz3Dv7VFJDyrkyjDyftsKHq9bTb1p/test/deployment`
-    );
-    console.log(res);
+  const test = () => {
+    console.log("Countdown ended");
   };
-  return <button onClick={test}>test</button>;
+  return <Countdown deadlineTime={new Date().getTime() + 5000} onEnd={test} />;
 }

@@ -55,6 +55,7 @@ function useCountDown(deadlineTime, onEnd) {
       } else {
         if (typeof onEnd === "function") {
           onEnd();
+          clearTimeout(timer);
         }
       }
     }

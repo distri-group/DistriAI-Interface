@@ -80,10 +80,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
           return (
             <Countdown
               deadlineTime={new Date(record.EndTime).getTime()}
-              onEnd={() => {
-                console.log("Order ended.");
-                reloadFunc();
-              }}
+              onEnd={reloadFunc}
             />
           );
         } else if (record.StatusName !== "Preparing") {
