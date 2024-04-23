@@ -48,7 +48,6 @@ function MyOrder({ className }) {
   return (
     <div className={className}>
       <div className="con">
-        <h1 className="title">My Orders</h1>
         <Stack direction="row" spacing={2} className="filter">
           <span className="txt">Filter</span>
           {Object.entries(filterData).map(([key, value]) => (

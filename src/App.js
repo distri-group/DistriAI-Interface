@@ -31,6 +31,7 @@ import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import Test from "@/views/Test.jsx";
 import { clusterApiUrl } from "@solana/web3.js";
+import Dashboard from "@/views/buyer/Dashboard.jsx";
 
 function App() {
   window.Buffer = Buffer;
@@ -239,6 +240,7 @@ function AppRoutes() {
           <Route path=":owner/:name" element={<Detail type="dataset" />} />
           <Route path="add" element={<Create type="dataset" />} />
         </Route>
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="faucet" element={<Faucet />} />
         <Route path="test" element={<Test />} />
       </Routes>
