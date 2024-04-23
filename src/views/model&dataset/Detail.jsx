@@ -156,7 +156,7 @@ function Detail({ className, type }) {
                       className="cbtn"
                       onClick={() => setOrderDialog(true)}
                       style={{ width: 100 }}>
-                      {intent}
+                      {capitalize(intent)}
                     </Button>
                   ) : (
                     <>
