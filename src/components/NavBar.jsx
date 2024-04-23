@@ -2,15 +2,73 @@ import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import { WalletMultiButton } from "./wallet/WalletMultiButton.jsx";
 import { useEffect, useState } from "react";
-import { Button, Menu, MenuItem } from "@mui/material";
+import {
+  Button,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import { KeyboardDoubleArrowDown } from "@mui/icons-material";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { getOrderList } from "@/services/order.js";
 
 function NavBar({ className }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const wallet = useAnchorWallet();
   const [user, setUser] = useState("buyer");
   const [anchorEl, setAnchorEl] = useState(null);
+  const [orderDialog, setOrderDialog] = useState(false);
+  const [halfOrderDialog, setHalfOrderDialog] = useState(false);
+  const [ordersUnderOneHour, setOrdersUnder] = useState(0);
+  const [ordersUnderHalf, setHalfOrder] = useState(0);
   const open = Boolean(anchorEl);
+  const loadOrderList = async () => {
+    const res = await getOrderList(
+      1,
+      100,
+      { Direction: "Buy", Status: 1 },
+      wallet.publicKey.toString()
+    );
+    let count = 0;
+    for (let order of res.List) {
+      if (
+        order.StatusName === "Available" &&
+        order.Duration > 1 &&
+        order.RemainingDuration === 0
+      ) {
+        count++;
+        res.List = res.List.filter((item) => item !== order);
+      }
+    }
+    setOrdersUnder(count);
+    if (count > 0) {
+      setOrderDialog(true);
+    }
+    let halfCount = 0;
+    for (let order of res.List) {
+      if (
+        order.StatusName === "Available" &&
+        order.Duration >= 10 &&
+        order.RemainingDuration <= order.Duration / 2
+      ) {
+        halfCount++;
+      }
+    }
+    setHalfOrder(halfCount);
+    if (halfCount > 0) {
+      setHalfOrderDialog(true);
+    }
+  };
+
+  useEffect(() => {
+    if (wallet?.publicKey) {
+      loadOrderList();
+    }
+  }, [wallet]);
   useEffect(() => {
     if (
       location.pathname === "/market" ||
@@ -102,6 +160,34 @@ function NavBar({ className }) {
           <WalletMultiButton />
         </div>
       </div>
+      <Dialog open={orderDialog}>
+        <DialogTitle>
+          Your remaining available time for {ordersUnderOneHour} orders is less
+          than <span style={{ color: "red" }}>1 HOUR</span>
+        </DialogTitle>
+        <DialogContent>
+          Backup or extend the duration to avoid data loss due to the end of
+          order.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOrderDialog(false)}>Got it</Button>
+          <Button onClick={() => navigate("/order")}>View Orders</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={halfOrderDialog}>
+        <DialogTitle>
+          Your remaining available time for {ordersUnderHalf} orders is less
+          than 50%.
+        </DialogTitle>
+        <DialogContent>
+          Backup or extend the duration to avoid data loss due to the end of
+          order.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOrderDialog(false)}>Got it</Button>
+          <Button onClick={() => navigate("/order")}>View Orders</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
