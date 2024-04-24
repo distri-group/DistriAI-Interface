@@ -10,11 +10,9 @@ import { WalletModalProvider } from "./components/wallet/WalletModalProvider.jsx
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles/index.js";
 import { Buffer } from "buffer";
-import NavBar from "@/components/NavBar.jsx";
 import Faucet from "@/views/Faucet.jsx";
 import Market from "@/views/buyer/Market.jsx";
 import Buy from "@/views/buyer/Buy.jsx";
-import MyOrder from "@/views/buyer/MyOrder.jsx";
 import OrderDetail from "@/views/buyer/OrderDetail.jsx";
 import ExtendDuration from "@/views/buyer/ExtendDuration.jsx";
 import EndDuration from "@/views/buyer/EndDuration.jsx";
@@ -32,6 +30,7 @@ import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import Test from "@/views/Test.jsx";
 import { clusterApiUrl } from "@solana/web3.js";
 import Dashboard from "@/views/buyer/Dashboard.jsx";
+import KeepAliveLayout from "./KeepAliveLayout.jsx";
 
 function App() {
   window.Buffer = Buffer;
@@ -190,7 +189,50 @@ function App() {
               <Routes>
                 <Route index element={<Navigate to="home" />} />
                 <Route path="home" element={<div id="home" />} />
-                <Route path="/*" element={<AppRoutes />} />
+                <Route path="/*" element={<KeepAliveLayout />}>
+                  <Route path="market" element={<Market />} />
+                  <Route path="device">
+                    <Route index element={<MyDevice />} />
+                    <Route path=":id">
+                      <Route path="buy" element={<Buy />} />
+                      <Route path="list" element={<MakeOffer />} />
+                    </Route>
+                  </Route>
+                  <Route path="order">
+                    <Route path=":id">
+                      <Route index element={<OrderDetail />} />
+                      <Route path="extend" element={<ExtendDuration />} />
+                      <Route path="end" element={<EndDuration />} />
+                    </Route>
+                  </Route>
+                  <Route path="reward">
+                    <Route index element={<Reward />} />
+                    <Route path=":period" element={<RewardDetail />} />
+                  </Route>
+                  <Route path="earning">
+                    <Route index element={<Earning />} />
+                    <Route path=":id" element={<EarningDetail />} />
+                  </Route>
+                  <Route path="model">
+                    <Route index element={<Contents type="model" />} />
+                    <Route
+                      path=":owner/:name"
+                      element={<Detail type="model" />}
+                    />
+                    <Route path="add" element={<Create type="model" />} />
+                  </Route>
+                  <Route path="dataset">
+                    <Route index element={<Contents type="dataset" />} />
+                    <Route
+                      path=":owner/:name"
+                      element={<Detail type="dataset" />}
+                    />
+                    <Route path="add" element={<Create type="dataset" />} />
+                  </Route>
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="faucet" element={<Faucet />} />
+                  <Route path="test" element={<Test />} />
+                </Route>
               </Routes>
               <ConnectToWallet open={open} />
             </SnackbarProvider>
@@ -198,52 +240,6 @@ function App() {
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
-  );
-}
-
-function AppRoutes() {
-  return (
-    <div id="App">
-      <NavBar className="page-header" />
-      <Routes>
-        <Route path="market" element={<Market />} />
-        <Route path="device">
-          <Route index element={<MyDevice />} />
-          <Route path=":id">
-            <Route path="buy" element={<Buy />} />
-            <Route path="list" element={<MakeOffer />} />
-          </Route>
-        </Route>
-        <Route path="order">
-          <Route path=":id">
-            <Route index element={<OrderDetail />} />
-            <Route path="extend" element={<ExtendDuration />} />
-            <Route path="end" element={<EndDuration />} />
-          </Route>
-        </Route>
-        <Route path="reward">
-          <Route index element={<Reward />} />
-          <Route path=":period" element={<RewardDetail />} />
-        </Route>
-        <Route path="earning">
-          <Route index element={<Earning />} />
-          <Route path=":id" element={<EarningDetail />} />
-        </Route>
-        <Route path="model">
-          <Route index element={<Contents type="model" />} />
-          <Route path=":owner/:name" element={<Detail type="model" />} />
-          <Route path="add" element={<Create type="model" />} />
-        </Route>
-        <Route path="dataset">
-          <Route index element={<Contents type="dataset" />} />
-          <Route path=":owner/:name" element={<Detail type="dataset" />} />
-          <Route path="add" element={<Create type="dataset" />} />
-        </Route>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="faucet" element={<Faucet />} />
-        <Route path="test" element={<Test />} />
-      </Routes>
-    </div>
   );
 }
 
