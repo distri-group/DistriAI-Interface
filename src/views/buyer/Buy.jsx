@@ -25,7 +25,8 @@ function Buy({ className }) {
   document.title = "Edit model";
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state } = useLocation();
+  const { state, search } = useLocation();
+  const owner = new URLSearchParams(search).get("own");
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,7 @@ function Buy({ className }) {
   const [filesToUpload, setFiles] = useState([]);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
-  const [selectedModel, setSelectedModel] = useState({});
+  const [selectedModel, setSelectedModel] = useState({ Id: 0 });
   const [deployable, setDeployable] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
   const amount = useMemo(() => {
@@ -53,10 +54,18 @@ function Buy({ className }) {
   function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
-    if (name === "model") {
-      setFormValue((prevState) => ({ ...prevState, model: parseInt(value) }));
-      setSelectedModel(models.find((model) => model.Id === parseInt(value)));
-    }
+  }
+  function handleModelChange(e) {
+    const selectedModel = models.find(
+      (model) => model.Id === parseInt(e.target.value)
+    );
+    setFormValue((prevState) => ({
+      ...prevState,
+      model: `${selectedModel.Owner.slice(0, 4)}..${selectedModel.Owner.slice(
+        -4
+      )}/${selectedModel.Name}`,
+    }));
+    setSelectedModel(selectedModel);
   }
 
   async function onSubmit(e) {
@@ -91,6 +100,14 @@ function Buy({ className }) {
       deviceDetail.Uuid,
       new PublicKey(deviceDetail.Metadata.Addr)
     );
+    console.log({
+      formData: {
+        duration: formValue.duration,
+        taskName: formValue.taskName,
+      },
+      MachineInfo,
+      OrderInfo,
+    });
     setSubmitting(true);
     try {
       await methods.placeOrder(machinePublicKey, formValue.duration, {
@@ -127,19 +144,21 @@ function Buy({ className }) {
       }));
       const models = await getModelList(1, 10);
       setModels(models.List);
-      if (state.model) {
+      if (state?.model) {
+        const selectedModel = models.List.find(
+          (model) => model.Id === parseInt(state.model.modelId)
+        );
         setFormValue((prevState) => ({
           ...prevState,
           usage: state.model.intent,
-          model: state.model.modelId,
+          model: `${selectedModel.Owner.slice(
+            0,
+            4
+          )}..${selectedModel.Owner.slice(-4)}/${selectedModel.Name}`,
         }));
-        setSelectedModel(
-          models.List.find(
-            (model) => model.Id === parseInt(state.model.modelId)
-          )
-        );
+        setSelectedModel();
       }
-      const device = await getMachineDetail(state.Owner, id);
+      const device = await getMachineDetail(owner, id);
       setDeviceDetail(device);
       setLoading(false);
     }
@@ -147,7 +166,7 @@ function Buy({ className }) {
       init();
     }
     // eslint-disable-next-line
-  }, [wallet, id, state]);
+  }, [wallet, id]);
   useEffect(() => {
     const handleModelChange = async () => {
       if (JSON.stringify(selectedModel) !== "{}") {
@@ -225,7 +244,7 @@ function Buy({ className }) {
                     placeholder="Must be 4-45 characters"
                   />
                 </Grid>
-                {state.model && (
+                {state?.model && (
                   <>
                     <Grid item md={6}>
                       <label>Model</label>
@@ -237,14 +256,13 @@ function Buy({ className }) {
                       <Select
                         fullWidth
                         onChange={(e) => {
-                          handleChange(e);
+                          handleModelChange(e);
                           setFormValue((prevState) => ({
                             ...prevState,
                             downloadLinks: [],
                           }));
                         }}
-                        name="model"
-                        value={formValue.model}>
+                        value={selectedModel.Id}>
                         {models.map((model) => (
                           <MenuItem value={model.Id} key={model.Id}>
                             {model.Name}

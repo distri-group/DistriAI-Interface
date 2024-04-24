@@ -193,9 +193,12 @@ function DeviceList({
                 return setConnectModal(true);
               }
               if (onPriceSort) {
-                return navigate("/device/" + record.Uuid + "/buy", {
-                  state: { model, Owner: record.Owner },
-                });
+                return navigate(
+                  `/device/${record.Uuid}/buy?own=${record.Owner}`,
+                  {
+                    state: { model },
+                  }
+                );
               }
               if (record.Status === 0) {
                 return navigate("/device/" + record.Uuid + "/list", {
@@ -292,17 +295,10 @@ export default styled(DeviceList)`
     height: 24px;
   }
   .mini-btn {
-    border-radius: 4px;
-    border: none;
-    height: 31px;
-    font-size: 14px;
-    display: block;
-    text-align: center;
-    overflow: hidden;
-    margin-right: 10px;
-    width: 102px;
-    line-height: 20px;
-    float: right;
+    width: 160px;
+    height: 48px;
+    font-size: 18px;
+    line-height: 26px;
     :hover {
       border: none;
     }
