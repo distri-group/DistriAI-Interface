@@ -144,7 +144,7 @@ function NavBar({ className }) {
               <span onClick={() => navigate("/market")}>Market</span>
               <span onClick={() => navigate("/model")}>Models</span>
               <span onClick={() => navigate("/dataset")}>Datasets</span>
-              <span onClick={() => navigate("/order")}>My Orders</span>
+              <span onClick={() => navigate("/dashboard")}>Dashboard</span>
             </>
           )}
           {user === "seller" && (
@@ -171,7 +171,7 @@ function NavBar({ className }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOrderDialog(false)}>Got it</Button>
-          <Button onClick={() => navigate("/order")}>View Orders</Button>
+          <Button onClick={() => navigate("/dashboard")}>View Orders</Button>
         </DialogActions>
       </Dialog>
       <Dialog open={halfOrderDialog}>
@@ -185,7 +185,7 @@ function NavBar({ className }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOrderDialog(false)}>Got it</Button>
-          <Button onClick={() => navigate("/order")}>View Orders</Button>
+          <Button onClick={() => navigate("/dashboard")}>View Orders</Button>
         </DialogActions>
       </Dialog>
     </div>

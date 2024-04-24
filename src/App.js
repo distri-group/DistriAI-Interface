@@ -215,7 +215,6 @@ function AppRoutes() {
           </Route>
         </Route>
         <Route path="order">
-          <Route index element={<MyOrder />} />
           <Route path=":id">
             <Route index element={<OrderDetail />} />
             <Route path="extend" element={<ExtendDuration />} />

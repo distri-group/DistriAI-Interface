@@ -46,7 +46,7 @@ function EndDuration({ className }) {
       );
       enqueueSnackbar("Refund order success.", { variant: "success" });
       setTimeout(() => {
-        navigate("/order");
+        navigate("/dashboard");
       }, 500);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });

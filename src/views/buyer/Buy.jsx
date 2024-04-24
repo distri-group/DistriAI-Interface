@@ -103,7 +103,7 @@ function Buy({ className }) {
       });
       enqueueSnackbar("Purchase success.", { variant: "success" });
       setTimeout(() => {
-        navigate("/order");
+        navigate("/dashboard");
       }, 500);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });

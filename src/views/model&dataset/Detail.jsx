@@ -215,7 +215,9 @@ function Detail({ className, type }) {
             </Stack>
             <hr style={{ margin: "32px 0" }} />
             <TabContext value={tabValue}>
-              <TabList onChange={handleTabChange}>
+              <TabList
+                TabIndicatorProps={{ style: { display: "none" } }}
+                onChange={handleTabChange}>
                 <Tab
                   className="tab"
                   label={type === "model" ? "Model Card" : "README"}
@@ -388,7 +390,7 @@ function Detail({ className, type }) {
               <Button
                 className="default-btn"
                 onClick={() => {
-                  navigate("/order");
+                  navigate("/dashboard");
                   setOrderDialog(false);
                 }}>
                 Go to GPUs
