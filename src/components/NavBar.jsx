@@ -30,7 +30,6 @@ function NavBar({ className }) {
   const loadOrderList = async (publicKey) => {
     if (!prevPublicKey) setPrev(publicKey);
     else if (prevPublicKey === publicKey) return;
-    console.log("Check if you have ending order...");
     const res = await getOrderList(
       1,
       100,
@@ -154,7 +153,18 @@ function NavBar({ className }) {
               <span onClick={() => navigate("/market")}>Market</span>
               <span onClick={() => navigate("/model")}>Models</span>
               <span onClick={() => navigate("/dataset")}>Datasets</span>
-              <span onClick={() => navigate("/dashboard")}>Dashboard</span>
+              <span onClick={() => navigate("/dashboard")}>
+                {ordersUnderOneHour > 0 && (
+                  <img
+                    src="/img/clock.png"
+                    alt="alarm"
+                    style={{
+                      marginRight: 8,
+                    }}
+                  />
+                )}
+                Dashboard
+              </span>
             </>
           )}
           {user === "seller" && (
