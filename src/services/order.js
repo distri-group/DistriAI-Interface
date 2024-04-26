@@ -75,7 +75,7 @@ export async function getOrderDetail(Id) {
 
 export async function checkIfPrepared(order) {
   const res = await getOrderDetail(order.Uuid);
-  return res.StatusName === "Available" || "Failed";
+  return res.StatusName === "Available" || res.StatusName === "Failed";
 }
 
 export const filterData = {
