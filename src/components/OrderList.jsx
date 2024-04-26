@@ -80,10 +80,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
       render: (text, record, index) => {
         if (record.StatusName === "Available") {
           return (
-            <Countdown
-              deadlineTime={new Date(record.EndTime).getTime()}
-              onEnd={reloadFunc}
-            />
+            <Countdown deadlineTime={new Date(record.EndTime).getTime()} />
           );
         } else if (record.StatusName !== "Preparing") {
           return <span>00:00:00</span>;
