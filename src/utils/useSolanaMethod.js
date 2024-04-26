@@ -255,11 +255,11 @@ export default function useSolanaMethod() {
             lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
             signature: transaction,
           },
-          "finalized"
+          "confirmed"
         );
         setTimeout(() => {
           resolve(confirmation);
-        }, 4000);
+        }, 1000);
       } catch (error) {
         reject(error);
       }
@@ -314,6 +314,11 @@ export default function useSolanaMethod() {
     }
   };
 
+  const fetchAccounts = async (name) => {
+    const account = program.account[name];
+    return await account.all();
+  };
+
   const handleError = (error) => {
     if (error.message.includes("found no record of a prior credit.")) {
       return new Error(
@@ -334,6 +339,7 @@ export default function useSolanaMethod() {
     claimButchRewards,
     getTokenBalance,
     getMachinePublicKey,
+    fetchAccounts,
   };
 
   return { wallet, methods };
