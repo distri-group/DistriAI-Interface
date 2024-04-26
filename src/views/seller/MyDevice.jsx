@@ -133,18 +133,11 @@ function MyDevice({ className }) {
 
 export default styled(MyDevice)`
   .con {
-    width: 100%;
     .title {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 28px;
-      color: #ffffff;
-      padding-left: 36px;
-      background-image: url(/img/market/seller.png);
-      background-repeat: no-repeat;
-      background-size: 32px;
-      background-position: left;
-      margin-top: 25px;
+      font-weight: 600;
+      font-size: 32px;
+      line-height: 44px;
+      margin: 0;
     }
     .filter {
       padding: 11px 0;

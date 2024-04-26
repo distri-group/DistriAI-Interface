@@ -81,11 +81,11 @@ export async function checkIfPrepared(order) {
 export const filterData = {
   Status: [
     { label: "All Status", value: "all" },
-    { label: "Preparing", value: "0" },
-    { label: "Available", value: "1" },
-    { label: "Completed", value: "2" },
-    { label: "Failed", value: "3" },
-    { label: "Refunded", value: "4" },
+    { label: "Preparing", value: 0 },
+    { label: "Available", value: 1 },
+    { label: "Completed", value: 2 },
+    { label: "Failed", value: 3 },
+    { label: "Refunded", value: 4 },
   ],
 };
 
@@ -105,6 +105,7 @@ function formatOrder(item) {
     "Refunded",
   ];
   item.StatusName = statusName[item.Status];
+  item.EndTime = endTime.toISOString();
   if (item.StatusName === "Available") {
     if (new Date() < endTime) {
       const result = getTimeDiff(new Date(), endTime);
@@ -114,8 +115,8 @@ function formatOrder(item) {
     }
   } else if (item.StatusName === "Failed") {
     item.Duration = 0;
+    item.EndTime = null;
   }
-  item.EndTime = endTime.toISOString();
   if (item.RefundTime && new Date(item.RefundTime).getTime() !== 0) {
     item.RefundDuration =
       item.Duration -

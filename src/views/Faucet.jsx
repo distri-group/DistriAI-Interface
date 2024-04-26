@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { DISTFaucet, SOLFaucet } from "@/services/faucet.js";
 import { useSnackbar } from "notistack";
-import { TextField } from "@mui/material";
+import { TextField, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
 function Faucet({ className }) {
@@ -12,16 +12,37 @@ function Faucet({ className }) {
   const [publicKey, setPublicKey] = useState("");
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
+  const [validateError, setValidateError] = useState({
+    address: null,
+  });
   useEffect(() => {
     if (wallet?.publicKey) {
       setPublicKey(wallet?.publicKey.toString());
     }
   }, [wallet]);
-  const onSubmit = async () => {
+  const handleInput = (e) => {
+    const publicKey = e.target.value;
+    setPublicKey(publicKey);
     if (!publicKey) {
-      return enqueueSnackbar("Please Enter Your Wallet Address.", {
-        variant: "info",
-      });
+      return setValidateError((prev) => ({
+        ...prev,
+        address: "Please input address",
+      }));
+    }
+    if (publicKey.length < 44) {
+      return setValidateError((prev) => ({
+        ...prev,
+        address: "Not valid publicKey",
+      }));
+    }
+    return setValidateError((prev) => ({
+      ...prev,
+      address: null,
+    }));
+  };
+  const onSubmit = async () => {
+    if (validateError.address) {
+      return;
     }
     setLoading(true);
     const res = await SOLFaucet(publicKey);
@@ -33,10 +54,8 @@ function Faucet({ className }) {
     setLoading(false);
   };
   const onSendDIST = async () => {
-    if (!publicKey) {
-      return enqueueSnackbar("Please Enter Your Wallet Address.", {
-        variant: "info",
-      });
+    if (validateError.address) {
+      return;
     }
     setLoading(true);
     try {
@@ -54,111 +73,82 @@ function Faucet({ className }) {
 
   return (
     <div className={className}>
-      <div className="con">
-        <h1 className="title">DistriAI Genesis Faucet</h1>
-        <h2 className="title2">Testnet faucet drips 1 SOL / 5 DIST per day</h2>
-        <div className="myform">
-          <div className="form-row">
-            <div className="tip1">
-              1. Install the phantom extension from the{" "}
-              <a href="https://phantom.app/" target="_blank" rel="noreferrer">
-                Phantom.app
-              </a>
-            </div>
-            <div className="tip1">
-              2. Create a new wallet OR import an existing wallet.
-            </div>
-            <TextField
-              onChange={(e) => setPublicKey(e.target.value)}
-              disabled={loading}
-              value={publicKey}
-              placeholder="Enter Your Wallet Address"
-            />
-          </div>
-          <div className="form-col">
-            <LoadingButton
-              className="cbtn"
-              loading={loading}
-              style={{ width: 152 }}
-              type="primary"
-              onClick={onSubmit}>
-              {loading ? "" : "Send Me SOL"}
-            </LoadingButton>
-            <LoadingButton
-              className="cbtn"
-              loading={loading}
-              style={{ width: 152 }}
-              type="primary"
-              onClick={onSendDIST}>
-              {loading ? "" : "Send Me DIST"}
-            </LoadingButton>
-          </div>
-        </div>
+      <h1>DistriAI Genesis Faucet</h1>
+      <h2>
+        Testnet faucet drips <span>1 SOL / 5 DIST</span> per day
+      </h2>
+      <div className="container">
+        <p className="text">
+          1. Install the phantom extension from the{" "}
+          <a href="https://phantom.app/" target="_blank" rel="noreferrer">
+            Phantom.app
+          </a>
+        </p>
+        <p className="text">
+          2. Create a new wallet OR import an existing wallet.
+        </p>
+        <TextField
+          onChange={handleInput}
+          disabled={loading}
+          value={publicKey}
+          error={!!validateError.address}
+          placeholder="Enter Your Wallet Address"
+          helperText={validateError.address}
+        />
+        <Stack
+          direction="row"
+          justifyContent="center"
+          style={{ paddingTop: 64 }}>
+          <LoadingButton
+            className="cbtn"
+            style={{ width: 160 }}
+            loading={loading}
+            type="primary"
+            onClick={onSubmit}>
+            {loading ? "" : "Send Me SOL"}
+          </LoadingButton>
+          <LoadingButton
+            className="cbtn"
+            style={{ width: 160 }}
+            loading={loading}
+            type="primary"
+            onClick={onSendDIST}>
+            {loading ? "" : "Send Me DIST"}
+          </LoadingButton>
+        </Stack>
       </div>
     </div>
   );
 }
 
 export default styled(Faucet)`
-  display: block;
-  overflow: hidden;
-  width: 100%;
-  height: calc(100% - 140px);
-  color: #fff;
-  .myform {
-    width: 800px;
-    background-color: #222;
-    padding: 48px;
-    display: block;
-    overflow: hidden;
-    margin: 40px auto;
-    .form-row {
-      .tip1,
-      .tip2 {
-        font-size: 16px;
-        color: #797979;
-        line-height: 30px;
-        a {
-          font-weight: 400;
-          font-style: normal;
-          font-size: 16px;
-          color: #0aab50;
-          line-height: 30px;
-          text-decoration: none;
-        }
-      }
-      input {
-        background-color: #222;
+  h1 {
+    margin: 0;
+    margin-bottom: 16px;
+    font-size: 32px;
+    line-height: 44px;
+  }
+  h2 {
+    margin: 0;
+    margin-bottom: 40px;
+    font-size: 16px;
+    color: #898989;
+    line-height: 22px;
+    span {
+      color: white;
+    }
+  }
+  .container {
+    background: rgba(149, 157, 165, 0.16);
+    padding: 40px;
+    .text {
+      color: #959da5;
+      a {
+        color: #09e98d;
       }
     }
   }
-  .form-col {
-    display: flex;
-    justify-content: space-around;
-  }
-  .con {
-    width: 1210px;
-    margin: 66px auto 10px auto;
-    display: block;
-    overflow: hidden;
-    .title {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 28px;
-      color: #ffffff;
-      margin-top: 25px;
-      line-height: 24px;
-      text-align: center;
-    }
-    .title2 {
-      font-size: 16px;
-      color: #797979;
-      text-align: center;
-      line-height: 20px;
-    }
-  }
-  .block {
-    display: block;
-    overflow: hidden;
+  .cbtn {
+    margin: 0 12px;
   }
 `;

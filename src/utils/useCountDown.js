@@ -59,6 +59,7 @@ function useCountDown(deadlineTime, onEnd) {
         }
       }
     }
+    clearTimeout(timer);
     countdown();
     return () => {
       clearTimeout(timer);

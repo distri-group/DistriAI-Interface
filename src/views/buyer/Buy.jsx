@@ -10,6 +10,7 @@ import {
   Grid,
   MenuItem,
   Select,
+  Stack,
   TextField,
 } from "@mui/material";
 import { getModelList, checkDeployable } from "@/services/model.js";
@@ -38,6 +39,9 @@ function Buy({ className }) {
     usage: "train",
     model: "",
   });
+  const [validateError, setValidateError] = useState({
+    taskName: null,
+  });
   const [filesToUpload, setFiles] = useState([]);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
@@ -54,6 +58,26 @@ function Buy({ className }) {
   function handleChange(e) {
     const { name, value } = e.target;
     setFormValue((prevState) => ({ ...prevState, [name]: value }));
+    if (name === "taskName") {
+      if (value.length <= 0) {
+        return setValidateError((prev) => ({
+          taskName: "Please input task name",
+        }));
+      }
+      if (value.length < 4) {
+        return setValidateError((prev) => ({
+          taskName: "Task name should no shorter than 4 characters",
+        }));
+      }
+      if (value.length > 45) {
+        return setValidateError((prev) => ({
+          taskName: "Task name should no longer than 45 characters",
+        }));
+      }
+      setValidateError((prev) => ({
+        taskName: null,
+      }));
+    }
   }
   function handleModelChange(e) {
     const selectedModel = models.find(
@@ -70,6 +94,7 @@ function Buy({ className }) {
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (validateError.taskName) return;
     const MachineInfo = {
       Uuid: deviceDetail.Uuid,
       Provider: deviceDetail.Provider,
@@ -199,133 +224,194 @@ function Buy({ className }) {
           <h1>Purchase Computing Power</h1>
           <div>
             <h2>Configuration</h2>
-            <DeviceCard device={deviceDetail} />
+            <div className="box">
+              <span className="gpu">
+                {deviceDetail.GpuCount}x <b>{deviceDetail.Gpu}</b>{" "}
+                {deviceDetail.GPUMemory || ""}
+              </span>
+              <Stack
+                direction="row"
+                spacing={0.5}
+                alignItems="center"
+                style={{ paddingBottom: 24 }}>
+                <span>{deviceDetail.Tflops}</span>
+                <label>TFLOPS</label>
+              </Stack>
+              <Grid container>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>RAM</label>
+                    <span>
+                      <b>{deviceDetail.RAM}</b> GB
+                    </span>
+                  </Stack>
+                </Grid>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>Avail Disk Storage</label>
+                    <span>
+                      <b>{deviceDetail.Disk}</b> GB
+                    </span>
+                  </Stack>
+                </Grid>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>CPU</label>
+                    <span>{deviceDetail.CPU}</span>
+                  </Stack>
+                </Grid>
+              </Grid>
+            </div>
           </div>
           <div>
             <h2>Order Info</h2>
-            <form onSubmit={onSubmit}>
-              <Grid container spacing={2}>
-                <Grid item md={12}>
-                  <DurationToggle
-                    duration={formValue.duration}
-                    setDuration={(duration) =>
-                      setFormValue((prevState) => ({ ...prevState, duration }))
-                    }
-                    max={deviceDetail.MaxDuration}
-                    title="Duration"
-                  />
-                </Grid>
-                <Grid item md={12}>
-                  <div className="gray-item">
-                    <label>Max Duration</label>
-                    <span>
-                      {deviceDetail.MaxDuration > 24
-                        ? `${Math.floor(deviceDetail.MaxDuration / 24)}d ${
-                            deviceDetail.MaxDuration % 24
-                          }`
-                        : deviceDetail.MaxDuration}
-                      h
-                    </span>
-                  </div>
-                  <div className="gray-item">
-                    <label>Price(per hour)</label>
-                    <span>{deviceDetail.Price} DIST</span>
-                  </div>
-                </Grid>
-                <Grid item md={12}>
-                  <label>Task Name</label>
-                </Grid>
-                <Grid item md={12}>
-                  <TextField
-                    required={true}
-                    value={formValue.taskName}
-                    name="taskName"
-                    onChange={handleChange}
-                    placeholder="Must be 4-45 characters"
-                  />
-                </Grid>
-                {state?.model && (
-                  <>
-                    <Grid item md={6}>
-                      <label>Model</label>
-                    </Grid>
-                    <Grid item md={6}>
-                      <label>Usage</label>
-                    </Grid>
-                    <Grid item md={6}>
-                      <Select
-                        fullWidth
-                        onChange={(e) => {
-                          handleModelChange(e);
-                          setFormValue((prevState) => ({
-                            ...prevState,
-                            downloadLinks: [],
-                          }));
-                        }}
-                        value={selectedModel.Id}>
-                        {models.map((model) => (
-                          <MenuItem value={model.Id} key={model.Id}>
-                            {model.Name}
+            <div className="box">
+              <form onSubmit={onSubmit}>
+                <Grid container spacing={2}>
+                  <Grid item md={12}>
+                    <DurationToggle
+                      duration={formValue.duration}
+                      setDuration={(duration) =>
+                        setFormValue((prevState) => ({
+                          ...prevState,
+                          duration,
+                        }))
+                      }
+                      max={deviceDetail.MaxDuration}
+                      title="Duration"
+                    />
+                  </Grid>
+                  <Grid item md={12}>
+                    <Stack direction="row" spacing={1}>
+                      <label style={{ display: "block", width: 160 }}>
+                        Max Duration
+                      </label>
+                      <span>
+                        {deviceDetail.MaxDuration > 24
+                          ? `${Math.floor(deviceDetail.MaxDuration / 24)}d ${
+                              deviceDetail.MaxDuration % 24
+                            }`
+                          : deviceDetail.MaxDuration}
+                        h
+                      </span>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <label style={{ display: "block", width: 160 }}>
+                        Price(per hour)
+                      </label>
+                      <span>{deviceDetail.Price} DIST</span>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={12}>
+                    <label
+                      style={{
+                        fontWeight: 600,
+                        fontSize: 24,
+                        color: "white",
+                        lineHeight: "34px",
+                      }}>
+                      Task Name
+                    </label>
+                  </Grid>
+                  <Grid item md={12}>
+                    <TextField
+                      value={formValue.taskName}
+                      name="taskName"
+                      error={!!validateError.taskName}
+                      helperText={validateError.taskName}
+                      onChange={handleChange}
+                      placeholder="Must be 4-45 characters"
+                    />
+                  </Grid>
+                  {state?.model && (
+                    <>
+                      <Grid item md={6}>
+                        <label>Model</label>
+                      </Grid>
+                      <Grid item md={6}>
+                        <label>Usage</label>
+                      </Grid>
+                      <Grid item md={6}>
+                        <Select
+                          fullWidth
+                          onChange={(e) => {
+                            handleModelChange(e);
+                            setFormValue((prevState) => ({
+                              ...prevState,
+                              downloadLinks: [],
+                            }));
+                          }}
+                          value={selectedModel.Id}>
+                          {models.map((model) => (
+                            <MenuItem value={model.Id} key={model.Id}>
+                              {model.Name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Grid>
+                      <Grid item md={6}>
+                        <Select
+                          disabled={!formValue.model}
+                          required={Boolean(formValue.model)}
+                          fullWidth
+                          value={formValue.usage}
+                          name="usage"
+                          onChange={handleChange}>
+                          <MenuItem value="train">Training</MenuItem>
+                          <MenuItem disabled={!deployable} value="deploy">
+                            Deploy
                           </MenuItem>
-                        ))}
-                      </Select>
-                    </Grid>
-                    <Grid item md={6}>
-                      <Select
-                        disabled={!formValue.model}
-                        required={Boolean(formValue.model)}
-                        fullWidth
-                        value={formValue.usage}
-                        name="usage"
-                        onChange={handleChange}>
-                        <MenuItem value="train">Training</MenuItem>
-                        <MenuItem disabled={!deployable} value="deploy">
-                          Deploy
-                        </MenuItem>
-                      </Select>
-                    </Grid>
-                  </>
-                )}
-                {formValue.usage === "train" && formValue.model && (
-                  <>
-                    <Grid item md={12}>
-                      <label>Data for trainning</label>
-                    </Grid>
-                    <Grid item md={12}>
-                      {selectedModel && (
-                        <FileList
-                          item={selectedModel}
-                          type="model"
-                          onSelect={(files) => setFiles(files)}
-                        />
-                      )}
-                    </Grid>
-                  </>
-                )}
-                <Grid item md={8} />
-                <Grid item md={4}>
-                  <p className="balance">Balance: {balance} DIST</p>
+                        </Select>
+                      </Grid>
+                    </>
+                  )}
+                  {formValue.usage === "train" && formValue.model && (
+                    <>
+                      <Grid item md={12}>
+                        <label>Data for trainning</label>
+                      </Grid>
+                      <Grid item md={12}>
+                        {selectedModel && (
+                          <FileList
+                            item={selectedModel}
+                            type="model"
+                            onSelect={(files) => setFiles(files)}
+                          />
+                        )}
+                      </Grid>
+                    </>
+                  )}
+                  <Grid item md={8} />
+                  <Grid item md={4}>
+                    <span className="balance">Balance: {balance} DIST</span>
+                  </Grid>
+                  <Grid item md={12}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      className="total">
+                      <span>Total</span>
+                      <Stack className="amount">
+                        <span>{amount || 0}</span>
+                        <label>DIST</label>
+                      </Stack>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={12}>
+                    <Stack direction="row" justifyContent="center">
+                      <LoadingButton
+                        type="submit"
+                        loading={submitting}
+                        className="cbtn"
+                        style={{ width: 160 }}>
+                        {!submitting && "Confirm"}
+                      </LoadingButton>
+                    </Stack>
+                  </Grid>
                 </Grid>
-                <Grid item md={12}>
-                  <div className="box">
-                    <div className="left">Total</div>
-                    <div className="right">
-                      <span style={{ fontSize: "28px" }}>{amount || 0}</span>
-                      <label>DIST</label>
-                    </div>
-                  </div>
-                </Grid>
-                <Grid item md={12}>
-                  <LoadingButton
-                    type="submit"
-                    loading={submitting}
-                    className="cbtn"
-                    style={{ width: 100 }}>
-                    {!submitting && "Confirm"}
-                  </LoadingButton>
-                </Grid>
-              </Grid>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -337,17 +423,18 @@ export default styled(Buy)`
   .container {
     width: 100%;
     h1 {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 28px;
-      margin-top: 25px;
-      line-height: 70px;
+      font-size: 32px;
+      line-height: 44px;
+      margin: 0;
     }
     h2 {
-      font-size: 20px;
+      font-weight: 600;
+      font-size: 28px;
+      line-height: 38px;
       margin: 0;
-      border-bottom: 1px solid rgb(121, 121, 121);
-      line-height: 48px;
+      padding-top: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #898989;
     }
     .balance {
       text-align: right;
@@ -357,31 +444,52 @@ export default styled(Buy)`
       margin: 0;
     }
     .box {
-      border-radius: 5px;
-      background-color: rgb(21, 21, 21);
-      display: flex;
-      justify-content: space-between;
-      padding: 20px;
-      .left {
-        display: flex;
-        align-items: center;
+      padding: 24px 40px;
+      .gpu {
+        margin: 0;
+        margin-bottom: 8px;
+        font-size: 24px;
+        line-height: 34px;
       }
-      .right {
-        span,
-        label {
-          display: block;
-          font-weight: 600;
-          text-align: right;
-        }
+      label {
+        font-size: 16px;
+        color: #898989;
+        line-height: 22px;
+      }
+      span {
+        font-size: 20px;
+        line-height: 28px;
       }
     }
-    .gray-item {
-      display: flex;
-      padding: 8px 0;
-      color: #898989;
-      label {
-        display: block;
-        width: 200px;
+    .balance {
+      display: block;
+      width: 100%;
+      font-weight: 400;
+      font-size: 18px;
+      color: #959da5;
+      line-height: 26px;
+      text-align: right;
+    }
+    .total {
+      width: 1440px;
+      height: 80px;
+      padding: 40px;
+      background: rgba(149, 157, 165, 0.16);
+      border-radius: 12px;
+      margin-top: 16px;
+      margin-bottom: 64px;
+      .amount {
+        span {
+          font-weight: 600;
+          font-size: 32px;
+          line-height: 44px;
+          text-align: right;
+        }
+        label {
+          font-size: 18px;
+          color: white;
+          line-height: 26px;
+        }
       }
     }
   }

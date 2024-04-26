@@ -21,12 +21,84 @@ function MakeOffer({ className }) {
     duration: 0,
     disk: 0,
   });
+  const [validateError, setValidateError] = useState({
+    price: null,
+    duration: null,
+    disk: null,
+  });
   function handleChange(e) {
-    const { name, value } = e.target;
-    setFormValue((prevState) => ({ ...prevState, [name]: parseFloat(value) }));
+    let { name, value } = e.target;
+    value = parseFloat(value);
+    setFormValue((prevState) => ({ ...prevState, [name]: value }));
+    switch (name) {
+      case "price":
+        if (!value) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            price: "Please input device price",
+          }));
+        }
+        if (value < 0) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            price: "Price should not lower than 0",
+          }));
+        }
+        setValidateError((prevState) => ({
+          ...prevState,
+          price: null,
+        }));
+        break;
+      case "duration":
+        if (!value) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            duration: "Please input max duration",
+          }));
+        }
+        if (value < 0) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            duration: "Max duration should not lower than 0",
+          }));
+        }
+        setValidateError((prevState) => ({
+          ...prevState,
+          duration: null,
+        }));
+        break;
+      case "disk":
+        if (!value) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            disk: "Please input max disk storage",
+          }));
+        }
+        if (value < 0) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            disk: "Max disk storage should not lower than 0",
+          }));
+        }
+        if (value > maxStorage) {
+          return setValidateError((prevState) => ({
+            ...prevState,
+            disk: "Max disk storage should not bigger than available disk storage",
+          }));
+        }
+        setValidateError((prevState) => ({
+          ...prevState,
+          disk: null,
+        }));
+        break;
+      default:
+        break;
+    }
   }
   async function onSubmit(e) {
     e.preventDefault();
+    if (validateError.disk || validateError.duration || validateError.price)
+      return;
     setLoading(true);
     try {
       await methods.makeOffer({
@@ -62,13 +134,12 @@ function MakeOffer({ className }) {
     <div className={className}>
       <h1>Make Offer</h1>
       <form onSubmit={onSubmit}>
-        <Grid className="container" container spacing={2}>
+        <Grid container spacing={2}>
           <Grid item md={12}>
             <label>Price(per hour)</label>
           </Grid>
           <Grid item md={12}>
             <TextField
-              required
               name="price"
               InputProps={{
                 type: "number",
@@ -83,7 +154,10 @@ function MakeOffer({ className }) {
                   </InputAdornment>
                 ),
               }}
+              value={formValue.price}
               onChange={handleChange}
+              error={!!validateError.price}
+              helperText={validateError.price}
             />
           </Grid>
           <Grid item md={12}>
@@ -91,7 +165,6 @@ function MakeOffer({ className }) {
           </Grid>
           <Grid item md={12}>
             <TextField
-              required
               name="duration"
               InputProps={{
                 type: "number",
@@ -105,18 +178,22 @@ function MakeOffer({ className }) {
                   </InputAdornment>
                 ),
               }}
+              value={formValue.duration}
               onChange={handleChange}
+              error={!!validateError.duration}
+              helperText={validateError.duration}
             />
           </Grid>
           <Grid item md={12}>
             <label>Max disk storage</label>
-            <span style={{ color: "#e0c4bd" }}>
+          </Grid>
+          <Grid item md={12}>
+            <span style={{ color: "#898989" }}>
               Avail Disk Storage: {maxStorage}GB
             </span>
           </Grid>
           <Grid item md={12}>
             <TextField
-              required
               name="disk"
               InputProps={{
                 type: "number",
@@ -130,7 +207,10 @@ function MakeOffer({ className }) {
                   </InputAdornment>
                 ),
               }}
+              value={formValue.disk}
               onChange={handleChange}
+              error={!!validateError.disk}
+              helperText={validateError.disk}
             />
           </Grid>
           <Grid item md={12}>
@@ -155,17 +235,19 @@ function MakeOffer({ className }) {
 }
 
 export default styled(MakeOffer)`
-  .container {
-    width: 750px;
-    label {
+  h1 {
+    margin: 40px 0;
+  }
+  label {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 28px;
+  }
+  .union {
+    p {
       font-size: 18px;
-      font-weight: 600;
-      display: block;
-    }
-    .union {
-      p {
-        color: white;
-      }
+      color: #ffffff;
+      line-height: 28px;
     }
   }
 `;

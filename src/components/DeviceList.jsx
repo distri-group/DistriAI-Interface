@@ -2,10 +2,9 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { Button, Stack } from "@mui/material";
+import { Button, Grid, Stack } from "@mui/material";
 import { formatAddress, getProvider } from "@/utils/index.js";
 import Table from "./Table.jsx";
-import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import ConnectToWallet from "./ConnectToWallet.jsx";
 
 function DeviceList({
@@ -35,23 +34,18 @@ function DeviceList({
       render: (text, record, index) => {
         return (
           <div className="provider">
-            <Stack direction="row" alignItems="end">
+            <Stack direction="row" alignItems="center">
               {(record?.SecurityLevel || record?.SecurityLevel === 0) && (
                 <span className={`level level-${record.SecurityLevel}`}>
                   Level {record.SecurityLevel}
                 </span>
               )}
               {onPriceSort ? (
-                <span style={{ marginLeft: 5, lineHeight: "20px" }}>
-                  From{" "}
-                  <span style={{ fontWeight: 600, fontSize: 20 }}>
-                    {record.From}
-                  </span>
+                <span className="from">
+                  From <span style={{ color: "white" }}>{record.From}</span>
                 </span>
               ) : (
-                <span style={{ marginLeft: 5, fontWeight: 600, fontSize: 20 }}>
-                  Personal
-                </span>
+                <span className="from">Personal</span>
               )}
             </Stack>
             <a
@@ -63,16 +57,16 @@ function DeviceList({
               {formatAddress(record.Owner)}
             </a>
             <div className="id"># {record.Uuid.slice(-10)}</div>
-            <div className="reliability">
-              <span className="l">
-                <label>{record.Reliability}</label>
-                <span>Reliability</span>
-              </span>
-              <span className="r">
-                <label>{record.CPS}</label>
-                <span>CPS</span>
-              </span>
-            </div>
+            <Stack direction="row" spacing={8} style={{ margin: "16px 0" }}>
+              <Stack className="info">
+                <span>{record.Reliability}</span>
+                <label>Reliability</label>
+              </Stack>
+              <Stack className="info">
+                <span>{record.CPS}</span>
+                <label>CPS</label>
+              </Stack>
+            </Stack>
             <div className="region">
               <img src="/img/market/global.svg" alt="global" />
               <div className="region-info">
@@ -85,43 +79,67 @@ function DeviceList({
     },
     {
       title: "Configuration",
-      width: "15%",
+      width: "23%",
       key: "Algorithm",
       render: (text, record, index) => {
         return (
           <div className="configuration">
             <div className="gpu">
-              {record.GPU} {record.GPUMemory || ""}
+              {record.GpuCount}x <b>{record.Gpu}</b> {record.GPUMemory || ""}
             </div>
             <div className="graphicsCoprocessor">#{record.CPU}</div>
-            <div className="more">
-              <span className="l">
-                <label>{record.Tflops || "--"}</label>
-                <span>TFLOPS</span>
-              </span>
-              <span className="l">
-                <label>{record.RAM}</label>
-                <span>RAM</span>
-              </span>
-              <span className="l">
-                <label>
-                  {record.Disk || parseInt(record.Metadata.DiskInfo.TotalSpace)}{" "}
-                  GB
-                </label>
-                <span>Avail Disk Storage</span>
-              </span>
-            </div>
-            <div className="dura">
-              <label>Max Duration: {record.MaxDuration}h</label>
-              <span>
-                <img className="t180" src="/img/market/download.svg" alt="" />{" "}
-                {record.Speed.Upload}
-              </span>
-              <font>
-                <img src="/img/market/download.svg" alt="" />{" "}
-                {record.Speed.Download}
-              </font>
-            </div>
+            <Grid container spacing={2} style={{ marginTop: 0 }}>
+              <Grid item md={2}>
+                <Stack className="info">
+                  <span>
+                    <b>{record.Tflops || "--"}</b>
+                  </span>
+                  <label>TFLOPS</label>
+                </Stack>
+              </Grid>
+              <Grid item md={2}>
+                <Stack className="info">
+                  <span>
+                    <b>{record.RAM}</b> GB
+                  </span>
+                  <label>RAM</label>
+                </Stack>
+              </Grid>
+              <Grid item md={4}>
+                <Stack className="info">
+                  <span>
+                    <b>
+                      {record.Disk ||
+                        parseInt(record.Metadata.DiskInfo.TotalSpace)}
+                    </b>{" "}
+                    GB
+                  </span>
+                  <label>Avail Disk Storage</label>
+                </Stack>
+              </Grid>
+              <Grid item md={4} />
+              <Grid item md={4}>
+                <span className="duration">
+                  Max Duration: {record.MaxDuration}h
+                </span>
+              </Grid>
+              <Grid item md={4}>
+                <img
+                  style={{ transform: "rotate(180deg)", marginLeft: 4 }}
+                  src="/img/market/download.svg"
+                  alt=""
+                />
+                <span className="duration">{record.Speed.Upload}</span>
+              </Grid>
+              <Grid item md={4}>
+                <img
+                  style={{ marginRight: 4 }}
+                  src="/img/market/download.svg"
+                  alt=""
+                />
+                <span className="duration">{record.Speed.Download}</span>
+              </Grid>
+            </Grid>
           </div>
         );
       },
@@ -131,51 +149,48 @@ function DeviceList({
         <div style={{ display: "flex", alignItems: "center" }}>
           <span>DIST / hr</span>
           {onPriceSort && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}>
-              <ArrowDropUp
-                onClick={() => setPriceSort(1)}
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  cursor: "pointer",
-                  color: priceSort === 1 ? "#898989" : "white",
-                }}
-              />
-              <ArrowDropDown
+            <Stack spacing={0.5} style={{ marginLeft: 11 }}>
+              <svg
+                width="10"
+                height="7"
                 onClick={() => setPriceSort(2)}
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  cursor: "pointer",
-                  color: priceSort === 2 ? "#898989" : "white",
-                }}
-              />
-            </div>
+                style={{ cursor: "pointer" }}>
+                <polygon
+                  points="5,0 10,7 0,7"
+                  fill={priceSort === 2 ? "#898989" : "white"}
+                />
+              </svg>
+              <svg
+                width="10"
+                height="7"
+                onClick={() => setPriceSort(1)}
+                style={{ cursor: "pointer" }}>
+                <polygon
+                  points="0,0 10,0 5,7"
+                  fill={priceSort === 1 ? "#898989" : "white"}
+                />
+              </svg>
+            </Stack>
           )}
         </div>
       ),
-      width: "12%",
+      width: "15%",
       key: "Price",
       render: (text, record, index) => {
         if (record.Status === 0) {
           return <span className="no-price">- -</span>;
         }
         return (
-          <div className="price">
+          <Stack direction="row" spacing={2} alignItems="center">
             <span className="token" />
-            <span>{record.Price}</span>
-          </div>
+            <span className="price">{record.Price}</span>
+          </Stack>
         );
       },
     },
     {
       title: "",
-      width: "13%",
+      width: "5%",
       key: "Id",
       render: (text, record, index) => {
         return (
@@ -268,13 +283,10 @@ export default styled(DeviceList)`
     width: 56px;
     height: 24px;
     border-radius: 6px;
-    font-family: AvenirNext, AvenirNext;
     font-weight: 400;
     font-size: 16px;
     color: #0f1d35;
     line-height: 22px;
-    text-align: left;
-    font-style: normal;
     padding: 0 11px;
   }
   .level-0 {
@@ -284,15 +296,11 @@ export default styled(DeviceList)`
   .level-2 {
     background: #09e98d;
   }
-  .token {
-    margin: 0;
-    border-radius: 100%;
-    background-image: url(/img/token.png);
-    background-size: 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 24px;
-    height: 24px;
+  .from {
+    font-size: 18px;
+    color: #898989;
+    line-height: 26px;
+    margin-left: 16px;
   }
   .mini-btn {
     width: 160px;
@@ -322,39 +330,25 @@ export default styled(DeviceList)`
     background-color: rgba(255, 214, 214, 1);
     color: black !important;
   }
-  .t180 {
-    transform: rotate(180deg);
-  }
-  .price {
-    display: flex;
-    clear: both;
-    flex-direction: row;
-    align-items: center;
-    img {
-      width: 24px;
-    }
+  .info {
     span {
       font-size: 20px;
-      color: #ffffff;
-      line-height: 20px;
-      margin-left: 5px;
-      font-weight: bold;
+      line-height: 28px;
+    }
+    label {
+      font-size: 16px;
+      color: #898989;
+      line-height: 22px;
     }
   }
+  .price {
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 34px;
+  }
   .provider {
-    width: 237px;
-    padding: 20px 0 15px;
     .status {
-      width: 77px;
-      height: 19px;
-      line-height: 19px;
-      color: #333;
-      border-radius: 4px;
-      display: block;
-      overflow: hidden;
-      text-align: center;
-      font-size: 12px;
-      margin-bottom: 10px;
+      padding-bottom: 24px;
     }
     .status0 {
       display: none;
@@ -370,64 +364,28 @@ export default styled(DeviceList)`
       font-size: 16px;
       color: #94d6e2;
       line-height: 24px;
-      margin-top: 4px;
+      margin: 12px 0 8px 0;
     }
     .id {
-      font-size: 13px;
-      color: #797979;
-      line-height: 15px;
-    }
-    .reliability {
-      display: flex;
-      clear: both;
-      flex-direction: row;
-      padding: 13px 0;
-      .l {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        label {
-          font-size: 16px;
-          color: #e0c4bd;
-          font-weight: bold;
-          line-height: 20px;
-        }
-        span {
-          color: #797979;
-          font-size: 13px;
-          line-height: 15px;
-        }
-      }
-      .r {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        label {
-          font-size: 16px;
-          color: #efc6ff;
-          font-weight: bold;
-          line-height: 20px;
-        }
-        span {
-          color: #797979;
-          font-size: 13px;
-          line-height: 15px;
-        }
-      }
+      font-weight: 400;
+      font-size: 16px;
+      color: #898989;
+      line-height: 22px;
     }
     .region {
       display: flex;
       clear: both;
       flex-direction: row;
-      align-items: center;
+      align-items: bottom;
       img {
-        width: 14px;
+        width: 24px;
+        height: 24px;
       }
       span {
-        font-size: 14px;
-        color: #ffffff;
-        line-height: 20px;
-        margin-left: 5px;
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 26px;
+        margin-left: 8px;
       }
     }
     .region-info {
@@ -437,74 +395,30 @@ export default styled(DeviceList)`
     }
   }
   .configuration {
-    width: 573px;
-    padding: 10px 0 0px;
     .gpu {
+      font-weight: 400;
       font-size: 24px;
-      color: #ffffff;
-      line-height: 20px;
+      line-height: 34px;
     }
     .graphicsCoprocessor {
-      font-size: 14px;
-      color: #d7ff65;
       background-image: url(/img/market/cpu.svg);
       background-size: 16px;
       background-repeat: no-repeat;
       background-position: left;
-      text-indent: 20px;
-      line-height: 40px;
+      font-weight: 400;
+      font-size: 18px;
+      color: #d7ff65;
+      line-height: 26px;
+      padding: 16px 0;
+      padding-left: 22px;
     }
-    .more {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      margin-top: 11px;
-      .l {
-        margin-right: 69px;
-        label {
-          display: block;
-          font-size: 16px;
-          line-height: 26px;
-          color: #ffffff;
-        }
-        span {
-          display: block;
-          color: #797979;
-          font-size: 13px;
-          line-height: 13px;
-        }
-      }
+    .duration {
+      font-size: 18px;
+      line-height: 26px;
     }
-    .dura {
-      color: #ffffff;
-      font-size: 13px;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      height: 40px;
-      line-height: 40px;
-      label {
-        width: 200px;
-      }
-      span {
-        width: 200px;
-        text-indent: 20px;
-        img {
-          width: 11px;
-        }
-      }
-      font {
-        background-size: 10px;
-        background-position: left;
-        background-repeat: no-repeat;
-        width: 200px;
-        text-indent: 20px;
-        position: relative;
-        top: 0;
-        img {
-          width: 11px;
-        }
-      }
+    img {
+      width: 16px;
+      height: 16px;
     }
   }
   .empty-box {

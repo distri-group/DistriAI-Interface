@@ -63,11 +63,9 @@ function Table({ className, columns, list, loading, empty }) {
 
 export default styled(Table)`
   .mytable {
-    display: table;
-    background-color: #222;
     border-radius: 10px;
     border-collapse: separate;
-    border-spacing: 0;
+    border-spacing: 0 24px;
     width: 100%;
     overflow: hidden;
     .link {
@@ -79,25 +77,55 @@ export default styled(Table)`
       cursor: pointer;
       text-decoration: underline;
     }
+    thead {
+      background: rgba(149, 157, 165, 0.16);
+      border-radius: 6px;
+      height: 64px;
+      tr {
+        th {
+          &:first-child {
+            padding-left: 40px;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+          }
+          &:last-child {
+            padding-right: 40px;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+          }
+        }
+      }
+    }
     th {
-      background-color: #151515;
-      color: #fff;
       height: 40px;
       line-height: 40px;
-      padding: 0 10px;
-      font-weight: normal;
       text-align: left;
-      font-style: normal;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
     }
-    tr td {
-      border-bottom: 1px solid #1a1a1a;
-      border-collapse: collapse;
-      padding: 0 10px;
-      overflow: hidden;
-    }
-    tr:last-children {
+    tr {
       td {
-        border-bottom: none;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #1a1a1a;
+        border-collapse: collapse;
+        overflow: hidden;
+        &:first-child {
+          padding-left: 40px;
+        }
+        &:last-child {
+          padding-right: 40px;
+        }
+      }
+      &:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+    }
+    tbody {
+      tr {
+        padding-bottom: 24px;
       }
     }
   }

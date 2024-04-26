@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Stack, Grid } from "@mui/material";
 import DurationProgress from "@/components/DurationProgress.jsx";
 import Countdown from "@/components/Countdown.jsx";
 import DeviceCard from "@/components/DeviceCard.jsx";
@@ -39,122 +39,145 @@ function EarningDetail({ className }) {
           <CircularProgress />
         ) : (
           <>
-            <p>
+            <h1>{record.Metadata.formData.taskName}</h1>
+            <p style={{ color: "#898989" }}>
               <b>For: </b>
               {record.Buyer}
             </p>
-            <h2 className={record.StatusName}>{record.StatusName}</h2>
+            <h2 className={record.StatusName}>
+              {" "}
+              · {record.StatusName}{" "}
+              {record.StatusName === "Failed" && <span>Failed reason</span>}
+            </h2>
             {record.Metadata.MachineInfo ? (
-              <div style={{ width: "64%" }}>
-                <div className="detail">
-                  <div className="info-box">
-                    <div className="info-box-title">
-                      <span>Order Info</span>
-                    </div>
-                    <div className="info-box-body">
-                      <div className="time">
+              <>
+                <div>
+                  <div className="title">
+                    <span>Order Info</span>
+                  </div>
+                  <div className="info">
+                    <Stack
+                      className="time"
+                      direction="row"
+                      justifyContent="space-between">
+                      <Stack direction="row" spacing={1}>
+                        <label>Start Time</label>
                         <span>
-                          Start Time{" "}
                           {new Date(record.StartTime) > 0
                             ? new Date(record.StartTime).toLocaleString()
                             : "--"}
                         </span>
+                      </Stack>
+                      <Stack direction="row" spacing={1}>
                         {record.StatusName !== "Failed" &&
                           (record.StatusName === "Available" ? (
-                            <span>
-                              Remaining Time{" "}
-                              <Countdown
-                                deadlineTime={new Date(
-                                  record.EndTime
-                                ).getTime()}
-                              />
-                            </span>
+                            <>
+                              <label>Remaining Time</label>
+                              <span>
+                                <Countdown
+                                  deadlineTime={new Date(
+                                    record.EndTime
+                                  ).getTime()}
+                                />
+                              </span>
+                            </>
+                          ) : record.StatusName === "Refunded" ? (
+                            <>
+                              <label>Refund Time</label>
+                              <span>
+                                {new Date(record.RefundTime).toLocaleString()}
+                              </span>
+                            </>
                           ) : (
-                            <span>
-                              {record.StatusName === "Refunded"
-                                ? "Refund Time " +
-                                  new Date(record.RefundTime).toLocaleString()
-                                : "End Time " +
-                                  new Date(record.EndTime).toLocaleString()}
-                            </span>
+                            <>
+                              <label>End Time</label>
+                              <span>
+                                {new Date(record.EndTime).toLocaleString()}
+                              </span>
+                            </>
                           ))}
-                      </div>
-                      {record.StatusName !== "Failed" && (
-                        <DurationProgress
-                          startTime={record.StartTime}
-                          endTime={
-                            record.StatusName === "Available"
-                              ? null
-                              : record.EndTime
-                          }
-                          duration={record.Duration}
-                          refundTime={
-                            record.RefundDuration ? record.RefundTime : null
-                          }
-                        />
-                      )}
-                      <div className="price">
-                        <div className="price-box">
+                      </Stack>
+                    </Stack>
+                    <DurationProgress
+                      startTime={record.StartTime}
+                      endTime={
+                        record.StatusName === "Available"
+                          ? null
+                          : record.EndTime
+                      }
+                      duration={record.Duration}
+                      refundTime={
+                        record.RefundDuration ? record.RefundTime : null
+                      }
+                    />
+                    <Grid container spacing={2}>
+                      <Grid item md={4}>
+                        <Stack className="price-box" direction="column">
                           <label>Price</label>
                           <span>
-                            {record.Metadata.MachineInfo.Price} DIST / h
+                            <b>{record.Price}</b> DIST / h
                           </span>
-                        </div>
-                        {record.RefundDuration && (
-                          <div className="price-box">
+                        </Stack>
+                      </Grid>
+                      {record.RefundDuration && (
+                        <Grid item md={4}>
+                          <Stack className="price-box" direction="column">
                             <label>Refunded</label>
                             <span>
-                              {record.RefundDuration} h -{" "}
-                              {record.RefundDuration * record.Price} DIST
+                              <b>{record.RefundDuration}</b> h -{" "}
+                              <b>{record.RefundDuration * record.Price}</b> DIST
                             </span>
-                          </div>
-                        )}
-                        <div className="price-box">
+                          </Stack>
+                        </Grid>
+                      )}
+                      <Grid item md={4}>
+                        <Stack className="price-box" direction="column">
                           <label>Total Duration</label>
                           <span>
-                            {record.RefundDuration
-                              ? record.Duration - record.RefundDuration
-                              : record.Duration}{" "}
+                            <b>
+                              {record.RefundDuration
+                                ? record.Duration - record.RefundDuration
+                                : record.Duration}
+                            </b>{" "}
                             h
                           </span>
-                        </div>
-                        <div className="price-box">
-                          <label>
-                            {record.StatusName === "Available" && "Expected "}
-                            Total Earnings
-                          </label>
+                        </Stack>
+                      </Grid>
+                      <Grid item md={4}>
+                        <Stack className="price-box" direction="column">
+                          <label>Total Earnings</label>
                           <span>
-                            {record.Price *
-                              (record.RefundDuration
-                                ? record.Duration - record.RefundDuration
-                                : record.Duration)}{" "}
+                            <b>
+                              {record.Price *
+                                (record.RefundDuration
+                                  ? record.Duration - record.RefundDuration
+                                  : record.Duration)}
+                            </b>{" "}
                             DIST
                           </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="info-box">
-                    <div className="info-box-title">
-                      <span>Configuration</span>
-                    </div>
-                    <DeviceCard device={record.Metadata.MachineInfo} />
-                  </div>
-                  <div className="info-box">
-                    <div className="info-box-title">
-                      <span>Blockchain Info</span>
-                    </div>
-                    <div className="info-box-body">
-                      <div className="line">
-                        <div className="f">
-                          <span>Hash</span>
-                          <span>{record.Uuid}</span>
-                        </div>
-                      </div>
-                    </div>
+                        </Stack>
+                      </Grid>
+                    </Grid>
                   </div>
                 </div>
-              </div>
+                <div>
+                  <div className="title">
+                    <span>Configuration</span>
+                  </div>
+                  <DeviceCard device={record.Metadata.MachineInfo} />
+                </div>
+                <div>
+                  <div className="title">
+                    <span>Blockchain Info</span>
+                  </div>
+                  <div className="info">
+                    <Stack direction="row" justifyContent="space-between">
+                      <label>Hash</label>
+                      <span>{record.Uuid}</span>
+                    </Stack>
+                  </div>
+                </div>
+              </>
             ) : (
               <span>Machine Data Not Found</span>
             )}
@@ -166,203 +189,35 @@ function EarningDetail({ className }) {
 }
 
 export default styled(EarningDetail)`
-  color: #fff;
-  height: calc(100% - 140px);
-  .con {
-    width: 1160px;
-    margin: 10px auto;
-    padding: 0 20px;
-    display: block;
-    overflow: hidden;
-    h1 {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 28px;
-      color: #ffffff;
-      margin: 0;
-      line-height: 70px;
-    }
-    h2 {
-      margin: 0;
-    }
+  h1 {
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 44px;
   }
-  .info-box {
-    .info-box-title {
-      border-bottom: 1px solid #797979;
-      display: flex;
-      justify-content: space-between;
-      span {
-        font-weight: bold;
-        font-size: 16px;
-        color: #ffffff;
-        line-height: 48px;
-      }
-      .extend-duration {
-        background-color: #94d6e2;
-        color: black;
-        margin-right: 20px;
-        :hover {
-          background-color: #94d6e2;
-          color: black;
-        }
-      }
-      .end-duration {
-        background-color: white;
-        color: black;
-        :hover {
-          background-color: white;
-          color: black;
-        }
-      }
-    }
-    .info-box-body {
-      padding: 5px;
-      display: block;
-      .title2 {
-        line-height: 20px;
-        padding: 15px 0 7px;
-        font-size: 18px;
-        font-weight: bold;
-      }
-      .line {
-        padding: 10px 0;
-        display: flex;
-        flex-direction: row;
-        .f {
-          width: 100%;
-        }
-        span {
-          line-height: 24px;
-          display: block;
-          clear: both;
-          font-size: 14px;
-        }
-        .l {
-          width: 60%;
-        }
-        .r {
-          width: 40%;
-        }
-      }
-      .time {
-        display: flex;
-        justify-content: space-between;
-        margin: 16px 0 12px 0;
-      }
-      .price {
-        color: #aaa;
-        font-size: 12px;
-        padding-top: 20px;
-        width: 30%;
-        .price-box {
-          display: flex;
-          justify-content: space-between;
-          label,
-          span {
-            width: 50%;
-          }
-        }
-      }
-    }
+  h2 {
+    margin: 0;
   }
-  .b-box {
-    display: block;
-    padding: 30px;
-    border: 1px solid rgba(121, 121, 121, 1);
-    border-radius: 5px;
-    margin: 20px 0;
-    .row {
-      display: block;
-      line-height: 30px;
-      font-size: 14px;
-      text-align: center;
-      b {
-        font-size: 24px;
-      }
-    }
-  }
-  .right-txt {
-    display: block;
-    overflow: hidden;
-    text-align: right;
-    line-height: 30px;
-    font-size: 14px;
-  }
-  .color-box {
-    border-radius: 5px;
-    background-color: #151515;
+  .title {
+    border-bottom: 1px solid #797979;
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
-    padding: 25px 10px;
-    .l {
-      display: flex;
-      flex-direction: column;
-      span {
-        font-size: 14px;
-        color: #ffffff;
-        line-height: 25px;
-      }
-      label {
-        font-size: 18px;
-        color: #faffa6;
-        font-weight: bold;
-        line-height: 25px;
-      }
-    }
-    .pointer {
-      color: white !important;
-      cursor: pointer;
-      background-image: linear-gradient(to right, #20ae98, #0aab50);
-      border-radius: 4px;
-      padding: 0 10px;
-    }
-    .r {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      .pointer,
-      .disable {
-        width: 150px;
-        height: 30px;
-        line-height: 30px;
-        font-size: 14px;
-        color: #151515;
-        text-align: center;
-        margin: 0 5px;
-        border-radius: 4px;
-      }
-      .disable {
-        cursor: not-allowed;
-        background-color: #2f2f2f;
-      }
+    span {
+      font-size: 28px;
+      line-height: 38px;
+      margin: 28px 0;
     }
   }
-  .box {
-    width: 30%;
-    height: 120px;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    padding: 10px;
+  .info {
+    margin-top: 24px;
+    padding: 0 40px;
+    label {
+      font-size: 20px;
+      color: #898989;
+      line-height: 28px;
+    }
     span {
-      word-wrap: break-word;
-      font-size: 14px;
-    }
-    .vertical {
-      padding: 4px 0;
-      label {
-        display: block;
-      }
-      span {
-        width: 100%;
-      }
-    }
-    .horizontal {
-      display: flex;
-      justify-content: space-between;
-      .speed {
-        text-align: right;
-      }
+      font-size: 20px;
+      line-height: 28px;
     }
   }
 `;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { useSnackbar } from "notistack";
-import { CircularProgress, Popover } from "@mui/material";
+import { CircularProgress, Popover, Stack, Grid } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import DurationProgress from "@/components/DurationProgress.jsx";
 import { PublicKey } from "@solana/web3.js";
@@ -18,7 +18,8 @@ function EndDuration({ className }) {
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [ending, setEnding] = useState(false);
-  const [detail, setDetail] = useState();
+  const [detail, setDetail] = useState({});
+  const [deviceDetail, setDeviceDetail] = useState({});
   const [balance, setBalance] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [remainingTime, setRemainingTime] = useState();
@@ -59,6 +60,9 @@ function EndDuration({ className }) {
       try {
         const res = await getOrderDetail(id);
         setDetail(res);
+        if (res.Metadata?.MachineInfo) {
+          setDeviceDetail(res.Metadata.MachineInfo);
+        }
         const remains = new Date(res.EndTime).getTime() - new Date().getTime();
         setRemainingTime(remains);
         const amount = await methods.getTokenBalance(wallet.publicKey);
@@ -73,241 +77,251 @@ function EndDuration({ className }) {
   }, [id, wallet]);
   return (
     <div className={className}>
-      <div className="container">
-        <h1>End Duration</h1>
-        <div className="form">
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <>
-              <div>
-                <h2>Configuration</h2>
-                <div>
-                  <p>{detail.Metadata.MachineInfo.GPU}</p>
-                  <span>
-                    {detail.Metadata.MachineInfo.Tflops || "--"} TFLOPS
-                  </span>
-                  <div className="vertical">
-                    <div className="box">
-                      <label>RAM</label>
-                      <span>{detail.Metadata.MachineInfo.RAM}</span>
-                    </div>
-                    <div className="box">
-                      <label>Avail Disk Storage</label>
-                      <span>
-                        {detail.Metadata.MachineInfo.AvailDiskStorage} GB
-                      </span>
-                    </div>
-                    <div className="box">
-                      <label>CPU</label>
-                      <span>{detail.Metadata.MachineInfo.CPU}</span>
-                    </div>
-                  </div>
-                </div>
+      <h1>End Duration</h1>
+      <div className="form">
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <div>
+            <div>
+              <div className="title">
+                <span>Configuration</span>
               </div>
-              <div>
-                <h2>Order Info</h2>
-                <div className="time">
-                  <span>
-                    Start Time{" "}
-                    {new Date(detail.StartTime) > 0
-                      ? new Date(detail.StartTime).toLocaleString()
-                      : "--"}
-                  </span>
-                  <span>
-                    Remaining Time{" "}
-                    <Countdown
-                      deadlineTime={new Date(detail.EndTime).getTime()}
-                    />
-                  </span>
-                </div>
-                {detail.StatusName !== "Failed" && (
-                  <DurationProgress
-                    startTime={detail.StartTime}
-                    duration={detail.Duration}
-                  />
-                )}
-                <div className="horizontal">
-                  <div className="box">
-                    <label>Price</label>
-                    <span>{detail.Metadata.MachineInfo.Price} DIST / h</span>
-                  </div>
-                  <div className="box">
-                    <label>Total Duration</label>
-                    <span>{detail.Duration} h</span>
-                  </div>
-                  <div className="box">
-                    <label>Total Price</label>
+              <div className="info">
+                <span className="name">{deviceDetail.GPU}</span>
+                <Stack direction="row" spacing={1} style={{ marginBottom: 24 }}>
+                  <span>{deviceDetail.Tflops || "--"}</span>
+                  <label>TFLOPS</label>
+                </Stack>
+                <Grid container>
+                  <Grid item md={4}>
+                    <Stack spacing={1}>
+                      <label>RAM</label>
+                      <span>{deviceDetail.RAM}</span>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={4}>
+                    <Stack spacing={1}>
+                      <label>Avail Disk Storage</label>
+                      <span>{deviceDetail.AvailDiskStorage} GB</span>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={4}>
+                    <Stack spacing={1}>
+                      <label>CPU</label>
+                      <span>{deviceDetail.CPU}</span>
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </div>
+            </div>
+            <div>
+              <div className="title">
+                <span>Order Info</span>
+              </div>
+              <div className="info">
+                <Stack direction="row" justifyContent="space-between">
+                  <Stack direction="row" spacing={1}>
+                    <label>Start Time</label>
+                    <span>{new Date(detail.StartTime).toLocaleString()}</span>
+                  </Stack>
+                  <Stack direction="row" spacing={1}>
+                    <label>Remaining Time</label>
                     <span>
-                      {detail.Metadata.MachineInfo.Price * detail.Duration} DIST
+                      <Countdown
+                        deadlineTime={new Date(detail.EndTime).getTime()}
+                      />
                     </span>
-                  </div>
-                  <div className="box">
-                    <label>Remain Duration</label>
-                    <span>{detail.RemainingDuration} h</span>
-                  </div>
-                </div>
-                <p className="balance">Balance: {balance} DIST</p>
-                <div className="total">
-                  <span style={{ display: "flex", alignItems: "center" }}>
-                    Refund Total
-                    <span
-                      className="tip"
-                      aria-owns={open ? "mouse-over-popover" : undefined}
-                      aria-haspopup="true"
-                      onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
-                      onMouseLeave={() => setAnchorEl(null)}></span>
-                    <Popover
-                      id="mouse-over-popover"
-                      sx={{
-                        pointerEvents: "none",
-                        width: "40%",
-                      }}
-                      open={open}
-                      anchorEl={anchorEl}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "center",
-                      }}
-                      transformOrigin={{
-                        vertical: "bottom",
-                        horizontal: "center",
-                      }}
-                      slotProps={{
-                        paper: {
-                          style: {
-                            backgroundColor: "#d7d7d7",
-                          },
+                  </Stack>
+                </Stack>
+                <DurationProgress
+                  startTime={detail.StartTime}
+                  duration={detail.Duration}
+                />
+                <Grid container>
+                  <Grid item md={3}>
+                    <Stack spacing={1}>
+                      <label>Price</label>
+                      <span>{deviceDetail.Price} DIST / h</span>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={3}>
+                    <Stack spacing={1}>
+                      <label>Total Duration</label>
+                      <span>
+                        <b>{detail.Duration}</b> h
+                      </span>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={3}>
+                    <Stack spacing={1}>
+                      <label>Total Price</label>
+                      <span>
+                        <b>{deviceDetail.Price * detail.Duration}</b> DIST
+                      </span>
+                    </Stack>
+                  </Grid>
+                  <Grid item md={3}>
+                    <Stack spacing={1}>
+                      <label>Remain Duration</label>
+                      <span>{detail.RemainingDuration || 0} h</span>
+                    </Stack>
+                  </Grid>
+                </Grid>
+                <Stack direction="row" justifyContent="end">
+                  <span className="balance">Balance: {balance} DIST</span>
+                </Stack>
+              </div>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                className="total">
+                <label style={{ display: "flex", alignItems: "center" }}>
+                  Refund Total
+                  <span
+                    className="tip"
+                    aria-owns={open ? "mouse-over-popover" : undefined}
+                    aria-haspopup="true"
+                    onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
+                    onMouseLeave={() => setAnchorEl(null)}></span>
+                  <Popover
+                    id="mouse-over-popover"
+                    sx={{
+                      pointerEvents: "none",
+                      width: "40%",
+                    }}
+                    open={open}
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "center",
+                    }}
+                    transformOrigin={{
+                      vertical: "bottom",
+                      horizontal: "center",
+                    }}
+                    slotProps={{
+                      paper: {
+                        style: {
+                          backgroundColor: "#d7d7d7",
                         },
-                      }}
-                      onClose={() => setAnchorEl(null)}
-                      disableRestoreFocus>
-                      <div style={{ padding: "8px 12px" }}>
-                        <h3 style={{ textAlign: "center", margin: "4px 0" }}>
-                          Refund Policy
-                        </h3>
-                        <p style={{ margin: "8px 0" }}>
-                          Full refunds are available for the unused rental time
-                          of 'available' orders. The minimum unit for
-                          calculation is per hour (any partial hour used will be
-                          counted as 1 full hour).
-                        </p>
-                        <p style={{ margin: "8px 0" }}>
-                          The used rental time will be deducted, and the refund
-                          amount calculated based on the remaining rental hours
-                          multiplied by the hourly rate.
-                        </p>
-                      </div>
-                    </Popover>
+                      },
+                    }}
+                    onClose={() => setAnchorEl(null)}
+                    disableRestoreFocus>
+                    <div style={{ padding: "8px 12px" }}>
+                      <h3 style={{ textAlign: "center", margin: "4px 0" }}>
+                        Refund Policy
+                      </h3>
+                      <p style={{ margin: "8px 0" }}>
+                        Full refunds are available for the unused rental time of
+                        'available' orders. The minimum unit for calculation is
+                        per hour (any partial hour used will be counted as 1
+                        full hour).
+                      </p>
+                      <p style={{ margin: "8px 0" }}>
+                        The used rental time will be deducted, and the refund
+                        amount calculated based on the remaining rental hours
+                        multiplied by the hourly rate.
+                      </p>
+                    </div>
+                  </Popover>
+                </label>
+                <Stack>
+                  <span className="amount">
+                    {detail.RemainingDuration * detail.Price || 0}
                   </span>
-                  <div>
-                    <span className="balance">
-                      <b>{detail.RemainingDuration * detail.Price}</b>
-                    </span>
-                    <span>DIST</span>
-                  </div>
-                </div>
+                  <label>DIST</label>
+                </Stack>
+              </Stack>
+              <Stack direction="row" justifyContent="center">
                 <LoadingButton
                   loading={ending}
                   onClick={onSubmit}
+                  style={{ width: 160 }}
                   className="cbtn confirm">
-                  {ending ? "" : "Confirm"}
+                  {!ending && "Confirm"}
                 </LoadingButton>
-              </div>
-            </>
-          )}
-        </div>
+              </Stack>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export default styled(EndDuration)`
-  color: white;
-  height: calc(100% - 140px);
   h1 {
-    font-weight: 700;
-    font-style: normal;
-    font-size: 28px;
-    color: white;
-    margin: 0;
-    line-height: 70px;
+    font-size: 32px;
+    line-height: 44px;
   }
-  h2 {
-    font-size: 16px;
-    color: white;
-    line-height: 48px;
+  .title {
     border-bottom: 1px solid #797979;
+    display: flex;
+    justify-content: space-between;
+    span {
+      font-size: 28px;
+      line-height: 38px;
+      margin: 28px 0;
+    }
   }
-  h3 {
-    text-align: center;
+  .info {
+    margin-top: 24px;
+    padding: 0 40px;
+    label {
+      font-size: 20px;
+      color: #898989;
+      line-height: 28px;
+    }
+    span {
+      font-size: 20px;
+      line-height: 28px;
+    }
+    .name {
+      font-size: 24px;
+      line-height: 34px;
+      padding-bottom: 8px;
+    }
   }
-  .form {
-    width: 64%;
-  }
-  .container {
-    width: 1160px;
-    margin: 10px auto;
-    padding: 0 20px;
+  .tip {
     display: block;
-    overflow: hidden;
-    .box {
-      font-size: 14px;
-      color: #aaa;
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+    background-image: url(/img/market/tip.svg);
+    background-position: center;
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .balance {
+    font-size: 18px;
+    color: #898989;
+    line-height: 26px;
+  }
+  .total {
+    width: 1440px;
+    height: 80px;
+    margin: 16px 40px;
+    margin-bottom: 64px;
+    padding: 40px;
+    background: rgba(149, 157, 165, 0.16);
+    border-radius: 12px;
+    label {
+      font-size: 20px;
+      color: #898989;
+      line-height: 28px;
     }
-    .vertical {
-      margin-top: 20px;
-      display: flex;
-      justify-content: space-between;
-      label,
-      span {
-        display: block;
-      }
+    span {
+      font-size: 20px;
+      line-height: 28px;
     }
-    .horizontal {
-      width: 30%;
-      .box {
-        display: flex;
-        justify-content: space-between;
-      }
-    }
-    .time {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-    }
-    .balance {
+    .amount {
+      font-weight: 600;
+      font-size: 32px;
+      line-height: 44px;
       text-align: right;
-      color: #e0c4bd;
-      font-size: 14px;
-    }
-    .total {
-      border-radius: 5px;
-      background-color: #151515;
-      display: flex;
-      justify-content: space-between;
-      padding: 24px 20px;
-      .balance {
-        display: block;
-        text-align: right;
-        font-size: 20px;
-        color: white;
-      }
-      .tip {
-        display: block;
-        width: 12px;
-        height: 12px;
-        margin-left: 4px;
-        background-image: url(/img/market/tip.svg);
-        background-position: center;
-        background-size: 100%;
-        background-repeat: no-repeat;
-      }
-    }
-    .confirm {
-      margin-top: 30px;
-      width: 120px;
-      height: 40px;
     }
   }
 `;

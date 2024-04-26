@@ -94,7 +94,7 @@ export function formatMachine(item) {
     item.CPS = item.Metadata.Score?.toFixed(2) || 0;
     item.CPU = item.Metadata.CPUInfo?.ModelName || "";
     item.GPU = item.GpuCount + "x" + item.Gpu;
-    item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0) + "GB";
+    item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0);
     item.IP = item.Metadata.Ip?.ip;
     item.Port = item.Metadata.Ip?.port;
     item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);

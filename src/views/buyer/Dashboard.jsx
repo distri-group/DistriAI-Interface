@@ -2,11 +2,12 @@ import styled from "styled-components";
 import { TabPanel, TabContext } from "@mui/lab";
 import { Box, Stack, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
-import MyOrder from "./MyOrder";
+import MyOrder from "@/components/buyer/MyOrder";
 import MyCreation from "@/components/buyer/MyCreation";
 import MyLike from "@/components/buyer/MyLike";
 
 function Dashboard({ className }) {
+  document.title = "My Dashboard";
   const [baseTab, setBaseTab] = useState("order");
 
   return (

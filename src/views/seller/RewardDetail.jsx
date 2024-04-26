@@ -1,13 +1,13 @@
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   getClaimableReward,
   getPeriodMachine,
   getRewardTotal,
 } from "@/services/reward.js";
 import { useSnackbar } from "notistack";
-import { Button, CircularProgress, Popover } from "@mui/material";
+import { Button, CircularProgress, Popover, Grid, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import DeviceCard from "@/components/DeviceCard.jsx";
@@ -21,6 +21,11 @@ function RewardDetail({ className }) {
   const [total, setTotal] = useState();
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const claimed = useMemo(() => {
+    if (total?.totalClaimable) {
+      return total.totalClaimable <= 0;
+    }
+  }, [total]);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const { wallet, methods } = useSolanaMethod();
@@ -89,245 +94,190 @@ function RewardDetail({ className }) {
   }, [period, wallet]);
   return (
     <div className={className}>
-      <div className="con">
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <>
-            <h1>Period {period}</h1>
-            <div className="box">
-              <div className="box-item" style={{ width: "150px" }}>
-                <div className="price">
-                  <span className="number">
-                    {(
-                      (total.ClaimablePeriodicRewards +
-                        total.ClaimedPeriodicRewards) /
-                      LAMPORTS_PER_SOL
-                    ).toFixed(2)}
-                  </span>
-                  <span className="dist">DIST</span>
-                </div>
-                <div className="title">
-                  Total Rewards{" "}
-                  <span
-                    className="tip"
-                    aria-owns={open ? "mouse-over-popover" : undefined}
-                    aria-haspopup="true"
-                    onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
-                    onMouseLeave={() => setAnchorEl(null)}></span>
-                  <Popover
-                    id="mouse-over-popover"
-                    sx={{
-                      pointerEvents: "none",
-                      width: "50%",
-                    }}
-                    open={open}
-                    anchorEl={anchorEl}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "center",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "center",
-                    }}
-                    slotProps={{
-                      paper: {
-                        style: {
-                          backgroundColor: "#d7d7d7",
-                        },
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <>
+          <h1>Period {period}</h1>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="total">
+            <Stack spacing={1}>
+              <Stack direction="row" spacing={1} alignItems="end">
+                <span>{total.totalClaimable}</span>
+                <label>DIST</label>
+              </Stack>
+              <Stack direction="row" spacing={1}>
+                <label>Total Rewards</label>
+                <span
+                  className="tip"
+                  aria-owns={open ? "mouse-over-popover" : undefined}
+                  aria-haspopup="true"
+                  onMouseEnter={(e) => setAnchorEl(e.currentTarget)}
+                  onMouseLeave={() => setAnchorEl(null)}></span>
+                <Popover
+                  id="mouse-over-popover"
+                  sx={{
+                    pointerEvents: "none",
+                    width: "50%",
+                  }}
+                  open={open}
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "center",
+                  }}
+                  slotProps={{
+                    paper: {
+                      style: {
+                        backgroundColor: "#d7d7d7",
                       },
-                    }}
-                    onClose={() => setAnchorEl(null)}
-                    disableRestoreFocus>
-                    <h3 style={{ textAlign: "center", margin: "4px 0" }}>
-                      Reward for each computing node :
-                    </h3>
-                    <p style={{ margin: "8px 0" }}>
-                      (Reward Pool * 50%)+(Reward Pool * 50% * Device evaluation
-                      ratio) / Participating Nodes
-                    </p>
-                    <p style={{ margin: "8px 0" }}>
-                      Device evaluation ratio (see Docs for detailed evaluation
-                      rules) : High(100%)、Medium(75%)、Low(50%)
-                    </p>
-                  </Popover>
-                </div>
-              </div>
-              <div className="box-item" style={{ width: "150px" }}>
-                <div className="price">
-                  <span className="number">
-                    {(total.ClaimedPeriodicRewards / LAMPORTS_PER_SOL).toFixed(
-                      2
-                    )}
-                  </span>
-                  <span className="dist">DIST</span>
-                </div>
-                <div className="title">Claimed</div>
-              </div>
-              <div className="box-item" style={{ width: "150px" }}>
-                <div className="price">
-                  <span className="number">
-                    {(
-                      total.ClaimablePeriodicRewards / LAMPORTS_PER_SOL
-                    ).toFixed(2)}
-                  </span>
-                  <span className="dist">DIST</span>
-                </div>
-                <div className="title">Claimable</div>
-              </div>
-              <div className="box-item">
-                {total.ClaimablePeriodicRewards ? (
-                  <LoadingButton
-                    loading={claiming}
-                    onClick={claimButchRewards}
-                    className="btn">
-                    {claiming ? "" : "Claim Rewards"}
-                  </LoadingButton>
-                ) : (
-                  <Button disabled className="btn disabled">
-                    All Claimed
-                  </Button>
-                )}
-              </div>
+                    },
+                  }}
+                  onClose={() => setAnchorEl(null)}
+                  disableRestoreFocus>
+                  <h3 style={{ textAlign: "center", margin: "4px 0" }}>
+                    Reward for each computing node :
+                  </h3>
+                  <p style={{ margin: "8px 0" }}>
+                    (Reward Pool * 50%)+(Reward Pool * 50% * Device evaluation
+                    ratio) / Participating Nodes
+                  </p>
+                  <p style={{ margin: "8px 0" }}>
+                    Device evaluation ratio (see Docs for detailed evaluation
+                    rules) : High(100%)、Medium(75%)、Low(50%)
+                  </p>
+                </Popover>
+              </Stack>
+            </Stack>
+            <Stack spacing={1}>
+              <Stack direction="row" spacing={1} alignItems="end">
+                <span>{total.ClaimedPeriodicRewards}</span>
+                <label>DIST</label>
+              </Stack>
+              <label>Claimed</label>
+            </Stack>
+            <Stack spacing={1}>
+              <Stack direction="row" spacing={1} alignItems="end">
+                <span>{total.ClaimablePeriodicRewards}</span>
+                <label>DIST</label>
+              </Stack>
+              <label>Claimable</label>
+            </Stack>
+            <div>
+              <LoadingButton
+                className="cbtn"
+                style={{ width: 140 }}
+                loading={claiming}
+                onClick={claimButchRewards}>
+                {claiming ? "" : claimed ? "All Claimed" : "Claim Rewards"}
+              </LoadingButton>
             </div>
-            <div className="space-between">
-              <div className="info-box horizontal" style={{ width: "45%" }}>
-                <div className="info-box-item">
-                  <label>Start time</label>
-                  <span>{new Date(periodInfo.StartTime).toLocaleString()}</span>
-                </div>
-                <div className="info-box-item">
-                  <label>End time</label>
-                  <span>
-                    {new Date(
-                      new Date(periodInfo.StartTime).getTime() +
-                        24 * 3600 * 1000
-                    ).toLocaleString()}
-                  </span>
-                </div>
-                <div className="info-box-item">
-                  <label>Duration</label>
-                  <span>24 h</span>
-                </div>
-              </div>
-              <div className="info-box horizontal" style={{ width: "45%" }}>
-                <div className="info-box-item">
-                  <label>Reward Pool</label>
-                  <span>
-                    {(periodInfo.Pool / LAMPORTS_PER_SOL).toFixed(2)} DIST
-                  </span>
-                </div>
-                <div className="info-box-item">
-                  <label>Participating Nodes</label>
-                  <span>{periodInfo.ParticipatingNodes}</span>
-                </div>
-                <div className="info-box-item">
-                  <label>My Nodes</label>
-                  <span>{machineList.length}</span>
-                </div>
-              </div>
-            </div>
-            <h2>Nodes Info</h2>
-            <hr />
-            {machineList.map((device) => (
-              <DeviceCard device={device} />
-            ))}
-          </>
-        )}
-      </div>
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            style={{ marginTop: 40 }}>
+            <Stack spacing={2} className="info">
+              <Stack direction="row" justifyContent="space-between">
+                <label>Start time</label>
+                <span>{new Date(periodInfo.StartTime).toLocaleString()}</span>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <label>End time</label>
+                <span>
+                  {new Date(
+                    new Date(periodInfo.StartTime).getTime() + 24 * 3600 * 1000
+                  ).toLocaleString()}
+                </span>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <label>Duration</label>
+                <span>24 h</span>
+              </Stack>
+            </Stack>
+            <Stack spacing={2} className="info">
+              <Stack direction="row" justifyContent="space-between">
+                <label>Reward Pool</label>
+                <span>
+                  {(periodInfo.Pool / LAMPORTS_PER_SOL).toFixed(2)} DIST
+                </span>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <label>Participating Nodes</label>
+                <span>{periodInfo.ParticipatingNodes}</span>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <label>My Nodes</label>
+                <span>{machineList.length}</span>
+              </Stack>
+            </Stack>
+          </Stack>
+          <h2>Nodes Info</h2>
+          <hr />
+          {machineList.map((device) => (
+            <>
+              <DeviceCard key={device.Uuid} device={device} />
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                className="total"
+                style={{ margin: "0 40px 40px 40px" }}>
+                <label>Rewards</label>
+                <Stack spacing={1}>
+                  <span>{device.PeriodicRewards}</span>
+                  <label style={{ textAlign: "right" }}>DIST</label>
+                </Stack>
+              </Stack>
+            </>
+          ))}
+        </>
+      )}
     </div>
   );
 }
 
 export default styled(RewardDetail)`
-  min-height: calc(100% - 160px);
-  .con {
-    width: 1160px;
-    margin: 10px auto;
-    padding: 0 20px;
-    display: block;
-    overflow: hidden;
-    h1 {
-      font-weight: 700;
-      font-style: normal;
-      color: #ffffff;
-      margin: 0;
-      line-height: 70px;
+  h1 {
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 44px;
+  }
+  .total {
+    padding: 40px;
+    background: rgba(149, 157, 165, 0.16);
+    border-radius: 12px;
+    span {
+      font-weight: 600;
+      font-size: 32px;
+      line-height: 44px;
     }
-    h2 {
-      margin: 12px 0;
-      font-size: 16px;
+    label {
+      font-size: 18px;
+      line-height: 26px;
     }
-    .space-between {
-      display: flex;
-      justify-content: space-between;
+  }
+  .info {
+    width: 700px;
+    padding: 24px 40px;
+    border: 1px solid #898989;
+    border-radius: 12px;
+    span {
+      font-weight: 500;
+      font-size: 18px;
+      line-height: 26px;
     }
-    .dist {
-      font-size: 10px;
-    }
-    .tip {
-      display: block;
-      width: 12px;
-      height: 12px;
-      margin-left: 4px;
-      background-image: url(/img/market/tip.svg);
-      background-position: center;
-      background-size: 100%;
-      background-repeat: no-repeat;
-    }
-    .box {
-      margin: 10px 0;
-      width: calc(100% - 40px);
-      padding: 20px;
-      background-color: rgba(34, 34, 34, 1);
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      .box-item {
-        b {
-          font-size: 20px;
-          margin-right: 8px;
-        }
-        .price {
-          display: flex;
-          justify-content: center;
-          .number {
-            font-size: 16px;
-            font-weight: 700;
-            margin-right: 8px;
-          }
-        }
-        .title {
-          display: flex;
-          justify-content: center;
-          font-size: 14px;
-          color: #aaa;
-        }
-        .btn {
-          width: 140px;
-          height: 30px;
-          background-color: rgba(148, 214, 226, 1);
-          border-radius: 5px;
-          color: black;
-        }
-      }
-    }
-    .info-box {
-      padding: 14px;
-      background-color: black;
-      border: 1px solid rgba(170, 170, 170, 1);
-      border-radius: 8px;
-      span,
-      label {
-        color: #aaa;
-      }
-    }
-    .horizontal {
-      .info-box-item {
-        display: flex;
-        justify-content: space-between;
-      }
+    label {
+      font-size: 18px;
+      color: #898989;
+      line-height: 26px;
     }
   }
 `;

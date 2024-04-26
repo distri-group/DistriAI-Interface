@@ -8,7 +8,7 @@ export default function Countdown({ deadlineTime, onEnd }) {
       {timeInfo.day > 0 && <span>Days: {timeInfo.day}</span>}
       <span
         style={{
-          color: timeInfo.day <= 0 && timeInfo.hours <= 0 ? "#ffb9b9" : "white",
+          color: timeInfo.day <= 0 && timeInfo.hours <= 0 ? "#ff6073" : "white",
         }}>
         {timeInfo.hoursStr}:{timeInfo.minutesStr}:{timeInfo.secondsStr}
       </span>

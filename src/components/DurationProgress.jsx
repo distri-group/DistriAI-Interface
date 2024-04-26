@@ -1,5 +1,5 @@
-import { Box, LinearProgress } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, LinearProgress, Stack } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
 
 export default function DurationProgress({
   startTime,
@@ -9,6 +9,8 @@ export default function DurationProgress({
 }) {
   const [used, setUsed] = useState(0);
   const [progress, setProgress] = useState(0);
+  const failed = !refundTime && !endTime;
+  const refunded = !!refundTime;
   useEffect(() => {
     if (!duration) {
       setProgress(0);
@@ -60,30 +62,28 @@ export default function DurationProgress({
           color="white"
           value={parseFloat(progress)}
           sx={{
-            height: 8,
-            borderRadius: "4px",
+            margin: "16px 0",
+            height: 16,
+            borderRadius: 4,
             "& .MuiLinearProgress-bar": {
-              backgroundColor: "#bdff95",
+              backgroundColor: "#D7FF65",
             },
-            backgroundColor: (refundTime || duration === 0) && "#ffb9b9",
+            backgroundColor: (refundTime || duration === 0) && "#ff6073",
           }}
         />
       </Box>
       <Box
         style={{
-          color: refundTime
-            ? "#ffb9b9"
-            : duration === 0 || new Date(startTime).getTime() === 0
-            ? "#878787"
-            : "#bdff95",
+          display: "inline-block",
+          color: refunded || failed ? "#ff6073" : "#D7FF65",
           position: "relative",
           left: `${progress > 4 ? progress : 4}%`,
           marginTop: "8px",
+          marginBottom: 24,
           marginLeft: "-20px",
         }}>
-        <span style={{ display: "block" }}>{`${parseFloat(progress).toFixed(
-          2
-        )}%`}</span>
+        <span>{`${parseFloat(progress).toFixed(2)}%`}</span>
+        <br />
         <span style={{ marginLeft: "-30px" }}>
           {"Duration: " + used + " h"}
         </span>

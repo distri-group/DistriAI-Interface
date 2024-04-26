@@ -20,7 +20,7 @@ import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import FileList from "@/components/FileList.jsx";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { Favorite } from "@mui/icons-material";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import "@/dark.css";
 import { getModelDetail, checkDeployable } from "@/services/model.js";
 import { getOrderList } from "@/services/order.js";
@@ -47,6 +47,7 @@ function Detail({ className, type }) {
   const [dialog, setDialog] = useState("");
   const [orderDialog, setOrderDialog] = useState(false);
   const [deployable, setDeployable] = useState(false);
+  const [liked, setLiked] = useState(false);
   const { client } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -129,24 +130,44 @@ function Detail({ className, type }) {
           <CircularProgress />
         ) : (
           <>
-            <Stack
-              direction="row"
-              spacing={2}
-              style={{ justifyContent: "space-between" }}>
+            <Stack direction="row" spacing={2} justifyContent="space-between">
               <div>
-                <Stack direction="row" spacing={2}>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  style={{ paddingBottom: 16 }}>
                   <h1>{item.Name}</h1>
-                  <Stack direction="row" alignItems="center">
-                    <Favorite sx={{ width: 20, height: 20 }} />
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack direction="row" alignItems="center">
+                      {liked ? (
+                        <Favorite
+                          onClick={() => setLiked(false)}
+                          sx={{ width: 24, height: 24, cursor: "pointer" }}
+                        />
+                      ) : (
+                        <FavoriteBorder
+                          onClick={() => setLiked(true)}
+                          sx={{ width: 24, height: 24, cursor: "pointer" }}
+                        />
+                      )}
+                      <label style={{ paddingLeft: 4 }}>Like</label>
+                    </Stack>
                     <span>{item.likes}</span>
                   </Stack>
                 </Stack>
                 <Stack direction="row" spacing={2}>
-                  <span>
-                    Updated {new Date(item.UpdatedAt).toLocaleString()}
-                  </span>
-                  <span>Downloads {item.downloads}</span>
-                  <span>From: {owner}</span>
+                  <Stack direction="row" spacing={1}>
+                    <label>Updated</label>
+                    <span>{new Date(item.UpdatedAt).toLocaleString()}</span>
+                  </Stack>
+                  <Stack direction="row" spacing={1}>
+                    <label>Downloads</label>
+                    <span>{item.downloads}</span>
+                  </Stack>
+                  <Stack direction="row" spacing={1}>
+                    <label>From</label>
+                    <span>{owner}</span>
+                  </Stack>
                 </Stack>
               </div>
               <Stack direction="row" style={{ alignItems: "end" }} spacing={2}>
@@ -163,13 +184,15 @@ function Detail({ className, type }) {
                       <Button
                         className="cbtn"
                         style={{ width: 100 }}
+                        component="label"
                         onClick={() => setDialog("train")}>
                         Train
                       </Button>
                       <Button
                         disabled={!deployable}
-                        className="cbtn"
+                        className="white-btn"
                         style={{ width: 100 }}
+                        component="label"
                         onClick={() => setDialog("deploy")}>
                         Deploy
                       </Button>
@@ -178,25 +201,15 @@ function Detail({ className, type }) {
               </Stack>
             </Stack>
             <Stack direction="row" spacing={2} style={{ margin: "10px 0" }}>
-              <Chip
-                color="warning"
-                size="small"
-                label={item.framework || item.scale}
-              />
-              <Chip color="success" size="small" label={item.type1} />
+              <Chip color="warning" label={item.framework || item.scale} />
+              <Chip color="success" label={item.type1} />
               {item.type1 !== "Others" && (
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  color="success"
-                  label={item.type2}
-                />
+                <Chip variant="outlined" color="success" label={item.type2} />
               )}
               {item.Tags &&
                 item.Tags.map((tag) => (
                   <Chip
                     color="primary"
-                    size="small"
                     label={tag}
                     key={tag}
                     style={{ minWidth: 50 }}
@@ -209,7 +222,6 @@ function Detail({ className, type }) {
                   />
                 }
                 color="info"
-                size="small"
                 label={item.license}
               />
             </Stack>
@@ -225,7 +237,6 @@ function Detail({ className, type }) {
                 />
                 <Tab
                   className="tab"
-                  style={{ margin: "0 20px" }}
                   label={`${capitalize(type)} Files`}
                   value="files"
                 />
@@ -296,11 +307,11 @@ function Detail({ className, type }) {
             </p>
           </DialogContent>
           <DialogActions>
-            <Button className="default-btn" onClick={() => setDialog("")}>
+            <Button className="cbtn" onClick={() => setDialog("")}>
               Cancel
             </Button>
             <Button
-              className="default-btn"
+              className="cbtn"
               onClick={() => {
                 navigate("/market", {
                   state: { modelId: item.Id, intent: dialog },
@@ -349,7 +360,7 @@ function Detail({ className, type }) {
                     </React.Fragment>
                   ))}
                   <Button
-                    className="default-btn"
+                    className="white-btn"
                     style={{
                       position: "absolute",
                       height: 24,
@@ -404,14 +415,27 @@ function Detail({ className, type }) {
 }
 
 export default styled(Detail)`
-  width: 1600px;
-  margin: 0 auto;
+  h1 {
+    font-size: 32px;
+    line-height: 44px;
+    margin: 0;
+  }
   .container {
     margin-top: 25px;
+    label {
+      color: #898989;
+      font-size: 16px;
+      line-height: 22px;
+    }
   }
   .tab {
-    border-radius: 15px 15px 0 0;
+    border-radius: 12px 12px 0 0;
     color: white;
+    width: 240px;
+    height: 64px;
+    &.Mui-selected {
+      background: rgba(149, 157, 165, 0.16);
+    }
   }
   .output {
     display: block;
@@ -433,5 +457,8 @@ export default styled(Detail)`
   }
   .default-btn {
     margin-left: 8px;
+  }
+  .Mui-disabled {
+    background-color: #898989;
   }
 `;

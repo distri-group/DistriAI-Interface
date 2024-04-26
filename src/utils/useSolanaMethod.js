@@ -246,23 +246,23 @@ export default function useSolanaMethod() {
 
   // Check Transaction Confirmation On Solana
   const checkConfirmation = async (transaction) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          const latestBlockHash = await connection.getLatestBlockhash();
-          const confirmation = await connection.confirmTransaction(
-            {
-              blockhash: latestBlockHash,
-              lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-              signature: transaction,
-            },
-            "finalized"
-          );
+    return new Promise(async (resolve, reject) => {
+      try {
+        const latestBlockHash = await connection.getLatestBlockhash();
+        const confirmation = await connection.confirmTransaction(
+          {
+            blockhash: latestBlockHash,
+            lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+            signature: transaction,
+          },
+          "finalized"
+        );
+        setTimeout(() => {
           resolve(confirmation);
-        } catch (error) {
-          reject(error);
-        }
-      }, 4000);
+        }, 4000);
+      } catch (error) {
+        reject(error);
+      }
     });
   };
 

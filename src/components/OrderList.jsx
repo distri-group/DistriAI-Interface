@@ -4,44 +4,46 @@ import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import Table from "./Table.jsx";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { Backdrop, CircularProgress } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Stack } from "@mui/material";
 import { getMachineDetail } from "@/services/machine.js";
-import { signToken, checkIfPrepared } from "@/services/order.js";
+import { signToken } from "@/services/order.js";
 import Countdown from "./Countdown.jsx";
+import { useSnackbar } from "notistack";
 
 function OrderList({ className, list, loading, reloadFunc }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
   const handleConsole = async (order, deploy) => {
-    const machine = await getMachineDetail(
-      order.Metadata.MachineInfo.Provider,
-      order.Metadata.MachineInfo.Uuid || order.Metadata.MachineInfo.UUID
-    );
-    setSigning(true);
-    const href = await signToken(
-      machine.IP,
-      machine.Port,
-      wallet.publicKey.toString(),
-      deploy
-    );
-    window.open(href);
-    setSigning(false);
+    try {
+      const machine = await getMachineDetail(
+        order.Metadata.MachineInfo.Provider,
+        order.Metadata.MachineInfo.Uuid || order.Metadata.MachineInfo.UUID
+      );
+      setSigning(true);
+      const href = await signToken(
+        machine.IP,
+        machine.Port,
+        wallet.publicKey.toString(),
+        deploy
+      );
+      window.open(href);
+      setSigning(false);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
   };
   let columns = [
     {
       title: "Time",
-      width: "10%",
+      width: "14%",
       key: "BuyTime",
-      render: (text, record, index) => (
-        <div className="time">
-          <div className="y">
-            {moment(record.OrderTime).format("YYYY.MM.DD")}
-          </div>
-          <div className="h">{moment(record.OrderTime).format("HH:mm:ss")}</div>
-        </div>
-      ),
+      render: (text, record, index) =>
+        `${moment(record.OrderTime).format("YYYY.MM.DD")} ${moment(
+          record.OrderTime
+        ).format("HH:mm:ss")}`,
     },
     {
       title: "Task Name",
@@ -103,59 +105,43 @@ function OrderList({ className, list, loading, reloadFunc }) {
     },
     {
       title: "",
-      width: "10%",
+      width: "5%",
       key: "Uuid",
       render: (text, record, index) => (
-        <div className="btns">
-          <span
+        <Stack direction="row" spacing={2}>
+          <Button
             onClick={() => {
               handleConsole(
                 record,
                 record.Metadata.OrderInfo.Intent === "deploy"
               );
             }}
-            className={`mini-btn ${
-              record.StatusName !== "Available" && "disabled"
-            }`}>
+            disabled={record.StatusName !== "Available"}
+            className={
+              record.StatusName === "Available" ? "cbtn" : "disabled-btn"
+            }
+            style={{ height: 32 }}>
             {record.Metadata.OrderInfo?.Intent &&
             record.Metadata.OrderInfo.Intent === "deploy"
               ? "Deployment"
               : "Console"}
-          </span>
-          <span
+          </Button>
+          <Button
             onClick={() => navigate("/order/" + text)}
-            className={`mini-btn${
-              record.StatusName === "Preparing" ? " disabled" : ""
-            }`}>
+            disabled={record.StatusName === "Preparing"}
+            className={
+              record.StatusName === "Preparing" ? "disabled-btn" : "white-btn"
+            }
+            style={{ height: 32 }}>
             Detail
-          </span>
-        </div>
+          </Button>
+        </Stack>
       ),
     },
   ];
   useEffect(() => {
     setIsLoading(loading);
   }, [loading]);
-  useEffect(() => {
-    const timers = [];
-
-    for (const item of list) {
-      if (item.StatusName === "Preparing") {
-        const timer = setInterval(async () => {
-          const prepared = await checkIfPrepared(item);
-          if (prepared) {
-            clearInterval(timer);
-            reloadFunc();
-          }
-        }, 3000);
-        timers.push(timer);
-      }
-    }
-
-    return () => {
-      timers.forEach((timer) => clearInterval(timer));
-    };
-  }, [list]);
   return (
     <div className={className}>
       <Table
@@ -175,11 +161,6 @@ function OrderList({ className, list, loading, reloadFunc }) {
 }
 
 export default styled(OrderList)`
-  .order-table {
-    tr td {
-      padding: 20px 10px !important;
-    }
-  }
   .spin-box {
     width: 100%;
     height: 50px;
@@ -215,53 +196,9 @@ export default styled(OrderList)`
       text-align: center;
     }
   }
-  .status-Available {
-    color: #bdff95;
-  }
-  .status-Completed {
-    color: #878787;
-  }
-  .status-Refunded {
-    color: #ffb9b9;
-  }
-  .btns {
-    display: flex;
-    justify-content: space-between;
-  }
-  .disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-  .disabled:hover {
-    opacity: 0.5 !important;
-  }
-  .mini-btn {
-    border-radius: 4px;
-    border: none;
-    height: 31px;
-    line-height: 31px;
-    padding: 0 10px;
-    font-size: 14px;
-    display: block;
-    text-align: center;
-    overflow: hidden;
-    margin-right: 10px;
-    float: right;
-    :hover {
-      border: none;
-    }
-    background-image: linear-gradient(to right, #20ae98, #0aab50);
-    color: white;
-    cursor: pointer;
-  }
-  .token {
-    margin: 0;
-    border-radius: 100%;
-    background-image: url(/img/token.png);
-    background-size: 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 24px;
-    height: 24px;
+
+  .Mui-disabled {
+    background: rgba(255, 255, 255, 0.24);
+    color: #0f1d35 !important;
   }
 `;

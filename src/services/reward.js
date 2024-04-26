@@ -1,5 +1,6 @@
 import axios from "@/utils/axios.js";
 import { formatMachine } from "./machine.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 const baseUrl = "/reward";
 
@@ -32,7 +33,17 @@ export async function getRewardTotal(period, publicKey) {
   };
   try {
     const res = await axios.post(apiUrl, body, { headers });
-    return res;
+    let formattedRes = Object.fromEntries(
+      Object.entries(res).map(([key, value]) => [
+        key,
+        Number((value / LAMPORTS_PER_SOL).toFixed(2)),
+      ])
+    );
+    formattedRes.totalClaimable =
+      formattedRes.ClaimablePeriodicRewards + formattedRes.ClaimableTaskRewards;
+    formattedRes.totalClaimed =
+      formattedRes.ClaimedPeriodicRewards + formattedRes.ClaimedTaskRewards;
+    return formattedRes;
   } catch (error) {
     throw error;
   }

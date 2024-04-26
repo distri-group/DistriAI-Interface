@@ -117,16 +117,15 @@ function App() {
       MuiTab: {
         styleOverrides: {
           root: {
-            backgroundColor: "#2d2d2d",
+            background: "rgba(149,157,165,0.08)",
           },
         },
       },
       MuiTabPanel: {
         styleOverrides: {
           root: {
-            padding: "24px 0",
-            backgroundColor: "#2d2d2d",
-            borderRadius: "0 15px 15px 15px",
+            padding: 0,
+            borderRadius: 8,
           },
         },
       },

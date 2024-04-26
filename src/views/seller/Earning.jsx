@@ -1,4 +1,4 @@
-import { MenuItem, Select, Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
   getOrderList,
@@ -12,6 +12,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useNavigate } from "react-router-dom";
 import Pager from "@/components/pager.jsx";
 import { formatBalance } from "@/utils/index.js";
+import Filter from "@/components/Filter";
 
 function Earning({ className }) {
   document.title = "My Earnings";
@@ -28,13 +29,6 @@ function Earning({ className }) {
   const [pending, setPending] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  function onFilter(event) {
-    setFilterValue((prevState) => ({
-      ...prevState,
-      Status: parseInt(event.target.value),
-    }));
-    setCurrent(1);
-  }
   useEffect(() => {
     async function loadList(curr) {
       setLoading(true);
@@ -63,13 +57,12 @@ function Earning({ className }) {
   const columns = [
     {
       title: "Time",
-      width: "10%",
+      width: "13%",
       key: "OrderTime",
       render: (text) => (
-        <div className="time-box">
-          <div>{moment(text).format("YYYY.MM.DD")}</div>
-          <div className="Completed">{moment(text).format("HH:mm:ss")}</div>
-        </div>
+        <span>
+          {moment(text).format("YYYY.MM.DD")} {moment(text).format("HH:mm:ss")}
+        </span>
       ),
     },
     {
@@ -77,17 +70,21 @@ function Earning({ className }) {
       width: "10%",
       key: "Price",
       render: (text) => (
-        <div className="price">
-          <span className="coin" />
-          <span style={{ lineHeight: "24px" }}>{text.toFixed(2)}</span>
-        </div>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <span className="token" />
+          <span>{text}</span>
+        </Stack>
       ),
     },
     {
       title: "Duration",
       width: "10%",
       key: "Duration",
-      render: (text) => <span>{text} h</span>,
+      render: (text) => (
+        <span>
+          <b>{text}</b> h
+        </span>
+      ),
     },
     {
       title: "Earnings",
@@ -112,67 +109,55 @@ function Earning({ className }) {
       width: "10%",
       key: "id",
       render: (text, record, index) => (
-        <span
+        <Button
           className="cbtn"
+          style={{
+            width: 100,
+            height: 32,
+          }}
           onClick={() => navigate("/earning/" + record.Uuid)}>
           Details
-        </span>
+        </Button>
       ),
     },
   ];
   return (
     <div className={className}>
       <h1>My Order Earnings</h1>
-      <div className="container">
-        <div className="box">
-          <div>
-            <p className="describe">
-              All order earnings you have already received.
-            </p>
-            <span className="volume">
-              <div>
-                <span className="number">{received}</span>
-                <span className="Completed">DIST</span>
-              </div>
-              <p className="Completed">Received</p>
-            </span>
-          </div>
-        </div>
-        <div className="box">
-          <div>
-            <p className="describe">
-              All order earnings you can expect to receive after orders are
-              completed.
-            </p>
-            <span className="volume">
-              <div>
-                <span className="number">{pending}</span>
-                <span className="Completed">DIST</span>
-              </div>
-              <p className="Completed">Pending</p>
-            </span>
-          </div>
-        </div>
-      </div>
-      <Stack direction="row" spacing={2} className="filter">
-        <span>Filter</span>
-        {Object.entries(filterData).map(([key, value]) => (
-          <span key={key}>
-            <Select value={filterValue[key]} onChange={onFilter}>
-              {value.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </span>
-        ))}
-        <span
-          className="btn-txt"
-          onClick={() => setFilterValue({ Direction: "buy", Status: "all" })}>
-          reset
-        </span>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        style={{ marginTop: 24 }}>
+        <Stack spacing={2} className="box">
+          <label>All order earnings you have already received.</label>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <span className="number">{received}</span>
+            <label style={{ color: "white" }}>DIST</label>
+          </Stack>
+          <span>Received</span>
+        </Stack>
+        <Stack spacing={2} className="box">
+          <label>
+            All order earnings you can expect to receive after orders are
+            completed.
+          </label>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <span className="number">{pending}</span>
+            <label style={{ color: "white" }}>DIST</label>
+          </Stack>
+          <span>Pending</span>
+        </Stack>
       </Stack>
+      <Filter
+        data={filterData}
+        defaultValue={{
+          Status: "all",
+        }}
+        onFilter={(value) => {
+          setCurrent(1);
+          setFilterValue(value);
+        }}
+      />
       <Table
         className="earning-list"
         columns={columns}
@@ -196,98 +181,36 @@ function Earning({ className }) {
 
 export default styled(Earning)`
   h1 {
-    font-weight: 700;
-    font-style: normal;
-    font-size: 28px;
-    padding-left: 36px;
-    background-image: url(/img/market/seller.png);
-    background-repeat: no-repeat;
-    background-size: 32px;
-    background-position: left;
-    margin-top: 25px;
-  }
-  .price {
-    display: flex;
-    .coin {
-      margin-right: 5px;
-    }
-  }
-  .container {
-    display: flex;
-    justify-content: space-between;
-    .box {
-      width: 45%;
-    }
+    font-size: 32px;
+    line-height: 44px;
+    margin: 0;
   }
   .box {
-    background-color: #222;
-    margin-bottom: 8px;
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    padding-left: 40px;
-    .describe {
-      color: #aaa;
-      font-size: 12px;
+    width: 700px;
+    height: 140px;
+    background: rgba(149, 157, 165, 0.16);
+    border-radius: 12px;
+    padding: 40px;
+    label {
+      font-size: 18px;
+      color: #959da5;
+      line-height: 26px;
     }
-    .volume {
-      display: inline-block;
-      padding: 8px 20px;
-      .number {
-        font-weight: bolder;
-        font-size: 24px;
-        padding: 0 8px;
-      }
-      p {
-        margin: 0;
-        text-align: center;
-      }
+    span {
+      font-weight: 500;
+      font-size: 18px;
+      line-height: 26px;
     }
-  }
-  .claim {
-    width: 140px;
-    height: 30px;
-    background-color: #94d6e2;
-    color: black;
-    margin-top: 48px;
+    .number {
+      font-weight: 600;
+      font-size: 32px;
+      line-height: 44px;
+    }
   }
   .earning-list {
-    tr td {
-      padding: 10px !important;
-    }
-    .time-box {
-      padding: 10px;
-      font-size: 14px;
-    }
-    .cbtn {
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  }
-  .coin {
-    display: block;
-    margin: 0;
-    border-radius: 100%;
-    background-image: url(/img/token.png);
-    background-size: 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 24px;
-    height: 24px;
-  }
-  .filter {
-    padding: 10px 0;
-    .sel {
-      margin: 0 12px;
-    }
-    .btn-txt {
-      font-weight: 700;
-      font-size: 14px;
-      text-decoration: underline;
-      color: #ffffff;
-      cursor: pointer;
+    span {
+      font-size: 18px;
+      line-height: 26px;
     }
   }
 `;

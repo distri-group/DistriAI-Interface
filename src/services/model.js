@@ -182,3 +182,10 @@ export const licenses = [
   "CC-BY-NC-ND",
   "Others",
 ];
+export const filterData = {
+  OrderBy: [
+    { label: "Updated Time", value: "Updated Time" },
+    { label: "Likes", value: "Likes" },
+    { label: "Downloads", value: "Downloads" },
+  ],
+};

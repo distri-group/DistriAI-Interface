@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { MenuItem, Select, Stack } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import DeviceList from "../../components/DeviceList";
-import Pager from "../../components/pager";
-import { getMachineList, getFilterData } from "../../services/machine";
+import DeviceList from "@/components/DeviceList";
+import Pager from "@/components/pager";
+import { getMachineList, getFilterData } from "@/services/machine";
+import Filter from "@/components/Filter";
 
 function Market({ className }) {
   document.title = "Market";
@@ -31,22 +31,6 @@ function Market({ className }) {
     setLoading(false);
   }
 
-  // Machine Filter Change
-  function onFilter(key, value) {
-    setFilterValue((prevState) => ({ ...prevState, [key]: value }));
-  }
-
-  // Reset Machine Filter
-  function resetFilter() {
-    setFilterValue((prevState) => {
-      const resetState = {};
-      Object.keys(prevState).forEach((key) => {
-        resetState[key] = "all";
-      });
-      return resetState;
-    });
-  }
-
   // Initialize Filter
   useEffect(() => {
     async function loadFilterData() {
@@ -57,7 +41,6 @@ function Market({ className }) {
         Object.entries(res).forEach(([key, value]) => {
           filter[key] = "all";
         });
-        setFilterValue(filter);
       } catch (error) {}
     }
     loadFilterData();
@@ -65,40 +48,34 @@ function Market({ className }) {
 
   // Reload List
   useEffect(() => {
-    if (filterValue && current && Object.keys(filterValue).length > 0) {
-      loadList(current);
-    }
+    loadList(current);
     // eslint-disable-next-line
-  }, [filterValue, current]);
+  }, [current, filterValue]);
 
   return (
     <div className={className}>
       <h1 className="title">Computing Power Market</h1>
-      <Stack className="filter" direction="row" spacing={2}>
-        <span>Filter</span>
-        {Object.entries(filterData).map(([key, value]) => (
-          <span key={key}>
-            <Select
-              value={filterValue[key]}
-              onChange={(e) => onFilter(key, e.target.value)}>
-              {value.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </span>
-        ))}
-        <span className="btn-txt" onClick={resetFilter}>
-          reset
-        </span>
-      </Stack>
+      <Filter
+        data={filterData}
+        defaultValue={{
+          Gpu: "all",
+          GpuCount: "all",
+          Region: "all",
+          OrderBy: "all",
+        }}
+        onFilter={(value) => {
+          setCurrent(1);
+          setFilterValue(value);
+        }}
+      />
       <div className="con-table">
         <DeviceList
           list={list}
           loading={loading}
-          onPriceSort={(value) => onFilter("PriceOrder", value)}
           model={state}
+          onPriceSort={(sort) => {
+            setFilterValue((prev) => ({ ...prev, PriceOrder: sort }));
+          }}
         />
         {total > 10 && (
           <Pager
@@ -120,12 +97,10 @@ export default styled(Market)`
     font-weight: 600;
     font-size: 32px;
     line-height: 44px;
-    text-align: left;
-    font-style: normal;
     margin: 0;
   }
   .filter {
-    padding: 24px 0;
+    padding-top: 24px;
     display: flex;
     flex-direction: row;
     line-height: 30px;

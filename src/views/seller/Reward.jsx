@@ -1,5 +1,5 @@
-import { Button } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Button, Stack, Grid } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import Table from "@/components/Table.jsx";
 import moment from "moment";
@@ -26,6 +26,12 @@ function Reward({ className }) {
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [rewards, setRewards] = useState(null);
+  const claimed = useMemo(() => {
+    if (rewards?.totalClaimable) {
+      return rewards.totalClaimable <= 0;
+    }
+  }, [rewards]);
+
   async function loadList(curr) {
     setLoading(true);
     try {
@@ -87,99 +93,59 @@ function Reward({ className }) {
   const columns = [
     {
       title: "Period",
-      width: "10%",
+      width: "12%",
       key: "Period",
-      render: (text) => (
-        <span style={{ display: "block", width: "80%", textAlign: "center" }}>
-          {text}
-        </span>
-      ),
+      render: (text) => <span style={{ marginLeft: 25 }}>{text}</span>,
     },
     {
       title: "Start",
-      width: "10%",
+      width: "15%",
       key: "StartTime",
-      render: (text) => {
-        return (
-          <div className="time">
-            <div className="y">{moment(text).format("YYYY.MM.DD")}</div>
-            <div className="h">{moment(text).format("HH:mm:ss")}</div>
-          </div>
-        );
-      },
-    },
-    {
-      title: "End",
-      width: "10%",
-      key: "EndTime",
-      render: (text, record) => {
-        return (
-          <div className="time">
-            <div className="y">
-              {moment(
-                new Date(record.StartTime).getTime() + 24 * 3600 * 1000
-              ).format("YYYY.MM.DD")}
-            </div>
-            <div className="h">
-              {moment(
-                new Date(record.StartTime).getTime() + 24 * 3600 * 1000
-              ).format("HH:mm:ss")}
-            </div>
-          </div>
-        );
-      },
+      render: (text) => (
+        <span className="time">
+          {moment(text).format("YYYY.MM.DD")} {moment(text).format("HH:mm:ss")}
+        </span>
+      ),
     },
     {
       title: "Duration",
       width: "10%",
       key: "Duration",
-      render: () => (
-        <span style={{ display: "block", textAlign: "center" }}>24 h</span>
-      ),
+      render: () => <span style={{ marginLeft: 25 }}>24 h</span>,
     },
     {
       title: "Reward pool",
-      width: "10%",
+      width: "15%",
       key: "Pool",
       render: (text) => (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <span className="coin" />
-          <span style={{ lineHeight: "24px" }}>
-            {(text / LAMPORTS_PER_SOL).toFixed(2)}
-          </span>
-        </div>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <span className="token" />
+          <span>{(text / LAMPORTS_PER_SOL).toFixed(2)}</span>
+        </Stack>
       ),
     },
     {
       title: "Rewards",
-      width: "10%",
+      width: "15%",
       key: "PeriodicRewards",
       render: (text) => (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <span className="coin" />
-          <span style={{ lineHeight: "24px" }}>
-            {(text / LAMPORTS_PER_SOL).toFixed(2)}
-          </span>
-        </div>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <span className="token" />
+          <span>{(text / LAMPORTS_PER_SOL).toFixed(2)}</span>
+        </Stack>
       ),
     },
     {
-      title: "",
-      width: "10%",
+      title: "Controls",
+      width: "5%",
       key: "ID",
       render: (text, record) => (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
-          <span
-            className="cbtn"
-            onClick={() => navigate("/reward/" + record.Period)}>
-            Details
-          </span>
-        </div>
+        <Button
+          className="cbtn"
+          style={{ width: 100, height: 32 }}
+          onClick={() => navigate(`/reward/${record.Period}`)}>
+          Detail
+        </Button>
       ),
     },
   ];
@@ -193,141 +159,86 @@ function Reward({ className }) {
   return (
     <div className={className}>
       <h1>My DAO Rewards</h1>
-      {rewards ? (
-        <>
-          <div className="box">
-            <div style={{ width: "400px" }}>
-              <p className="describe">
-                All periodic & task rewards you can currently claim.
-              </p>
-              <div className="volume">
-                <div style={{ width: "160px" }}>
-                  <span className="number">
-                    {(
-                      (rewards.ClaimablePeriodicRewards +
-                        rewards.ClaimableTaskRewards) /
-                      LAMPORTS_PER_SOL
-                    ).toFixed(2)}
-                  </span>
-                  <span>DIST</span>
-                  <p>Total Claimable</p>
-                </div>
-                <div className="vertical">
-                  <span>
-                    {(
-                      rewards.ClaimablePeriodicRewards / LAMPORTS_PER_SOL
-                    ).toFixed(2)}
-                  </span>
-                  <label>Periodic Rewards</label>
-                </div>
-                <div className="vertical">
-                  <span>
-                    {(rewards.ClaimableTaskRewards / LAMPORTS_PER_SOL).toFixed(
-                      2
-                    )}
-                  </span>
-                  <label>Task Rewards</label>
-                </div>
-              </div>
-            </div>
-            {rewards.ClaimablePeriodicRewards ||
-            rewards.ClaimableTaskRewards ? (
-              <LoadingButton
-                onClick={claimButchRewards}
-                loading={claiming}
-                className="claim">
-                {claiming ? "" : "Claim Rewards"}
-              </LoadingButton>
-            ) : (
-              <Button className="claimed" disabled>
-                All Claimed
-              </Button>
-            )}
-          </div>
-          <div className="box">
-            <div style={{ width: "400px" }}>
-              <p className="describe">
-                All periodic & task rewards you have already claimed.
-              </p>
-              <div className="volume">
-                <div style={{ width: "160px" }}>
-                  <span className="number Completed">
-                    {(
-                      (rewards.ClaimedPeriodicRewards +
-                        rewards.ClaimedTaskRewards) /
-                      LAMPORTS_PER_SOL
-                    ).toFixed(2)}
-                  </span>
-                  <span className="Completed">DIST</span>
-                  <p>Total Claimed</p>
-                </div>
-                <div className="vertical">
-                  <span>
-                    {(
-                      rewards.ClaimedPeriodicRewards / LAMPORTS_PER_SOL
-                    ).toFixed(2)}
-                  </span>
-                  <label>Periodic Rewards</label>
-                </div>
-                <div className="vertical">
-                  <span>
-                    {(rewards.ClaimedTaskRewards / LAMPORTS_PER_SOL).toFixed(2)}
-                  </span>
-                  <label>Task Rewards</label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="box">
-            <div style={{ width: "400px" }}>
-              <p className="describe">
-                All periodic & task rewards you can currently claim.
-              </p>
-              <div className="volume">
-                <div style={{ width: "160px" }}>
-                  <span className="number">0</span>
-                  <span>DIST</span>
-                  <p>Total Claimable</p>
-                </div>
-                <div className="vertical">
-                  <span>0</span>
-                  <label>Periodic Rewards</label>
-                </div>
-                <div className="vertical">
-                  <span>0</span>
-                  <label>Task Rewards</label>
-                </div>
-              </div>
-            </div>
-            <Button className="claim">Claim Rewards</Button>
-          </div>
-          <div className="box">
-            <div style={{ width: "400px" }}>
-              <p className="describe">
-                All periodic & task rewards you have already claimed.
-              </p>
-              <div className="volume">
-                <div style={{ width: "160px" }}>
-                  <span className="number Completed">0</span>
-                  <span className="Completed">DIST</span>
-                  <p>Total Claimed</p>
-                </div>
-                <div className="vertical">
-                  <span>0</span>
-                  <label>Periodic Rewards</label>
-                </div>
-                <div className="vertical">
-                  <span>0</span>
-                  <label>Task Rewards</label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <Stack direction="row" spacing={5}>
+        <div className="box">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="describe">
+            <label>All periodic & task rewards you can currently claim</label>
+            <LoadingButton
+              loading={claiming}
+              disabled={claimed}
+              onClick={claimButchRewards}
+              className="cbtn"
+              style={{ width: 140 }}>
+              {claiming ? "" : claimed ? "All Claimed" : "Claim Rewards"}
+            </LoadingButton>
+          </Stack>
+          <Grid container className="rewards">
+            <Grid item md={4}>
+              <Stack spacing={1}>
+                <span className="total">
+                  {rewards?.totalClaimable || 0}
+                  <span className="union">DIST</span>
+                </span>
+                <label style={{ color: "white" }}>Received</label>
+              </Stack>
+            </Grid>
+            <Grid item md={3}>
+              <Stack spacing={1}>
+                <span className="part">
+                  {rewards?.ClaimablePeriodicRewards || 0}
+                </span>
+                <label>Periodic Rewards</label>
+              </Stack>
+            </Grid>
+            <Grid item md={3}>
+              <Stack spacing={1}>
+                <span className="part">
+                  {rewards?.ClaimableTaskRewards || 0}
+                </span>
+                <label>Task Rewards</label>
+              </Stack>
+            </Grid>
+          </Grid>
+        </div>
+        <div className="box">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="describe">
+            <label>All periodic & task rewards you have already claimed</label>
+          </Stack>
+          <Grid container className="rewards">
+            <Grid item md={4}>
+              <Stack spacing={1}>
+                <span className="total">
+                  {rewards?.totalClaimed || 0}
+                  <span className="union">DIST</span>
+                </span>
+                <label style={{ color: "white" }}>Total Claimed</label>
+              </Stack>
+            </Grid>
+            <Grid item md={3}>
+              <Stack spacing={1}>
+                <span className="part">
+                  {rewards?.ClaimedPeriodicRewards || 0}
+                </span>
+                <label>Periodic Rewards</label>
+              </Stack>
+            </Grid>
+            <Grid item md={3}>
+              <Stack spacing={1}>
+                <span className="part">{rewards?.ClaimedTaskRewards || 0}</span>
+                <label>Task Rewards</label>
+              </Stack>
+            </Grid>
+          </Grid>
+        </div>
+      </Stack>
       <Table
         className="reward-list"
         columns={columns}
@@ -362,111 +273,51 @@ export default styled(Reward)`
   .container {
     display: flex;
     justify-content: space-between;
-    .box {
-      width: 45%;
-    }
   }
   .h {
     color: #aaa;
   }
   .box {
-    background-color: #222;
-    margin-bottom: 8px;
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    padding-left: 40px;
+    width: 780px;
+    height: 120px;
+    padding: 40px;
+    background: rgba(149, 157, 165, 0.16);
+    border-radius: 12px;
+    label {
+      font-weight: 400;
+      font-size: 18px;
+      color: #959da5;
+      line-height: 26px;
+    }
     .describe {
-      color: #aaa;
-      font-size: 12px;
+      height: 48px;
     }
-    .volume {
-      display: flex;
-      justify-content: space-between;
-      .number {
-        font-weight: bolder;
-        font-size: 24px;
-        padding: 0 8px;
+    .rewards {
+      label {
+        font-weight: 500;
       }
-      p {
-        width: 130px;
-        text-align: center;
-      }
-      .vertical {
-        color: #aaa;
-        label {
-          font-size: 12px;
-        }
-        span {
-          display: block;
+      .total {
+        font-weight: 600;
+        font-size: 32px;
+        line-height: 44px;
+        .union {
+          font-weight: 400;
           font-size: 18px;
-          font-weight: bolder;
-          margin-top: 16px;
+          line-height: 26px;
+          padding-left: 8px;
         }
       }
+      .part {
+        font-size: 20px;
+        line-height: 44px;
+      }
     }
-  }
-  .claim,
-  .claimed {
-    width: 140px;
-    height: 30px;
-    margin-top: 48px;
-  }
-  .claim {
-    background-color: #94d6e2;
-    color: black;
-  }
-  .claimed {
-    background-color: #333;
   }
   .reward-list {
     margin-top: 20px;
-    th {
-      text-align: center;
-    }
-    tr td {
-      padding: 10px !important;
-    }
-    .time-box {
-      padding: 10px;
-      font-size: 14px;
-    }
-    .time {
-      width: 60%;
-      margin: 0 auto;
-    }
-    .cbtn {
-      padding: 4px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      height: 32px;
-      line-height: 32px;
-    }
-  }
-  .coin {
-    display: block;
-    margin-right: 5px;
-    border-radius: 100%;
-    background-color: white;
-    background-image: url(/img/token.png);
-    background-size: 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 24px;
-    height: 24px;
-  }
-  .filter {
-    padding: 10px 0;
-    .sel {
-      margin: 0 12px;
-    }
-    .btn-txt {
-      font-weight: 700;
-      font-size: 14px;
-      text-decoration: underline;
-      color: #ffffff;
-      cursor: pointer;
+    span {
+      font-size: 18px;
+      line-height: 26px;
     }
   }
 `;

@@ -1,53 +1,54 @@
 import styled from "styled-components";
 import { formatAddress } from "@/utils/index.js";
+import { Stack } from "@mui/material";
 
 function DeviceCard({ className, device }) {
   return (
     <div className={className}>
       <h3># {formatAddress(device.Uuid || device.UUID)}</h3>
-      <div className="card-container">
-        <div className="info-box vertical">
-          <div className="box-item">
+      <Stack direction="row" spacing={5} justifyContent="space-between">
+        <Stack spacing={5} className="box">
+          <Stack spacing={2}>
             <label>Provider</label>
-            <span>{device.Provider}</span>
-          </div>
-          <div className="box-item">
+            <span style={{ wordWrap: "break-word" }}>{device.Provider}</span>
+          </Stack>
+          <Stack spacing={2}>
             <label>Region</label>
             <span>{device.Region || "--"}</span>
-          </div>
-        </div>
-        <div className="info-box vertical">
-          <div className="box-item">
+          </Stack>
+        </Stack>
+        <Stack spacing={5} className="box">
+          <Stack spacing={2}>
             <label>GPU</label>
             <span>{device.GPU}</span>
-          </div>
-          <div className="box-item">
+          </Stack>
+          <Stack spacing={2}>
             <label>CPU</label>
             <span>{device.CPU || "--"}</span>
-          </div>
-        </div>
-        <div className="info-box horizontal" style={{ width: "35%" }}>
-          <div className="box-item">
+          </Stack>
+        </Stack>
+        <Stack spacing={2} className="box">
+          <Stack direction="row" justifyContent="space-between">
             <label>TFLOPS</label>
             <span>{device.Tflops}</span>
-          </div>
-          <div className="box-item">
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
             <label>RAM</label>
             <span>{device.RAM || "--"}</span>
-          </div>
-          <div className="box-item">
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
             <label>Avail Disk Storage</label>
-            <span>{device.Disk || device.AvailDiskStorage}GB</span>
-          </div>
-          <div className="box-item">
+            <span>{device.Disk || device.AvailDiskStorage} GB</span>
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
             <label>Reliability</label>
             <span>{device.Reliability}</span>
-          </div>
-          <div className="box-item">
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
             <label>CPS</label>
             <span>{device.CPS}</span>
-          </div>
-          <div className="box-item">
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
             <label>Internet Speed</label>
             <span>
               <div className="speed">
@@ -63,45 +64,36 @@ function DeviceCard({ className, device }) {
                 {device.Speed?.Download || "-- Mbps"}
               </div>
             </span>
-          </div>
-        </div>
-      </div>
+          </Stack>
+        </Stack>
+      </Stack>
     </div>
   );
 }
 
 export default styled(DeviceCard)`
+  padding: 24px 40px;
   h3 {
-    font-size: 16px;
+    font-size: 24px;
+    color: #ffffff;
+    line-height: 34px;
+    margin: 0;
+    padding-bottom: 16px;
   }
-  .card-container {
-    display: flex;
-    justify-content: space-between;
-    height: 180px;
-    .info-box {
-      width: 25%;
-      padding: 14px;
-      background-color: black;
-      border: 1px solid rgba(170, 170, 170, 1);
-      border-radius: 8px;
+  .box {
+    width: 400px;
+    height: 240px;
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid #898989;
+    label {
+      font-size: 20px;
+      color: #898989;
+      line-height: 28px;
     }
-    .vertical {
-      span,
-      label {
-        display: block;
-      }
-      span {
-        word-wrap: break-word;
-      }
-      label {
-        margin: 8px 0;
-      }
-    }
-    .horizontal {
-      .box-item {
-        display: flex;
-        justify-content: space-between;
-      }
+    span {
+      font-size: 20px;
+      line-height: 28px;
     }
   }
 `;

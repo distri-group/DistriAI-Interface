@@ -1,4 +1,4 @@
-import { ArrowDownward, Folder, InsertDriveFile } from "@mui/icons-material";
+import { Download, Folder, InsertDriveFile } from "@mui/icons-material";
 import {
   Button,
   Box,
@@ -284,8 +284,8 @@ function FileList({
               direction="row"
               justifyContent="space-between"
               alignItems="bottom"
-              style={{ padding: "0 16px" }}>
-              <span>
+              className="controls">
+              <div className="breadcrumbs">
                 {breadcrumbs.length > 0 && (
                   <Breadcrumbs
                     separator={<span style={{ color: "white" }}>/</span>}>
@@ -302,17 +302,17 @@ function FileList({
                     </span>
                   </Breadcrumbs>
                 )}
-              </span>
+              </div>
               {item.Owner === wallet.publicKey.toString() &&
                 !(onSelect || disableUpload) && (
-                  <Stack direction="row" justifyContent="right" spacing={2}>
+                  <Stack direction="row" justifyContent="right" spacing={3}>
                     <Button
-                      className="cbtn"
+                      className="white-btn"
                       style={{ width: 100 }}
                       component="label"
                       role={undefined}
                       tabIndex={-1}>
-                      Upload File
+                      Add File
                       <input
                         type="file"
                         id="uploadFile"
@@ -328,8 +328,8 @@ function FileList({
                       />
                     </Button>
                     <Button
-                      className="cbtn"
-                      style={{ width: 120 }}
+                      className="white-btn"
+                      style={{ width: 160 }}
                       disabled={currentPrefix === initialPrefix + "/deployment"}
                       component="label"
                       role={undefined}
@@ -346,12 +346,12 @@ function FileList({
                     </Button>
                     {type === "model" && (
                       <Button
-                        className="cbtn"
-                        style={{ width: 200 }}
+                        className="white-btn"
+                        style={{ width: 220 }}
                         component="label"
                         role={undefined}
                         tabIndex={-1}>
-                        Upload Deployment Script
+                        Add Deployment Script
                         <input
                           type="file"
                           id="uploadDeployment"
@@ -362,15 +362,16 @@ function FileList({
                       </Button>
                     )}
                     <Button
-                      className="cbtn"
+                      className="white-btn"
                       style={{ width: 120 }}
+                      component="label"
                       onClick={() => setDialog(true)}>
                       Create Folder
                     </Button>
                   </Stack>
                 )}
             </Stack>
-            <Table>
+            <Table className="file-table">
               <TableBody>
                 {currentPrefix !== initialPrefix ? (
                   <TableRow>
@@ -391,7 +392,7 @@ function FileList({
                 ) : (
                   list.length === 0 && (
                     <div className="empty">
-                      <span style={{ color: "#797979" }}>No item yet</span>
+                      <span style={{ color: "#898989" }}>No item yet</span>
                     </div>
                   )
                 )}
@@ -435,10 +436,10 @@ function FileList({
                           <a
                             href={`https://ipfs.distri.ai/ipfs/${folderCid}/${file.name}`}
                             download={file.name}>
+                            <Download />
                             <span className="size">
                               {prettyBytes(file.size)}
                             </span>
-                            <ArrowDownward />
                           </a>
                         )}
                       </TableCell>
@@ -450,7 +451,10 @@ function FileList({
                             file.name === "deployment"
                           ) && (
                             <Button
-                              className="default-btn"
+                              className="white-btn"
+                              style={{
+                                height: 32,
+                              }}
                               onClick={() =>
                                 handleDelete(currentPrefix + "/" + file.name)
                               }>
@@ -576,7 +580,7 @@ export default styled(FileList)`
   }
   .size {
     display: inline-block;
-    margin-right: 8px;
+    margin-left: 8px;
   }
   .empty {
     width: 100%;
@@ -585,15 +589,36 @@ export default styled(FileList)`
     justify-content: center;
     align-items: center;
   }
-  .breadcrumb {
-    color: white;
-  }
-  .breadcrumb.avail {
-    color: #797979;
-    cursor: pointer;
-    &:hover {
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    .breadcrumb {
       color: white;
-      text-decoration: underline;
+    }
+    .breadcrumb.avail {
+      color: #898989;
+      cursor: pointer;
+      &:hover {
+        color: white;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .controls {
+    background: rgba(149, 157, 165, 0.16);
+    padding: 16px 40px;
+    border-radius: 0 8px 8px 8px;
+  }
+  .file-table {
+    border-collapse: separate;
+    border-spacing: 0 27px;
+    tr {
+      td {
+        font-size: 18px;
+        line-height: 26px;
+        padding-bottom: 27px;
+      }
     }
   }
 `;

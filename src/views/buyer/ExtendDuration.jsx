@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useState, useEffect, useMemo } from "react";
 import { useSnackbar } from "notistack";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Grid, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import DurationProgress from "@/components/DurationProgress.jsx";
 import DurationToggle from "@/components/DurationToggle.jsx";
@@ -65,226 +65,173 @@ function ExtendDuration({ className }) {
   }, [wallet, id]);
   return (
     <div className={className}>
-      <div className="con">
-        <h1 className="title">Extend Duration</h1>
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <div className="myform">
-            <div className="info-box">
-              <div className="info-box-title">Configuration</div>
-              <div className="info-box-body">
-                <div className="line">
-                  <div className="f">
-                    <span style={{ fontSize: 18, fontWeight: "bold" }}>
-                      {deviceDetail.GPU}
-                    </span>
-                    <span>{deviceDetail.Tflops || "--"} TFLOPS</span>
-                  </div>
-                </div>
-                <div
-                  className="line"
-                  style={{ justifyContent: "space-between" }}>
-                  <div style={{ width: "30%" }}>
-                    <span>RAM</span>
+      <h1>Extend Duration</h1>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <div>
+          <div>
+            <div className="title">
+              <span>Configuration</span>
+            </div>
+            <div className="info">
+              <span className="name">{deviceDetail.GPU}</span>
+              <Stack direction="row" spacing={1} style={{ marginBottom: 24 }}>
+                <span>{deviceDetail.Tflops || "--"}</span>
+                <label>TFLOPS</label>
+              </Stack>
+              <Grid container>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>RAM</label>
                     <span>{deviceDetail.RAM}</span>
-                  </div>
-                  <div style={{ width: "30%" }}>
-                    <span>Avail Disk Storage</span>
+                  </Stack>
+                </Grid>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>Avail Disk Storage</label>
                     <span>{deviceDetail.AvailDiskStorage} GB</span>
-                  </div>
-                  <div style={{ width: "30%" }}>
-                    <span>CPU</span>
+                  </Stack>
+                </Grid>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>CPU</label>
                     <span>{deviceDetail.CPU}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="info-box">
-              <div className="info-box-title">Order Info</div>
-              <div className="info-box-body">
-                <div className="time">
-                  <div>
-                    <label>Start Time</label>
-                    <span>
-                      {new Date(orderDetail.StartTime).toLocaleString()}
-                    </span>
-                  </div>
-                  <div>
-                    <label>Remaining Time</label>
-                    <span>
-                      <Countdown
-                        deadlineTime={new Date(orderDetail.EndTime).getTime()}
-                      />
-                    </span>
-                  </div>
-                </div>
-                {orderDetail.StatusName !== "Failed" && (
-                  <DurationProgress
-                    startTime={orderDetail.StartTime}
-                    duration={orderDetail.Duration}
-                  />
-                )}
-                <DurationToggle
-                  duration={duration}
-                  setDuration={setDuration}
-                  max={deviceDetail.MaxDuration - orderDetail.Duration}
-                  title="Extend Duration"
-                />
-                <div
-                  style={{ margin: "16px 0", color: "#aaa", display: "flex" }}>
-                  <label style={{ width: "120px", display: "block" }}>
-                    Max Duration
-                  </label>
-                  <span>{deviceDetail.MaxDuration}h</span>
-                </div>
-                <div
-                  style={{ margin: "16px 0", color: "#aaa", display: "flex" }}>
-                  <label style={{ width: "120px", display: "block" }}>
-                    Price(h)
-                  </label>
-                  <span>{orderDetail.Price} DIST</span>
-                </div>
-              </div>
-            </div>
-            <div className="right-txt">Balance: {balance} DIST</div>
-            <div className="color-box">
-              <div className="row-txt">Total</div>
-              <div className="drow">
-                <span className="num">{amount}</span>
-                <label>DIST</label>
-              </div>
-            </div>
-            <div className="form-row btn-row">
-              <LoadingButton
-                loading={extending}
-                style={{ width: 154 }}
-                className="cbtn"
-                onClick={onSubmit}>
-                {extending ? "" : "Confirm"}
-              </LoadingButton>
+                  </Stack>
+                </Grid>
+              </Grid>
             </div>
           </div>
-        )}
-      </div>
+          <div>
+            <div className="title">
+              <span>Order Info</span>
+            </div>
+            <div className="info">
+              <Stack direction="row" justifyContent="space-between">
+                <Stack direction="row" spacing={1}>
+                  <label>Start Time</label>
+                  <span>
+                    {new Date(orderDetail.StartTime).toLocaleString()}
+                  </span>
+                </Stack>
+                <Stack direction="row" spacing={1}>
+                  <label>Remaining Time</label>
+                  <span>
+                    <Countdown
+                      deadlineTime={new Date(orderDetail.EndTime).getTime()}
+                    />
+                  </span>
+                </Stack>
+              </Stack>
+              <DurationProgress
+                startTime={orderDetail.StartTime}
+                duration={orderDetail.Duration}
+              />
+            </div>
+          </div>
+          <div>
+            <div className="title">
+              <span>Extend Duration</span>
+            </div>
+            <div className="info">
+              <DurationToggle
+                duration={duration}
+                setDuration={setDuration}
+                max={deviceDetail.MaxDuration - orderDetail.Duration}
+                title="Extend Duration"
+              />
+              <Stack direction="row" spacing={1}>
+                <label style={{ display: "block", width: 160 }}>
+                  Max Duration
+                </label>
+                <span>{deviceDetail.MaxDuration}h</span>
+              </Stack>
+              <Stack direction="row" spacing={1}>
+                <label style={{ display: "block", width: 160 }}>Price(h)</label>
+                <span>{orderDetail.Price} DIST</span>
+              </Stack>
+              <Stack direction="row" justifyContent="end">
+                <span className="balance">Balance: {balance} DIST</span>
+              </Stack>
+            </div>
+          </div>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="total">
+            <span>Total</span>
+            <Stack>
+              <span className="amount">{amount}</span>
+              <label>DIST</label>
+            </Stack>
+          </Stack>
+          <Stack direction="row" justifyContent="center">
+            <LoadingButton
+              loading={extending}
+              style={{ width: 160 }}
+              className="cbtn"
+              onClick={onSubmit}>
+              {!extending && "Confirm"}
+            </LoadingButton>
+          </Stack>
+        </div>
+      )}
     </div>
   );
 }
 
 export default styled(ExtendDuration)`
-  width: 100%;
-  .con {
-    width: 1160px;
-    padding: 0 20px;
-    margin: 10px auto;
-    display: block;
-    overflow: hidden;
-    .title {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 28px;
-      color: #ffffff;
-      margin-top: 25px;
-      line-height: 70px;
-    }
-    .info-box {
-      display: block;
-      .info-box-title {
-        font-weight: bold;
-        font-size: 16px;
-        color: #ffffff;
-        border-bottom: 1px solid #797979;
-        line-height: 48px;
-      }
-      .info-box-body {
-        padding: 5px 0;
-        display: block;
-        .line {
-          padding: 10px 0;
-          display: flex;
-          flex-direction: row;
-          .f {
-            width: 100%;
-          }
-          span {
-            line-height: 24px;
-            display: block;
-            clear: both;
-            font-size: 14px;
-          }
-          .l {
-            width: 50%;
-          }
-          .r {
-            width: 50%;
-          }
-        }
-      }
-    }
-    .b-box {
-      display: block;
-      padding: 30px;
-      border: 1px solid rgba(121, 121, 121, 1);
-      border-radius: 5px;
-      margin: 20px 0;
-      .row {
-        display: block;
-        line-height: 30px;
-        font-size: 14px;
-        text-align: center;
-        b {
-          font-size: 24px;
-        }
-      }
-    }
-    .right-txt {
-      display: block;
-      overflow: hidden;
-      text-align: right;
-      line-height: 30px;
-      font-size: 14px;
-      color: #e0c4bd;
-    }
-    .color-box {
-      border-radius: 5px;
-      background-color: #151515;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      padding: 19px 10px;
-      .row-txt {
-        font-size: 16px;
-        font-weight: bold;
-        line-height: 51px;
-      }
-      .drow {
-        display: flex;
-        flex-direction: column;
-        span {
-          width: 100%;
-          font-size: 28px;
-          font-weight: bold;
-          text-align: right;
-        }
-        label {
-          width: 100%;
-          font-size: 13px;
-          text-align: right;
-        }
-      }
-    }
-    .btn-row {
-      display: block;
-      margin: 30px 0;
-    }
+  h1 {
+    font-size: 32px;
+    line-height: 44px;
   }
-  .time {
+  .title {
+    border-bottom: 1px solid #797979;
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
     span {
-      font-weight: bolder;
-      padding: 0 8px;
+      font-size: 28px;
+      line-height: 38px;
+      margin: 28px 0;
     }
+  }
+  .info {
+    margin-top: 24px;
+    padding: 0 40px;
+    label {
+      font-size: 20px;
+      color: #898989;
+      line-height: 28px;
+    }
+    span {
+      font-size: 20px;
+      line-height: 28px;
+    }
+    .name {
+      font-size: 24px;
+      line-height: 34px;
+      padding-bottom: 8px;
+    }
+  }
+  .balance {
+    font-size: 18px;
+    color: #898989;
+    line-height: 26px;
+  }
+  .total {
+    width: 1440px;
+    height: 80px;
+    margin: 16px 40px;
+    margin-bottom: 64px;
+    padding: 40px;
+    background: rgba(149, 157, 165, 0.16);
+    border-radius: 12px;
+  }
+  .amount {
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 44px;
+    text-align: right;
   }
 `;
