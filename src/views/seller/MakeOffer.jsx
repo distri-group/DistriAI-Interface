@@ -154,7 +154,7 @@ function MakeOffer({ className }) {
                   </InputAdornment>
                 ),
               }}
-              value={formValue.price}
+              value={parseFloat(formValue.price)}
               onChange={handleChange}
               error={!!validateError.price}
               helperText={validateError.price}
@@ -178,7 +178,7 @@ function MakeOffer({ className }) {
                   </InputAdornment>
                 ),
               }}
-              value={formValue.duration}
+              value={parseFloat(formValue.duration)}
               onChange={handleChange}
               error={!!validateError.duration}
               helperText={validateError.duration}
@@ -207,7 +207,7 @@ function MakeOffer({ className }) {
                   </InputAdornment>
                 ),
               }}
-              value={formValue.disk}
+              value={parseFloat(formValue.disk)}
               onChange={handleChange}
               error={!!validateError.disk}
               helperText={validateError.disk}

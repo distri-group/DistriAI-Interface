@@ -119,7 +119,7 @@ function Reward({ className }) {
       key: "Pool",
       render: (text) => (
         <Stack direction="row" spacing={2} alignItems="center">
-          <span className="token" />
+          <span className="dist" />
           <span>{(text / LAMPORTS_PER_SOL).toFixed(2)}</span>
         </Stack>
       ),
@@ -130,7 +130,7 @@ function Reward({ className }) {
       key: "PeriodicRewards",
       render: (text) => (
         <Stack direction="row" spacing={2} alignItems="center">
-          <span className="token" />
+          <span className="dist" />
           <span>{(text / LAMPORTS_PER_SOL).toFixed(2)}</span>
         </Stack>
       ),
@@ -144,7 +144,14 @@ function Reward({ className }) {
           className="cbtn"
           style={{ width: 100, height: 32 }}
           onClick={() => navigate(`/reward/${record.Period}`)}>
-          Detail
+          <span
+            style={{
+              fontWeight: 500,
+              fontSize: 16,
+              lineHeight: "22px",
+            }}>
+            Detail
+          </span>
         </Button>
       ),
     },
@@ -173,7 +180,14 @@ function Reward({ className }) {
               onClick={claimButchRewards}
               className="cbtn"
               style={{ width: 140 }}>
-              {claiming ? "" : claimed ? "All Claimed" : "Claim Rewards"}
+              <span
+                style={{
+                  fontWeight: 500,
+                  fontSize: 16,
+                  lineHeight: "22px",
+                }}>
+                {claiming ? "" : claimed ? "All Claimed" : "Claim Rewards"}
+              </span>
             </LoadingButton>
           </Stack>
           <Grid container className="rewards">

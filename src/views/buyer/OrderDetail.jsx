@@ -65,8 +65,14 @@ function OrderDetail({ className }) {
           <>
             <h1>{record.Metadata.formData.taskName}</h1>
             <h2 className={record.StatusName}>
-              · {record.StatusName}{" "}
-              {record.StatusName === "Failed" && <span>Failed reason</span>}
+              · {record.StatusName}
+              {record.StatusName === "Failed" && (
+                <span>
+                  :{" "}
+                  {record.Metadata.OrderInfo?.Message &&
+                    record.Metadata.OrderInfo?.Message}
+                </span>
+              )}
             </h2>
             {record.Metadata.MachineInfo ? (
               <>

@@ -94,21 +94,34 @@ function MyDevice({ className }) {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 1000,
-            bgcolor: "#00000b",
+            width: 1600,
+            background: "#20192d",
             boxShadow: 24,
-            p: 4,
+            p: 10,
             borderRadius: "8px",
             color: "#fff",
           }}>
-          <h1 style={{ fontSize: "72px", textAlign: "center" }}>
+          <h1
+            style={{
+              fontWeight: 600,
+              fontSize: 32,
+              lineHeight: "44px",
+              textAlign: "center",
+              margin: 0,
+              marginBottom: 24,
+            }}>
             Unlist The Offer
           </h1>
-          <div style={{ fontSize: "16px", textAlign: "center" }}>
-            <p style={{ margin: 0, lineHeight: "19px" }}>
-              This will cancel your listing.
-            </p>
-            <p style={{ margin: 0, lineHeight: "19px" }}>
+          <div
+            style={{
+              fontWeight: 400,
+              fontSize: 18,
+              color: "#959DA5",
+              lineHeight: "28px",
+              textAlign: "center",
+            }}>
+            <p style={{ margin: 0 }}>This will cancel your listing.</p>
+            <p style={{ margin: "12px 0" }}>
               You will also be asked to confirm this cancelation from your
               wallet.
             </p>
@@ -116,14 +129,21 @@ function MyDevice({ className }) {
           <LoadingButton
             loading={canceling}
             style={{
-              width: 100,
+              width: 160,
               margin: "0 auto",
               display: "block",
-              marginTop: "150px",
+              marginTop: "64px",
             }}
             onClick={handleCancel}
             className="cbtn">
-            {!canceling && "Confirm"}
+            <span
+              style={{
+                fontWeight: 500,
+                fontSize: 18,
+                lineHeight: "26px",
+              }}>
+              {!canceling && "Confirm"}
+            </span>
           </LoadingButton>
         </Box>
       </Modal>

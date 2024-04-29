@@ -71,7 +71,7 @@ function Earning({ className }) {
       key: "Price",
       render: (text) => (
         <Stack direction="row" spacing={1} alignItems="center">
-          <span className="token" />
+          <span className="dist" />
           <span>{text}</span>
         </Stack>
       ),
@@ -116,7 +116,13 @@ function Earning({ className }) {
             height: 32,
           }}
           onClick={() => navigate("/earning/" + record.Uuid)}>
-          Details
+          <span
+            style={{
+              fontSize: 16,
+              lineHeight: "22px",
+            }}>
+            Details
+          </span>
         </Button>
       ),
     },

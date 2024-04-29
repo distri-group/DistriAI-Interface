@@ -68,7 +68,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
       key: "Total",
       render: (text, record, index) => (
         <div className="price">
-          <span className="token" />
+          <span className="dist" />
           <label>{text}</label>
         </div>
       ),

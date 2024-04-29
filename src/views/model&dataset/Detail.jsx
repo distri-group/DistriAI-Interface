@@ -176,25 +176,25 @@ function Detail({ className, type }) {
                     <Button
                       className="cbtn"
                       onClick={() => setOrderDialog(true)}
-                      style={{ width: 100 }}>
-                      {capitalize(intent)}
+                      style={{ width: 160 }}>
+                      <span className="btn-txt">{capitalize(intent)}</span>
                     </Button>
                   ) : (
                     <>
                       <Button
                         className="cbtn"
-                        style={{ width: 100 }}
+                        style={{ width: 160 }}
                         component="label"
                         onClick={() => setDialog("train")}>
-                        Train
+                        <span className="btn-txt">Train</span>
                       </Button>
                       <Button
                         disabled={!deployable}
                         className="white-btn"
-                        style={{ width: 100 }}
+                        style={{ width: 160 }}
                         component="label"
                         onClick={() => setDialog("deploy")}>
-                        Deploy
+                        <span className="btn-txt">Deploy</span>
                       </Button>
                     </>
                   ))}
@@ -241,27 +241,17 @@ function Detail({ className, type }) {
                   value="files"
                 />
               </TabList>
-              <TabPanel
-                value="readme"
-                style={{
-                  backgroundColor: "#0d1117",
-                }}>
+              <TabPanel value="readme">
                 {markdown ? (
-                  <>
+                  <div
+                    style={{
+                      background: "rgba(149,157,165,0.16)",
+                    }}>
+                    <div style={{ width: "100%", height: 32 }} />
                     {metadata && (
-                      <div>
-                        <Chip
-                          label="metadata"
-                          style={{
-                            background: "gray",
-                            color: "white",
-                            marginLeft: 16,
-                          }}
-                        />
-                        <SyntaxHighlighter language="yaml" style={tomorrow}>
-                          {metadata}
-                        </SyntaxHighlighter>
-                      </div>
+                      <SyntaxHighlighter language="yaml" style={tomorrow}>
+                        {metadata}
+                      </SyntaxHighlighter>
                     )}
                     <Markdown
                       className="markdown-body"
@@ -286,7 +276,7 @@ function Detail({ className, type }) {
                         },
                       }}
                     />
-                  </>
+                  </div>
                 ) : (
                   <div className="empty">
                     <span>There is no detailed {type} introduction yet</span>
@@ -460,5 +450,10 @@ export default styled(Detail)`
   }
   .Mui-disabled {
     background-color: #898989;
+  }
+  .btn-txt {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 26px;
   }
 `;

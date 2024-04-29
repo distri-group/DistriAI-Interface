@@ -5,9 +5,10 @@ import {
   Button,
   TextField,
   InputAdornment,
-  OutlinedInput,
+  Stack,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { Add, Remove } from "@mui/icons-material";
 
 function DurationToggle({ className, duration, setDuration, max, title }) {
   const [type, setType] = useState("hour");
@@ -75,8 +76,8 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
   }, [type, max]);
   return (
     <div className={className}>
-      <div className="row-txt">{title}</div>
-      <div className="toggle-box">
+      <h3>{title}</h3>
+      <Stack direction="row" justifyContent="space-between">
         <ToggleButtonGroup value={type} exclusive onChange={onSelect}>
           <ToggleButton value="hour" className="duration-btn">
             Hourly
@@ -92,24 +93,24 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
             MAX
           </ToggleButton>
         </ToggleButtonGroup>
-        <div className="count">
+        <Stack direction="row" spacing={2} className="count">
           <Button
             disabled={type === "max" || count - 1 === 0}
             className="count-btn"
             onClick={() => {
               setCount(count - 1);
             }}>
-            -
+            <Remove />
           </Button>
           <TextField
-            size="small"
             style={{
-              width: "100px",
+              width: 160,
+              height: 56,
             }}
-            sx={{}}
             disabled={type === "max"}
             value={count}
             type="number"
+            inputProps={{ min: 0, style: { textAlign: "center" } }}
             onChange={onCountInput}
           />
           <Button
@@ -118,11 +119,11 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
             onClick={() => {
               setCount(count + 1);
             }}>
-            +
+            <Add />
           </Button>
-        </div>
-      </div>
-      <OutlinedInput
+        </Stack>
+      </Stack>
+      <TextField
         data-name="duration"
         value={duration}
         placeholder="Hour"
@@ -139,31 +140,26 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
 }
 
 export default styled(DurationToggle)`
-  .row-txt {
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 51px;
+  h3 {
+    font-size: 24px;
+    line-height: 34px;
+    margin: 16px 0;
   }
   .count {
-    display: flex;
-    justify-content: space-between;
+    height: 56px;
     .count-btn {
       background-color: white;
       border: 1px solid black;
       color: black;
-      font-size: 20px;
-      font-weight: bolder;
     }
   }
   .duration-btn {
-    border-radius: 4px;
-    border: 1px solid white !important;
-    width: 86px;
+    width: 160px;
+    height: 48px;
+    border: 1px solid white;
+    border-radius: 6px;
   }
-  .toggle-box {
-    display: flex;
-    justify-content: space-between;
-    height: 40px;
-    padding-bottom: 16px;
+  .MuiToggleButtonGroup-middleButton.Mui-disabled {
+    border-left: 1px solid white;
   }
 `;

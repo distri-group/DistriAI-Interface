@@ -23,7 +23,7 @@ a{
   line-height: 26px;
 }
 .cbtn{
-  background-image: linear-gradient(to right, #20ae98, #0aab50);
+  background: linear-gradient( 270deg, #09E98D 0%, #0AAB50 100%);
   color:white!important;
 }
 .white-btn{
@@ -50,22 +50,6 @@ a{
   padding: 60px 30px;
   background-color: #00000b;
 }
-.myform {
-  width: 64%;
-  .form-row {
-    margin: 10px 0;
-    position: relative;
-    left:0;
-    .row-txt {
-      font-weight: 700;
-      font-style: normal;
-      font-size: 16px;
-      color: #FFFFFF;
-      line-height: 20px;
-      padding: 10px 0;
-    }
-  }
-}
 
 .false span{
   color: #5f5f5f;
@@ -86,22 +70,16 @@ a{
 .Refunded {
   color: #ff6073;
 }
-.default-btn{
-  background-color: rgb(148, 214, 226)!important;
-  border-radius: 3px!important;
-  color: black!important;
-  padding: 4px 12px!important;
-  height: 32px;
-}
 .markdown-body{
   padding: 24px;
 }
-.token {
+.dist {
   margin: 0;
   display: block;
   border-radius: 100%;
+  background-color: white;
   background-image: url(/public/img/token.png);
-  background-size: 100%;
+  background-size: 70%;
   background-position: center;
   background-repeat: no-repeat;
   width: 32px;

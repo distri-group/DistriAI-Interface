@@ -1,11 +1,15 @@
-import { Select, Stack, MenuItem } from "@mui/material";
+import { Select, Stack, MenuItem, TextField } from "@mui/material";
+import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 
-export default function Filter({ data, defaultValue, onFilter }) {
+export default function Filter({ data, defaultValue, onFilter, search }) {
   const [filterValue, setFilterValue] = useState(defaultValue);
   const resetFilter = () => {
     setFilterValue(defaultValue);
   };
+  const handleInput = debounce((key, value) => {
+    setFilterValue((prev) => ({ ...prev, [key]: value }));
+  }, 500);
   useEffect(() => {
     onFilter(filterValue);
   }, [filterValue]);
@@ -16,20 +20,31 @@ export default function Filter({ data, defaultValue, onFilter }) {
       spacing={2}
       style={{
         height: 48,
+        margin: "24px 0",
       }}>
       <span
         style={{
           fontWeight: 500,
           fontSize: 20,
           color: "white",
-          lineHeight: 28,
+          lineHeight: "28px",
         }}>
         Filter
       </span>
+      {search && (
+        <TextField
+          name={search.key}
+          placeholder={`Search By ${search.key}`}
+          onChange={(e) => handleInput(search.key, e.target.value)}
+        />
+      )}
       {Object.entries(data).map(([key, value]) => (
         <Select
           key={key}
           value={filterValue[key]}
+          style={{
+            width: 240,
+          }}
           onChange={(e) =>
             setFilterValue((prev) => ({ ...prev, [key]: e.target.value }))
           }>
@@ -45,7 +60,7 @@ export default function Filter({ data, defaultValue, onFilter }) {
           fontWeight: 400,
           fontSize: 18,
           color: "#09E98D",
-          lineHeight: 26,
+          lineHeight: "26px",
           textDecoration: "underline",
           cursor: "pointer",
         }}

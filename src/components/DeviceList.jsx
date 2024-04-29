@@ -85,7 +85,10 @@ function DeviceList({
         return (
           <div className="configuration">
             <div className="gpu">
-              {record.GpuCount}x <b>{record.Gpu}</b> {record.GPUMemory || ""}
+              {record.GpuCount}x{" "}
+              <b>
+                {record.Gpu} {record.GPUMemory || ""}
+              </b>
             </div>
             <div className="graphicsCoprocessor">#{record.CPU}</div>
             <Grid container spacing={2} style={{ marginTop: 0 }}>
@@ -124,20 +127,35 @@ function DeviceList({
                 </span>
               </Grid>
               <Grid item md={4}>
-                <img
-                  style={{ transform: "rotate(180deg)", marginLeft: 4 }}
-                  src="/img/market/download.svg"
-                  alt=""
-                />
-                <span className="duration">{record.Speed.Upload}</span>
+                <Stack direction="row" spacing={0.5} alignItems="end">
+                  <img
+                    style={{
+                      transform: "rotate(180deg)",
+                      marginLeft: 4,
+                      width: 24,
+                      height: 24,
+                      padding: 2,
+                    }}
+                    src="/img/market/download.svg"
+                    alt=""
+                  />
+                  <span className="duration">{record.Speed.Upload}</span>
+                </Stack>
               </Grid>
               <Grid item md={4}>
-                <img
-                  style={{ marginRight: 4 }}
-                  src="/img/market/download.svg"
-                  alt=""
-                />
-                <span className="duration">{record.Speed.Download}</span>
+                <Stack direction="row" spacing={0.5} alignItems="end">
+                  <img
+                    style={{
+                      marginRight: 4,
+                      width: 24,
+                      height: 24,
+                      padding: 2,
+                    }}
+                    src="/img/market/download.svg"
+                    alt=""
+                  />
+                  <span className="duration">{record.Speed.Download}</span>
+                </Stack>
               </Grid>
             </Grid>
           </div>
@@ -182,7 +200,7 @@ function DeviceList({
         }
         return (
           <Stack direction="row" spacing={2} alignItems="center">
-            <span className="token" />
+            <span className="dist" />
             <span className="price">{record.Price}</span>
           </Stack>
         );
@@ -313,7 +331,7 @@ export default styled(DeviceList)`
     color: black;
   }
   .mini-btn0 {
-    background-image: linear-gradient(to right, #20ae98, #0aab50);
+    background: linear-gradient(270deg, #09e98d 0%, #0aab50 100%);
     color: white;
   }
   .mini-btn0:hover {

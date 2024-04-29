@@ -226,8 +226,10 @@ function Buy({ className }) {
             <h2>Configuration</h2>
             <div className="box">
               <span className="gpu">
-                {deviceDetail.GpuCount}x <b>{deviceDetail.Gpu}</b>{" "}
-                {deviceDetail.GPUMemory || ""}
+                {deviceDetail.GpuCount}x{" "}
+                <b>
+                  {deviceDetail.Gpu} {deviceDetail.GPUMemory || ""}
+                </b>
               </span>
               <Stack
                 direction="row"
@@ -405,7 +407,14 @@ function Buy({ className }) {
                         loading={submitting}
                         className="cbtn"
                         style={{ width: 160 }}>
-                        {!submitting && "Confirm"}
+                        <span
+                          style={{
+                            fontWeight: 500,
+                            fontSize: 18,
+                            lineHeight: "26px",
+                          }}>
+                          {!submitting && "Purchase"}
+                        </span>
                       </LoadingButton>
                     </Stack>
                   </Grid>
@@ -478,9 +487,13 @@ export default styled(Buy)`
       border-radius: 12px;
       margin-top: 16px;
       margin-bottom: 64px;
+      span {
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 34px;
+      }
       .amount {
         span {
-          font-weight: 600;
           font-size: 32px;
           line-height: 44px;
           text-align: right;

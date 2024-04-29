@@ -59,6 +59,25 @@ function App() {
         defaultProps: {
           fullWidth: true,
         },
+        styleOverrides: {
+          root: {
+            ".MuiOutlinedInput-input": {
+              padding: "18px 16px",
+            },
+            ".MuiOutlinedInput-notchedOutline": {
+              padding: "18px 16px",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#898989",
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#898989",
+            },
+            "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#898989",
+            },
+          },
+        },
       },
       MuiInputBase: {
         styleOverrides: {
@@ -87,10 +106,18 @@ function App() {
       },
       MuiSelect: {
         styleOverrides: {
+          root: {
+            border: "1px solid #898989",
+            "&$focused": {
+              borderColor: "red",
+            },
+            "&$focused $notchedOutline": {
+              borderColor: "inherit !important",
+            },
+          },
           select: {
-            padding: "4px",
+            padding: 12,
             color: "white",
-            paddingLeft: "12px",
           },
           icon: {
             color: "white",
@@ -109,6 +136,7 @@ function App() {
                 color: "black",
               },
             },
+            backgroundColor: "transparent",
             color: "white",
             borderColor: "white",
           },

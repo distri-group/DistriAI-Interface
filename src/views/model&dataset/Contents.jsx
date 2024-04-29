@@ -4,20 +4,19 @@ import {
   CircularProgress,
   MenuItem,
   Select,
-  Stack,
-  TextField,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import types from "@/services/types.json";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import ItemCard from "./ItemCard.jsx";
-import { getModelList } from "@/services/model.js";
+import { getModelList, filterData } from "@/services/model.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 import Pager from "@/components/pager.jsx";
 import { capitalize } from "lodash";
 import { getDatasetList } from "@/services/dataset.js";
+import Filter from "../../components/Filter.jsx";
 
 function Contents({ className, type }) {
   document.title = capitalize(type + "s");
@@ -42,14 +41,6 @@ function Contents({ className, type }) {
     border: "1px solid #09E98D",
     color: "#fff",
   };
-  function onFilter(e) {
-    const { name, value } = e.target;
-    setFilterValue({ ...filterValue, [name]: value });
-  }
-  function clearFilter() {
-    setFilterValue({ Name: "", OrderBy: "Updated Time" });
-    setType(0);
-  }
   function onTypeFilter(e) {
     setType(e.target.value);
     setFilterValue({ ...filterValue, Type1: e.target.value });
@@ -108,7 +99,7 @@ function Contents({ className, type }) {
             ))}
           </Select>
           {filterType ? (
-            <div>
+            <div className="types">
               <h2>{types[filterType - 1].title}</h2>
               <div>
                 {types[filterType - 1].items.map((item, index) => (
@@ -129,7 +120,7 @@ function Contents({ className, type }) {
             </div>
           ) : (
             types.map((type, index) => (
-              <div key={type.title}>
+              <div className="types" key={type.title}>
                 <h2>{type.title}</h2>
                 <div>
                   {type.items.map((item, itemIndex) => (
@@ -155,34 +146,18 @@ function Contents({ className, type }) {
         </div>
         <div className="right">
           <div className="container">
-            <Stack direction="row" alignItems="end" spacing={2}>
-              <span>Filter</span>
-              <TextField
-                onChange={onFilter}
-                value={filterValue.Name}
-                name="Name"
-                size="small"
-                placeholder="Search By Name"
-                style={{ width: 200 }}
-              />
-              <Select
-                defaultValue="Updated Time"
-                value={filterValue.sort}
-                onChange={onFilter}
-                name="sort"
-                style={{
-                  height: 40,
-                }}>
-                {sorts.map((sort) => (
-                  <MenuItem key={sort} value={sort}>
-                    {sort}
-                  </MenuItem>
-                ))}
-              </Select>
-              <span className="reset" onClick={clearFilter}>
-                reset
-              </span>
-            </Stack>
+            <Filter
+              data={filterData}
+              defaultValue={{
+                Name: "",
+                OrderBy: "Updated Time",
+              }}
+              onFilter={(value) => {
+                setFilterValue(value);
+                setCurrent(1);
+              }}
+              search={{ key: "Name" }}
+            />
             <Button
               onClick={() => {
                 if (wallet?.publicKey) navigate(`/${type}/add`);
@@ -264,5 +239,12 @@ export default styled(Contents)`
       color: #aaa;
     }
   }
+  .types {
+    h2 {
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
+      margin: 24px 0 16px 0;
+    }
+  }
 `;
-const sorts = ["Updated Time", "Likes", "Downloads"];

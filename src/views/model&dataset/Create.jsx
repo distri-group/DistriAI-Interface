@@ -94,6 +94,13 @@ function Create({ className, type }) {
   async function onSubmit(e) {
     e.preventDefault();
     let validation = true;
+    if (!formValue.Name) {
+      setValidateError((prevState) => ({
+        ...prevState,
+        Name: `Please input ${type} name`,
+      }));
+      validation = false;
+    }
     if (type === "model") {
       if (!formValue.Framework) {
         setValidateError((prevState) => ({
@@ -130,6 +137,10 @@ function Create({ className, type }) {
         ...prevState,
         Type2: "Please select the sub type",
       }));
+      validation = false;
+    }
+    if (selectedFile && selectedFile.name !== "README.md") validation = false;
+    if (!Object.values(validateError).every((value) => value === null)) {
       validation = false;
     }
     if (!validation) return;
@@ -424,7 +435,8 @@ export default styled(Create)`
   .upload-box {
     width: 100%;
     height: 160px;
-    padding: 16px;
+    border-radius: 4px;
+    cursor: pointer;
     border: 1px solid #898989;
     span {
       color: #898989;

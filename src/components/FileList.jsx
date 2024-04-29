@@ -1,4 +1,4 @@
-import { Download, Folder, InsertDriveFile } from "@mui/icons-material";
+import { Folder, InsertDriveFile } from "@mui/icons-material";
 import {
   Button,
   Box,
@@ -377,7 +377,7 @@ function FileList({
                   <TableRow>
                     {onSelect && <TableCell width="5%" />}
                     <TableCell>
-                      <Folder />
+                      <Folder style={{ color: "#959DA5" }} />
                       <span
                         onClick={() => {
                           setPrefix(getParentPrefix(currentPrefix));
@@ -414,29 +414,39 @@ function FileList({
                         </TableCell>
                       )}
                       <TableCell>
-                        {file.type === "file" ? (
-                          <InsertDriveFile />
-                        ) : (
-                          file.type === "directory" && <Folder />
-                        )}
-                        <span
-                          style={{
-                            marginLeft: 8,
-                            cursor: file.type === "directory" && "pointer",
-                          }}
-                          onClick={() =>
-                            file.type === "directory" &&
-                            setPrefix(`${currentPrefix}/${file.name}`)
-                          }>
-                          {file.name}
-                        </span>
+                        <Stack direction="row" spacing={1} alignItems="end">
+                          {file.type === "file" ? (
+                            <InsertDriveFile style={{ color: "#959DA5" }} />
+                          ) : (
+                            file.type === "directory" && (
+                              <Folder style={{ color: "#959DA5" }} />
+                            )
+                          )}
+                          <span
+                            style={{
+                              cursor: file.type === "directory" && "pointer",
+                            }}
+                            onClick={() =>
+                              file.type === "directory" &&
+                              setPrefix(`${currentPrefix}/${file.name}`)
+                            }>
+                            {file.name}
+                          </span>
+                        </Stack>
                       </TableCell>
                       <TableCell>
                         {file.size !== 0 && (
                           <a
                             href={`https://ipfs.distri.ai/ipfs/${folderCid}/${file.name}`}
                             download={file.name}>
-                            <Download />
+                            <img
+                              src="/img/download.png"
+                              alt="download"
+                              style={{
+                                width: 17,
+                                height: 17,
+                              }}
+                            />
                             <span className="size">
                               {prettyBytes(file.size)}
                             </span>
@@ -618,6 +628,12 @@ export default styled(FileList)`
         font-size: 18px;
         line-height: 26px;
         padding-bottom: 27px;
+        border-bottom: 1px solid #898989;
+        span {
+          font-weight: 400;
+          font-size: 18px;
+          line-height: 26px;
+        }
       }
     }
   }
