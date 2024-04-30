@@ -3,6 +3,7 @@ import {
   AccountBalance,
   ArrowDownward,
   Favorite,
+  FavoriteBorder,
 } from "@mui/icons-material";
 import { Chip, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -53,12 +54,16 @@ function ItemCard({ item, className, type }) {
             <span>{new Date(item.CreatedAt).toLocaleString()}</span>
           </Stack>
           <Stack direction="row" alignItems="end" spacing={1}>
-            <Favorite sx={{ width: 20, height: 20 }} />
-            <span>{item.likes}</span>
+            {item.Islike ? (
+              <Favorite sx={{ width: 20, height: 20 }} />
+            ) : (
+              <FavoriteBorder sx={{ width: 20, height: 20 }} />
+            )}
+            <span>{item.Likes}</span>
           </Stack>
           <Stack direction="row" alignItems="end" spacing={1}>
             <ArrowDownward sx={{ width: 20, height: 20 }} />
-            <span>{item.downloads}</span>
+            <span>{item.Downloads}</span>
           </Stack>
         </Stack>
       </div>
