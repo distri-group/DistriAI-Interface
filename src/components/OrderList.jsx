@@ -9,11 +9,13 @@ import { getMachineDetail } from "@/services/machine.js";
 import { signToken } from "@/services/order.js";
 import Countdown from "./Countdown.jsx";
 import { useSnackbar } from "notistack";
+import { useKeepAliveContext } from "keepalive-for-react";
 
 function OrderList({ className, list, loading, reloadFunc }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
+  const { destroy } = useKeepAliveContext();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
   const handleConsole = async (order, deploy) => {
@@ -117,21 +119,37 @@ function OrderList({ className, list, loading, reloadFunc }) {
             className={
               record.StatusName === "Available" ? "cbtn" : "disabled-btn"
             }
-            style={{ height: 32 }}>
-            {record.Metadata.OrderInfo?.Intent &&
-            record.Metadata.OrderInfo.Intent === "deploy"
-              ? "Deployment"
-              : "Console"}
+            style={{ width: 64, height: 32 }}>
+            Console
           </Button>
-          <Button
-            onClick={() => navigate("/order/" + text)}
-            disabled={record.StatusName === "Preparing"}
-            className={
-              record.StatusName === "Preparing" ? "disabled-btn" : "white-btn"
-            }
-            style={{ height: 32 }}>
-            Detail
-          </Button>
+          {record.StatusName === "Preparing" ? (
+            Date.now() - new Date(record.OrderTime).getTime() > 300000 ? (
+              <Button
+                onClick={() => {
+                  destroy();
+                  navigate(`/order/${text}/end`);
+                }}
+                className="white-btn"
+                style={{ width: 64, height: 32 }}>
+                Refund
+              </Button>
+            ) : (
+              <Button
+                disabled
+                className="disabled-btn"
+                style={{ width: 64, height: 32 }}>
+                Detail
+              </Button>
+            )
+          ) : (
+            <Button
+              onClick={() => navigate("/order/" + text)}
+              disabled={record.StatusName === "Preparing"}
+              className="white-btn"
+              style={{ width: 64, height: 32 }}>
+              Detail
+            </Button>
+          )}
         </Stack>
       ),
     },
@@ -193,7 +211,10 @@ export default styled(OrderList)`
       text-align: center;
     }
   }
-
+  .white-btn,
+  .disabled-btn {
+    height: 32px;
+  }
   .Mui-disabled {
     background: rgba(255, 255, 255, 0.24);
     color: #0f1d35 !important;
