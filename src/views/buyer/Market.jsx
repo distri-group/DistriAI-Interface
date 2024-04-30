@@ -67,6 +67,7 @@ function Market({ className }) {
           setCurrent(1);
           setFilterValue(value);
         }}
+        loading={loading}
       />
       <div className="con-table">
         <DeviceList

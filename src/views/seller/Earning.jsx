@@ -164,6 +164,7 @@ function Earning({ className }) {
           setCurrent(1);
           setFilterValue(value);
         }}
+        loading={loading}
       />
       <Table
         className="earning-list"

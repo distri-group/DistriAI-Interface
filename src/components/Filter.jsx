@@ -2,7 +2,14 @@ import { Select, Stack, MenuItem, TextField } from "@mui/material";
 import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 
-export default function Filter({ data, defaultValue, onFilter, search }) {
+export default function Filter({
+  data,
+  defaultValue,
+  onFilter,
+  search,
+  loading,
+  style,
+}) {
   const [filterValue, setFilterValue] = useState(defaultValue);
   const resetFilter = () => {
     setFilterValue(defaultValue);
@@ -18,10 +25,12 @@ export default function Filter({ data, defaultValue, onFilter, search }) {
       direction="row"
       alignItems="center"
       spacing={2}
-      style={{
-        height: 48,
-        margin: "24px 0",
-      }}>
+      style={
+        style ?? {
+          height: 48,
+          margin: "24px 0",
+        }
+      }>
       <span
         style={{
           fontWeight: 500,
@@ -36,6 +45,7 @@ export default function Filter({ data, defaultValue, onFilter, search }) {
           name={search.key}
           placeholder={`Search By ${search.key}`}
           onChange={(e) => handleInput(search.key, e.target.value)}
+          disabled={loading}
         />
       )}
       {Object.entries(data).map(([key, value]) => (
@@ -47,7 +57,8 @@ export default function Filter({ data, defaultValue, onFilter, search }) {
           }}
           onChange={(e) =>
             setFilterValue((prev) => ({ ...prev, [key]: e.target.value }))
-          }>
+          }
+          disabled={loading}>
           {value.map((item) => (
             <MenuItem key={item.value} value={item.value}>
               {item.label}
