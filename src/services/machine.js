@@ -97,6 +97,7 @@ export function formatMachine(item) {
     item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0);
     item.IP = item.Metadata.Ip?.ip;
     item.Port = item.Metadata.Ip?.port;
+    item.AvailPorts = item.Metadata.Ip?.expandPort || [];
     item.SecurityLevel = parseInt(item.Metadata.SecurityLevel);
     item.Tflops = item.Metadata.InfoTFLOPS?.TFLOPS;
     item.Speed = item.Metadata.SpeedInfo;
