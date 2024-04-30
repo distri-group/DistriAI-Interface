@@ -12,25 +12,33 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import idl from "@/services/idl.json";
 import webconfig from "@/webconfig.js";
 import { formatBalance } from "./index.js";
 import { enqueueSnackbar } from "notistack";
+import { useEffect, useState } from "react";
 
 const { PROGRAM, MINT_PROGRAM } = webconfig;
 
 export default function useSolanaMethod() {
+  const [program, setProgram] = useState(null);
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
   const provider = new AnchorProvider(connection, wallet, {});
   setProvider(provider);
-  const program = new Program(idl, PROGRAM);
-
   const [vault] = web3.PublicKey.findProgramAddressSync(
     [utils.bytes.utf8.encode("vault"), MINT_PROGRAM.toBytes()],
     PROGRAM
   );
   const systemProgram = new PublicKey("11111111111111111111111111111111");
+
+  useEffect(() => {
+    const initializeProgram = async () => {
+      const idl = await Program.fetchIdl(PROGRAM, provider);
+      const program = new Program(idl, PROGRAM, provider);
+      setProgram(program);
+    };
+    initializeProgram();
+  }, []);
 
   // Seller's Device Make Offer
   const makeOffer = async (machineInfo) => {
@@ -75,6 +83,7 @@ export default function useSolanaMethod() {
   const placeOrder = async (machinePublicKey, duration, metadata) => {
     duration = new BN(duration);
     metadata = JSON.stringify(metadata);
+    console.log(wallet.publicKey.toString());
     const orderUuid = utils.bytes.utf8.encode(new Date().valueOf().toString());
     const orderArray = new Uint8Array(16);
     orderArray.set(orderUuid);
