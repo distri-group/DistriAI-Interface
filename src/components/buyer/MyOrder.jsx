@@ -5,6 +5,7 @@ import { getOrderList, filterData, checkIfPrepared } from "@/services/order";
 import Pager from "@/components/pager";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import Filter from "@/components/Filter";
+import { ToggleButton, ToggleButtonGroup, Stack } from "@mui/material";
 
 function MyOrder({ className }) {
   const [list, setList] = useState([]);
@@ -56,7 +57,27 @@ function MyOrder({ className }) {
   }, [list]);
   return (
     <div className={className}>
-      <h1>My Orders</h1>
+      <ToggleButtonGroup>
+        <Stack direction="row" spacing={2}>
+          <ToggleButton
+            value="gpu"
+            sx={{ width: 160, padding: "4px", textTransform: "none" }}>
+            GPU Orders
+          </ToggleButton>
+          <ToggleButton
+            disabled
+            value="dataset"
+            sx={{ width: 160, padding: "4px", textTransform: "none" }}>
+            Datasets Orders
+          </ToggleButton>
+          <ToggleButton
+            disabled
+            value="api"
+            sx={{ width: 160, padding: "4px", textTransform: "none" }}>
+            API Orders
+          </ToggleButton>
+        </Stack>
+      </ToggleButtonGroup>
       <Filter
         data={filterData}
         defaultValue={{
@@ -66,6 +87,7 @@ function MyOrder({ className }) {
           setCurrent(1);
           setFilterValue(value);
         }}
+        loading={loading}
       />
       <OrderList
         list={list}
