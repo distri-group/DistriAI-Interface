@@ -1,8 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { enqueueSnackbar } from "notistack";
-import { getModelList, filterData } from "@/services/model.js";
-import { getDatasetList } from "@/services/dataset.js";
+import { getItemList, filterData } from "@/services/model.js";
 import {
   ToggleButtonGroup,
   ToggleButton,
@@ -30,13 +29,8 @@ function MyCreation({ className }) {
     setLoading(true);
     setList([]);
     setTotal(0);
-    let res;
     try {
-      if (type === "model") {
-        res = await getModelList(current, 10, filterValue);
-      } else {
-        res = await getDatasetList(current, 10, filterValue);
-      }
+      const res = await getItemList(type, current, 10, filterValue);
       setList(res.List);
       setTotal(res.Total);
     } catch (error) {
@@ -84,6 +78,7 @@ function MyCreation({ className }) {
           setFilterValue(value);
           setCurrent(1);
         }}
+        loading={loading}
       />
       <div className="list">
         {loading ? (

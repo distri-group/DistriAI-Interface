@@ -22,11 +22,10 @@ import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import "@/dark.css";
-import { getModelDetail, checkDeployable } from "@/services/model.js";
+import { getItemDetail, checkDeployable, likeItem } from "@/services/model.js";
 import { getOrderList } from "@/services/order.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { AccountBalance } from "@mui/icons-material";
-import { getDatasetDetail } from "@/services/dataset.js";
 import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
 import { copy } from "@/utils/index.js";
@@ -87,13 +86,10 @@ function Detail({ className, type }) {
   }, [wallet, item, type]);
   async function loadItem() {
     setLoading(true);
-    let res;
+    const res = await getItemDetail(type, owner, name);
     if (type === "model") {
-      res = await getModelDetail(owner, name);
       const isDeployable = await checkDeployable(res);
       setDeployable(isDeployable);
-    } else {
-      res = await getDatasetDetail(owner, name);
     }
     try {
       for await (const item of client.files.read(
@@ -112,6 +108,20 @@ function Detail({ className, type }) {
     } catch (error) {}
     setItem(res);
     setLoading(false);
+  }
+  async function handleLiked() {
+    try {
+      await likeItem(
+        type,
+        item.Owner,
+        item.Name,
+        wallet.publicKey.toString(),
+        !liked
+      );
+      setLiked((prev) => !prev);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
   }
   useEffect(() => {
     loadItem();
@@ -141,18 +151,18 @@ function Detail({ className, type }) {
                     <Stack direction="row" alignItems="center">
                       {liked ? (
                         <Favorite
-                          onClick={() => setLiked(false)}
+                          onClick={handleLiked}
                           sx={{ width: 24, height: 24, cursor: "pointer" }}
                         />
                       ) : (
                         <FavoriteBorder
-                          onClick={() => setLiked(true)}
+                          onClick={handleLiked}
                           sx={{ width: 24, height: 24, cursor: "pointer" }}
                         />
                       )}
                       <label style={{ paddingLeft: 4 }}>Like</label>
                     </Stack>
-                    <span>{item.likes}</span>
+                    <span>{item.Likes}</span>
                   </Stack>
                 </Stack>
                 <Stack direction="row" spacing={2}>
@@ -162,7 +172,7 @@ function Detail({ className, type }) {
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <label>Downloads</label>
-                    <span>{item.downloads}</span>
+                    <span>{item.Downloads}</span>
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <label>From</label>

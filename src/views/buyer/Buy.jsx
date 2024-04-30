@@ -13,9 +13,8 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { getModelList, checkDeployable } from "@/services/model.js";
+import { getItemList, checkDeployable } from "@/services/model.js";
 import DurationToggle from "@/components/DurationToggle.jsx";
-import DeviceCard from "@/components/DeviceCard.jsx";
 import FileList from "@/components/FileList.jsx";
 import { getMachineDetail } from "@/services/machine.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
@@ -167,7 +166,7 @@ function Buy({ className }) {
         ...prevState,
         taskName: `Computing Task-${res.Total}`,
       }));
-      const models = await getModelList(1, 10);
+      const models = await getItemList("model", 1, 10);
       setModels(models.List);
       if (state?.model) {
         const selectedModel = models.List.find(
@@ -239,7 +238,7 @@ function Buy({ className }) {
                 <span>{deviceDetail.Tflops}</span>
                 <label>TFLOPS</label>
               </Stack>
-              <Grid container>
+              <Grid container spacing={2}>
                 <Grid item md={4}>
                   <Stack spacing={1}>
                     <label>RAM</label>
@@ -260,6 +259,18 @@ function Buy({ className }) {
                   <Stack spacing={1}>
                     <label>CPU</label>
                     <span>{deviceDetail.CPU}</span>
+                  </Stack>
+                </Grid>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>IP</label>
+                    <span>{deviceDetail.IP}</span>
+                  </Stack>
+                </Grid>
+                <Grid item md={4}>
+                  <Stack spacing={1}>
+                    <label>Available Ports</label>
+                    <span>{deviceDetail.AvailPorts.join(", ")}</span>
                   </Stack>
                 </Grid>
               </Grid>

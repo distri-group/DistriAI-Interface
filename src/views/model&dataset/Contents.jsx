@@ -10,13 +10,13 @@ import types from "@/services/types.json";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import ItemCard from "./ItemCard.jsx";
-import { getModelList, filterData } from "@/services/model.js";
+import { getItemList, filterData } from "@/services/model.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 import Pager from "@/components/pager.jsx";
 import { capitalize } from "lodash";
-import { getDatasetList } from "@/services/dataset.js";
 import Filter from "../../components/Filter.jsx";
+import { useKeepAliveContext } from "keepalive-for-react";
 
 function Contents({ className, type }) {
   document.title = capitalize(type + "s");
@@ -34,6 +34,7 @@ function Contents({ className, type }) {
   const [search, setSearch] = useState("");
   const wallet = useAnchorWallet();
   const inputTimer = useRef(null);
+  const { destroy } = useKeepAliveContext();
   const chipStyle = {
     borderRadius: "8px",
     margin: "6px",
@@ -49,36 +50,34 @@ function Contents({ className, type }) {
     setLoading(true);
     setList([]);
     setTotal(0);
-    let res;
     try {
-      if (type === "model") {
-        res = await getModelList(current, 10, filterValue);
-      } else if (type === "dataset") {
-        res = await getDatasetList(current, 10, filterValue);
-      }
+      const res = await getItemList(
+        type,
+        current,
+        10,
+        filterValue,
+        wallet?.publicKey?.toString() || ""
+      );
       setList(res.List);
       setTotal(res.Total);
     } catch (error) {}
     setLoading(false);
   }
   useEffect(() => {
-    loadList(current);
-    // eslint-disable-next-line
-  }, [current, type]);
-  useEffect(() => {
     const currentName = filterValue.Name;
     if (search !== currentName) {
       clearTimeout(inputTimer.current);
       inputTimer.current = setTimeout(() => {
         loadList(current);
+        setSearch(currentName);
       }, 1000);
-      setSearch(currentName);
     } else {
       loadList(current);
     }
+
     return () => clearTimeout(inputTimer.current);
     // eslint-disable-next-line
-  }, [filterValue]);
+  }, [current, type, filterValue]);
   return (
     <div className={className}>
       <h1>{capitalize(type + "s")}</h1>
@@ -157,15 +156,21 @@ function Contents({ className, type }) {
                 setCurrent(1);
               }}
               search={{ key: "Name" }}
+              loading={loading}
+              style={{
+                marginBottom: 24,
+              }}
             />
             <Button
               onClick={() => {
-                if (wallet?.publicKey) navigate(`/${type}/add`);
-                else setModal(true);
+                if (wallet?.publicKey) {
+                  destroy();
+                  navigate(`/${type}/add`);
+                } else setModal(true);
               }}
               style={{ width: 160 }}
               className="cbtn">
-              Create {capitalize(type)}
+              <span>Create {capitalize(type)}</span>
             </Button>
           </div>
           <div className="list">

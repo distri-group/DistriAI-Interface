@@ -12,13 +12,11 @@ import types from "@/services/types.json";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
-import { licenses, frameworks, createModel } from "@/services/model.js";
+import { licenses, frameworks, scales, createItem } from "@/services/model.js";
 import { useSnackbar } from "notistack";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { LoadingButton } from "@mui/lab";
 import { capitalize } from "lodash";
-import { scales } from "@/services/dataset.js";
-import { createDataset } from "@/services/dataset.js";
 import useIpfs from "@/utils/useIpfs.js";
 
 function Create({ className, type }) {
@@ -146,23 +144,14 @@ function Create({ className, type }) {
     if (!validation) return;
     setLoading(true);
     try {
-      if (type === "model") {
-        await createModel(
-          {
-            ...formValue,
-            Tags: formValue.Tags.toString(),
-          },
-          wallet.publicKey.toString()
-        );
-      } else {
-        await createDataset(
-          {
-            ...formValue,
-            Tags: formValue.Tags.toString(),
-          },
-          wallet.publicKey.toString()
-        );
-      }
+      await createItem(
+        type,
+        {
+          ...formValue,
+          Tags: formValue.Tags.toString(),
+        },
+        wallet.publicKey.toString()
+      );
       if (selectedFile) {
         await methods.fileUpload(
           `/distri.ai/${type}/${wallet.publicKey.toString()}/${formValue.Name}`,
@@ -418,8 +407,6 @@ export default styled(Create)`
     font-weight: 600;
     font-size: 32px;
     line-height: 44px;
-  }
-  form {
   }
   label {
     display: block;

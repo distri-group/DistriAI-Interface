@@ -2,13 +2,21 @@ import axios from "@/utils/axios.js";
 import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
 import { getProvider } from "@/utils/index.js";
-import { scales } from "./dataset.js";
 import { create } from "kubo-rpc-client";
 
-const baseUrl = "/model";
-
-export async function getModelList(pageIndex, pageSize, filter) {
-  const apiUrl = baseUrl + "/list";
+export async function getItemList(
+  type,
+  pageIndex,
+  pageSize,
+  filter,
+  publicKey
+) {
+  const apiUrl = `/${type}/list`;
+  let headers = {};
+  if (publicKey) {
+    const token = await login(publicKey);
+    headers.Authorization = token;
+  }
   const body = {
     Page: pageIndex,
     PageSize: pageSize,
@@ -21,9 +29,9 @@ export async function getModelList(pageIndex, pageSize, filter) {
     });
   }
   try {
-    const res = await axios.post(apiUrl, body);
-    for (let model of res.List) {
-      model = formatItem(model);
+    const res = await axios.post(apiUrl, body, { headers });
+    for (let item of res.List) {
+      item = formatItem(item);
     }
     return res;
   } catch (error) {
@@ -31,8 +39,8 @@ export async function getModelList(pageIndex, pageSize, filter) {
   }
 }
 
-export async function getModelDetail(owner, name) {
-  const apiUrl = baseUrl + `/${owner}/${name}`;
+export async function getItemDetail(type, owner, name) {
+  const apiUrl = `/${type}/${owner}/${name}`;
   try {
     const res = await axios.get(apiUrl);
     return formatItem(res);
@@ -41,41 +49,70 @@ export async function getModelDetail(owner, name) {
   }
 }
 
-export async function checkDeployable(model) {
-  const client = create({ url: "https://ipfs.distri.ai/rpc/api/v0" });
-  try {
-    for await (const file of client.files.ls(
-      `/distri.ai/model/${model.Owner}/${model.Name}`
-    )) {
-      if (file.name === "deployment" && file.type === "directory") {
-        try {
-          const list = [];
-          for await (const item of client.files.ls(
-            `/distri.ai/model/${model.Owner}/${model.Name}/deployment`
-          )) {
-            list.push(item);
-          }
-          if (list.length > 0) return true;
-        } catch (error) {
-          return false;
-        }
-        return false;
-      }
-    }
-    return false;
-  } catch (error) {
-    return false;
-  }
-}
-
-export async function createModel(model, publicKey) {
-  const apiUrl = baseUrl + "/create";
+export async function createItem(type, item, publicKey) {
+  const apiUrl = `/${type}/create`;
   const token = await login(publicKey);
   const headers = {
     Authorization: token,
   };
   try {
-    const res = await axios.post(apiUrl, model, { headers });
+    const res = await axios.post(apiUrl, item, { headers });
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function isItemLiked(type, owner, name, publicKey) {
+  const apiUrl = `/${type}/islike`;
+  const token = await login(publicKey);
+  const headers = {
+    Authorization: token,
+  };
+  try {
+    const res = await axios.post(
+      apiUrl,
+      {
+        Owner: owner,
+        Name: name,
+      },
+      { headers }
+    );
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function likeItem(type, owner, name, publicKey, isLiked) {
+  const apiUrl = `/${type}/like`;
+  const token = await login(publicKey);
+  const headers = {
+    Authorization: token,
+  };
+  try {
+    const res = await axios.post(
+      apiUrl,
+      {
+        Owner: owner,
+        Name: name,
+        Like: isLiked,
+      },
+      { headers }
+    );
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function downloadItem(type, owner, name) {
+  const apiUrl = `/${type}/download`;
+  try {
+    const res = await axios.post(apiUrl, {
+      Owner: owner,
+      Name: name,
+    });
     return res;
   } catch (error) {
     throw error;
@@ -125,7 +162,7 @@ export async function login(publicKey) {
   }
 }
 
-export async function formatItem(item) {
+async function formatItem(item) {
   if (item.Tags.includes(",")) {
     item.Tags = item.Tags.split(",");
   } else if (!item.Tags.length) item.Tags = null;
@@ -138,23 +175,34 @@ export async function formatItem(item) {
   item.type1 = types[item.Type1 - 1].title;
   item.type2 = types[item.Type1 - 1].items[item.Type2 - 1];
   item.expanded = false;
-  const [likes, downloads] = generateNumbers(item.Name);
-  item.likes = likes;
-  item.downloads = downloads;
   return item;
 }
 
-function hashString(input) {
-  const hash = utils.sha256.hash(input);
-  const hashedNumber = parseInt(hash, 16);
-  const numberInRange = (hashedNumber % (30001 - 3000)) + 3000;
-  return Math.round(numberInRange / 100) / 10 + "k";
-}
-
-function generateNumbers(name) {
-  const number1 = hashString(name);
-  const number2 = hashString(name + "salt");
-  return [number1, number2];
+export async function checkDeployable(model) {
+  const client = create({ url: "https://ipfs.distri.ai/rpc/api/v0" });
+  try {
+    for await (const file of client.files.ls(
+      `/distri.ai/model/${model.Owner}/${model.Name}`
+    )) {
+      if (file.name === "deployment" && file.type === "directory") {
+        try {
+          const list = [];
+          for await (const item of client.files.ls(
+            `/distri.ai/model/${model.Owner}/${model.Name}/deployment`
+          )) {
+            list.push(item);
+          }
+          if (list.length > 0) return true;
+        } catch (error) {
+          return false;
+        }
+        return false;
+      }
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
 }
 
 export const frameworks = [
@@ -182,6 +230,7 @@ export const licenses = [
   "CC-BY-NC-ND",
   "Others",
 ];
+export const scales = ["<1k", "1k-10k", "10k-100k", "100k-1M", ">1M"];
 export const filterData = {
   OrderBy: [
     { label: "Updated Time", value: "Updated Time" },

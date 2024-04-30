@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
-import { checkDeployable } from "@/services/model.js";
+import { checkDeployable, downloadItem } from "@/services/model.js";
 
 function FileList({
   className,
@@ -177,6 +177,25 @@ function FileList({
     }
   };
 
+  // Download file
+  const handleDownload = async (event) => {
+    event.preventDefault();
+    try {
+      await downloadItem(type, item.Owner, item.Name);
+    } catch (error) {}
+    const downloadLink = event.target.closest("a");
+    if (downloadLink) {
+      const downloadUrl = downloadLink.getAttribute("href");
+      const fileName = downloadLink.getAttribute("download");
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
   useEffect(() => {
     setPrefix(initialPrefix);
   }, [initialPrefix]);
@@ -283,7 +302,7 @@ function FileList({
             <Stack
               direction="row"
               justifyContent="space-between"
-              alignItems="bottom"
+              alignItems="end"
               className="controls">
               <div className="breadcrumbs">
                 {breadcrumbs.length > 0 && (
@@ -438,7 +457,8 @@ function FileList({
                         {file.size !== 0 && (
                           <a
                             href={`https://ipfs.distri.ai/ipfs/${folderCid}/${file.name}`}
-                            download={file.name}>
+                            download={file.name}
+                            onClick={handleDownload}>
                             <img
                               src="/img/download.png"
                               alt="download"
@@ -618,6 +638,7 @@ export default styled(FileList)`
   .controls {
     background: rgba(149, 157, 165, 0.16);
     padding: 16px 40px;
+    height: 48px;
     border-radius: 0 8px 8px 8px;
   }
   .file-table {
