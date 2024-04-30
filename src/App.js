@@ -116,7 +116,7 @@ function App() {
             },
           },
           select: {
-            padding: 12,
+            padding: 16,
             color: "white",
           },
           icon: {

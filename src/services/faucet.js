@@ -25,12 +25,12 @@ export async function SOLFaucet(publicKey) {
       LAMPORTS_PER_SOL
     );
     const latestBlockHash = await connection.getLatestBlockhash();
-    await connection.confirmTransaction({
+    const res = await connection.confirmTransaction({
       blockhash: latestBlockHash,
       lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
       signature,
     });
-    return { msg: "ok" };
+    return res;
   } catch (error) {
     let msg = error.message;
     if (msg.indexOf("429") !== -1) {
@@ -39,6 +39,6 @@ export async function SOLFaucet(publicKey) {
     } else {
       msg = "Failed to claim airdrop.Try again later.";
     }
-    return { msg };
+    throw new Error(msg);
   }
 }

@@ -7,7 +7,7 @@ import {
   getRewardTotal,
 } from "@/services/reward.js";
 import { useSnackbar } from "notistack";
-import { Button, CircularProgress, Popover, Grid, Stack } from "@mui/material";
+import { CircularProgress, Popover, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import DeviceCard from "@/components/DeviceCard.jsx";

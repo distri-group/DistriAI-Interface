@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Stack,
 } from "@mui/material";
 import { KeyboardDoubleArrowDown } from "@mui/icons-material";
 import { getOrderList } from "@/services/order.js";
@@ -154,16 +155,20 @@ function NavBar({ className }) {
               <span onClick={() => navigate("/model")}>Models</span>
               <span onClick={() => navigate("/dataset")}>Datasets</span>
               <span onClick={() => navigate("/dashboard")}>
-                {ordersUnderOneHour > 0 && (
-                  <img
-                    src="/img/clock.png"
-                    alt="alarm"
-                    style={{
-                      marginRight: 8,
-                    }}
-                  />
+                {ordersUnderOneHour > 0 ? (
+                  <Stack direction="row">
+                    <img
+                      src="/img/clock.png"
+                      alt="alarm"
+                      style={{
+                        marginRight: 8,
+                      }}
+                    />
+                    <span style={{ margin: 0 }}>Dashboard</span>
+                  </Stack>
+                ) : (
+                  "Dashboard"
                 )}
-                Dashboard
               </span>
             </>
           )}

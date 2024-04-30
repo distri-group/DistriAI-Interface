@@ -129,11 +129,13 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
         placeholder="Hour"
         onChange={onDurationInput}
         fullWidth
-        endAdornment={
-          <InputAdornment position="end">
-            <span style={{ color: "white" }}>Hour</span>
-          </InputAdornment>
-        }
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <span style={{ color: "white" }}>Hour</span>
+            </InputAdornment>
+          ),
+        }}
       />
     </div>
   );

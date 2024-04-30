@@ -26,12 +26,15 @@ function EndDuration({ className }) {
   const open = Boolean(anchorEl);
 
   async function onSubmit() {
-    if (remainingTime < 3600000) {
+    if (detail.StatusName === "Available" && remainingTime < 3600000) {
       return enqueueSnackbar("Remaining duration less than 1 hour.", {
         variant: "info",
       });
     }
-    if (detail.StatusName !== "Available") {
+    if (
+      detail.StatusName !== "Available" &&
+      detail.StatusName !== "Preparing"
+    ) {
       return enqueueSnackbar("Order not in training", { variant: "info" });
     }
     setEnding(true);
