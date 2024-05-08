@@ -44,4 +44,12 @@ module.exports = {
       }),
     ],
   },
+  devServer: {
+    proxy: {
+      "/index-api": {
+        target: "https://test.distri.ai",
+        changeOrigin: true,
+      },
+    },
+  },
 };

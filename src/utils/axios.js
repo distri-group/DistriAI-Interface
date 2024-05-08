@@ -1,9 +1,8 @@
 import axios from "axios";
-import webconfig from "@/webconfig.js";
 import { enqueueSnackbar } from "notistack";
 
 const instance = axios.create({
-  baseURL: webconfig.apiUrl + "/index-api",
+  baseURL: "/index-api",
   timeout: 20000,
 });
 instance.interceptors.response.use(
