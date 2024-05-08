@@ -168,7 +168,7 @@ function Detail({ className, type }) {
                 <Stack direction="row" spacing={2}>
                   <Stack direction="row" spacing={1}>
                     <label>Updated</label>
-                    <span>{new Date(item.UpdatedAt).toLocaleString()}</span>
+                    <span>{new Date(item.UpdateTime).toLocaleString()}</span>
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <label>Downloads</label>

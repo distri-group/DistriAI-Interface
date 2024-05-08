@@ -45,11 +45,11 @@ function Faucet({ className }) {
       return;
     }
     setLoading(true);
-    const res = await SOLFaucet(publicKey);
-    if (res.msg === "ok") {
+    try {
+      await SOLFaucet(publicKey);
       enqueueSnackbar("1 SOL has sent to your wallet", { variant: "success" });
-    } else {
-      enqueueSnackbar(res.msg, { variant: "error" });
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
   };
@@ -105,7 +105,7 @@ function Faucet({ className }) {
             loading={loading}
             type="primary"
             onClick={onSubmit}>
-            {loading ? "" : "Send Me SOL"}
+            {!loading && "Send Me SOL"}
           </LoadingButton>
           <LoadingButton
             className="cbtn"
@@ -113,7 +113,7 @@ function Faucet({ className }) {
             loading={loading}
             type="primary"
             onClick={onSendDIST}>
-            {loading ? "" : "Send Me DIST"}
+            {!loading && "Send Me DIST"}
           </LoadingButton>
         </Stack>
       </div>

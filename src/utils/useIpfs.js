@@ -42,7 +42,6 @@ export default function useIpfs() {
             throw error;
           }
         }
-
         uploadResponse.push(res);
       }
       return uploadResponse;

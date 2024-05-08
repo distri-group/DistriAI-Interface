@@ -253,6 +253,74 @@ export default function useSolanaMethod() {
     }
   };
 
+  // Create Model
+  const createModel = async (model, ownerPublicKey) => {
+    const hashedName = await getItemName(model.Name);
+    const [modelPublicKey] = PublicKey.findProgramAddressSync(
+      [
+        utils.bytes.utf8.encode("ai_model"),
+        ownerPublicKey.toBytes(),
+        hashedName,
+      ],
+      PROGRAM
+    );
+    try {
+      const transaction = await program.methods
+        .createAiModel(
+          model.Name,
+          model.Framework,
+          model.License,
+          model.Type1,
+          model.Type2,
+          model.Tags
+        )
+        .accounts({
+          aiModel: modelPublicKey,
+          owner: ownerPublicKey,
+          systemProgram,
+        })
+        .rpc();
+      const res = await checkConfirmation(transaction);
+      return res;
+    } catch (error) {
+      throw handleError(error);
+    }
+  };
+
+  // Create Dataset
+  const createDataset = async (dataset, ownerPublicKey) => {
+    const hashedName = await getItemName(dataset.Name);
+    const [datasetPublicKey] = PublicKey.findProgramAddressSync(
+      [
+        utils.bytes.utf8.encode("dataset"),
+        ownerPublicKey.toBytes(),
+        hashedName,
+      ],
+      PROGRAM
+    );
+    try {
+      const transaction = await program.methods
+        .createDataset(
+          dataset.Name,
+          dataset.Scale,
+          dataset.License,
+          dataset.Type1,
+          dataset.Type2,
+          dataset.Tags
+        )
+        .accounts({
+          dataset: datasetPublicKey,
+          owner: ownerPublicKey,
+          systemProgram,
+        })
+        .rpc();
+      const res = await checkConfirmation(transaction);
+      return res;
+    } catch (error) {
+      throw handleError(error);
+    }
+  };
+
   // Check Transaction Confirmation On Solana
   const checkConfirmation = async (transaction) => {
     return new Promise(async (resolve, reject) => {
@@ -323,11 +391,6 @@ export default function useSolanaMethod() {
     }
   };
 
-  const fetchAccounts = async (name) => {
-    const account = program.account[name];
-    return await account.all();
-  };
-
   const handleError = (error) => {
     if (error.message.includes("found no record of a prior credit.")) {
       return new Error(
@@ -339,6 +402,13 @@ export default function useSolanaMethod() {
     return error;
   };
 
+  const getItemName = async (name) => {
+    const data = new TextEncoder().encode(name);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashUint8Array = new Uint8Array(hashBuffer);
+    return hashUint8Array;
+  };
+
   const methods = {
     makeOffer,
     cancelOffer,
@@ -346,9 +416,10 @@ export default function useSolanaMethod() {
     renewOrder,
     refundOrder,
     claimButchRewards,
+    createModel,
+    createDataset,
     getTokenBalance,
     getMachinePublicKey,
-    fetchAccounts,
   };
 
   return { wallet, methods };

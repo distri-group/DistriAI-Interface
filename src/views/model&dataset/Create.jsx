@@ -12,18 +12,22 @@ import types from "@/services/types.json";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
-import { licenses, frameworks, scales, createItem } from "@/services/model.js";
+import { licenses, frameworks, scales } from "@/services/model.js";
 import { useSnackbar } from "notistack";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { LoadingButton } from "@mui/lab";
 import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
+import useSolanaMethod from "@/utils/useSolanaMethod";
+import { useKeepAliveContext } from "keepalive-for-react";
 
 function Create({ className, type }) {
   document.title = `Create ${capitalize(type)}`;
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
+  const { methods: solanaMethods } = useSolanaMethod();
   const { methods } = useIpfs();
+  const { destroy } = useKeepAliveContext();
   const { enqueueSnackbar } = useSnackbar();
   const [formValue, setFormValue] = useState({
     Name: "",
@@ -144,14 +148,23 @@ function Create({ className, type }) {
     if (!validation) return;
     setLoading(true);
     try {
-      await createItem(
-        type,
-        {
-          ...formValue,
-          Tags: formValue.Tags.toString(),
-        },
-        wallet.publicKey.toString()
-      );
+      if (type === "model") {
+        await solanaMethods.createModel(
+          {
+            ...formValue,
+            Tags: formValue.Tags.toString(),
+          },
+          wallet.publicKey
+        );
+      } else {
+        await solanaMethods.createDataset(
+          {
+            ...formValue,
+            Tags: formValue.Tags.toString(),
+          },
+          wallet.publicKey
+        );
+      }
       if (selectedFile) {
         await methods.fileUpload(
           `/distri.ai/${type}/${wallet.publicKey.toString()}/${formValue.Name}`,
@@ -173,9 +186,11 @@ function Create({ className, type }) {
       }
       enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
       setTimeout(() => {
+        destroy();
         navigate(`/${type}`);
       }, 300);
     } catch (error) {
+      console.log(error);
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);

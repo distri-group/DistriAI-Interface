@@ -51,7 +51,7 @@ function ItemCard({ item, className, type }) {
           style={{ padding: 10, color: "#898989" }}>
           <Stack direction="row" alignItems="end" spacing={1}>
             <AccessTimeFilled />
-            <span>{new Date(item.CreatedAt).toLocaleString()}</span>
+            <span>{new Date(item.CreateTime).toLocaleString()}</span>
           </Stack>
           <Stack direction="row" alignItems="end" spacing={1}>
             {item.Islike ? (

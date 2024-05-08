@@ -9,6 +9,7 @@ import { PublicKey } from "@solana/web3.js";
 import Countdown from "@/components/Countdown.jsx";
 import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
+import { useKeepAliveContext } from "keepalive-for-react";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
@@ -23,6 +24,7 @@ function EndDuration({ className }) {
   const [balance, setBalance] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [remainingTime, setRemainingTime] = useState();
+  const { destroy } = useKeepAliveContext();
   const open = Boolean(anchorEl);
 
   async function onSubmit() {
@@ -50,6 +52,7 @@ function EndDuration({ className }) {
       );
       enqueueSnackbar("Refund order success.", { variant: "success" });
       setTimeout(() => {
+        destroy();
         navigate("/dashboard");
       }, 500);
     } catch (error) {
