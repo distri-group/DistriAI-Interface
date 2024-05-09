@@ -69,8 +69,8 @@ function OrderDetail({ className }) {
               {record.StatusName === "Failed" && (
                 <span>
                   :{" "}
-                  {record.Metadata.OrderInfo?.Message &&
-                    record.Metadata.OrderInfo?.Message}
+                  {record.Metadata.OrderInfo?.Message ??
+                    "Failed reason not found"}
                 </span>
               )}
             </h2>

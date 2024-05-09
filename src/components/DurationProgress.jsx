@@ -1,5 +1,5 @@
-import { Box, LinearProgress, Stack } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
+import { Box, LinearProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
 export default function DurationProgress({
   startTime,
@@ -9,7 +9,7 @@ export default function DurationProgress({
 }) {
   const [used, setUsed] = useState(0);
   const [progress, setProgress] = useState(0);
-  const failed = !refundTime && !endTime;
+  const failed = !refundTime || !new Date(startTime).getTime();
   const refunded = !!refundTime;
   useEffect(() => {
     if (!duration) {

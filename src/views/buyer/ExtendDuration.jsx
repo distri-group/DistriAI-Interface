@@ -133,12 +133,11 @@ function ExtendDuration({ className }) {
             <div className="title">
               <span>Extend Duration</span>
             </div>
-            <div className="info">
+            <Stack spacing={2} className="info">
               <DurationToggle
                 duration={duration}
                 setDuration={setDuration}
                 max={deviceDetail.MaxDuration - orderDetail.Duration}
-                title="Extend Duration"
               />
               <Stack direction="row" spacing={1}>
                 <label style={{ display: "block", width: 160 }}>
@@ -153,7 +152,7 @@ function ExtendDuration({ className }) {
               <Stack direction="row" justifyContent="end">
                 <span className="balance">Balance: {balance} DIST</span>
               </Stack>
-            </div>
+            </Stack>
           </div>
           <Stack
             direction="row"
