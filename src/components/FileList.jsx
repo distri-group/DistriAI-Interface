@@ -296,7 +296,12 @@ function FileList({
     <div className={className}>
       <Stack direction="column">
         {loading ? (
-          <CircularProgress />
+          <Stack
+            justifyContent="center"
+            alignItems="center"
+            style={{ width: "100%", height: 400 }}>
+            <CircularProgress />
+          </Stack>
         ) : (
           <TableContainer>
             <Stack
