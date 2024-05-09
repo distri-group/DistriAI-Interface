@@ -186,7 +186,13 @@ function Reward({ className }) {
                   fontSize: 16,
                   lineHeight: "22px",
                 }}>
-                {claiming ? "" : claimed ? "All Claimed" : "Claim Rewards"}
+                {claiming ? (
+                  <span></span>
+                ) : claimed ? (
+                  <span>All Claimed</span>
+                ) : (
+                  <span>Claim Rewards</span>
+                )}
               </span>
             </LoadingButton>
           </Stack>

@@ -171,7 +171,7 @@ function ExtendDuration({ className }) {
               style={{ width: 160 }}
               className="cbtn"
               onClick={onSubmit}>
-              {!extending && "Confirm"}
+              {!extending && <span>Confirm</span>}
             </LoadingButton>
           </Stack>
         </div>

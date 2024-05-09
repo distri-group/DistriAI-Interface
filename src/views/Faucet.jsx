@@ -105,7 +105,7 @@ function Faucet({ className }) {
             loading={loading}
             type="primary"
             onClick={onSubmit}>
-            {!loading && "Send Me SOL"}
+            {!loading && <span>Send Me SOL</span>}
           </LoadingButton>
           <LoadingButton
             className="cbtn"
@@ -113,7 +113,7 @@ function Faucet({ className }) {
             loading={loading}
             type="primary"
             onClick={onSendDIST}>
-            {!loading && "Send Me DIST"}
+            {!loading && <span>Send Me DIST</span>}
           </LoadingButton>
         </Stack>
       </div>

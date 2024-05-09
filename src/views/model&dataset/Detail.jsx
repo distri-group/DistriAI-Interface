@@ -357,7 +357,7 @@ function Detail({ className, type }) {
             }}>
             <DialogTitle>
               You have already rent a GPU for {intent}ing{" "}
-              {intent === "deploy" && "using this model"}
+              {intent === "deploy" && <span>using this model</span>}
             </DialogTitle>
             <DialogContent>
               <p>

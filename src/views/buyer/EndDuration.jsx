@@ -247,7 +247,7 @@ function EndDuration({ className }) {
                   onClick={onSubmit}
                   style={{ width: 160 }}
                   className="cbtn confirm">
-                  {!ending && "Confirm"}
+                  {!ending && <span>Confirm</span>}
                 </LoadingButton>
               </Stack>
             </div>

@@ -176,7 +176,13 @@ function RewardDetail({ className }) {
                 style={{ width: 140 }}
                 loading={claiming}
                 onClick={claimButchRewards}>
-                {claiming ? "" : claimed ? "All Claimed" : "Claim Rewards"}
+                {claiming ? (
+                  <span></span>
+                ) : claimed ? (
+                  <span>All Claimed</span>
+                ) : (
+                  <span>Claim Rewards</span>
+                )}
               </LoadingButton>
             </div>
           </Stack>

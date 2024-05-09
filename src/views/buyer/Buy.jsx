@@ -427,7 +427,7 @@ function Buy({ className }) {
                             fontSize: 18,
                             lineHeight: "26px",
                           }}>
-                          {!submitting && "Purchase"}
+                          {!submitting && <span>Submit</span>}
                         </span>
                       </LoadingButton>
                     </Stack>

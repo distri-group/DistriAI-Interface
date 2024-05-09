@@ -532,7 +532,7 @@ function FileList({
             loading={creating}
             className="default-btn"
             onClick={handleFolderCreate}>
-            {!creating && "Create"}
+            {!creating && <span>Create</span>}
           </LoadingButton>
         </DialogActions>
       </Dialog>

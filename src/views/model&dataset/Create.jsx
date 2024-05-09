@@ -399,7 +399,7 @@ function Create({ className, type }) {
             style={{ width: 160 }}
             className="cbtn"
             type="submit">
-            {!loading && "Submit"}
+            {!loading && <span>Submit</span>}
           </LoadingButton>
           <Button
             disabled={loading}

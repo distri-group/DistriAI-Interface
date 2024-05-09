@@ -225,7 +225,7 @@ function MakeOffer({ className }) {
               type="submit"
               className="cbtn"
               style={{ width: 100 }}>
-              {!loading && "Confirm"}
+              {!loading && <span>Confirm</span>}
             </LoadingButton>
           </Grid>
         </Grid>

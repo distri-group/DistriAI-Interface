@@ -142,7 +142,7 @@ function MyDevice({ className }) {
                 fontSize: 18,
                 lineHeight: "26px",
               }}>
-              {!canceling && "Confirm"}
+              {!canceling && <span>Confirm</span>}
             </span>
           </LoadingButton>
         </Box>
