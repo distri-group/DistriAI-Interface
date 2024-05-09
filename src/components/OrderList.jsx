@@ -31,6 +31,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
         wallet.publicKey.toString(),
         deploy
       );
+      console.log(href);
       window.open(href);
       setSigning(false);
     } catch (error) {
