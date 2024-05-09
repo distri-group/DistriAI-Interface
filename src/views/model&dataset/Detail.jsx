@@ -22,7 +22,12 @@ import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import "@/dark.css";
-import { getItemDetail, checkDeployable, likeItem } from "@/services/model.js";
+import {
+  getItemDetail,
+  checkDeployable,
+  likeItem,
+  isItemLiked,
+} from "@/services/model.js";
 import { getOrderList } from "@/services/order.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { AccountBalance } from "@mui/icons-material";
@@ -56,7 +61,6 @@ function Detail({ className, type }) {
 
   useEffect(() => {
     async function loadDetail() {
-      setLoading(true);
       const orders = await getOrderList(
         1,
         10,
@@ -107,7 +111,6 @@ function Detail({ className, type }) {
       }
     } catch (error) {}
     setItem(res);
-    setLoading(false);
   }
   async function handleLiked() {
     try {
@@ -123,10 +126,24 @@ function Detail({ className, type }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
   }
+  async function checkIsLiked() {
+    const isLike = await isItemLiked(
+      type,
+      owner,
+      name,
+      wallet.publicKey.toString()
+    );
+    setLiked(isLike);
+  }
   useEffect(() => {
     loadItem();
     // eslint-disable-next-line
   }, [type]);
+  useEffect(() => {
+    if (wallet?.publicKey) {
+      checkIsLiked();
+    }
+  }, [wallet]);
   useEffect(() => {
     if (!orderDialog && filesForTraining.length > 0) {
       setTrainingFiles([]);
@@ -137,7 +154,15 @@ function Detail({ className, type }) {
     <div className={className}>
       <div className="container">
         {loading ? (
-          <CircularProgress />
+          <Stack
+            justifyContent="center"
+            alignItems="center"
+            style={{
+              width: "100%",
+              height: 1000,
+            }}>
+            <CircularProgress />
+          </Stack>
         ) : (
           <>
             <Stack direction="row" spacing={2} justifyContent="space-between">

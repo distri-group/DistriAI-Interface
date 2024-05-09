@@ -88,14 +88,13 @@ export async function isItemLiked(type, owner, name, publicKey) {
     Authorization: token,
   };
   try {
-    const res = await axios.post(
-      apiUrl,
-      {
+    const res = await axios.get(apiUrl, {
+      params: {
         Owner: owner,
         Name: name,
       },
-      { headers }
-    );
+      headers,
+    });
     return res;
   } catch (error) {
     throw error;
