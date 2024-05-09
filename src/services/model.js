@@ -39,6 +39,24 @@ export async function getItemList(
   }
 }
 
+export async function getLikeList(type, publicKey) {
+  const apiUrl = `/${type}/likes`;
+  let headers = {};
+  if (publicKey) {
+    const token = await login(publicKey);
+    headers.Authorization = token;
+  }
+  try {
+    const res = await axios.get(apiUrl, { headers });
+    for (let item of res.List) {
+      item = formatItem(item);
+    }
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getItemDetail(type, owner, name) {
   const apiUrl = `/${type}/${owner}/${name}`;
   try {

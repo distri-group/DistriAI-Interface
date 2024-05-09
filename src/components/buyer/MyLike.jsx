@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { enqueueSnackbar } from "notistack";
-import { getItemList, filterData } from "@/services/model.js";
+import { getLikeList, filterData } from "@/services/model.js";
 import {
   ToggleButtonGroup,
   ToggleButton,
@@ -30,7 +30,7 @@ function MyLike({ className }) {
     setList([]);
     setTotal(0);
     try {
-      const res = await getItemList(type, current, 10, filterValue);
+      const res = await getLikeList(type, wallet?.publicKey.toString());
       setList(res.List);
       setTotal(res.Total);
     } catch (error) {
@@ -41,15 +41,7 @@ function MyLike({ className }) {
   useEffect(() => {
     loadList(current);
     // eslint-disable-next-line
-  }, [current, filterValue]);
-  useEffect(() => {
-    if (current !== 1) {
-      setCurrent(1);
-    } else {
-      loadList(current);
-    }
-    // eslint-disable-next-line
-  }, [type]);
+  }, [current, filterValue, type]);
   return (
     <div className={className}>
       <ToggleButtonGroup
@@ -110,4 +102,12 @@ function MyLike({ className }) {
   );
 }
 
-export default styled(MyLike)``;
+export default styled(MyLike)`
+  .empty {
+    width: 100%;
+    height: 480px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+`;

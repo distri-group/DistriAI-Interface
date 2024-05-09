@@ -41,15 +41,7 @@ function MyCreation({ className }) {
   useEffect(() => {
     loadList(current);
     // eslint-disable-next-line
-  }, [current, filterValue]);
-  useEffect(() => {
-    if (current !== 1) {
-      setCurrent(1);
-    } else {
-      loadList(current);
-    }
-    // eslint-disable-next-line
-  }, [type]);
+  }, [current, filterValue, type]);
   return (
     <div className={className}>
       <ToggleButtonGroup
@@ -110,4 +102,12 @@ function MyCreation({ className }) {
   );
 }
 
-export default styled(MyCreation)``;
+export default styled(MyCreation)`
+  .empty {
+    width: 100%;
+    height: 480px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+`;
