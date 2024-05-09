@@ -18,15 +18,8 @@ export default function KeepAliveLayout() {
         <NavBar />
         <KeepAlive
           activeName={cacheKey}
-          include={[
-            /\/dashboard/,
-            /\/model/,
-            /\/dataset/,
-            /\/earning/,
-            /\/reward/,
-            /\/market/,
-          ]}
-          max={10}
+          include={[/\/model/, /\/dataset/]}
+          max={3}
           strategy={"LRU"}>
           {outlet}
         </KeepAlive>
