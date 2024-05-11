@@ -31,6 +31,7 @@ import Test from "@/views/Test.jsx";
 import { clusterApiUrl } from "@solana/web3.js";
 import Dashboard from "@/views/buyer/Dashboard.jsx";
 import KeepAliveLayout from "./KeepAliveLayout.jsx";
+import FileUpload from "./views/model&dataset/FileUpload.jsx";
 
 function App() {
   window.Buffer = Buffer;
@@ -230,6 +231,7 @@ function App() {
                       <Route index element={<OrderDetail />} />
                       <Route path="extend" element={<ExtendDuration />} />
                       <Route path="end" element={<EndDuration />} />
+                      <Route path="create-model" element={<FileUpload />} />
                     </Route>
                   </Route>
                   <Route path="reward">

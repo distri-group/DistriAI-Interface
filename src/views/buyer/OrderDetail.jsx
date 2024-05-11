@@ -80,7 +80,7 @@ function OrderDetail({ className }) {
                   <div className="info-box-title">
                     <span>Task Info</span>
                     {record.StatusName === "Available" && (
-                      <div>
+                      <Stack direction="row" spacing={3}>
                         <Button
                           className="cbtn"
                           style={{ width: 180 }}
@@ -89,11 +89,21 @@ function OrderDetail({ className }) {
                         </Button>
                         <Button
                           className="white-btn"
-                          style={{ width: 180, marginLeft: 24 }}
+                          style={{ width: 180 }}
                           onClick={handleEndDuration}>
                           End Duration
                         </Button>
-                      </div>
+                        {record.Metadata.OrderInfo.Intent === "train" && (
+                          <Button
+                            className="cbtn"
+                            style={{ width: 180 }}
+                            onClick={() =>
+                              navigate(`/order/${id}/create-model`)
+                            }>
+                            Create Model
+                          </Button>
+                        )}
+                      </Stack>
                     )}
                   </div>
                   <div className="info">
