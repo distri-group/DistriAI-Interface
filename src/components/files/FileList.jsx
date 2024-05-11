@@ -6,6 +6,7 @@ import { Folder as FolderIcon } from "@mui/icons-material";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { signToken } from "@/services/jupyter";
 import styled from "styled-components";
+import { useSnackbar } from "notistack";
 
 function FileList({ ip, port, onSelect, className }) {
   const [contents, setContents] = useState([]);
@@ -16,6 +17,7 @@ function FileList({ ip, port, onSelect, className }) {
   const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [token, setToken] = useState("");
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const getList = async (path, token) => {
     setLoading(true);
     const res = await getFileList(`http://${ip}:${port}`, path, token);
@@ -41,10 +43,9 @@ function FileList({ ip, port, onSelect, className }) {
         `http://${ip}:${port}`,
         wallet.publicKey.toString()
       );
-      console.log(res);
       setToken(res.data.token);
     } catch (error) {
-      console.log(error);
+      enqueueSnackbar(error.message, { variant: "error" });
     }
   };
 
@@ -83,7 +84,6 @@ function FileList({ ip, port, onSelect, className }) {
               key={index}
               className="breadcrumb avail"
               onClick={() => {
-                console.log(breadcrumbs.slice(0, index - 1).join("/"));
                 setCurrentPath(breadcrumbs.slice(0, index - 1).join("/"));
               }}>
               {breadcrumb}
