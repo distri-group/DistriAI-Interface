@@ -86,7 +86,6 @@ export default function useSolanaMethod() {
   const placeOrder = async (machinePublicKey, duration, metadata) => {
     duration = new BN(duration);
     metadata = JSON.stringify(metadata);
-    console.log(wallet.publicKey.toString());
     const orderUuid = utils.bytes.utf8.encode(new Date().valueOf().toString());
     const orderArray = new Uint8Array(16);
     orderArray.set(orderUuid);

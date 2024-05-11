@@ -71,20 +71,6 @@ export async function getItemDetail(type, owner, name) {
   }
 }
 
-export async function createItem(type, item, publicKey) {
-  const apiUrl = `/${type}/create`;
-  const token = await login(publicKey);
-  const headers = {
-    Authorization: token,
-  };
-  try {
-    const res = await axios.post(apiUrl, item, { headers });
-    return res;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export async function isItemLiked(type, owner, name, publicKey) {
   const apiUrl = `/${type}/islike`;
   const token = await login(publicKey);
