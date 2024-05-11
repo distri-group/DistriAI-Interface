@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { MuiChipsInput } from "mui-chips-input";
 import { useSnackbar } from "notistack";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FileList from "@/components/files/FileList";
 import types from "@/services/types.json";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
@@ -23,7 +23,8 @@ import { frameworks, licenses } from "@/services/model";
 import useSolanaMethod from "@/utils/useSolanaMethod";
 import useIpfs from "@/utils/useIpfs";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { getOrderDetail } from "@/services/order";
 
 function FileUpload({ className }) {
   const { enqueueSnackbar } = useSnackbar();
@@ -47,9 +48,16 @@ function FileUpload({ className }) {
   const [loading, setLoading] = useState(false);
   const [progressing, setProgressing] = useState(0);
   const [selectedPaths, setSelectedPaths] = useState([]);
+  const [orderDetail, setOrderDetail] = useState(null);
+  const addr = useMemo(() => {
+    if (orderDetail?.Metadata?.MachineInfo?.IP) {
+      return `http://${orderDetail.Metadata.MachineInfo.IP}:${orderDetail.Metadata.MachineInfo.Port}`;
+    }
+  }, [orderDetail]);
   const { client } = useIpfs();
   const { methods: solanaMethods } = useSolanaMethod();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -168,13 +176,10 @@ function FileUpload({ className }) {
       const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
       setProgressing(3);
-      const res = await axios.post(
-        "http://44.220.54.244/distri/uploadfile/ipfs",
-        {
-          signature,
-          fileList: selectedPaths,
-        }
-      );
+      const res = await axios.post(`${addr}/distri/uploadfile/ipfs`, {
+        signature,
+        fileList: selectedPaths,
+      });
       for (let item of res.data.resUploadFile) {
         await client.files.cp(
           `/ipfs/${item.cid}`,
@@ -194,6 +199,18 @@ function FileUpload({ className }) {
       setLoading(false);
     }
   }
+  useEffect(() => {
+    async function loadDetail() {
+      try {
+        const res = await getOrderDetail(id);
+        setOrderDetail(res);
+      } catch (error) {}
+    }
+    if (wallet?.publicKey) {
+      loadDetail();
+    }
+    // eslint-disable-next-line
+  }, [id, wallet]);
   return (
     <div className={className}>
       <h1>Create a new model</h1>
@@ -205,10 +222,14 @@ function FileUpload({ className }) {
               <TextField
                 name="Name"
                 error={!!validateError.Name}
-                helperText={validateError.Name}
                 placeholder="Maximum 100 characters"
                 onChange={handleChange}
               />
+              {validateError.Name && (
+                <FormHelperText style={{ color: "red" }}>
+                  {validateError.Name}
+                </FormHelperText>
+              )}
             </Stack>
           </Grid>
           <Grid item md={6}>
@@ -318,11 +339,14 @@ function FileUpload({ className }) {
           <Grid item md={12}>
             <Stack spacing={2}>
               <label>Model Files</label>
-              <FileList
-                ip="44.220.54.244"
-                port={80}
-                onSelect={(paths) => setSelectedPaths(paths)}
-              />
+              {orderDetail ? (
+                <FileList
+                  addr={addr}
+                  onSelect={(paths) => setSelectedPaths(paths)}
+                />
+              ) : (
+                <CircularProgress />
+              )}
             </Stack>
           </Grid>
           <Grid item md={12}>

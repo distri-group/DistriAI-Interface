@@ -8,7 +8,7 @@ import { signToken } from "@/services/jupyter";
 import styled from "styled-components";
 import { useSnackbar } from "notistack";
 
-function FileList({ ip, port, onSelect, className }) {
+function FileList({ addr, onSelect, className }) {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [defaultPath] = useState("");
@@ -20,7 +20,7 @@ function FileList({ ip, port, onSelect, className }) {
   const { enqueueSnackbar } = useSnackbar();
   const getList = async (path, token) => {
     setLoading(true);
-    const res = await getFileList(`http://${ip}:${port}`, path, token);
+    const res = await getFileList(addr, path, token);
     setContents(res.content);
     setLoading(false);
   };
@@ -39,12 +39,10 @@ function FileList({ ip, port, onSelect, className }) {
   };
   const getToken = async () => {
     try {
-      const res = await signToken(
-        `http://${ip}:${port}`,
-        wallet.publicKey.toString()
-      );
+      const res = await signToken(addr, wallet.publicKey.toString());
       setToken(res.data.token);
     } catch (error) {
+      console.log(error.message);
       enqueueSnackbar(error.message, { variant: "error" });
     }
   };
