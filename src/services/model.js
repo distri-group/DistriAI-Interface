@@ -39,15 +39,19 @@ export async function getItemList(
   }
 }
 
-export async function getLikeList(type, publicKey) {
+export async function getLikeList(type, pageIndex, pageSize, publicKey) {
   const apiUrl = `/${type}/likes`;
   let headers = {};
   if (publicKey) {
     const token = await login(publicKey);
     headers.Authorization = token;
   }
+  const body = {
+    Page: pageIndex,
+    PageSize: pageSize,
+  };
   try {
-    const res = await axios.get(apiUrl, { headers });
+    const res = await axios.post(apiUrl, body, { headers });
     for (let item of res.List) {
       item = formatItem(item);
     }
@@ -141,7 +145,7 @@ export async function login(publicKey) {
     let token;
     try {
       token = JSON.parse(localStorage.getItem("token"));
-      if (token.expired > Date.now()) {
+      if (token.expired > Date.now() && token.publicKey === publicKey) {
         return token.value;
       } else {
         localStorage.removeItem("token");
@@ -170,6 +174,7 @@ export async function login(publicKey) {
         JSON.stringify({
           value: res,
           expired: new Date(expirationTime).getTime(),
+          publicKey,
         })
       );
       return res;
@@ -250,8 +255,8 @@ export const licenses = [
 export const scales = ["<1k", "1k-10k", "10k-100k", "100k-1M", ">1M"];
 export const filterData = {
   OrderBy: [
-    { label: "Updated Time", value: "Updated Time" },
-    { label: "Likes", value: "Likes" },
-    { label: "Downloads", value: "Downloads" },
+    { label: "Updated Time", value: "all" },
+    { label: "Likes", value: "likes DESC" },
+    { label: "Downloads", value: "downloads DESC" },
   ],
 };

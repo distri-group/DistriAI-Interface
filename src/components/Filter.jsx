@@ -60,7 +60,7 @@ export default function Filter({
           }
           disabled={loading}>
           {value.map((item) => (
-            <MenuItem key={item.value} value={item.value}>
+            <MenuItem key={item.label} value={item.value}>
               {item.label}
             </MenuItem>
           ))}

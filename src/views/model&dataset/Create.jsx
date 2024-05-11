@@ -215,7 +215,7 @@ function Create({ className, type }) {
               name="Name"
               error={!!validateError.Name}
               helperText={validateError.Name}
-              placeholder="Maximum 50 characters"
+              placeholder="Maximum 100 characters"
               onChange={handleChange}
             />
           </Grid>

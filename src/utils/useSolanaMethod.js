@@ -15,7 +15,7 @@ import {
 import webconfig from "@/webconfig.js";
 import { formatBalance } from "./index.js";
 import { enqueueSnackbar } from "notistack";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const { PROGRAM, MINT_PROGRAM } = webconfig;
 
@@ -23,7 +23,10 @@ export default function useSolanaMethod() {
   const [program, setProgram] = useState(null);
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
-  const provider = new AnchorProvider(connection, wallet, {});
+  const provider = useMemo(
+    () => new AnchorProvider(connection, wallet, {}),
+    [connection, wallet]
+  );
   setProvider(provider);
   const [vault] = web3.PublicKey.findProgramAddressSync(
     [utils.bytes.utf8.encode("vault"), MINT_PROGRAM.toBytes()],
@@ -38,7 +41,7 @@ export default function useSolanaMethod() {
       setProgram(program);
     };
     initializeProgram();
-  }, []);
+  }, [provider]);
 
   // Seller's Device Make Offer
   const makeOffer = async (machineInfo) => {

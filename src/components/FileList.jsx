@@ -327,7 +327,8 @@ function FileList({
                   </Breadcrumbs>
                 )}
               </div>
-              {item.Owner === wallet.publicKey.toString() &&
+              {wallet?.publicKey &&
+                item.Owner === wallet.publicKey.toString() &&
                 !(onSelect || disableUpload) && (
                   <Stack direction="row" justifyContent="right" spacing={3}>
                     <Button
@@ -479,7 +480,8 @@ function FileList({
                         )}
                       </TableCell>
                       <TableCell align="right">
-                        {item.Owner === wallet.publicKey.toString() &&
+                        {wallet?.publicKey &&
+                          item.Owner === wallet.publicKey.toString() &&
                           !(onSelect || disableUpload) &&
                           !(
                             file.type === "directory" &&

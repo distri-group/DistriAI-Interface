@@ -63,7 +63,7 @@ function MyCreation({ className }) {
         data={filterData}
         defaultValue={{
           Name: "",
-          OrderBy: "Updated Time",
+          OrderBy: "all",
           Owner: wallet?.publicKey.toString(),
         }}
         onFilter={(value) => {

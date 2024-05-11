@@ -16,11 +16,11 @@ import Filter from "../Filter";
 function MyLike({ className }) {
   const wallet = useAnchorWallet();
   const [list, setList] = useState([]);
-  const [filterValue, setFilterValue] = useState({
-    Name: "",
-    OrderBy: "Updated Time",
-    Owner: wallet?.publicKey.toString(),
-  });
+  // const [filterValue, setFilterValue] = useState({
+  //   Name: "",
+  //   OrderBy: "Updated Time",
+  //   Owner: wallet?.publicKey.toString(),
+  // });
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,12 @@ function MyLike({ className }) {
     setList([]);
     setTotal(0);
     try {
-      const res = await getLikeList(type, wallet?.publicKey.toString());
+      const res = await getLikeList(
+        type,
+        current,
+        10,
+        wallet?.publicKey.toString()
+      );
       setList(res.List);
       setTotal(res.Total);
     } catch (error) {
@@ -39,9 +44,11 @@ function MyLike({ className }) {
     setLoading(false);
   }
   useEffect(() => {
-    loadList(current);
+    if (wallet?.publicKey) {
+      loadList(current);
+    }
     // eslint-disable-next-line
-  }, [current, filterValue, type]);
+  }, [wallet, current, type]);
   return (
     <div className={className}>
       <ToggleButtonGroup
@@ -59,11 +66,11 @@ function MyLike({ className }) {
           </ToggleButton>
         </Stack>
       </ToggleButtonGroup>
-      <Filter
+      {/* <Filter
         data={filterData}
         defaultValue={{
           Name: "",
-          OrderBy: "Updated Time",
+          OrderBy: "",
           Owner: wallet?.publicKey.toString(),
         }}
         onFilter={(value) => {
@@ -71,7 +78,7 @@ function MyLike({ className }) {
           setCurrent(1);
         }}
         loading={loading}
-      />
+      /> */}
       <div className="list">
         {loading ? (
           <div className="empty">

@@ -149,7 +149,7 @@ function Contents({ className, type }) {
               data={filterData}
               defaultValue={{
                 Name: "",
-                OrderBy: "Updated Time",
+                OrderBy: "all",
               }}
               onFilter={(value) => {
                 setFilterValue(value);

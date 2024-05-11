@@ -52,6 +52,7 @@ function Detail({ className, type }) {
   const [orderDialog, setOrderDialog] = useState(false);
   const [deployable, setDeployable] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const { client } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -82,7 +83,6 @@ function Detail({ className, type }) {
           setIntent("train");
         }
       }
-      setLoading(false);
     }
     if (wallet?.publicKey && Object.keys(item).length > 0 && type === "model") {
       loadDetail();
@@ -111,6 +111,7 @@ function Detail({ className, type }) {
       }
     } catch (error) {}
     setItem(res);
+    setLoading(false);
   }
   async function handleLiked() {
     try {
@@ -121,6 +122,11 @@ function Detail({ className, type }) {
         wallet.publicKey.toString(),
         !liked
       );
+      if (liked) {
+        setLikeCount((prev) => prev - 1);
+      } else {
+        setLikeCount((prev) => prev + 1);
+      }
       setLiked((prev) => !prev);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
@@ -187,7 +193,7 @@ function Detail({ className, type }) {
                       )}
                       <label style={{ paddingLeft: 4 }}>Like</label>
                     </Stack>
-                    <span>{item.Likes}</span>
+                    <span>{item.Likes + likeCount}</span>
                   </Stack>
                 </Stack>
                 <Stack direction="row" spacing={2}>
