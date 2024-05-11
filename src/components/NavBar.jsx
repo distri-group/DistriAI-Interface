@@ -84,8 +84,7 @@ function NavBar({ className }) {
       location.pathname === "/market" ||
       location.pathname.includes("buy") ||
       location.pathname.includes("order") ||
-      location.pathname.includes("extend") ||
-      location.pathname.includes("end") ||
+      location.pathname.includes("dashboard") ||
       location.pathname.includes("model")
     ) {
       setUser("buyer");
