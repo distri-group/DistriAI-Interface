@@ -164,11 +164,12 @@ function FileUpload({ className }) {
       setProgress(2);
       const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
-      window.open(
-        `${addr}/uploadfiles?s=${signature}&n=${
-          formValue.Name
-        }&p=${wallet.publicKey.toString()}&t=${Date.now()}`
-      );
+      const search = new URLSearchParams();
+      search.append("s", signature);
+      search.append("n", formValue.Name);
+      search.append("p", wallet.publicKey.toString());
+      search.append("t", Date.now());
+      window.open(`${addr}/uploadfiles?${search.toString()}`);
       setProgress(0);
       navigate("/dashboard");
     } catch (error) {

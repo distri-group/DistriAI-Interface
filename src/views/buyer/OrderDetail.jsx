@@ -89,10 +89,15 @@ function OrderDetail({ className }) {
       const encodeMsg = new TextEncoder().encode(msg);
       const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+      const search = new URLSearchParams();
+      search.append("s", signature);
+      search.append("n", selectedModel);
+      search.append("p", wallet.publicKey.toString());
+      search.append("t", Date.now());
       window.open(
         `http://${record.Metadata.MachineInfo.IP}:${
           record.Metadata.MachineInfo.Port
-        }/uploadfiles?s=${signature}&n=${selectedModel}&p=${wallet.publicKey.toString()}&t=${Date.now()}`
+        }/uploadfiles?${search.toString()}`
       );
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
