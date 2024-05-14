@@ -135,8 +135,7 @@ export async function login(publicKey) {
   } else {
     const apiUrl = "/user/login";
     const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
-    const provider = getProvider();
-    const sign = await provider.signMessage(encodeMsg, "utf8");
+    const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
     const Signature = utils.bytes.bs58.encode(sign.signature);
     const body = {
       Account: publicKey,

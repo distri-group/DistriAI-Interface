@@ -50,10 +50,10 @@ export default function KeepAliveLayout() {
         <NavBar />
         <KeepAlive
           activeName={cacheKey}
-          include={[/\/model/, /\/dataset/]}
+          include={["/model", "/dataset"]}
           aliveRef={aliveRef}
-          max={3}
-          strategy={"LRU"}>
+          max={2}
+          strategy="PRE">
           <ClearCacheProvider aliveRef={aliveRef}>{outlet}</ClearCacheProvider>
         </KeepAlive>
       </div>
