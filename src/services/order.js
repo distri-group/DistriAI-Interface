@@ -54,8 +54,15 @@ export async function getTotalEarnings(total, publicKey) {
     res.List.forEach((currentValue) => {
       if (currentValue.Status === 0 || currentValue.Status === 1) {
         pending += currentValue.Total;
-      } else if (currentValue.Status === 2 || currentValue.Status === 3) {
+      } else if (currentValue.Status === 2) {
         received += currentValue.Total;
+      } else if (currentValue.Status === 4) {
+        const refundDuration = Math.ceil(
+          (new Date(currentValue.RefundTime) -
+            new Date(currentValue.StartTime)) /
+            3600000
+        );
+        received += refundDuration * currentValue.Price;
       }
     });
     return { pending, received };

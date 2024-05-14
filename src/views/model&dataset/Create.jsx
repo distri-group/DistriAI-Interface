@@ -190,7 +190,6 @@ function Create({ className, type }) {
         navigate(`/${type}`);
       }, 300);
     } catch (error) {
-      console.log(error);
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);

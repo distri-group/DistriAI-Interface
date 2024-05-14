@@ -42,7 +42,6 @@ function FileList({ addr, onSelect, className }) {
       const res = await signToken(addr, wallet.publicKey.toString());
       setToken(res.data.token);
     } catch (error) {
-      console.log(error.message);
       enqueueSnackbar(error.message, { variant: "error" });
     }
   };
