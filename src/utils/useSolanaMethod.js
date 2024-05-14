@@ -18,7 +18,7 @@ const [vault] = web3.PublicKey.findProgramAddressSync(
 const systemProgram = new PublicKey("11111111111111111111111111111111");
 
 export default function useSolanaMethod() {
-  const { program } = useProgram();
+  const program = useProgram();
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
 
