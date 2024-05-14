@@ -27,6 +27,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
 import { checkDeployable, downloadItem } from "@/services/model.js";
+import { useKeepAliveContext } from "keepalive-for-react";
 
 function FileList({
   className,
@@ -56,6 +57,7 @@ function FileList({
   const [existedDialog, setExistedDialog] = useState(false);
   const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
+  const { destroy } = useKeepAliveContext();
 
   // Go back to parent folder
   const getParentPrefix = (prefix) => {
@@ -181,6 +183,7 @@ function FileList({
   const handleDownload = async (event) => {
     event.preventDefault();
     try {
+      destroy();
       await downloadItem(type, item.Owner, item.Name);
     } catch (error) {}
     const downloadLink = event.target.closest("a");

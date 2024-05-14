@@ -34,7 +34,7 @@ function NavBar({ className }) {
     const res = await getOrderList(
       1,
       100,
-      { Direction: "Buy", Status: 1 },
+      { Direction: "buy", Status: 1 },
       wallet.publicKey.toString()
     );
     let count = 0;

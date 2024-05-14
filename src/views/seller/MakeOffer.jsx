@@ -1,21 +1,20 @@
 import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 import { TextField, Grid, InputAdornment } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { getMachineDetail } from "@/services/machine.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function MakeOffer({ className }) {
   document.title = "Make Offer";
   const { id } = useParams();
-  const { state } = useLocation();
+  const { search } = useLocation();
+  const maxStorage = parseInt(new URLSearchParams(search).get("max"));
   const navigate = useNavigate();
-  const { wallet, methods } = useSolanaMethod();
+  const { methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const [maxStorage, setMaxStorage] = useState(0);
   const [formValue, setFormValue] = useState({
     price: 0,
     duration: 0,
@@ -114,21 +113,6 @@ function MakeOffer({ className }) {
     }
     setLoading(false);
   }
-  useEffect(() => {
-    async function init() {
-      setLoading(true);
-      try {
-        const detail = await getMachineDetail(state.Owner, id);
-        if (detail) {
-          setMaxStorage(parseInt(detail.Metadata?.DiskInfo?.TotalSpace));
-        }
-      } catch (error) {}
-      setLoading(false);
-    }
-    if (wallet?.publicKey) {
-      init();
-    }
-  }, [id, wallet?.publicKey, state]);
 
   return (
     <div className={className}>

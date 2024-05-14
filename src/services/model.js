@@ -4,19 +4,10 @@ import { utils } from "@project-serum/anchor";
 import { getProvider } from "@/utils/index.js";
 import { create } from "kubo-rpc-client";
 
-export async function getItemList(
-  type,
-  pageIndex,
-  pageSize,
-  filter,
-  publicKey
-) {
+export async function getItemList(type, pageIndex, pageSize, filter) {
   const apiUrl = `/${type}/list`;
   let headers = {};
-  if (publicKey) {
-    const token = await login(publicKey);
-    headers.Authorization = token;
-  }
+
   const body = {
     Page: pageIndex,
     PageSize: pageSize,
@@ -241,7 +232,8 @@ export const licenses = [
 export const scales = ["<1k", "1k-10k", "10k-100k", "100k-1M", ">1M"];
 export const filterData = {
   OrderBy: [
-    { label: "Updated Time", value: "all" },
+    { label: "Auto Sort", value: "all" },
+    { label: "Updated Time", value: "update_time DESC" },
     { label: "Likes", value: "likes DESC" },
     { label: "Downloads", value: "downloads DESC" },
   ],

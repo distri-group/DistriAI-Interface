@@ -51,13 +51,7 @@ function Contents({ className, type }) {
     setList([]);
     setTotal(0);
     try {
-      const res = await getItemList(
-        type,
-        current,
-        10,
-        filterValue,
-        wallet?.publicKey?.toString() || ""
-      );
+      const res = await getItemList(type, current, 10, filterValue);
       setList(res.List);
       setTotal(res.Total);
     } catch (error) {}
@@ -181,7 +175,11 @@ function Contents({ className, type }) {
             ) : list.length > 0 ? (
               <>
                 {list.map((item) => (
-                  <ItemCard item={item} key={item.Id} type={type} />
+                  <ItemCard
+                    item={item}
+                    key={item.Owner + "/" + item.Name}
+                    type={type}
+                  />
                 ))}
                 {total > 10 && (
                   <Pager

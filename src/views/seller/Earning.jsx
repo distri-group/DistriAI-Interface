@@ -157,7 +157,7 @@ function Earning({ className }) {
       <Filter
         data={filterData}
         defaultValue={{
-          Direction: "buy",
+          Direction: "sell",
           Status: "all",
         }}
         onFilter={(value) => {

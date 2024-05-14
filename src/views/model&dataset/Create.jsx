@@ -407,6 +407,7 @@ function Create({ className, type }) {
             className="white-btn"
             onClick={() => {
               setFormValue({});
+              destroy();
               navigate(`/${type}`);
             }}>
             Cancel

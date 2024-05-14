@@ -18,13 +18,13 @@ function MyOrder({ className }) {
   });
   const wallet = useAnchorWallet();
 
-  async function loadList(curr) {
+  async function loadList(curr, filter) {
     setLoading(true);
     try {
       const res = await getOrderList(
         curr,
         10,
-        filterValue,
+        filter,
         wallet.publicKey.toString()
       );
       setTotal(res.Total);
@@ -34,7 +34,7 @@ function MyOrder({ className }) {
   }
   useEffect(() => {
     if (wallet?.publicKey) {
-      loadList(current);
+      loadList(current, filterValue);
     }
   }, [wallet, filterValue, current]);
   useEffect(() => {
@@ -81,6 +81,7 @@ function MyOrder({ className }) {
       <Filter
         data={filterData}
         defaultValue={{
+          Direction: "buy",
           Status: "all",
         }}
         onFilter={(value) => {
