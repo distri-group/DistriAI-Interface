@@ -114,8 +114,9 @@ function DeviceList({
                 <Stack className="info">
                   <span>
                     <b>
-                      {record.Disk ||
-                        parseInt(record.Metadata.DiskInfo.TotalSpace)}
+                      {onCancel
+                        ? parseInt(record.Metadata.DiskInfo.TotalSpace)
+                        : record.Disk}
                     </b>{" "}
                     GB
                   </span>
