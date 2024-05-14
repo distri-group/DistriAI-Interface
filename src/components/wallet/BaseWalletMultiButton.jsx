@@ -94,7 +94,7 @@ export function BaseWalletMultiButton({ children, labels, ...props }) {
             {copied ? labels["copied"] : labels["copy-address"]}
           </li>
         ) : null}
-        <li
+        {/* <li
           className="wallet-adapter-dropdown-list-item"
           onClick={() => {
             setModalVisible(true);
@@ -102,7 +102,7 @@ export function BaseWalletMultiButton({ children, labels, ...props }) {
           }}
           role="menuitem">
           {labels["change-wallet"]}
-        </li>
+        </li> */}
         {onDisconnect ? (
           <li
             className="wallet-adapter-dropdown-list-item"
