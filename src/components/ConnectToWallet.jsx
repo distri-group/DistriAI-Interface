@@ -7,6 +7,7 @@ export default function ConnectToWallet({ open }) {
   const wallet = useAnchorWallet();
   return (
     <Modal
+      disableScrollLock
       open={!wallet?.publicKey && open}
       slotProps={{ root: { style: { zIndex: "300" } } }}>
       <Box
