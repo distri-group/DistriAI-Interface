@@ -56,11 +56,16 @@ export async function getClaimableReward(
   publicKey
 ) {
   const apiUrl = baseUrl + "/claimable/list";
-  const body = {
-    Period: period ?? "",
-    Page: pageIndex,
-    PageSize: pageSize,
-  };
+  const body = !isNaN(period)
+    ? {
+        Period: period,
+        PageIndex: pageIndex,
+        PageSize: pageSize,
+      }
+    : {
+        PageIndex: pageIndex,
+        PageSize: pageSize,
+      };
   const headers = {
     Account: publicKey,
   };
