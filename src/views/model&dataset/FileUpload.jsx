@@ -5,7 +5,10 @@ import {
   MenuItem,
   Select,
   Stack,
-  Button,
+  Box,
+  Modal,
+  LinearProgress,
+  CircularProgress,
 } from "@mui/material";
 import { MuiChipsInput } from "mui-chips-input";
 import { useSnackbar } from "notistack";
@@ -16,8 +19,9 @@ import * as anchor from "@project-serum/anchor";
 import { frameworks, licenses } from "@/services/model";
 import useSolanaMethod from "@/utils/useSolanaMethod";
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getOrderDetail } from "@/services/order";
+import { LoadingButton } from "@mui/lab";
 
 function FileUpload({ className }) {
   const { enqueueSnackbar } = useSnackbar();
@@ -37,6 +41,7 @@ function FileUpload({ className }) {
     Type1: null,
     Type2: null,
   });
+  const [progressing, setProgress] = useState(0);
   const [chips, setChips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [orderDetail, setOrderDetail] = useState(null);
@@ -47,6 +52,7 @@ function FileUpload({ className }) {
   }, [orderDetail]);
   const { methods: solanaMethods } = useSolanaMethod();
   const { id } = useParams();
+  const navigate = useNavigate();
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -149,11 +155,13 @@ function FileUpload({ className }) {
     };
     try {
       setLoading(true);
+      setProgress(1);
       await solanaMethods.createModel(model, wallet.publicKey);
       const msg = `upload/file/${parseInt(
-        Date.now() / 100000
+        Date.now() / 1000000
       )}/${wallet?.publicKey.toString()}`;
       const encodeMsg = new TextEncoder().encode(msg);
+      setProgress(2);
       const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
       window.open(
@@ -161,10 +169,12 @@ function FileUpload({ className }) {
           formValue.Name
         }&p=${wallet.publicKey.toString()}&t=${Date.now()}`
       );
+      setProgress(0);
+      navigate("/dashboard");
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
-      setLoading(false);
     }
+    setLoading(false);
   }
   useEffect(() => {
     async function loadDetail() {
@@ -305,18 +315,56 @@ function FileUpload({ className }) {
           </Grid>
           <Grid item md={12}>
             <Stack direction="row" justifyContent="center">
-              <Button
+              <LoadingButton
+                loading={loading}
                 type="submit"
                 className="cbtn"
                 style={{
                   width: 160,
                 }}>
-                <span>Next Step</span>
-              </Button>
+                {!loading && <span>Next Step</span>}
+              </LoadingButton>
             </Stack>
           </Grid>
         </Grid>
       </form>
+      <Modal open={loading} slotProps={{ root: { style: { zIndex: "300" } } }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 1000,
+            height: 300,
+            bgcolor: "#00000b",
+            p: 4,
+            zIndex: 300,
+            borderRadius: "8px",
+          }}>
+          <Stack
+            justifyContent="space-between"
+            alignItems="center"
+            style={{ height: "100%" }}>
+            <h2>Creating model with selecting files</h2>
+            <CircularProgress size={48} />
+            <span style={{ fontSize: 20 }}>{progress[progressing]}</span>
+            <LinearProgress
+              variant="determinate"
+              value={(progressing / (progress.length - 1)) * 100}
+              sx={{
+                width: "100%",
+                height: 16,
+                borderRadius: 4,
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: "#D7FF65",
+                },
+                backgroundColor: "#ccc",
+              }}
+            />
+          </Stack>
+        </Box>
+      </Modal>
     </div>
   );
 }
@@ -330,3 +378,9 @@ export default styled(FileUpload)`
     padding: 16px 0;
   }
 `;
+
+const progress = [
+  "default",
+  "Creating model...",
+  "Please sign in Phantom to select model files to upload.",
+];
