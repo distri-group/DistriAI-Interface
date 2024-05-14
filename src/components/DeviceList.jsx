@@ -18,7 +18,7 @@ function DeviceList({
 }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
-  const { clearCache } = useClearCache;
+  const { clearCache } = useClearCache();
   const [connectModal, setConnectModal] = useState(false);
   const [priceSort, setPriceSort] = useState(0);
 
