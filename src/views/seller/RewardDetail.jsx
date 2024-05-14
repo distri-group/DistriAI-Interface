@@ -12,6 +12,7 @@ import { LoadingButton } from "@mui/lab";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import DeviceCard from "@/components/DeviceCard.jsx";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
+import { formatBalance } from "@/utils/index.js";
 
 function RewardDetail({ className }) {
   const { period } = useParams();
@@ -177,11 +178,11 @@ function RewardDetail({ className }) {
                 loading={claiming}
                 onClick={claimButchRewards}>
                 {claiming ? (
-                  <span></span>
+                  <label></label>
                 ) : claimed ? (
-                  <span>All Claimed</span>
+                  <label>All Claimed</label>
                 ) : (
-                  <span>Claim Rewards</span>
+                  <label>Claim Rewards</label>
                 )}
               </LoadingButton>
             </div>
@@ -238,7 +239,7 @@ function RewardDetail({ className }) {
                 style={{ margin: "0 40px 40px 40px" }}>
                 <label>Rewards</label>
                 <Stack spacing={1}>
-                  <span>{device.PeriodicRewards}</span>
+                  <span>{formatBalance(device.PeriodicRewards)}</span>
                   <label style={{ textAlign: "right" }}>DIST</label>
                 </Stack>
               </Stack>
