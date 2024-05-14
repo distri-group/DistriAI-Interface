@@ -5,25 +5,18 @@ import {
   MenuItem,
   Select,
   Stack,
-  Modal,
-  LinearProgress,
-  Box,
-  CircularProgress,
   Button,
 } from "@mui/material";
 import { MuiChipsInput } from "mui-chips-input";
 import { useSnackbar } from "notistack";
 import { useEffect, useMemo, useState } from "react";
-import FileList from "@/components/files/FileList";
 import types from "@/services/types.json";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
-import axios from "axios";
 import { frameworks, licenses } from "@/services/model";
 import useSolanaMethod from "@/utils/useSolanaMethod";
-import useIpfs from "@/utils/useIpfs";
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getOrderDetail } from "@/services/order";
 
 function FileUpload({ className }) {
@@ -46,17 +39,13 @@ function FileUpload({ className }) {
   });
   const [chips, setChips] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [progressing, setProgressing] = useState(0);
-  const [selectedPaths, setSelectedPaths] = useState([]);
   const [orderDetail, setOrderDetail] = useState(null);
   const addr = useMemo(() => {
     if (orderDetail?.Metadata?.MachineInfo?.IP) {
       return `http://${orderDetail.Metadata.MachineInfo.IP}:${orderDetail.Metadata.MachineInfo.Port}`;
     }
   }, [orderDetail]);
-  const { client } = useIpfs();
   const { methods: solanaMethods } = useSolanaMethod();
-  const navigate = useNavigate();
   const { id } = useParams();
 
   function handleChange(e) {
@@ -160,40 +149,18 @@ function FileUpload({ className }) {
     };
     try {
       setLoading(true);
-      setProgressing(1);
-      await solanaMethods.createModel(
-        {
-          ...formValue,
-          Tags: formValue.Tags.toString(),
-        },
-        wallet.publicKey
-      );
-      setProgressing(2);
+      await solanaMethods.createModel(model, wallet.publicKey);
       const msg = `upload/file/${parseInt(
         Date.now() / 100000
       )}/${wallet?.publicKey.toString()}`;
       const encodeMsg = new TextEncoder().encode(msg);
       const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
-      setProgressing(3);
-      const res = await axios.post(`${addr}/distri/uploadfile/ipfs`, {
-        signature,
-        fileList: selectedPaths,
-      });
-      for (let item of res.data.resUploadFile) {
-        await client.files.cp(
-          `/ipfs/${item.cid}`,
-          `/distri.ai/model/${wallet.publicKey.toString()}/${model.Name}${
-            item.path
-          }`,
-          { parents: true }
-        );
-      }
-      setProgressing(4);
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/dashboard");
-      }, 2000);
+      window.open(
+        `${addr}/uploadfiles?s=${signature}&n=${
+          formValue.Name
+        }&p=${wallet.publicKey.toString()}&t=${Date.now()}`
+      );
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
       setLoading(false);
@@ -337,19 +304,6 @@ function FileUpload({ className }) {
             </Stack>
           </Grid>
           <Grid item md={12}>
-            <Stack spacing={2}>
-              <label>Model Files</label>
-              {orderDetail ? (
-                <FileList
-                  addr={addr}
-                  onSelect={(paths) => setSelectedPaths(paths)}
-                />
-              ) : (
-                <CircularProgress />
-              )}
-            </Stack>
-          </Grid>
-          <Grid item md={12}>
             <Stack direction="row" justifyContent="center">
               <Button
                 type="submit"
@@ -357,41 +311,12 @@ function FileUpload({ className }) {
                 style={{
                   width: 160,
                 }}>
-                <span>Submit</span>
+                <span>Next Step</span>
               </Button>
             </Stack>
           </Grid>
         </Grid>
       </form>
-      <Modal open={loading} slotProps={{ root: { style: { zIndex: "300" } } }}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 1000,
-            bgcolor: "#ffffff",
-            p: 4,
-            zIndex: 300,
-            borderRadius: "8px",
-          }}>
-          <div className="login-box">
-            <Stack spacing={2} alignItems="center">
-              <h2 className="text-[32px] font-bold">Creating Model</h2>
-              <CircularProgress size={100} />
-              <span>{progress[progressing]}</span>
-              <LinearProgress
-                variant="determinate"
-                value={parseInt(((progressing + 1) / progress.length) * 100)}
-                sx={{
-                  width: "100%",
-                }}
-              />
-            </Stack>
-          </div>
-        </Box>
-      </Modal>
     </div>
   );
 }
@@ -405,11 +330,3 @@ export default styled(FileUpload)`
     padding: 16px 0;
   }
 `;
-
-const progress = [
-  "default",
-  "Creating model...Please confirm transaction on Phantom.",
-  "Please sign message on Phantom for uploading model files.",
-  "Uploading model files...",
-  "Model created",
-];

@@ -238,9 +238,11 @@ function DeviceList({
               }
               if (record.Status === 0) {
                 destroy();
-                return navigate("/device/" + record.Uuid + "/list", {
-                  state: { Owner: record.Owner },
-                });
+                return navigate(
+                  "/device/" +
+                    record.Uuid +
+                    `/list?max=${parseInt(record.Metadata.DiskInfo.TotalSpace)}`
+                );
               }
               if (record.Status === 1) {
                 return onCancel(record);

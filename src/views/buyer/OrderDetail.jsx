@@ -12,12 +12,16 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  MenuItem,
+  Select,
   Stack,
 } from "@mui/material";
 import DurationProgress from "@/components/DurationProgress.jsx";
 import Countdown from "@/components/Countdown.jsx";
 import DeviceCard from "@/components/DeviceCard.jsx";
+import * as anchor from "@project-serum/anchor";
 import { capitalize } from "lodash";
+import { getItemList } from "@/services/model";
 
 function OrderDetail({ className }) {
   const { id } = useParams();
@@ -25,19 +29,22 @@ function OrderDetail({ className }) {
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
   const [endDialog, setEndDialog] = useState(false);
+  const [fileUploadDialog, setFileUploadDialog] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("default");
+  const [modelList, setModelList] = useState([]);
   const wallet = useAnchorWallet();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
+  async function loadDetail() {
+    setLoading(true);
+    try {
+      const res = await getOrderDetail(id);
+      setRecord(res);
+    } catch (error) {}
+    setLoading(false);
+  }
   useEffect(() => {
-    async function loadDetail() {
-      setLoading(true);
-      try {
-        const res = await getOrderDetail(id);
-        setRecord(res);
-      } catch (error) {}
-      setLoading(false);
-    }
     if (wallet?.publicKey) {
       loadDetail();
     }
@@ -56,6 +63,55 @@ function OrderDetail({ className }) {
       return setEndDialog(true);
     }
   }
+  async function checkIfEnd(id) {
+    const timer = setInterval(async () => {
+      const res = await getOrderDetail(id);
+      if (
+        res.StatusName === "Completed" ||
+        res.StatusName === "Failed" ||
+        res.StatusName === "Refunded"
+      ) {
+        clearInterval(timer);
+        loadDetail();
+      }
+    }, 3000);
+  }
+  async function handleFileSelect() {
+    if (selectedModel === "default") {
+      return enqueueSnackbar("Please select model to upload files", {
+        variant: "info",
+      });
+    }
+    try {
+      const msg = `upload/file/${parseInt(
+        Date.now() / 1000000
+      )}/${wallet?.publicKey.toString()}`;
+      const encodeMsg = new TextEncoder().encode(msg);
+      const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
+      const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+      window.open(
+        `http://${record.Metadata.MachineInfo.IP}:${
+          record.Metadata.MachineInfo.Port
+        }/uploadfiles?s=${signature}&n=${selectedModel}&p=${wallet.publicKey.toString()}&t=${Date.now()}`
+      );
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    setFileUploadDialog(false);
+    setSelectedModel("default");
+  }
+  useEffect(() => {
+    const getCreatedModelList = async () => {
+      const res = await getItemList("model", 1, 100, {
+        Owner: wallet.publicKey.toString(),
+      });
+      setModelList(res.List);
+    };
+    if (wallet?.publicKey) {
+      getCreatedModelList();
+    }
+  }, [wallet]);
+
   return (
     <div className={className}>
       <div>
@@ -97,10 +153,8 @@ function OrderDetail({ className }) {
                           <Button
                             className="cbtn"
                             style={{ width: 180 }}
-                            onClick={() =>
-                              navigate(`/order/${id}/create-model`)
-                            }>
-                            Create Model
+                            onClick={() => setFileUploadDialog(true)}>
+                            Upload File
                           </Button>
                         )}
                       </Stack>
@@ -129,6 +183,7 @@ function OrderDetail({ className }) {
                                   deadlineTime={new Date(
                                     record.EndTime
                                   ).getTime()}
+                                  onEnd={checkIfEnd}
                                 />
                               </span>
                             </>
@@ -268,15 +323,43 @@ function OrderDetail({ className }) {
         </DialogContent>
         <DialogActions>
           <Button
-            style={{
-              backgroundColor: "#94d6e2",
-              borderRadius: "3px",
-              color: "black",
-              padding: "4px 12px",
-            }}
+            className="cbtn"
             onClick={() => setEndDialog(false)}
             autoFocus>
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={fileUploadDialog}>
+        <DialogTitle>Upload device files to model</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <span>
+              Are you willing to upload files to model already created or create
+              a model before?
+            </span>
+            <Select
+              value={selectedModel}
+              onChange={(e) => {
+                setSelectedModel(e.target.value);
+              }}>
+              <MenuItem value="default" disabled>
+                <span style={{ color: "black" }}>
+                  Please select model you created here
+                </span>
+              </MenuItem>
+              {modelList.map((model) => (
+                <MenuItem key={model.Name} value={model.Name}>
+                  <span style={{ color: "black" }}>{model.Name}</span>
+                </MenuItem>
+              ))}
+            </Select>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleFileSelect}>Select file</Button>
+          <Button onClick={() => navigate(`/order/${id}/create-model`)}>
+            Create a new model
           </Button>
         </DialogActions>
       </Dialog>
