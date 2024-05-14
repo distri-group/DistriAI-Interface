@@ -1,11 +1,4 @@
-import {
-  utils,
-  web3,
-  Program,
-  BN,
-  AnchorProvider,
-  setProvider,
-} from "@project-serum/anchor";
+import { utils, web3, BN } from "@project-serum/anchor";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey, Transaction } from "@solana/web3.js";
 import {
@@ -15,33 +8,19 @@ import {
 import webconfig from "@/webconfig.js";
 import { formatBalance } from "./index.js";
 import { enqueueSnackbar } from "notistack";
-import { useEffect, useMemo, useState } from "react";
+import { useProgram } from "../KeepAliveLayout.jsx";
 
 const { PROGRAM, MINT_PROGRAM } = webconfig;
+const [vault] = web3.PublicKey.findProgramAddressSync(
+  [utils.bytes.utf8.encode("vault"), MINT_PROGRAM.toBytes()],
+  PROGRAM
+);
+const systemProgram = new PublicKey("11111111111111111111111111111111");
 
 export default function useSolanaMethod() {
-  const [program, setProgram] = useState(null);
+  const program = useProgram();
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
-  const provider = useMemo(
-    () => new AnchorProvider(connection, wallet, {}),
-    [connection, wallet]
-  );
-  setProvider(provider);
-  const [vault] = web3.PublicKey.findProgramAddressSync(
-    [utils.bytes.utf8.encode("vault"), MINT_PROGRAM.toBytes()],
-    PROGRAM
-  );
-  const systemProgram = new PublicKey("11111111111111111111111111111111");
-
-  useEffect(() => {
-    const initializeProgram = async () => {
-      const idl = await Program.fetchIdl(PROGRAM, provider);
-      const program = new Program(idl, PROGRAM, provider);
-      setProgram(program);
-    };
-    initializeProgram();
-  }, [provider]);
 
   // Seller's Device Make Offer
   const makeOffer = async (machineInfo) => {
@@ -394,6 +373,11 @@ export default function useSolanaMethod() {
   };
 
   const handleError = (error) => {
+    if (!program) {
+      return new Error(
+        "Solana program not initialized. Please check your network connection and refresh the page."
+      );
+    }
     if (error.message.includes("found no record of a prior credit.")) {
       return new Error(
         "Token account not initialzed. Please go to Faucet and claim DIST before operating."
