@@ -33,10 +33,10 @@ function OrderList({ className, list, loading, reloadFunc }) {
       );
       console.log(href);
       window.open(href);
-      setSigning(false);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
+    setSigning(false);
   };
   let columns = [
     {
