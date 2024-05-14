@@ -54,7 +54,7 @@ export async function getTotalEarnings(total, publicKey) {
     res.List.forEach((currentValue) => {
       if (currentValue.Status === 0 || currentValue.Status === 1) {
         pending += currentValue.Total;
-      } else if (currentValue.Status === 2) {
+      } else if (currentValue.Status === 2 || currentValue.Status === 3) {
         received += currentValue.Total;
       }
     });
