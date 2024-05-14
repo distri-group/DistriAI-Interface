@@ -15,8 +15,8 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 import Pager from "@/components/pager.jsx";
 import { capitalize } from "lodash";
-import Filter from "../../components/Filter.jsx";
-import { useKeepAliveContext } from "keepalive-for-react";
+import Filter from "@/components/Filter.jsx";
+import { useClearCache } from "@/components/ClearCacheProvider.jsx";
 
 function Contents({ className, type }) {
   document.title = capitalize(type + "s");
@@ -34,7 +34,7 @@ function Contents({ className, type }) {
   const [search, setSearch] = useState("");
   const wallet = useAnchorWallet();
   const inputTimer = useRef(null);
-  const { destroy } = useKeepAliveContext();
+  const { clearCache } = useClearCache();
   const chipStyle = {
     borderRadius: "8px",
     margin: "6px",
@@ -158,7 +158,7 @@ function Contents({ className, type }) {
             <Button
               onClick={() => {
                 if (wallet?.publicKey) {
-                  destroy();
+                  clearCache();
                   navigate(`/${type}/add`);
                 } else setModal(true);
               }}

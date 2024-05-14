@@ -9,13 +9,13 @@ import { getMachineDetail } from "@/services/machine.js";
 import { signToken } from "@/services/order.js";
 import Countdown from "./Countdown.jsx";
 import { useSnackbar } from "notistack";
-import { useKeepAliveContext } from "keepalive-for-react";
+import { useClearCache } from "./ClearCacheProvider.jsx";
 
 function OrderList({ className, list, loading, reloadFunc }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
-  const { destroy } = useKeepAliveContext();
+  const { clearCache } = useClearCache();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
   const handleConsole = async (order, deploy) => {
@@ -127,7 +127,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
             Date.now() - new Date(record.OrderTime).getTime() > 300000 ? (
               <Button
                 onClick={() => {
-                  destroy();
+                  clearCache();
                   navigate(`/order/${text}/end`);
                 }}
                 className="white-btn"

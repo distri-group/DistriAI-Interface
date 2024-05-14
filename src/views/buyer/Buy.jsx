@@ -20,7 +20,7 @@ import { getMachineDetail } from "@/services/machine.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import useIpfs from "@/utils/useIpfs.js";
 import { getTotal } from "@/utils/index.js";
-import { useKeepAliveContext } from "keepalive-for-react";
+import { useClearCache } from "@/components/ClearCacheProvider";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -48,7 +48,7 @@ function Buy({ className }) {
   const [selectedModel, setSelectedModel] = useState({ Id: 0 });
   const [deployable, setDeployable] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
-  const { destroy } = useKeepAliveContext();
+  const { clearCache } = useClearCache();
   const amount = useMemo(() => {
     if (deviceDetail.Price) {
       return getTotal(deviceDetail.Price, parseFloat(formValue.duration));
@@ -146,7 +146,7 @@ function Buy({ className }) {
       });
       enqueueSnackbar("Purchase success.", { variant: "success" });
       setTimeout(() => {
-        destroy();
+        clearCache();
         navigate("/dashboard");
       }, 500);
     } catch (error) {

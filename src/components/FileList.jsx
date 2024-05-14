@@ -27,7 +27,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
 import { checkDeployable, downloadItem } from "@/services/model.js";
-import { useKeepAliveContext } from "keepalive-for-react";
+import { useClearCache } from "./ClearCacheProvider";
 
 function FileList({
   className,
@@ -57,7 +57,7 @@ function FileList({
   const [existedDialog, setExistedDialog] = useState(false);
   const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
-  const { destroy } = useKeepAliveContext();
+  const { clearCache } = useClearCache();
 
   // Go back to parent folder
   const getParentPrefix = (prefix) => {
@@ -183,7 +183,7 @@ function FileList({
   const handleDownload = async (event) => {
     event.preventDefault();
     try {
-      destroy();
+      clearCache();
       await downloadItem(type, item.Owner, item.Name);
     } catch (error) {}
     const downloadLink = event.target.closest("a");
@@ -550,7 +550,7 @@ function FileList({
             transform: "translate(-50%, -50%)",
             width: 1000,
             maxHeight: 600,
-            overflowY: "scroll",
+            overflowY: "auto",
             bgcolor: "#00000b",
             p: 4,
             zIndex: 300,

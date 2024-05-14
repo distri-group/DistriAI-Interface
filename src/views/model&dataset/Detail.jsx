@@ -35,6 +35,8 @@ import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
 import { copy } from "@/utils/index.js";
 import { useSnackbar } from "notistack";
+import { useProgram } from "@/KeepAliveLayout";
+import { useClearCache } from "@/components/ClearCacheProvider";
 
 function Detail({ className, type }) {
   document.title = `${capitalize(type)} Detail`;
@@ -55,6 +57,7 @@ function Detail({ className, type }) {
   const [likeCount, setLikeCount] = useState(0);
   const { client } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
+  const { clearCache } = useClearCache();
 
   function handleTabChange(e, newValue) {
     setTabValue(newValue);
@@ -115,6 +118,7 @@ function Detail({ className, type }) {
   }
   async function handleLiked() {
     try {
+      clearCache();
       await likeItem(
         type,
         item.Owner,

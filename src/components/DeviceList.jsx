@@ -6,7 +6,7 @@ import { Button, Grid, Stack } from "@mui/material";
 import { formatAddress, getProvider } from "@/utils/index.js";
 import Table from "./Table.jsx";
 import ConnectToWallet from "./ConnectToWallet.jsx";
-import { useKeepAliveContext } from "keepalive-for-react";
+import { useClearCache } from "./ClearCacheProvider.jsx";
 
 function DeviceList({
   className,
@@ -18,7 +18,7 @@ function DeviceList({
 }) {
   const navigate = useNavigate();
   const wallet = useAnchorWallet();
-  const { destroy } = useKeepAliveContext();
+  const { clearCache } = useClearCache;
   const [connectModal, setConnectModal] = useState(false);
   const [priceSort, setPriceSort] = useState(0);
 
@@ -229,7 +229,7 @@ function DeviceList({
                 return setConnectModal(true);
               }
               if (onPriceSort) {
-                destroy();
+                clearCache();
                 return navigate(
                   `/device/${record.Uuid}/buy?own=${record.Owner}`,
                   {
@@ -238,7 +238,7 @@ function DeviceList({
                 );
               }
               if (record.Status === 0) {
-                destroy();
+                clearCache();
                 return navigate(
                   "/device/" +
                     record.Uuid +

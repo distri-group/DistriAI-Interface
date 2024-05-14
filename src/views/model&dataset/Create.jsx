@@ -19,7 +19,7 @@ import { LoadingButton } from "@mui/lab";
 import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
 import useSolanaMethod from "@/utils/useSolanaMethod";
-import { useKeepAliveContext } from "keepalive-for-react";
+import { useClearCache } from "@/components/ClearCacheProvider";
 
 function Create({ className, type }) {
   document.title = `Create ${capitalize(type)}`;
@@ -27,7 +27,7 @@ function Create({ className, type }) {
   const wallet = useAnchorWallet();
   const { methods: solanaMethods } = useSolanaMethod();
   const { methods } = useIpfs();
-  const { destroy } = useKeepAliveContext();
+  const { clearCache } = useClearCache();
   const { enqueueSnackbar } = useSnackbar();
   const [formValue, setFormValue] = useState({
     Name: "",
@@ -186,7 +186,7 @@ function Create({ className, type }) {
       }
       enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
       setTimeout(() => {
-        destroy();
+        clearCache();
         navigate(`/${type}`);
       }, 300);
     } catch (error) {
@@ -407,7 +407,7 @@ function Create({ className, type }) {
             className="white-btn"
             onClick={() => {
               setFormValue({});
-              destroy();
+              clearCache();
               navigate(`/${type}`);
             }}>
             Cancel

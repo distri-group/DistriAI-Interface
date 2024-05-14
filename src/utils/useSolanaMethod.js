@@ -18,7 +18,7 @@ const [vault] = web3.PublicKey.findProgramAddressSync(
 const systemProgram = new PublicKey("11111111111111111111111111111111");
 
 export default function useSolanaMethod() {
-  const program = useProgram();
+  const { program } = useProgram();
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
 
@@ -384,6 +384,8 @@ export default function useSolanaMethod() {
       );
     } else if (error.message.includes("custom program error: 0x1")) {
       return new Error("Insufficient token balance.");
+    } else if (error.message.includes("custom program error: 0xbc4")) {
+      return new Error("Insufficient reward pool balance.");
     }
     return error;
   };
