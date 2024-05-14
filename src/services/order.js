@@ -40,6 +40,7 @@ export async function getTotalEarnings(total, publicKey) {
   const body = {
     Page: 1,
     PageSize: total,
+    Direction: "sell",
   };
   const headers = {
     Account: publicKey,

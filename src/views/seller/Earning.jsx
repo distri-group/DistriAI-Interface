@@ -1,4 +1,4 @@
-import { Button, Stack } from "@mui/material";
+import { Button, CircularProgress, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
   getOrderList,
@@ -20,6 +20,8 @@ function Earning({ className }) {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [total, setTotal] = useState(0);
+  const [initialTotal, setInitialTotal] = useState(0);
+  const [totalLoading, setTotalLoading] = useState(false);
   const [current, setCurrent] = useState(1);
   const [filterValue, setFilterValue] = useState({
     Direction: "sell",
@@ -39,14 +41,11 @@ function Earning({ className }) {
           filterValue,
           wallet.publicKey.toString()
         );
+        if (initialTotal === 0) {
+          setInitialTotal(res.Total);
+        }
         setTotal(res.Total);
         setList(res.List);
-        const { pending, received } = await getTotalEarnings(
-          res.Total,
-          wallet.publicKey.toString()
-        );
-        setPending(formatBalance(pending));
-        setReceived(formatBalance(received));
       } catch (error) {}
       setLoading(false);
     }
@@ -54,6 +53,21 @@ function Earning({ className }) {
       loadList(current);
     }
   }, [wallet, filterValue, current]);
+  useEffect(() => {
+    const getEarnings = async () => {
+      setTotalLoading(true);
+      const { pending, received } = await getTotalEarnings(
+        initialTotal,
+        wallet.publicKey.toString()
+      );
+      setPending(formatBalance(pending));
+      setReceived(formatBalance(received));
+      setTotalLoading(false);
+    };
+    if (wallet?.publicKey && initialTotal > 0) {
+      getEarnings();
+    }
+  }, [wallet, initialTotal]);
   const columns = [
     {
       title: "Time",
@@ -137,7 +151,11 @@ function Earning({ className }) {
         <Stack spacing={2} className="box">
           <label>All order earnings you have already received.</label>
           <Stack direction="row" spacing={1} alignItems="center">
-            <span className="number">{received}</span>
+            {totalLoading ? (
+              <CircularProgress size={40} />
+            ) : (
+              <span className="number">{received}</span>
+            )}
             <label style={{ color: "white" }}>DIST</label>
           </Stack>
           <span>Received</span>
@@ -148,7 +166,11 @@ function Earning({ className }) {
             completed.
           </label>
           <Stack direction="row" spacing={1} alignItems="center">
-            <span className="number">{pending}</span>
+            {totalLoading ? (
+              <CircularProgress size={40} />
+            ) : (
+              <span className="number">{pending}</span>
+            )}
             <label style={{ color: "white" }}>DIST</label>
           </Stack>
           <span>Pending</span>
