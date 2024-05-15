@@ -233,7 +233,7 @@ function DeviceList({
                 return navigate(
                   `/device/${record.Uuid}/buy?own=${record.Owner}`,
                   {
-                    state: { model },
+                    state: model,
                   }
                 );
               }

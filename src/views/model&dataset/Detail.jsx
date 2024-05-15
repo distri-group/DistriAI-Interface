@@ -349,7 +349,10 @@ function Detail({ className, type }) {
               className="cbtn"
               onClick={() => {
                 navigate("/market", {
-                  state: { modelId: item.Id, intent: dialog },
+                  state: {
+                    model: { name: item.Name, owner: item.Owner },
+                    intent: dialog,
+                  },
                 });
                 setDialog("");
               }}>

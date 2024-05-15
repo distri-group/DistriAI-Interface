@@ -45,7 +45,7 @@ function Buy({ className }) {
   const [filesToUpload, setFiles] = useState([]);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
-  const [selectedModel, setSelectedModel] = useState({ Id: 0 });
+  const [selectedModel, setSelectedModel] = useState({});
   const [deployable, setDeployable] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
   const { clearCache } = useClearCache();
@@ -82,7 +82,9 @@ function Buy({ className }) {
   }
   function handleModelChange(e) {
     const selectedModel = models.find(
-      (model) => model.Id === parseInt(e.target.value)
+      (model) =>
+        `${model.Owner.slice(0, 4)}..${model.Owner.slice(-4)}/${model.Name}` ===
+        e.target.value
     );
     setFormValue((prevState) => ({
       ...prevState,
@@ -173,8 +175,10 @@ function Buy({ className }) {
       setModels(models.List);
       if (state?.model) {
         const selectedModel = models.List.find(
-          (model) => model.Id === parseInt(state.model.modelId)
+          (model) =>
+            model.Name === state.model.name && model.Owner === state.model.owner
         );
+        console.log(state, selectedModel);
         setFormValue((prevState) => ({
           ...prevState,
           usage: state.model.intent,
@@ -183,7 +187,7 @@ function Buy({ className }) {
             4
           )}..${selectedModel.Owner.slice(-4)}/${selectedModel.Name}`,
         }));
-        setSelectedModel();
+        setSelectedModel(selectedModel);
       }
       const device = await getMachineDetail(owner, id);
       setDeviceDetail(device);
@@ -357,10 +361,25 @@ function Buy({ className }) {
                               downloadLinks: [],
                             }));
                           }}
-                          value={selectedModel.Id}>
+                          value={`${selectedModel.Owner.slice(
+                            0,
+                            4
+                          )}..${selectedModel.Owner.slice(-4)}/${
+                            selectedModel.Name
+                          }`}>
                           {models.map((model) => (
-                            <MenuItem value={model.Id} key={model.Id}>
-                              {model.Name}
+                            <MenuItem
+                              value={`${model.Owner.slice(
+                                0,
+                                4
+                              )}..${model.Owner.slice(-4)}/${model.Name}`}
+                              key={`${model.Owner.slice(
+                                0,
+                                4
+                              )}..${model.Owner.slice(-4)}/${model.Name}`}>
+                              {`${model.Owner.slice(0, 4)}..${model.Owner.slice(
+                                -4
+                              )}/${model.Name}`}
                             </MenuItem>
                           ))}
                         </Select>
