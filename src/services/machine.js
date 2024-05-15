@@ -20,61 +20,49 @@ export async function getMachineList(pageIndex, pageSize, filter, publicKey) {
       }
     });
   }
-  try {
-    const res = await axios.post(apiUrl, body, {
-      headers,
-    });
-    for (let machine of res.List) {
-      machine = formatMachine(machine);
-    }
-    return res;
-  } catch (error) {
-    throw error;
+  const res = await axios.post(apiUrl, body, {
+    headers,
+  });
+  for (let machine of res.List) {
+    machine = formatMachine(machine);
   }
+  return res;
 }
 
 // Retrieve the detailed information of the machine from the storage based on the provided id.
 export async function getMachineDetail(Owner, Uuid) {
   const apiUrl = baseUrl + `/${Owner}/${Uuid}`;
-  try {
-    const res = await axios.get(apiUrl);
-    return formatMachine(res);
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.get(apiUrl);
+  return formatMachine(res);
 }
 
 export async function getFilterData() {
   const apiUrl = baseUrl + "/filter";
-  try {
-    let res = await axios.post(apiUrl);
-    Object.entries(res).forEach(([key, value]) => {
-      value.forEach((item, index) => {
-        value[index] = {
-          label: item,
-          value: item,
-        };
-      });
-      value.unshift({
-        label:
-          "ANY " +
-          (key === "Gpu" ? "GPU" : key === "GpuCount" ? "GPU Count" : key),
-        value: "all",
-      });
+  let res = await axios.post(apiUrl);
+  Object.entries(res).forEach(([key, value]) => {
+    value.forEach((item, index) => {
+      value[index] = {
+        label: item,
+        value: item,
+      };
     });
-    res.OrderBy = [
-      { label: "Auto Sort", value: "all" },
-      { label: "TFLOPS", value: "tflops DESC" },
-      { label: "Score", value: "score DESC" },
-      { label: "Reliability", value: "reliability" },
-      { label: "Max Duration", value: "max_duration DESC" },
-      { label: "Disk", value: "disk DESC" },
-      { label: "RAM", value: "ram DESC" },
-    ];
-    return res;
-  } catch (error) {
-    throw error;
-  }
+    value.unshift({
+      label:
+        "ANY " +
+        (key === "Gpu" ? "GPU" : key === "GpuCount" ? "GPU Count" : key),
+      value: "all",
+    });
+  });
+  res.OrderBy = [
+    { label: "Auto Sort", value: "all" },
+    { label: "TFLOPS", value: "tflops DESC" },
+    { label: "Score", value: "score DESC" },
+    { label: "Reliability", value: "reliability" },
+    { label: "Max Duration", value: "max_duration DESC" },
+    { label: "Disk", value: "disk DESC" },
+    { label: "RAM", value: "ram DESC" },
+  ];
+  return res;
 }
 
 // Format Machine Info

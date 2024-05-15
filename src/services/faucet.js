@@ -8,12 +8,8 @@ import {
 
 // Get DIST Faucet
 export async function DISTFaucet(publicKey) {
-  try {
-    const res = await axios.post("/faucet", { Account: publicKey });
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.post("/faucet", { Account: publicKey });
+  return res;
 }
 
 // Get SOL Faucet
