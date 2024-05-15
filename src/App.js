@@ -6,7 +6,7 @@ import {
   ConnectionProvider,
 } from "@solana/wallet-adapter-react";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import { WalletModalProvider } from "./components/wallet/WalletModalProvider.jsx";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles/index.js";
 import { Buffer } from "buffer";

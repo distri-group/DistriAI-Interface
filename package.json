@@ -36,6 +36,7 @@
     "moment": "^2.29.4",
     "mui-chips-input": "^2.1.4",
     "notistack": "^3.0.1",
+    "patch-package": "^8.0.0",
     "pretty-bytes": "^6.1.1",
     "qiankun": "^2.10.16",
     "rc-pagination": "^3.6.1",
