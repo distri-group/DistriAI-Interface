@@ -198,7 +198,7 @@ function NavBar({ className }) {
           </DialogActions>
         </Dialog>
         <Dialog
-          open={halfOrderDialog}
+          open={halfOrderDialog && !orderDialog}
           onClose={() => setHalfOrderDialog(false)}>
           <DialogTitle>
             Your remaining available time for {ordersUnderHalf} orders is less
