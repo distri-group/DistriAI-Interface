@@ -52,6 +52,7 @@ function Earning({ className }) {
     if (wallet?.publicKey) {
       loadList(current);
     }
+    // eslint-disable-next-line
   }, [wallet, filterValue, current]);
   useEffect(() => {
     const getEarnings = async () => {

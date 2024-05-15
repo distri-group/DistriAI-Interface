@@ -69,6 +69,8 @@ export function BaseWalletMultiButton({ children, labels, ...props }) {
             case "connected":
               setMenuOpen(true);
               break;
+            default:
+              break;
           }
         }}
         walletIcon={walletIcon}

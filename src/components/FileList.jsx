@@ -293,6 +293,7 @@ function FileList({
       ]);
       handleDeploymentFile();
     }
+    // eslint-disable-next-line
   }, [deployFile]);
 
   return (
