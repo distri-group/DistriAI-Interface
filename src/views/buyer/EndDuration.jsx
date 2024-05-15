@@ -9,7 +9,6 @@ import { PublicKey } from "@solana/web3.js";
 import Countdown from "@/components/Countdown.jsx";
 import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
-import { useKeepAliveContext } from "keepalive-for-react";
 import { useClearCache } from "@/components/ClearCacheProvider";
 
 function EndDuration({ className }) {

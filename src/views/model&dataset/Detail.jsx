@@ -35,7 +35,6 @@ import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
 import { copy } from "@/utils/index.js";
 import { useSnackbar } from "notistack";
-import { useProgram } from "@/KeepAliveLayout";
 import { useClearCache } from "@/components/ClearCacheProvider";
 
 function Detail({ className, type }) {
@@ -136,24 +135,24 @@ function Detail({ className, type }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
   }
-  async function checkIsLiked() {
-    const isLike = await isItemLiked(
-      type,
-      owner,
-      name,
-      wallet.publicKey.toString()
-    );
-    setLiked(isLike);
-  }
+
   useEffect(() => {
     loadItem();
-    // eslint-disable-next-line
   }, [type]);
   useEffect(() => {
+    async function checkIsLiked() {
+      const isLike = await isItemLiked(
+        type,
+        owner,
+        name,
+        wallet.publicKey.toString()
+      );
+      setLiked(isLike);
+    }
     if (wallet?.publicKey) {
       checkIsLiked();
     }
-  }, [wallet]);
+  }, [type, owner, name, wallet]);
   useEffect(() => {
     if (!orderDialog && filesForTraining.length > 0) {
       setTrainingFiles([]);

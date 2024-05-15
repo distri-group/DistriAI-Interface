@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { enqueueSnackbar } from "notistack";
-import { getLikeList, filterData } from "@/services/model.js";
+import { getLikeList } from "@/services/model.js";
 import {
   ToggleButtonGroup,
   ToggleButton,
@@ -11,16 +11,10 @@ import {
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import ItemCard from "@/views/model&dataset/ItemCard";
 import Pager from "@/components/pager.jsx";
-import Filter from "../Filter";
 
 function MyLike({ className }) {
   const wallet = useAnchorWallet();
   const [list, setList] = useState([]);
-  // const [filterValue, setFilterValue] = useState({
-  //   Name: "",
-  //   OrderBy: "Updated Time",
-  //   Owner: wallet?.publicKey.toString(),
-  // });
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);

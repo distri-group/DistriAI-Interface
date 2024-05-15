@@ -1,7 +1,6 @@
 import axios from "@/utils/axios.js";
 import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
-import { getProvider } from "@/utils/index.js";
 import { create } from "kubo-rpc-client";
 
 export async function getItemList(type, pageIndex, pageSize, filter) {

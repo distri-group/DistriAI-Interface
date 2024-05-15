@@ -81,9 +81,13 @@ export async function getOrderDetail(Id) {
   }
 }
 
-export async function checkIfPrepared(order) {
+export async function checkIfPrepared(order, done) {
   const res = await getOrderDetail(order.Uuid);
-  return res.StatusName === "Available" || res.StatusName === "Failed";
+  if (done) {
+    return res.StatusName !== "Available";
+  } else {
+    return res.StatusName === "Available" || res.StatusName === "Failed";
+  }
 }
 
 export const filterData = {

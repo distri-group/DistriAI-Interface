@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import OrderList from "@/components/OrderList";
 import { getOrderList, filterData, checkIfPrepared } from "@/services/order";
 import Pager from "@/components/pager";
@@ -18,25 +18,25 @@ function MyOrder({ className }) {
   });
   const wallet = useAnchorWallet();
 
-  async function loadList(curr, filter) {
+  const loadList = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getOrderList(
-        curr,
+        current,
         10,
-        filter,
+        filterValue,
         wallet.publicKey.toString()
       );
       setTotal(res.Total);
       setList(res.List);
     } catch (error) {}
     setLoading(false);
-  }
+  }, [current, filterValue, wallet]);
   useEffect(() => {
     if (wallet?.publicKey) {
-      loadList(current, filterValue);
+      loadList();
     }
-  }, [wallet, filterValue, current]);
+  }, [wallet, filterValue, current, loadList]);
   useEffect(() => {
     const timers = [];
     for (const item of list) {
@@ -45,7 +45,7 @@ function MyOrder({ className }) {
           const prepared = await checkIfPrepared(item);
           if (prepared) {
             clearInterval(timer);
-            loadList(current);
+            loadList();
           }
         }, 3000);
         timers.push(timer);
@@ -54,7 +54,7 @@ function MyOrder({ className }) {
     return () => {
       timers.forEach((timer) => clearInterval(timer));
     };
-  }, [list]);
+  }, [list, loadList]);
   return (
     <div className={className}>
       <ToggleButtonGroup>
@@ -90,11 +90,7 @@ function MyOrder({ className }) {
         }}
         loading={loading}
       />
-      <OrderList
-        list={list}
-        loading={loading}
-        reloadFunc={() => loadList(current)}
-      />
+      <OrderList list={list} loading={loading} reloadFunc={loadList} />
       {total > 10 && (
         <Pager
           current={current}

@@ -7,6 +7,7 @@ import { AnchorProvider, Program } from "@project-serum/anchor";
 import webconfig from "@/webconfig.js";
 import { useSnackbar } from "notistack";
 import { ClearCacheProvider } from "./components/ClearCacheProvider";
+import { Connection, clusterApiUrl } from "@solana/web3.js";
 
 const ProgramContext = createContext(null);
 
@@ -16,7 +17,6 @@ export default function KeepAliveLayout() {
   const aliveRef = useKeepaliveRef();
   const outlet = useOutlet();
   const location = useLocation();
-  const { connection } = useConnection();
   const wallet = useAnchorWallet();
   const cacheKey = useMemo(
     () => location.pathname + location.search,
@@ -27,7 +27,11 @@ export default function KeepAliveLayout() {
   useEffect(() => {
     const programInit = async () => {
       try {
-        const provider = new AnchorProvider(connection, wallet, {});
+        const provider = new AnchorProvider(
+          new Connection(clusterApiUrl("devnet"), "confirmed"),
+          wallet,
+          {}
+        );
         const idl = await Program.fetchIdl(webconfig.PROGRAM, provider);
         const program = new Program(idl, webconfig.PROGRAM, provider);
         setProgram(program);
@@ -41,6 +45,7 @@ export default function KeepAliveLayout() {
     if (wallet?.publicKey) {
       programInit();
     }
+    // eslint-disable-next-line
   }, [wallet]);
 
   return (

@@ -10,6 +10,7 @@ import { signToken } from "@/services/order.js";
 import Countdown from "./Countdown.jsx";
 import { useSnackbar } from "notistack";
 import { useClearCache } from "./ClearCacheProvider.jsx";
+import { checkIfPrepared } from "@/services/order.js";
 
 function OrderList({ className, list, loading, reloadFunc }) {
   const navigate = useNavigate();
@@ -37,6 +38,15 @@ function OrderList({ className, list, loading, reloadFunc }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setSigning(false);
+  };
+  const checkIfDone = async (order) => {
+    const timer = setInterval(async () => {
+      const completed = await checkIfPrepared(order, true);
+      if (completed) {
+        clearInterval(timer);
+        reloadFunc();
+      }
+    }, 2000);
   };
   let columns = [
     {
@@ -83,7 +93,10 @@ function OrderList({ className, list, loading, reloadFunc }) {
       render: (text, record, index) => {
         if (record.StatusName === "Available") {
           return (
-            <Countdown deadlineTime={new Date(record.EndTime).getTime()} />
+            <Countdown
+              deadlineTime={new Date(record.EndTime).getTime()}
+              onEnd={(record) => checkIfDone(record)}
+            />
           );
         } else if (record.StatusName !== "Preparing") {
           return <span>00:00:00</span>;

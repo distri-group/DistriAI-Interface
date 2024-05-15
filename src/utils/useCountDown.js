@@ -46,6 +46,7 @@ function useCountDown(deadlineTime, onEnd) {
   useEffect(() => {
     let timer;
     function countdown() {
+      clearTimeout(timer);
       const nowTime = Date.now();
       const remainTime = (deadlineTime - nowTime) / 1000;
       const data = computeCountdownInfo(remainTime);
@@ -55,16 +56,14 @@ function useCountDown(deadlineTime, onEnd) {
       } else {
         if (typeof onEnd === "function") {
           onEnd();
-          clearTimeout(timer);
         }
       }
     }
-    clearTimeout(timer);
     countdown();
     return () => {
       clearTimeout(timer);
     };
-  }, [deadlineTime]);
+  }, [deadlineTime, onEnd]);
 
   return timeInfo;
 }

@@ -24,49 +24,10 @@ function NavBar({ className }) {
   const [halfOrderDialog, setHalfOrderDialog] = useState(false);
   const [ordersUnderOneHour, setOrdersUnder] = useState(0);
   const [ordersUnderHalf, setHalfOrder] = useState(0);
-  const [prevPublicKey, setPrev] = useState(null);
   const wallet = useAnchorWallet();
 
   const open = Boolean(anchorEl);
-  const loadOrderList = async (publicKey) => {
-    if (!prevPublicKey) setPrev(publicKey);
-    else if (prevPublicKey === publicKey) return;
-    const res = await getOrderList(
-      1,
-      100,
-      { Direction: "buy", Status: 1 },
-      wallet.publicKey.toString()
-    );
-    let count = 0;
-    for (let order of res.List) {
-      if (
-        order.StatusName === "Available" &&
-        order.Duration > 1 &&
-        order.RemainingDuration === 0
-      ) {
-        count++;
-        res.List = res.List.filter((item) => item !== order);
-      }
-    }
-    setOrdersUnder(count);
-    if (count > 0) {
-      setOrderDialog(true);
-    }
-    let halfCount = 0;
-    for (let order of res.List) {
-      if (
-        order.StatusName === "Available" &&
-        order.Duration >= 10 &&
-        order.RemainingDuration <= order.Duration / 2
-      ) {
-        halfCount++;
-      }
-    }
-    setHalfOrder(halfCount);
-    if (halfCount > 0) {
-      setHalfOrderDialog(true);
-    }
-  };
+
   const handleOrderDialogClose = () => {
     setOrderDialog(false);
   };
@@ -75,8 +36,42 @@ function NavBar({ className }) {
   };
 
   useEffect(() => {
+    const loadOrderList = async () => {
+      const res = await getOrderList(
+        1,
+        100,
+        { Direction: "buy", Status: 1 },
+        wallet.publicKey.toString()
+      );
+      let count = 0;
+      for (let order of res.List) {
+        if (order.Duration > 1 && order.RemainingDuration === 0) {
+          count++;
+          res.List = res.List.filter((item) => item !== order);
+        }
+      }
+      setOrdersUnder(count);
+      if (count > 0) {
+        setOrderDialog(true);
+      }
+      let halfCount = 0;
+      for (let order of res.List) {
+        if (
+          // order.Duration >= 10 &&
+          (new Date(order.EndTime).getTime() - Date.now()) / 3600000 <
+          order.Duration / 2
+        ) {
+          console.log(order.EndTime, order.StartTime);
+          halfCount++;
+        }
+      }
+      setHalfOrder(halfCount);
+      if (halfCount > 0) {
+        setHalfOrderDialog(true);
+      }
+    };
     if (wallet?.publicKey) {
-      loadOrderList(wallet.publicKey);
+      loadOrderList();
     }
   }, [wallet]);
   useEffect(() => {

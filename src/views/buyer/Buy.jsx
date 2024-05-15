@@ -220,6 +220,7 @@ function Buy({ className }) {
       }
     };
     handleModelChange();
+    // eslint-disable-next-line
   }, [selectedModel]);
   return (
     <div className={className}>
