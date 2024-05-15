@@ -57,11 +57,10 @@ function NavBar({ className }) {
       let halfCount = 0;
       for (let order of res.List) {
         if (
-          // order.Duration >= 10 &&
+          order.Duration >= 10 &&
           (new Date(order.EndTime).getTime() - Date.now()) / 3600000 <
-          order.Duration / 2
+            order.Duration / 2
         ) {
-          console.log(order.EndTime, order.StartTime);
           halfCount++;
         }
       }
