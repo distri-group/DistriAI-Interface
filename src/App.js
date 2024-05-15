@@ -32,6 +32,7 @@ import { clusterApiUrl } from "@solana/web3.js";
 import Dashboard from "@/views/buyer/Dashboard.jsx";
 import KeepAliveLayout from "./KeepAliveLayout.jsx";
 import FileUpload from "./views/model&dataset/FileUpload.jsx";
+import Home from "./views/Home.jsx";
 
 function App() {
   window.Buffer = Buffer;
@@ -216,7 +217,7 @@ function App() {
               autoHideDuration={3000}>
               <Routes>
                 <Route index element={<Navigate to="home" />} />
-                <Route path="home" element={<div id="home" />} />
+                <Route path="home" element={<Home />} />
                 <Route path="/*" element={<KeepAliveLayout />}>
                   <Route path="market" element={<Market />} />
                   <Route path="device">
