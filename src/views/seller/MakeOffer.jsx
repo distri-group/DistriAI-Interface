@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import React, { useState } from "react";
 import { useSnackbar } from "notistack";
-import { TextField, Grid, InputAdornment } from "@mui/material";
+import { TextField, Grid, InputAdornment, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
@@ -118,7 +118,7 @@ function MakeOffer({ className }) {
     <div className={className}>
       <h1>Make Offer</h1>
       <form onSubmit={onSubmit}>
-        <Grid container spacing={2}>
+        <Grid container spacing={4}>
           <Grid item md={12}>
             <label>Price(per hour)</label>
           </Grid>
@@ -198,19 +198,31 @@ function MakeOffer({ className }) {
             />
           </Grid>
           <Grid item md={12}>
-            <span className="num" style={{ fontSize: 28, margin: "0 10px" }}>
-              {formValue.price || 0}
-            </span>
-            <span>DIST</span>
+            <Stack direction="row" spacing={3} alignItems="center">
+              <span className="dist" />
+              <span className="num">{formValue.price || 0}</span>
+              <span>DIST</span>
+            </Stack>
           </Grid>
           <Grid item md={12}>
-            <LoadingButton
-              loading={loading}
-              type="submit"
-              className="cbtn"
-              style={{ width: 100 }}>
-              {!loading && <span>Confirm</span>}
-            </LoadingButton>
+            <Stack alignItems="center">
+              <LoadingButton
+                loading={loading}
+                type="submit"
+                className="cbtn"
+                style={{ width: 160 }}>
+                {!loading && (
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 18,
+                      lineHeight: "26px",
+                    }}>
+                    Confirm
+                  </span>
+                )}
+              </LoadingButton>
+            </Stack>
           </Grid>
         </Grid>
       </form>
@@ -233,5 +245,10 @@ export default styled(MakeOffer)`
       color: #ffffff;
       line-height: 28px;
     }
+  }
+  .num {
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 44px;
   }
 `;
