@@ -86,15 +86,3 @@ a{
   width: 32px;
   height: 32px;
 }
-.logo {
-  margin: 0;
-  display: block;
-  background-image: url(/public/img/token.png);
-  background-color: white;
-  background-size: 70%;
-  border-radius: 16px;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 240px;
-  height: 240px;
-}

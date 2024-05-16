@@ -13,7 +13,20 @@ export default function Home() {
         justifyContent="center"
         alignItems="center"
         spacing={4}>
-        <span className="logo" />
+        <span
+          style={{
+            margin: 0,
+            display: "block",
+            backgroundImage: "url(/public/img/token.png)",
+            backgroundColor: "white",
+            backgroundSize: "70%",
+            borderRadius: "16px",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            width: 240,
+            height: 240,
+          }}
+        />
         <h1>Welcome to Distri.AI!</h1>
         <p>👇Click buttons below to navigate to function page👇</p>
         <Stack direction="row" spacing={4} justifyContent="center">
@@ -39,7 +52,7 @@ export default function Home() {
             onClick={() => navigate("/device")}
             className="cbtn"
             style={{ width: 160 }}>
-            Market
+            My Device
           </Button>
         </Stack>
       </Stack>
