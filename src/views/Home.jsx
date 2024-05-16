@@ -17,7 +17,7 @@ export default function Home() {
           style={{
             margin: 0,
             display: "block",
-            backgroundImage: "url(/public/img/token.png)",
+            backgroundImage: "url(/img/token.png)",
             backgroundColor: "white",
             backgroundSize: "70%",
             borderRadius: "16px",
