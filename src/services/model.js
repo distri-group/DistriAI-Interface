@@ -18,15 +18,11 @@ export async function getItemList(type, pageIndex, pageSize, filter) {
       }
     });
   }
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    for (let item of res.List) {
-      item = formatItem(item);
-    }
-    return res;
-  } catch (error) {
-    throw error;
+  const res = await axios.post(apiUrl, body, { headers });
+  for (let item of res.List) {
+    item = formatItem(item);
   }
+  return res;
 }
 
 export async function getLikeList(type, pageIndex, pageSize, publicKey) {
@@ -40,25 +36,17 @@ export async function getLikeList(type, pageIndex, pageSize, publicKey) {
     Page: pageIndex,
     PageSize: pageSize,
   };
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    for (let item of res.List) {
-      item = formatItem(item);
-    }
-    return res;
-  } catch (error) {
-    throw error;
+  const res = await axios.post(apiUrl, body, { headers });
+  for (let item of res.List) {
+    item = formatItem(item);
   }
+  return res;
 }
 
 export async function getItemDetail(type, owner, name) {
   const apiUrl = `/${type}/${owner}/${name}`;
-  try {
-    const res = await axios.get(apiUrl);
-    return formatItem(res);
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.get(apiUrl);
+  return formatItem(res);
 }
 
 export async function isItemLiked(type, owner, name, publicKey) {
@@ -67,18 +55,14 @@ export async function isItemLiked(type, owner, name, publicKey) {
   const headers = {
     Authorization: token,
   };
-  try {
-    const res = await axios.get(apiUrl, {
-      params: {
-        Owner: owner,
-        Name: name,
-      },
-      headers,
-    });
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.get(apiUrl, {
+    params: {
+      Owner: owner,
+      Name: name,
+    },
+    headers,
+  });
+  return res;
 }
 
 export async function likeItem(type, owner, name, publicKey, isLiked) {
@@ -87,33 +71,25 @@ export async function likeItem(type, owner, name, publicKey, isLiked) {
   const headers = {
     Authorization: token,
   };
-  try {
-    const res = await axios.post(
-      apiUrl,
-      {
-        Owner: owner,
-        Name: name,
-        Like: isLiked,
-      },
-      { headers }
-    );
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.post(
+    apiUrl,
+    {
+      Owner: owner,
+      Name: name,
+      Like: isLiked,
+    },
+    { headers }
+  );
+  return res;
 }
 
 export async function downloadItem(type, owner, name) {
   const apiUrl = `/${type}/download`;
-  try {
-    const res = await axios.post(apiUrl, {
-      Owner: owner,
-      Name: name,
-    });
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.post(apiUrl, {
+    Owner: owner,
+    Name: name,
+  });
+  return res;
 }
 
 export async function login(publicKey) {
@@ -140,22 +116,18 @@ export async function login(publicKey) {
       Account: publicKey,
       Signature,
     };
-    try {
-      const res = await axios.post(apiUrl, body);
-      const now = new Date();
-      const expirationTime = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
-      localStorage.setItem(
-        "token",
-        JSON.stringify({
-          value: res,
-          expired: new Date(expirationTime).getTime(),
-          publicKey,
-        })
-      );
-      return res;
-    } catch (error) {
-      throw error;
-    }
+    const res = await axios.post(apiUrl, body);
+    const now = new Date();
+    const expirationTime = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
+    localStorage.setItem(
+      "token",
+      JSON.stringify({
+        value: res,
+        expired: new Date(expirationTime).getTime(),
+        publicKey,
+      })
+    );
+    return res;
   }
 }
 

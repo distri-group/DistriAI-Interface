@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Box } from "@mui/material";
-import { WalletMultiButton } from "./wallet/WalletMultiButton.jsx";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
 export default function ConnectToWallet({ open }) {

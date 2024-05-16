@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
-import { WalletMultiButton } from "./wallet/WalletMultiButton.jsx";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
 import {
   Button,
