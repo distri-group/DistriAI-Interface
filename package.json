@@ -60,7 +60,8 @@
     "build": "craco build",
     "build:test": "dotenv -e .env.test craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "patch-package"
   },
   "eslintConfig": {
     "extends": [

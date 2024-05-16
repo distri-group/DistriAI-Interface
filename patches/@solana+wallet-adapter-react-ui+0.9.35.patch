@@ -1,0 +1,35 @@
+diff --git a/node_modules/@solana/wallet-adapter-react-ui/lib/esm/BaseWalletMultiButton.js b/node_modules/@solana/wallet-adapter-react-ui/lib/esm/BaseWalletMultiButton.js
+index 5f1ad69..beff98b 100644
+--- a/node_modules/@solana/wallet-adapter-react-ui/lib/esm/BaseWalletMultiButton.js
++++ b/node_modules/@solana/wallet-adapter-react-ui/lib/esm/BaseWalletMultiButton.js
+@@ -64,10 +64,10 @@ export function BaseWalletMultiButton({ children, labels, ...props }) {
+                     setCopied(true);
+                     setTimeout(() => setCopied(false), 400);
+                 }, role: "menuitem" }, copied ? labels['copied'] : labels['copy-address'])) : null,
+-            React.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
+-                    setModalVisible(true);
+-                    setMenuOpen(false);
+-                }, role: "menuitem" }, labels['change-wallet']),
++            // React.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
++            //         setModalVisible(true);
++            //         setMenuOpen(false);
++            //     }, role: "menuitem" }, labels['change-wallet']),
+             onDisconnect ? (React.createElement("li", { className: "wallet-adapter-dropdown-list-item", onClick: () => {
+                     onDisconnect();
+                     setMenuOpen(false);
+diff --git a/node_modules/@solana/wallet-adapter-react-ui/lib/esm/WalletListItem.js b/node_modules/@solana/wallet-adapter-react-ui/lib/esm/WalletListItem.js
+index a0b24c2..9b78461 100644
+--- a/node_modules/@solana/wallet-adapter-react-ui/lib/esm/WalletListItem.js
++++ b/node_modules/@solana/wallet-adapter-react-ui/lib/esm/WalletListItem.js
+@@ -4,8 +4,8 @@ import { Button } from './Button.js';
+ import { WalletIcon } from './WalletIcon.js';
+ export const WalletListItem = ({ handleClick, tabIndex, wallet }) => {
+     return (React.createElement("li", null,
+-        React.createElement(Button, { onClick: handleClick, startIcon: React.createElement(WalletIcon, { wallet: wallet }), tabIndex: tabIndex },
++        React.createElement(Button, { onClick: handleClick, startIcon: React.createElement(WalletIcon, { wallet: wallet }), tabIndex: tabIndex, disabled:wallet.adapter.name !== "Phantom" },
+             wallet.adapter.name,
+-            wallet.readyState === WalletReadyState.Installed && React.createElement("span", null, "Detected"))));
++            wallet.readyState === WalletReadyState.Installed && wallet.adapter.name === "Phantom" ? React.createElement("span", null, "Detected") : React.createElement("span", null, "Not supported"))));
+ };
+ //# sourceMappingURL=WalletListItem.js.map
+\ No newline at end of file
