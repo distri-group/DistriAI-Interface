@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   WalletProvider,
   ConnectionProvider,
@@ -33,11 +33,18 @@ import Dashboard from "@/views/buyer/Dashboard.jsx";
 import KeepAliveLayout from "./KeepAliveLayout.jsx";
 import FileUpload from "./views/model&dataset/FileUpload.jsx";
 import Home from "./views/Home.jsx";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 function App() {
   window.Buffer = Buffer;
   const [open, setOpen] = useState(false);
-  const endPoint = clusterApiUrl("devnet");
+  const network = WalletAdapterNetwork.Devnet;
+  const endPoint = useMemo(() => clusterApiUrl(network), [network]);
+  const wallets = useMemo(
+    () => [new PhantomWalletAdapter({ clusterApiUrl: network })],
+    [network]
+  );
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const Mtheme = createTheme({
@@ -209,7 +216,7 @@ function App() {
   }, []);
   return (
     <ConnectionProvider endpoint={endPoint}>
-      <WalletProvider wallets={[]} autoConnect={true}>
+      <WalletProvider wallets={wallets} autoConnect={true}>
         <WalletModalProvider>
           <ThemeProvider theme={Mtheme}>
             <SnackbarProvider
