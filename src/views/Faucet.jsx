@@ -26,7 +26,7 @@ function Faucet({ className }) {
     if (!publicKey) {
       return setValidateError((prev) => ({
         ...prev,
-        address: "Please input address",
+        address: "Please input address or connect with wallet",
       }));
     }
     if (publicKey.length < 44) {
@@ -41,6 +41,12 @@ function Faucet({ className }) {
     }));
   };
   const onSubmit = async () => {
+    if (!publicKey) {
+      return setValidateError((prev) => ({
+        ...prev,
+        address: "Please input address or connect with wallet",
+      }));
+    }
     if (validateError.address) {
       return;
     }
@@ -83,6 +89,7 @@ function Faucet({ className }) {
           <a href="https://phantom.app/" target="_blank" rel="noreferrer">
             Phantom.app
           </a>
+          ;
         </p>
         <p className="text">
           2. Create a new wallet OR import an existing wallet.
@@ -92,7 +99,7 @@ function Faucet({ className }) {
           disabled={loading}
           value={publicKey}
           error={!!validateError.address}
-          placeholder="Enter Your Wallet Address"
+          placeholder="Enter your wallet address or connect with wallet."
           helperText={validateError.address}
         />
         <Stack

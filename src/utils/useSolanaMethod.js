@@ -379,11 +379,15 @@ export default function useSolanaMethod() {
       );
     }
     if (error.message.includes("found no record of a prior credit.")) {
-      return new Error(
-        "Token account not initialzed. Please go to Faucet and claim DIST before operating."
+      const error = new Error(
+        "Token account not initialized. Please go to Faucet and claim DIST before operating."
       );
+      error.insufficient = true;
+      return error;
     } else if (error.message.includes("custom program error: 0x1")) {
-      return new Error("Insufficient token balance.");
+      const error = new Error("Insufficient token balance.");
+      error.insufficient = true;
+      return error;
     } else if (error.message.includes("custom program error: 0xbc4")) {
       return new Error("Insufficient reward pool balance.");
     }

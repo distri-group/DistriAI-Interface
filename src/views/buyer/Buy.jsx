@@ -21,6 +21,7 @@ import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import useIpfs from "@/utils/useIpfs.js";
 import { getTotal } from "@/utils/index.js";
 import { useClearCache } from "@/components/ClearCacheProvider";
+import InsufficientDialog from "@/components/InsufficientDialog";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -47,6 +48,7 @@ function Buy({ className }) {
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState({});
   const [deployable, setDeployable] = useState(false);
+  const [insufficientDialog, setInsufficientDialog] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
   const { clearCache } = useClearCache();
   const amount = useMemo(() => {
@@ -152,6 +154,9 @@ function Buy({ className }) {
         navigate("/dashboard");
       }, 500);
     } catch (error) {
+      if (error.insufficient) {
+        setInsufficientDialog(true);
+      }
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setSubmitting(false);
@@ -178,7 +183,6 @@ function Buy({ className }) {
           (model) =>
             model.Name === state.model.name && model.Owner === state.model.owner
         );
-        console.log(state, selectedModel);
         setFormValue((prevState) => ({
           ...prevState,
           usage: state.model.intent,
@@ -458,6 +462,10 @@ function Buy({ className }) {
           </div>
         </div>
       )}
+      <InsufficientDialog
+        open={insufficientDialog}
+        close={() => setInsufficientDialog(false)}
+      />
     </div>
   );
 }

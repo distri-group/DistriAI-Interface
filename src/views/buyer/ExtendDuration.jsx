@@ -11,6 +11,7 @@ import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { PublicKey } from "@solana/web3.js";
 import { getTotal } from "@/utils/index.js";
+import InsufficientDialog from "@/components/InsufficientDialog";
 
 function ExtendDuration({ className }) {
   const { id } = useParams();
@@ -24,6 +25,7 @@ function ExtendDuration({ className }) {
   const [balance, setBalance] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
+  const [insufficientDialog, setInsufficientDialog] = useState(false);
   const amount = useMemo(() => {
     if (deviceDetail.Price) {
       return getTotal(deviceDetail.Price, parseFloat(duration));
@@ -176,6 +178,10 @@ function ExtendDuration({ className }) {
           </Stack>
         </div>
       )}
+      <InsufficientDialog
+        open={insufficientDialog}
+        close={() => setInsufficientDialog(false)}
+      />
     </div>
   );
 }
