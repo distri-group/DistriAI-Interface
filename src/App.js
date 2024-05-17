@@ -25,8 +25,7 @@ import EarningDetail from "@/views/seller/EarningDetail.jsx";
 import Contents from "@/views/model&dataset/Contents.jsx";
 import Create from "@/views/model&dataset/Create.jsx";
 import Detail from "@/views/model&dataset/Detail.jsx";
-import ConnectToWallet from "@/components/ConnectToWallet.jsx";
-import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import Test from "@/views/Test.jsx";
 import { clusterApiUrl } from "@solana/web3.js";
 import Dashboard from "@/views/buyer/Dashboard.jsx";
@@ -38,14 +37,12 @@ import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 function App() {
   window.Buffer = Buffer;
-  const [open, setOpen] = useState(false);
   const network = WalletAdapterNetwork.Devnet;
   const endPoint = useMemo(() => clusterApiUrl(network), [network]);
   const wallets = useMemo(
     () => [new PhantomWalletAdapter({ clusterApiUrl: network })],
     [network]
   );
-  const { pathname } = useLocation();
   const navigate = useNavigate();
   const Mtheme = createTheme({
     palette: {
@@ -187,22 +184,6 @@ function App() {
     },
   });
   useEffect(() => {
-    if (
-      pathname === "/" ||
-      pathname.includes("home") ||
-      pathname.includes("market") ||
-      pathname.includes("faucet") ||
-      pathname.includes("model")
-    ) {
-      setOpen(false);
-    } else {
-      setOpen(true);
-    }
-    if (pathname.includes("add")) {
-      setOpen(true);
-    }
-  }, [pathname]);
-  useEffect(() => {
     const handleNavigate = ({ detail }) => {
       if (detail.type === "routeChange") {
         navigate(detail.path);
@@ -271,7 +252,6 @@ function App() {
                   <Route path="test" element={<Test />} />
                 </Route>
               </Routes>
-              <ConnectToWallet open={open} />
             </SnackbarProvider>
           </ThemeProvider>
         </WalletModalProvider>
