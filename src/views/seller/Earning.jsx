@@ -44,13 +44,16 @@ function Earning({ className }) {
         if (initialTotal === 0) {
           setInitialTotal(res.Total);
         }
-        setTotal(res.Total);
         setList(res.List);
+        setTotal(res.Total);
       } catch (error) {}
       setLoading(false);
     }
     if (wallet?.publicKey) {
       loadList(current);
+    } else {
+      setList([]);
+      setTotal(0);
     }
     // eslint-disable-next-line
   }, [wallet, filterValue, current]);
@@ -67,6 +70,9 @@ function Earning({ className }) {
     };
     if (wallet?.publicKey && initialTotal > 0) {
       getEarnings();
+    } else {
+      setPending(0);
+      setReceived(0);
     }
   }, [wallet, initialTotal]);
   const columns = [

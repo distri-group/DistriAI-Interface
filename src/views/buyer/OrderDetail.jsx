@@ -22,6 +22,7 @@ import DeviceCard from "@/components/DeviceCard.jsx";
 import * as anchor from "@project-serum/anchor";
 import { capitalize } from "lodash";
 import { getItemList } from "@/services/model";
+import ConnectToWallet from "../../components/ConnectToWallet";
 
 function OrderDetail({ className }) {
   const { id } = useParams();
@@ -32,6 +33,7 @@ function OrderDetail({ className }) {
   const [fileUploadDialog, setFileUploadDialog] = useState(false);
   const [selectedModel, setSelectedModel] = useState("default");
   const [modelList, setModelList] = useState([]);
+  const [connectModal, setConnectModal] = useState(false);
   const wallet = useAnchorWallet();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -45,12 +47,13 @@ function OrderDetail({ className }) {
     setLoading(false);
   }
   useEffect(() => {
-    if (wallet?.publicKey) {
-      loadDetail();
-    }
+    loadDetail();
     // eslint-disable-next-line
-  }, [id, wallet]);
+  }, []);
   function handleEndDuration() {
+    if (!wallet?.publicKey) {
+      return setConnectModal(true);
+    }
     if (record.StatusName !== "Available") {
       return enqueueSnackbar("Order not in training", { variant: "info" });
     }
@@ -145,7 +148,11 @@ function OrderDetail({ className }) {
                         <Button
                           className="cbtn"
                           style={{ width: 180 }}
-                          onClick={() => navigate(`/order/${id}/extend`)}>
+                          onClick={() => {
+                            if (!wallet?.publicKey)
+                              return setConnectModal(true);
+                            navigate(`/order/${id}/extend`);
+                          }}>
                           Extend Duration
                         </Button>
                         <Button
@@ -158,7 +165,11 @@ function OrderDetail({ className }) {
                           <Button
                             className="cbtn"
                             style={{ width: 180 }}
-                            onClick={() => setFileUploadDialog(true)}>
+                            onClick={() => {
+                              if (!wallet?.publicKey)
+                                return setConnectModal(true);
+                              setFileUploadDialog(true);
+                            }}>
                             Upload File
                           </Button>
                         )}
@@ -368,6 +379,10 @@ function OrderDetail({ className }) {
           </Button>
         </DialogActions>
       </Dialog>
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
+      />
     </div>
   );
 }

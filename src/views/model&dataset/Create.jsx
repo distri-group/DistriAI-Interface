@@ -20,6 +20,7 @@ import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
 import useSolanaMethod from "@/utils/useSolanaMethod";
 import { useClearCache } from "@/components/ClearCacheProvider";
+import ConnectToWallet from "@/components/ConnectToWallet";
 
 function Create({ className, type }) {
   document.title = `Create ${capitalize(type)}`;
@@ -48,6 +49,7 @@ function Create({ className, type }) {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [deployFile, setDeployFile] = useState(null);
+  const [connectModal, setConnectModal] = useState(false);
   const readmeRef = useRef(null);
   const deployRef = useRef(null);
 
@@ -95,6 +97,9 @@ function Create({ className, type }) {
   }
   async function onSubmit(e) {
     e.preventDefault();
+    if (!wallet?.publicKey) {
+      return setConnectModal(true);
+    }
     let validation = true;
     if (!formValue.Name) {
       setValidateError((prevState) => ({
@@ -413,6 +418,10 @@ function Create({ className, type }) {
           </Button>
         </Stack>
       </form>
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
+      />
     </div>
   );
 }

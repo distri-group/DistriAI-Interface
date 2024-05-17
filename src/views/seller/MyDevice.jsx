@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getMachineList } from "@/services/machine.js";
 import DeviceList from "@/components/DeviceList.jsx";
 import Pager from "@/components/pager.jsx";
@@ -20,11 +20,11 @@ function MyDevice({ className }) {
   const { enqueueSnackbar } = useSnackbar();
 
   // Load Machine List
-  async function loadList(curr) {
+  const loadList = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getMachineList(
-        curr,
+        current,
         10,
         [],
         wallet.publicKey.toString()
@@ -35,7 +35,8 @@ function MyDevice({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
-  }
+    // eslint-disable-next-line
+  }, [current, wallet]);
 
   // Cancel Offer
   async function handleCancel() {
@@ -48,17 +49,19 @@ function MyDevice({ className }) {
     setTimeout(() => {
       setDeviceToCancel(null);
       setCanceling(false);
-      loadList(current);
+      loadList();
     }, 500);
   }
 
   // Reload List
   useEffect(() => {
-    if (current && wallet?.publicKey) {
-      loadList(current);
+    if (wallet?.publicKey) {
+      loadList();
+    } else {
+      setList([]);
+      setTotal(0);
     }
-    // eslint-disable-next-line
-  }, [current, wallet]);
+  }, [wallet, loadList]);
 
   return (
     <div className={className}>

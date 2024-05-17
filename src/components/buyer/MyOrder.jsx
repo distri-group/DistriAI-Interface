@@ -35,6 +35,9 @@ function MyOrder({ className }) {
   useEffect(() => {
     if (wallet?.publicKey) {
       loadList();
+    } else {
+      setList([]);
+      setTotal(0);
     }
   }, [wallet, filterValue, current, loadList]);
   useEffect(() => {

@@ -10,6 +10,7 @@ import Countdown from "@/components/Countdown.jsx";
 import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { useClearCache } from "@/components/ClearCacheProvider";
+import ConnectToWallet from "@/components/ConnectToWallet";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
@@ -17,17 +18,19 @@ function EndDuration({ className }) {
   const { wallet, methods } = useSolanaMethod();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [ending, setEnding] = useState(false);
   const [detail, setDetail] = useState({});
   const [deviceDetail, setDeviceDetail] = useState({});
   const [balance, setBalance] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [remainingTime, setRemainingTime] = useState();
+  const [connectModal, setConnectModal] = useState(false);
   const { clearCache } = useClearCache();
   const open = Boolean(anchorEl);
 
   async function onSubmit() {
+    if (!wallet?.publicKey) return setConnectModal(true);
     if (detail.StatusName === "Available" && remainingTime < 3600000) {
       return enqueueSnackbar("Remaining duration less than 1 hour.", {
         variant: "info",
@@ -71,16 +74,22 @@ function EndDuration({ className }) {
         }
         const remains = new Date(res.EndTime).getTime() - new Date().getTime();
         setRemainingTime(remains);
-        const amount = await methods.getTokenBalance(wallet.publicKey);
-        setBalance(amount);
       } catch (error) {}
       setLoading(false);
     }
+    loadDetail();
+  }, [id]);
+  useEffect(() => {
+    const getBalance = async () => {
+      const amount = await methods.getTokenBalance(wallet.publicKey);
+      setBalance(amount);
+    };
     if (wallet?.publicKey) {
-      loadDetail();
+      getBalance();
+    } else {
+      setBalance(0);
     }
-    // eslint-disable-next-line
-  }, [id, wallet]);
+  }, [wallet]);
   return (
     <div className={className}>
       <h1>End Duration</h1>
@@ -254,6 +263,10 @@ function EndDuration({ className }) {
           </div>
         )}
       </div>
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { enqueueSnackbar } from "notistack";
 import { getLikeList } from "@/services/model.js";
 import {
@@ -19,7 +19,7 @@ function MyLike({ className }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState("model");
-  async function loadList(current) {
+  const loadList = useCallback(async () => {
     setLoading(true);
     setList([]);
     setTotal(0);
@@ -36,13 +36,15 @@ function MyLike({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
-  }
+  }, [current, type, wallet]);
   useEffect(() => {
     if (wallet?.publicKey) {
-      loadList(current);
+      loadList();
+    } else {
+      setList([]);
+      setTotal(0);
     }
-    // eslint-disable-next-line
-  }, [wallet, current, type]);
+  }, [wallet, loadList]);
   return (
     <div className={className}>
       <ToggleButtonGroup

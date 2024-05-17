@@ -13,14 +13,21 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import DeviceCard from "@/components/DeviceCard.jsx";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { formatBalance } from "@/utils/index.js";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 
 function RewardDetail({ className }) {
   const { period } = useParams();
   document.title = "Order detail";
   const [periodInfo, setPeriodInfo] = useState({});
-  const [machineList, setMachineList] = useState();
-  const [total, setTotal] = useState();
-  const [loading, setLoading] = useState(true);
+  const [machineList, setMachineList] = useState([]);
+  const [total, setTotal] = useState({
+    ClaimablePeriodicRewards: 0,
+    ClaimableTaskRewards: 0,
+    ClaimedPeriodicRewards: 0,
+    ClaimedTaskRewards: 0,
+  });
+  const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const claimed = useMemo(() => {
     if (total?.totalClaimable) {
@@ -28,8 +35,10 @@ function RewardDetail({ className }) {
     }
   }, [total]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [connectModal, setConnectModal] = useState(false);
   const open = Boolean(anchorEl);
-  const { wallet, methods } = useSolanaMethod();
+  const { methods } = useSolanaMethod();
+  const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   async function getClaimableList() {
     const res = await getClaimableReward(
@@ -51,6 +60,7 @@ function RewardDetail({ className }) {
     }
   }
   async function claimButchRewards() {
+    if (!wallet?.publicKey) return setConnectModal(true);
     setClaiming(true);
     const { claimableList, total } = await getClaimableList();
     try {
@@ -65,6 +75,7 @@ function RewardDetail({ className }) {
   }
   useEffect(() => {
     async function loadDetail() {
+      setLoading(true);
       const machines = await getPeriodMachine(
         Number(period),
         1,
@@ -90,6 +101,15 @@ function RewardDetail({ className }) {
     }
     if (wallet?.publicKey) {
       loadDetail();
+    } else {
+      setTotal({
+        ClaimablePeriodicRewards: 0,
+        ClaimableTaskRewards: 0,
+        ClaimedPeriodicRewards: 0,
+        ClaimedTaskRewards: 0,
+      });
+      setMachineList([]);
+      setPeriodInfo({});
     }
     // eslint-disable-next-line
   }, [period, wallet]);
@@ -107,7 +127,7 @@ function RewardDetail({ className }) {
             className="total">
             <Stack spacing={1}>
               <Stack direction="row" spacing={1} alignItems="end">
-                <span>{total.totalClaimable}</span>
+                <span>{total.totalClaimable || 0}</span>
                 <label>DIST</label>
               </Stack>
               <Stack direction="row" spacing={1}>
@@ -194,14 +214,21 @@ function RewardDetail({ className }) {
             <Stack spacing={2} className="info">
               <Stack direction="row" justifyContent="space-between">
                 <label>Start time</label>
-                <span>{new Date(periodInfo.StartTime).toLocaleString()}</span>
+                <span>
+                  {periodInfo.StartTime
+                    ? new Date(periodInfo.StartTime).toLocaleString()
+                    : "--"}
+                </span>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <label>End time</label>
                 <span>
-                  {new Date(
-                    new Date(periodInfo.StartTime).getTime() + 24 * 3600 * 1000
-                  ).toLocaleString()}
+                  {periodInfo.StartTime
+                    ? new Date(
+                        new Date(periodInfo.StartTime).getTime() +
+                          24 * 3600 * 1000
+                      ).toLocaleString()
+                    : "--"}
                 </span>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -213,12 +240,12 @@ function RewardDetail({ className }) {
               <Stack direction="row" justifyContent="space-between">
                 <label>Reward Pool</label>
                 <span>
-                  {(periodInfo.Pool / LAMPORTS_PER_SOL).toFixed(2)} DIST
+                  {periodInfo.Pool ? formatBalance(periodInfo.Pool) : 0} DIST
                 </span>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <label>Participating Nodes</label>
-                <span>{periodInfo.ParticipatingNodes}</span>
+                <span>{periodInfo.ParticipatingNodes || 0}</span>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <label>My Nodes</label>
@@ -228,25 +255,38 @@ function RewardDetail({ className }) {
           </Stack>
           <h2>Nodes Info</h2>
           <hr />
-          {machineList.map((device) => (
-            <>
-              <DeviceCard key={device.Uuid} device={device} />
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                className="total"
-                style={{ margin: "0 40px 40px 40px" }}>
-                <label>Rewards</label>
-                <Stack spacing={1}>
-                  <span>{formatBalance(device.PeriodicRewards)}</span>
-                  <label style={{ textAlign: "right" }}>DIST</label>
+          {machineList.length > 0 ? (
+            machineList.map((device) => (
+              <>
+                <DeviceCard key={device.Uuid} device={device} />
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  className="total"
+                  style={{ margin: "0 40px 40px 40px" }}>
+                  <label>Rewards</label>
+                  <Stack spacing={1}>
+                    <span>{formatBalance(device.PeriodicRewards)}</span>
+                    <label style={{ textAlign: "right" }}>DIST</label>
+                  </Stack>
                 </Stack>
-              </Stack>
-            </>
-          ))}
+              </>
+            ))
+          ) : (
+            <Stack
+              justifyContent="center"
+              alignItems="center"
+              className="empty">
+              <span>No node info</span>
+            </Stack>
+          )}
         </>
       )}
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
+      />
     </div>
   );
 }
@@ -285,6 +325,13 @@ export default styled(RewardDetail)`
       font-size: 18px;
       color: #898989;
       line-height: 26px;
+    }
+  }
+  .empty {
+    width: 100%;
+    height: 300px;
+    span {
+      color: #898989;
     }
   }
 `;

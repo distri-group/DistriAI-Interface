@@ -27,11 +27,9 @@ function EarningDetail({ className }) {
       }
       setLoading(false);
     }
-    if (wallet?.publicKey) {
-      loadDetail();
-    }
+    loadDetail();
     // eslint-disable-next-line
-  }, [id, wallet]);
+  }, []);
   return (
     <div className={className}>
       <div className="con">

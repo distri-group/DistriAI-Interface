@@ -199,7 +199,7 @@ function Contents({ className, type }) {
           </div>
         </div>
       </div>
-      <ConnectToWallet open={connectModal} />
+      <ConnectToWallet open={connectModal} onClose={() => setModal(false)} />
     </div>
   );
 }

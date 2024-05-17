@@ -12,6 +12,7 @@ import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { PublicKey } from "@solana/web3.js";
 import { getTotal } from "@/utils/index.js";
 import InsufficientDialog from "@/components/InsufficientDialog";
+import ConnectToWallet from "../../components/ConnectToWallet";
 
 function ExtendDuration({ className }) {
   const { id } = useParams();
@@ -26,6 +27,7 @@ function ExtendDuration({ className }) {
   const [deviceDetail, setDeviceDetail] = useState({});
   const [orderDetail, setOrderDetail] = useState({});
   const [insufficientDialog, setInsufficientDialog] = useState(false);
+  const [connectModal, setConnectModal] = useState(false);
   const amount = useMemo(() => {
     if (deviceDetail.Price) {
       return getTotal(deviceDetail.Price, parseFloat(duration));
@@ -34,6 +36,7 @@ function ExtendDuration({ className }) {
   }, [duration, deviceDetail]);
 
   async function onSubmit() {
+    if (!wallet?.publicKey) return setConnectModal(true);
     const machinePublicKey = methods.getMachinePublicKey(
       deviceDetail.Uuid,
       new PublicKey(deviceDetail.Provider)
@@ -181,6 +184,10 @@ function ExtendDuration({ className }) {
       <InsufficientDialog
         open={insufficientDialog}
         close={() => setInsufficientDialog(false)}
+      />
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
       />
     </div>
   );

@@ -22,6 +22,7 @@ import useIpfs from "@/utils/useIpfs.js";
 import { getTotal } from "@/utils/index.js";
 import { useClearCache } from "@/components/ClearCacheProvider";
 import InsufficientDialog from "@/components/InsufficientDialog";
+import ConnectToWallet from "@/components/ConnectToWallet";
 
 function Buy({ className }) {
   document.title = "Edit model";
@@ -49,6 +50,7 @@ function Buy({ className }) {
   const [selectedModel, setSelectedModel] = useState({});
   const [deployable, setDeployable] = useState(false);
   const [insufficientDialog, setInsufficientDialog] = useState(false);
+  const [connectModal, setConnectModal] = useState(false);
   const { methods: ipfsMethods } = useIpfs();
   const { clearCache } = useClearCache();
   const amount = useMemo(() => {
@@ -99,6 +101,7 @@ function Buy({ className }) {
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (!wallet?.publicKey) return setConnectModal(true);
     if (validateError.taskName) return;
     const MachineInfo = {
       Uuid: deviceDetail.Uuid,
@@ -164,18 +167,6 @@ function Buy({ className }) {
   useEffect(() => {
     async function init() {
       setLoading(true);
-      const balance = await methods.getTokenBalance(wallet.publicKey);
-      setBalance(balance);
-      const res = await getOrderList(
-        1,
-        10,
-        { Direction: "buy" },
-        wallet.publicKey.toString()
-      );
-      setFormValue((prevState) => ({
-        ...prevState,
-        taskName: `Computing Task-${res.Total}`,
-      }));
       const models = await getItemList("model", 1, 10);
       setModels(models.List);
       if (state?.model) {
@@ -197,11 +188,10 @@ function Buy({ className }) {
       setDeviceDetail(device);
       setLoading(false);
     }
-    if (wallet?.publicKey) {
-      init();
-    }
+    init();
+
     // eslint-disable-next-line
-  }, [wallet, id]);
+  }, []);
   useEffect(() => {
     const handleModelChange = async () => {
       if (JSON.stringify(selectedModel) !== "{}") {
@@ -226,6 +216,32 @@ function Buy({ className }) {
     handleModelChange();
     // eslint-disable-next-line
   }, [selectedModel]);
+  useEffect(() => {
+    const getInfo = async () => {
+      const balance = await methods.getTokenBalance(wallet.publicKey);
+      setBalance(balance);
+      const res = await getOrderList(
+        1,
+        10,
+        { Direction: "buy" },
+        wallet.publicKey.toString()
+      );
+      setFormValue((prevState) => ({
+        ...prevState,
+        taskName: `Computing Task-${res.Total}`,
+      }));
+    };
+    if (wallet?.publicKey) {
+      getInfo();
+    } else {
+      setBalance(0);
+      setFormValue((prevState) => ({
+        ...prevState,
+        taskName: "Computing Task",
+      }));
+    }
+    // eslint-disable-next-line
+  }, [wallet]);
   return (
     <div className={className}>
       {loading ? (
@@ -465,6 +481,10 @@ function Buy({ className }) {
       <InsufficientDialog
         open={insufficientDialog}
         close={() => setInsufficientDialog(false)}
+      />
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import React, { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   WalletProvider,
   ConnectionProvider,

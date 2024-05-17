@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Box } from "@mui/material";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 
-export default function ConnectToWallet({ open }) {
+export default function ConnectToWallet({ open, onClose }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const wallet = useAnchorWallet();
+  useEffect(() => {
+    setIsModalOpen(!wallet?.publicKey && open);
+  }, [wallet, open]);
   return (
     <Modal
       disableScrollLock
-      open={!wallet?.publicKey && open}
+      open={isModalOpen}
+      onClose={() => {
+        setIsModalOpen(false);
+        onClose();
+      }}
       slotProps={{ root: { style: { zIndex: "300" } } }}>
       <Box
         sx={{

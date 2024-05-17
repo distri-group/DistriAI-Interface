@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { enqueueSnackbar } from "notistack";
 import { getItemList, filterData } from "@/services/model.js";
 import {
@@ -25,10 +25,8 @@ function MyCreation({ className }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState("model");
-  async function loadList(current) {
+  const loadList = useCallback(async () => {
     setLoading(true);
-    setList([]);
-    setTotal(0);
     try {
       const res = await getItemList(type, current, 10, filterValue);
       setList(res.List);
@@ -37,11 +35,15 @@ function MyCreation({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setLoading(false);
-  }
-  useEffect(() => {
-    loadList(current);
-    // eslint-disable-next-line
   }, [current, filterValue, type]);
+  useEffect(() => {
+    if (wallet?.publicKey) {
+      loadList();
+    } else {
+      setList([]);
+      setTotal(0);
+    }
+  }, [current, filterValue, type, wallet, loadList]);
   return (
     <div className={className}>
       <ToggleButtonGroup

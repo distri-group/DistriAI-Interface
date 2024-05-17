@@ -14,6 +14,7 @@ import {
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
+import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 
 function Reward({ className }) {
   document.title = "My Rewards";
@@ -26,6 +27,7 @@ function Reward({ className }) {
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [rewards, setRewards] = useState(null);
+  const [connectModal, setConnectModal] = useState(false);
   const claimed = useMemo(() => {
     if (rewards?.totalClaimable) {
       return rewards.totalClaimable <= 0;
@@ -66,6 +68,7 @@ function Reward({ className }) {
     }
   }
   async function claimButchRewards() {
+    if (!wallet?.publicKey) return setConnectModal(true);
     setClaiming(true);
     const { claimableList, total } = await getClaimableList();
     try {
@@ -274,6 +277,10 @@ function Reward({ className }) {
           onChange={onPageChange}
         />
       )}
+      <ConnectToWallet
+        open={connectModal}
+        onClose={() => setConnectModal(false)}
+      />
     </div>
   );
 }
