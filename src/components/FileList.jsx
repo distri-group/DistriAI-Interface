@@ -55,6 +55,7 @@ function FileList({
   const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [deployFile, setDeployFile] = useState(null);
   const [existedDialog, setExistedDialog] = useState(false);
+  const [deleteFile, setDeleteFile] = useState("");
   const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
   const { clearCache } = useClearCache();
@@ -74,7 +75,7 @@ function FileList({
     setLoading(true);
     try {
       let { files: list, cid } = await methods.getFolderList(prefix);
-      if (wallet.publicKey.toString() !== item.Owner) {
+      if (wallet?.publicKey && wallet.publicKey.toString() !== item.Owner) {
         list = list.filter(
           (file) => !(file.type === "directory" && file.name === "deployment")
         );
@@ -135,6 +136,9 @@ function FileList({
   // Change prefix
   const handleFolderNavigate = (index) => {
     let suffix;
+    if (!index) {
+      return setPrefix(initialPrefix);
+    }
     if (index > 0) {
       suffix = breadcrumbs.slice(0, index + 1).join("/");
     } else suffix = breadcrumbs[index];
@@ -314,22 +318,25 @@ function FileList({
               alignItems="end"
               className="controls">
               <div className="breadcrumbs">
-                {breadcrumbs.length > 0 && (
-                  <Breadcrumbs
-                    separator={<span style={{ color: "white" }}>/</span>}>
-                    {breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
-                      <span
-                        key={index}
-                        className="breadcrumb avail"
-                        onClick={() => handleFolderNavigate(index)}>
-                        {breadcrumb}
-                      </span>
-                    ))}
-                    <span className="breadcrumb">
-                      {breadcrumbs.slice(-1)[0]}
+                <Breadcrumbs
+                  separator={<span style={{ color: "white" }}>/</span>}>
+                  <span
+                    className={`breadcrumb${
+                      breadcrumbs.length > 0 ? " avail" : ""
+                    }`}
+                    onClick={() => handleFolderNavigate(0)}>
+                    {item.Name}
+                  </span>
+                  {breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
+                    <span
+                      key={index}
+                      className="breadcrumb avail"
+                      onClick={() => handleFolderNavigate(index)}>
+                      {breadcrumb}
                     </span>
-                  </Breadcrumbs>
-                )}
+                  ))}
+                  <span className="breadcrumb">{breadcrumbs.slice(-1)[0]}</span>
+                </Breadcrumbs>
               </div>
               {wallet?.publicKey &&
                 item.Owner === wallet.publicKey.toString() &&
@@ -497,7 +504,7 @@ function FileList({
                                 height: 32,
                               }}
                               onClick={() =>
-                                handleDelete(currentPrefix + "/" + file.name)
+                                setDeleteFile(currentPrefix + "/" + file.name)
                               }>
                               Delete
                             </Button>
@@ -605,6 +612,26 @@ function FileList({
               handleDeploymentFileUpload(true);
             }}>
             Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteFile} fullWidth maxWidth="sm">
+        <DialogTitle>Are you sure you want to delete the file?</DialogTitle>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              handleDelete(deleteFile);
+              setDeleteFile("");
+            }}
+            className="cbtn"
+            style={{ width: 100 }}>
+            Delete
+          </Button>
+          <Button
+            onClick={() => setDeleteFile("")}
+            className="cbtn"
+            style={{ width: 100 }}>
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>
