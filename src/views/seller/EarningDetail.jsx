@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 import { CircularProgress, Stack, Grid } from "@mui/material";
 import DurationProgress from "@/components/DurationProgress.jsx";
@@ -14,7 +13,6 @@ function EarningDetail({ className }) {
   document.title = "Earning Detail";
   const [record, setRecord] = useState();
   const [loading, setLoading] = useState(true);
-  const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     async function loadDetail() {

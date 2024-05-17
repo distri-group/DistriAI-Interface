@@ -89,6 +89,7 @@ function EndDuration({ className }) {
     } else {
       setBalance(0);
     }
+    // eslint-disable-next-line
   }, [wallet]);
   return (
     <div className={className}>
