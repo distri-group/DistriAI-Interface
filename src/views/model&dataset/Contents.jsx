@@ -46,7 +46,7 @@ function Contents({ className, type }) {
     setType(e.target.value);
     setFilterValue({ ...filterValue, Type1: e.target.value });
   }
-  async function loadList(current) {
+  async function loadList() {
     setLoading(true);
     setList([]);
     setTotal(0);
@@ -62,11 +62,11 @@ function Contents({ className, type }) {
     if (search !== currentName) {
       clearTimeout(inputTimer.current);
       inputTimer.current = setTimeout(() => {
-        loadList(current);
+        loadList();
         setSearch(currentName);
       }, 1000);
     } else {
-      loadList(current);
+      loadList();
     }
 
     return () => clearTimeout(inputTimer.current);
@@ -147,6 +147,7 @@ function Contents({ className, type }) {
               }}
               onFilter={(value) => {
                 setFilterValue(value);
+                console.log("onFilter");
                 setCurrent(1);
               }}
               search={{ key: "Name" }}

@@ -1,6 +1,6 @@
 import { Select, Stack, MenuItem, TextField } from "@mui/material";
 import { debounce } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Filter({
   data,
@@ -17,15 +17,10 @@ export default function Filter({
   const handleInput = debounce((key, value) => {
     setFilterValue((prev) => ({ ...prev, [key]: value }));
   }, 500);
-  const handleFilterChange = useCallback(
-    (filterValue) => {
-      onFilter(filterValue);
-    },
-    [onFilter]
-  );
   useEffect(() => {
-    handleFilterChange(filterValue);
-  }, [filterValue, handleFilterChange]);
+    onFilter(filterValue);
+    // eslint-disable-next-line
+  }, [filterValue]);
   return (
     <Stack
       direction="row"
