@@ -71,13 +71,17 @@ function Reward({ className }) {
     if (!wallet?.publicKey) return setConnectModal(true);
     setClaiming(true);
     const { claimableList, total } = await getClaimableList();
-    try {
-      await methods.claimButchRewards(claimableList);
-      enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
-        variant: "success",
-      });
-    } catch (error) {
-      enqueueSnackbar(error.message, { variant: "error" });
+    if (claimableList.length === 0) {
+      enqueueSnackbar("No claimable node.", { variant: "info" });
+    } else {
+      try {
+        await methods.claimButchRewards(claimableList);
+        enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
+          variant: "success",
+        });
+      } catch (error) {
+        enqueueSnackbar(error.message, { variant: "error" });
+      }
     }
     setClaiming(false);
   }

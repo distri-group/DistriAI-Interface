@@ -31,6 +31,11 @@ function EndDuration({ className }) {
 
   async function onSubmit() {
     if (!wallet?.publicKey) return setConnectModal(true);
+    if (wallet.publicKey.toString() !== detail.Owner)
+      return enqueueSnackbar(
+        "You are not connected with right account. Please change wallet account.",
+        { variant: "info" }
+      );
     if (detail.StatusName === "Available" && remainingTime < 3600000) {
       return enqueueSnackbar("Remaining duration less than 1 hour.", {
         variant: "info",

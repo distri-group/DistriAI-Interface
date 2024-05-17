@@ -37,6 +37,11 @@ function ExtendDuration({ className }) {
 
   async function onSubmit() {
     if (!wallet?.publicKey) return setConnectModal(true);
+    if (orderDetail.Buyer !== wallet.publicKey.toString())
+      return enqueueSnackbar(
+        "You are not connected with right account. Please change wallet account.",
+        { variant: "info" }
+      );
     const machinePublicKey = methods.getMachinePublicKey(
       deviceDetail.Uuid,
       new PublicKey(deviceDetail.Provider)
