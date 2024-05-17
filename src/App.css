@@ -86,3 +86,8 @@ a{
   width: 32px;
   height: 32px;
 }
+@media(max-width: 1920px) {
+  #App{
+    zoom:0.75
+  }
+}
