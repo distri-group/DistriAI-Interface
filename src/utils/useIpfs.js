@@ -11,7 +11,6 @@ export default function useIpfs() {
     };
     try {
       const res = await client.add(file, { progress: onProgress });
-      console.log(res.cid.toString());
       await client.files.cp(res.cid, path + "/" + res.path, {
         parents: true,
       });

@@ -147,7 +147,6 @@ function Contents({ className, type }) {
               }}
               onFilter={(value) => {
                 setFilterValue(value);
-                console.log("onFilter");
                 setCurrent(1);
               }}
               search={{ key: "Name" }}
