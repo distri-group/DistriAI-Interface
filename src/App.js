@@ -129,6 +129,15 @@ function App() {
             color: "white",
           },
         },
+        defaultProps: {
+          MenuProps: {
+            sx: {
+              "@media(max-width: 1920px) and (max-height: 1080px)": {
+                zoom: "75%",
+              },
+            },
+          },
+        },
       },
       MuiToggleButton: {
         styleOverrides: {
