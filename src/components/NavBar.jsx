@@ -232,7 +232,8 @@ export default styled(NavBar)`
   padding: 32px 0;
   display: block;
   .wallet-adapter-button {
-    font-size: 20px;
+    font-size: 18px;
+    line-height: 24px;
   }
   .wallet-adapter-button-trigger {
     background-color: transparent !important;
