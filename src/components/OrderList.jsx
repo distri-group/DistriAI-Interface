@@ -20,11 +20,16 @@ function OrderList({ className, list, loading, reloadFunc }) {
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
   const handleConsole = async (order, deploy) => {
+    let machine;
     try {
-      const machine = await getMachineDetail(
-        order.Metadata.MachineInfo.Provider,
-        order.Metadata.MachineInfo.Uuid || order.Metadata.MachineInfo.UUID
-      );
+      if (order?.Metadata?.MachineInfo) {
+        machine = order.Metadata.MachineInfo;
+      } else {
+        machine = await getMachineDetail(
+          order.Metadata.MachineInfo.Provider,
+          order.Metadata.MachineInfo.Uuid || order.Metadata.MachineInfo.UUID
+        );
+      }
       setSigning(true);
       const href = await signToken(
         machine.IP,

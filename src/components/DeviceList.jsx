@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { Button, Grid, Stack } from "@mui/material";
-import { formatAddress, getProvider } from "@/utils/index.js";
+import { formatAddress } from "@/utils/index.js";
 import Table from "./Table.jsx";
 import ConnectToWallet from "./ConnectToWallet.jsx";
 import { useClearCache } from "./ClearCacheProvider.jsx";
@@ -21,6 +21,39 @@ function DeviceList({
   const { clearCache } = useClearCache();
   const [connectModal, setConnectModal] = useState(false);
   const [priceSort, setPriceSort] = useState(0);
+  const isMyDevice = useMemo(() => Boolean(onCancel), [onCancel]);
+
+  function handleDeviceClick(device) {
+    if (!wallet?.publicKey) {
+      return setConnectModal(true);
+    }
+    if (isMyDevice) {
+      if (device.StatusName === "Not-Listed") {
+        clearCache();
+        return navigate(
+          `/device/${device.Uuid}/list?max=${parseInt(
+            device.Metadata.DiskInfo.TotalSpace
+          )}`
+        );
+      }
+      if (device.StatusName === "Listed") {
+        return onCancel(device);
+      }
+    } else {
+      clearCache();
+      return navigate(`/device/${device.Uuid}/buy?own=${device.Owner}`, {
+        state: model,
+      });
+    }
+  }
+
+  function formatButtonText(device) {
+    if (isMyDevice) {
+      return device.StatusName === "Not-Listed" ? "Make Offer" : "Unlist";
+    } else {
+      return device.StatusName === "Listed" ? "Select" : "Rented";
+    }
+  }
 
   useEffect(() => {
     if (priceSort) {
@@ -30,7 +63,7 @@ function DeviceList({
   }, [priceSort]);
   let columns = [
     {
-      title: onCancel ? "Device" : "Provider",
+      title: isMyDevice ? "Device" : "Provider",
       width: "14%",
       key: "addr",
       render: (text, record, index) => {
@@ -38,11 +71,16 @@ function DeviceList({
           <div className="provider">
             <Stack direction="row" alignItems="center">
               {(record?.SecurityLevel || record?.SecurityLevel === 0) && (
-                <span className={`level level-${record.SecurityLevel}`}>
+                <span
+                  className="level"
+                  style={{
+                    background:
+                      record.SecurityLevel === 0 ? "#898989" : "#09e98d",
+                  }}>
                   Level {record.SecurityLevel}
                 </span>
               )}
-              {onPriceSort ? (
+              {isMyDevice ? (
                 <span className="from">
                   From <span style={{ color: "white" }}>{record.From}</span>
                 </span>
@@ -114,7 +152,7 @@ function DeviceList({
                 <Stack className="info">
                   <span>
                     <b>
-                      {onCancel
+                      {isMyDevice
                         ? parseInt(record.Metadata.DiskInfo.TotalSpace)
                         : record.Disk}
                     </b>{" "}
@@ -198,7 +236,7 @@ function DeviceList({
       width: "15%",
       key: "Price",
       render: (text, record, index) => {
-        if (record.Status === 0) {
+        if (record.StatusName === "Not-Listed") {
           return <span className="no-price">- -</span>;
         }
         return (
@@ -216,46 +254,16 @@ function DeviceList({
       render: (text, record, index) => {
         return (
           <Button
-            disabled={record.Status === 2}
-            className={
-              onCancel
-                ? "mini-btn mini-btn" + record.Status
-                : record.Status === 1
-                ? "mini-btn mini-btn0"
-                : "mini-btn mini-btn2"
-            }
-            onClick={() => {
-              if (!getProvider() || !wallet?.publicKey) {
-                return setConnectModal(true);
-              }
-              if (onPriceSort) {
-                clearCache();
-                return navigate(
-                  `/device/${record.Uuid}/buy?own=${record.Owner}`,
-                  {
-                    state: model,
-                  }
-                );
-              }
-              if (record.Status === 0) {
-                clearCache();
-                return navigate(
-                  "/device/" +
-                    record.Uuid +
-                    `/list?max=${parseInt(record.Metadata.DiskInfo.TotalSpace)}`
-                );
-              }
-              if (record.Status === 1) {
-                return onCancel(record);
-              }
-            }}>
-            {onCancel
-              ? record.Status === 0
-                ? "Make Offer"
-                : "Unlist"
-              : record.Status === 1
-              ? "Select"
-              : "Rented"}
+            disabled={record.StatusName === "Rented"}
+            className={`mini-btn ${
+              isMyDevice
+                ? record.StatusName
+                : record.StatusName === "Listed"
+                ? "Not-Listed"
+                : record.StatusName
+            }`}
+            onClick={() => handleDeviceClick(record)}>
+            {formatButtonText(record)}
           </Button>
         );
       },
@@ -317,13 +325,6 @@ export default styled(DeviceList)`
     line-height: 22px;
     padding: 0 11px;
   }
-  .level-0 {
-    background: #898989;
-  }
-  .level-1,
-  .level-2 {
-    background: #09e98d;
-  }
   .from {
     font-size: 18px;
     color: #898989;
@@ -340,34 +341,23 @@ export default styled(DeviceList)`
     }
     color: black;
   }
-  .mini-btn0 {
+  .Not-Listed {
     background: linear-gradient(270deg, #09e98d 0%, #0aab50 100%);
     color: white;
+    &:hover {
+      color: white !important;
+    }
   }
-  .mini-btn0:hover {
-    color: white !important;
-  }
-  .mini-btn1 {
+  .Listed {
     background-color: rgba(255, 185, 185, 1);
+    &:hover {
+      background-color: rgba(255, 214, 214, 1);
+      color: black !important;
+    }
   }
-  .mini-btn2 {
+  .Rented {
     background-color: rgba(70, 70, 70, 1);
     color: white;
-  }
-  .mini-btn1:hover {
-    background-color: rgba(255, 214, 214, 1);
-    color: black !important;
-  }
-  .info {
-    span {
-      font-size: 20px;
-      line-height: 28px;
-    }
-    label {
-      font-size: 16px;
-      color: #898989;
-      line-height: 22px;
-    }
   }
   .price {
     font-weight: 600;
@@ -375,18 +365,6 @@ export default styled(DeviceList)`
     line-height: 34px;
   }
   .provider {
-    .status {
-      padding-bottom: 24px;
-    }
-    .status0 {
-      display: none;
-    }
-    .status1 {
-      background-color: #f7ffad;
-    }
-    .status2 {
-      background-color: #b6ff9e;
-    }
     .addr {
       display: block;
       font-size: 16px;

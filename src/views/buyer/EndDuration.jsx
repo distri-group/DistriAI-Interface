@@ -31,7 +31,7 @@ function EndDuration({ className }) {
 
   async function onSubmit() {
     if (!wallet?.publicKey) return setConnectModal(true);
-    if (wallet.publicKey.toString() !== detail.Owner)
+    if (detail.Buyer !== wallet.publicKey.toString())
       return enqueueSnackbar(
         "You are not connected with right account. Please change wallet account.",
         { variant: "info" }

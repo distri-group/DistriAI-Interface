@@ -67,6 +67,8 @@ export async function getFilterData() {
 
 // Format Machine Info
 export function formatMachine(item) {
+  const statusName = ["Not-Listed", "Listed", "Rented"];
+  item.StatusName = statusName[item.Status];
   item.Price = formatBalance(item.Price);
   if (item.CompletedCount + item.FailedCount <= 0) {
     item.Reliability = "--";

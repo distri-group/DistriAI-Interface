@@ -36,27 +36,22 @@ export async function getOrderList(pageIndex, pageSize, filter, publicKey) {
 }
 
 export async function getTotalEarnings(total, publicKey) {
-  const apiUrl = baseUrl + "/mine";
-  const body = {
-    Page: 1,
-    PageSize: total,
-    Direction: "sell",
-  };
-  const headers = {
-    Account: publicKey,
-  };
   try {
-    const res = await axios.post(apiUrl, body, {
-      headers,
+    const res = await getOrderDetail(1, total, {
+      Direction: "sell",
+      publicKey,
     });
     let pending = 0;
     let received = 0;
     res.List.forEach((currentValue) => {
-      if (currentValue.Status === 0 || currentValue.Status === 1) {
+      if (
+        currentValue.StatusName === "Preparing" ||
+        currentValue.StatusName === "Available"
+      ) {
         pending += currentValue.Total;
-      } else if (currentValue.Status === 2) {
+      } else if (currentValue.StatusName === "Completed") {
         received += currentValue.Total;
-      } else if (currentValue.Status === 4) {
+      } else if (currentValue.StatusName === "Refunded") {
         const refundDuration = Math.ceil(
           (new Date(currentValue.RefundTime) -
             new Date(currentValue.StartTime)) /
