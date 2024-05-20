@@ -19,7 +19,7 @@ import Filter from "@/components/Filter.jsx";
 import { useClearCache } from "@/components/ClearCacheProvider.jsx";
 
 function Contents({ className, type }) {
-  document.title = capitalize(type + "s");
+  document.title = capitalize(`${type}s`);
   const navigate = useNavigate();
   const [filterValue, setFilterValue] = useState({
     Name: "",
@@ -74,7 +74,7 @@ function Contents({ className, type }) {
   }, [current, type, filterValue]);
   return (
     <div className={className}>
-      <h1>{capitalize(type + "s")}</h1>
+      <h1>{capitalize(`${type}s`)}</h1>
       <div className="container">
         <div className="left">
           <Select
@@ -177,7 +177,7 @@ function Contents({ className, type }) {
                 {list.map((item) => (
                   <ItemCard
                     item={item}
-                    key={item.Owner + "/" + item.Name}
+                    key={`${item.Owner}/${item.Name}`}
                     type={type}
                   />
                 ))}

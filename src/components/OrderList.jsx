@@ -162,7 +162,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
             )
           ) : (
             <Button
-              onClick={() => navigate("/order/" + text)}
+              onClick={() => navigate(`/order/${record.Uuid}`)}
               disabled={record.StatusName === "Preparing"}
               className="white-btn"
               style={{ width: 64, height: 32 }}>

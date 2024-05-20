@@ -11,7 +11,7 @@ export default function useIpfs() {
     };
     try {
       const res = await client.add(file, { progress: onProgress });
-      await client.files.cp(res.cid, path + "/" + res.path, {
+      await client.files.cp(res.cid, `${path}/${res.path}`, {
         parents: true,
       });
       return res;
@@ -34,7 +34,7 @@ export default function useIpfs() {
         progress: onProgress,
       })) {
         try {
-          await client.files.cp(res.cid, path + "/" + res.path, {
+          await client.files.cp(res.cid, `${path}/${res.path}`, {
             parents: true,
           });
         } catch (error) {

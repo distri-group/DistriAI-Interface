@@ -26,6 +26,7 @@ export async function getMachineList(pageIndex, pageSize, filter, publicKey) {
   for (let machine of res.List) {
     machine = formatMachine(machine);
   }
+  console.log(res.List);
   return res;
 }
 
@@ -47,9 +48,8 @@ export async function getFilterData() {
       };
     });
     value.unshift({
-      label:
-        "ANY " +
-        (key === "Gpu" ? "GPU" : key === "GpuCount" ? "GPU Count" : key),
+      label: `ANY 
+        ${key === "Gpu" ? "GPU" : key === "GpuCount" ? "GPU Count" : key}`,
       value: "all",
     });
   });
@@ -73,17 +73,16 @@ export function formatMachine(item) {
   if (item.CompletedCount + item.FailedCount <= 0) {
     item.Reliability = "--";
   } else {
-    item.Reliability =
-      parseInt(
-        (item.CompletedCount * 100) / (item.CompletedCount + item.FailedCount)
-      ) + "%";
+    item.Reliability = `${parseInt(
+      (item.CompletedCount * 100) / (item.CompletedCount + item.FailedCount)
+    )}%`;
   }
   if (item.Metadata && typeof item.Metadata == "string") {
     item.Metadata = JSON.parse(item.Metadata);
     item.Provider = item.Metadata.Addr;
     item.CPS = item.Metadata.Score?.toFixed(2) || 0;
     item.CPU = item.Metadata.CPUInfo?.ModelName || "";
-    item.GPU = item.GpuCount + "x" + item.Gpu;
+    item.GPU = `${item.GpuCount}x ${item.Gpu}`;
     item.RAM = item.Metadata.InfoMemory?.RAM?.toFixed(0);
     item.IP = item.Metadata.Ip?.ip;
     item.Port = item.Metadata.Ip?.port;
@@ -101,7 +100,7 @@ export function formatMachine(item) {
       const memory = parseInt(item.Metadata.GPUInfo.Memory.match(/\d+/)[0]);
       item.GPUMemory = `${
         memory > 1024
-          ? Math.floor((memory / 1024) * 100) / 100 + "GiB"
+          ? Math.floor((memory / 1024) * 100) / 100 + " GiB"
           : memory + " MiB"
       }`;
     }

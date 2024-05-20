@@ -56,6 +56,10 @@ function FileList({
   const [deployFile, setDeployFile] = useState(null);
   const [existedDialog, setExistedDialog] = useState(false);
   const [deleteFile, setDeleteFile] = useState("");
+  const deployPath = useMemo(
+    () => `${initialPrefix}/deployment`,
+    [initialPrefix]
+  );
   const { methods } = useIpfs();
   const { enqueueSnackbar } = useSnackbar();
   const { clearCache } = useClearCache();
@@ -142,7 +146,7 @@ function FileList({
     if (index > 0) {
       suffix = breadcrumbs.slice(0, index + 1).join("/");
     } else suffix = breadcrumbs[index];
-    setPrefix(initialPrefix + "/" + suffix);
+    setPrefix(`${initialPrefix}/${suffix}`);
   };
 
   const handleUploadProgress = (bytes, total) => {
@@ -153,22 +157,18 @@ function FileList({
   // Deployment script upload
   const handleDeploymentFileUpload = async (existed) => {
     if (existed) {
-      await methods.fileDelete(initialPrefix + "/deployment", true);
+      await methods.fileDelete(deployPath, true);
     }
     enqueueSnackbar("Start uploading", { variant: "info" });
     try {
-      await methods.fileUpload(
-        initialPrefix + "/deployment",
-        deployFile,
-        (bytes) => {
-          const progress = handleUploadProgress(bytes, deployFile.size);
-          setProgress((prevState) => {
-            const newProgress = [...prevState];
-            newProgress[0].progress = progress;
-            return newProgress;
-          });
-        }
-      );
+      await methods.fileUpload(deployPath, deployFile, (bytes) => {
+        const progress = handleUploadProgress(bytes, deployFile.size);
+        setProgress((prevState) => {
+          const newProgress = [...prevState];
+          newProgress[0].progress = progress;
+          return newProgress;
+        });
+      });
       enqueueSnackbar("Upload success", { variant: "success" });
       await loadFiles(currentPrefix);
       setDeployFile(null);
@@ -355,7 +355,7 @@ function FileList({
                         style={{ display: "none" }}
                         onClick={(e) => (e.target.value = null)}
                         onChange={(e) => {
-                          if (currentPrefix === initialPrefix + "/deployment") {
+                          if (currentPrefix === deployPath) {
                             setDeployFile(e.target.files[0]);
                           } else {
                             setFiles(e.target.files);
@@ -366,7 +366,7 @@ function FileList({
                     <Button
                       className="white-btn"
                       style={{ width: 160 }}
-                      disabled={currentPrefix === initialPrefix + "/deployment"}
+                      disabled={currentPrefix === deployPath}
                       component="label"
                       role={undefined}
                       tabIndex={-1}>
@@ -504,7 +504,7 @@ function FileList({
                                 height: 32,
                               }}
                               onClick={() =>
-                                setDeleteFile(currentPrefix + "/" + file.name)
+                                setDeleteFile(`${currentPrefix}/${file.name}`)
                               }>
                               Delete
                             </Button>

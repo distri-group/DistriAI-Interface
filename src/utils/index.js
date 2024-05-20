@@ -8,7 +8,7 @@ function formatBalance(balance) {
 function formatAddress(addr) {
   if (!addr) return "";
   if (addr.length < 10) return addr;
-  return addr.slice(0, 8) + "..." + addr.slice(-8);
+  return `${addr.slice(0, 8)}...${addr.slice(-8)}`;
 }
 function getProvider() {
   if ("phantom" in window) {

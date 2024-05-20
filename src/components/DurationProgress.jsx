@@ -84,9 +84,7 @@ export default function DurationProgress({
         }}>
         <span>{`${parseFloat(progress).toFixed(2)}%`}</span>
         <br />
-        <span style={{ marginLeft: "-30px" }}>
-          {"Duration: " + used + " h"}
-        </span>
+        <span style={{ marginLeft: "-30px" }}>Duration: {used}h</span>
       </Box>
     </Box>
   );

@@ -136,7 +136,7 @@ function Earning({ className }) {
             width: 100,
             height: 32,
           }}
-          onClick={() => navigate("/earning/" + record.Uuid)}>
+          onClick={() => navigate(`/earning/${record.Uuid}`)}>
           <span
             style={{
               fontSize: 16,
