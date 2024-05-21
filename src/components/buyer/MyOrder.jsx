@@ -6,6 +6,7 @@ import Pager from "@/components/pager";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import Filter from "@/components/Filter";
 import { ToggleButton, ToggleButtonGroup, Stack } from "@mui/material";
+import { useSnackbar } from "notistack";
 
 function MyOrder({ className }) {
   const [list, setList] = useState([]);
@@ -17,6 +18,7 @@ function MyOrder({ className }) {
     Status: "all",
   });
   const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
 
   const loadList = useCallback(async () => {
     setLoading(true);
@@ -29,8 +31,11 @@ function MyOrder({ className }) {
       );
       setTotal(res.Total);
       setList(res.List);
-    } catch (error) {}
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
     setLoading(false);
+    // eslint-disable-next-line
   }, [current, filterValue, wallet]);
   useEffect(() => {
     if (wallet?.publicKey) {

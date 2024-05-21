@@ -26,7 +26,6 @@ export async function getMachineList(pageIndex, pageSize, filter, publicKey) {
   for (let machine of res.List) {
     machine = formatMachine(machine);
   }
-  console.log(res.List);
   return res;
 }
 

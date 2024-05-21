@@ -9,15 +9,11 @@ export default function useIpfs() {
       path: file.name,
       content: file,
     };
-    try {
-      const res = await client.add(file, { progress: onProgress });
-      await client.files.cp(res.cid, `${path}/${res.path}`, {
-        parents: true,
-      });
-      return res;
-    } catch (error) {
-      throw error;
-    }
+    const res = await client.add(file, { progress: onProgress });
+    await client.files.cp(res.cid, `${path}/${res.path}`, {
+      parents: true,
+    });
+    return res;
   };
 
   // Folder upload
@@ -57,55 +53,39 @@ export default function useIpfs() {
     let createPath;
     if (name) createPath = `${path}/${name}`;
     else createPath = path;
-    try {
-      const res = await client.files.mkdir(createPath, { parents: true });
-      return res;
-    } catch (error) {
-      throw error;
-    }
+    const res = await client.files.mkdir(createPath, { parents: true });
+    return res;
   };
 
   // Check folder
   const getFolderList = async (path) => {
     const files = [];
-    try {
-      const res = await client.files.stat(path);
-      for await (const item of client.files.ls(path)) {
-        files.push(item);
-      }
-      files.sort((a, b) => {
-        if (a.type === "directory" && b.type === "file") {
-          return -1;
-        } else if (a.type === "file" && b.type === "directory") {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
-      return { files, cid: res.cid.toString() };
-    } catch (error) {
-      throw error;
+    const res = await client.files.stat(path);
+    for await (const item of client.files.ls(path)) {
+      files.push(item);
     }
+    files.sort((a, b) => {
+      if (a.type === "directory" && b.type === "file") {
+        return -1;
+      } else if (a.type === "file" && b.type === "directory") {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    return { files, cid: res.cid.toString() };
   };
 
   // Delete file from folder
   const fileDelete = async (path, recursive) => {
-    try {
-      const res = await client.files.rm(path, { recursive });
-      return res;
-    } catch (error) {
-      throw error;
-    }
+    const res = await client.files.rm(path, { recursive });
+    return res;
   };
 
   // JSON upload
   const jsonUpload = async (object) => {
-    try {
-      const res = await client.add(JSON.stringify(object));
-      return res;
-    } catch (error) {
-      throw error;
-    }
+    const res = await client.add(JSON.stringify(object));
+    return res;
   };
 
   const methods = {

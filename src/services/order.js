@@ -22,58 +22,45 @@ export async function getOrderList(pageIndex, pageSize, filter, publicKey) {
       }
     });
   }
-  try {
-    const res = await axios.post(apiUrl, body, {
-      headers,
-    });
-    for (let order of res.List) {
-      order = formatOrder(order);
-    }
-    return res;
-  } catch (error) {
-    throw error;
+  const res = await axios.post(apiUrl, body, {
+    headers,
+  });
+  for (let order of res.List) {
+    order = formatOrder(order);
   }
+  return res;
 }
 
 export async function getTotalEarnings(total, publicKey) {
-  try {
-    const res = await getOrderDetail(1, total, {
-      Direction: "sell",
-      publicKey,
-    });
-    let pending = 0;
-    let received = 0;
-    res.List.forEach((currentValue) => {
-      if (
-        currentValue.StatusName === "Preparing" ||
-        currentValue.StatusName === "Available"
-      ) {
-        pending += currentValue.Total;
-      } else if (currentValue.StatusName === "Completed") {
-        received += currentValue.Total;
-      } else if (currentValue.StatusName === "Refunded") {
-        const refundDuration = Math.ceil(
-          (new Date(currentValue.RefundTime) -
-            new Date(currentValue.StartTime)) /
-            3600000
-        );
-        received += refundDuration * currentValue.Price;
-      }
-    });
-    return { pending, received };
-  } catch (error) {
-    throw error;
-  }
+  const res = await getOrderDetail(1, total, {
+    Direction: "sell",
+    publicKey,
+  });
+  let pending = 0;
+  let received = 0;
+  res.List.forEach((currentValue) => {
+    if (
+      currentValue.StatusName === "Preparing" ||
+      currentValue.StatusName === "Available"
+    ) {
+      pending += currentValue.Total;
+    } else if (currentValue.StatusName === "Completed") {
+      received += currentValue.Total;
+    } else if (currentValue.StatusName === "Refunded") {
+      const refundDuration = Math.ceil(
+        (new Date(currentValue.RefundTime) - new Date(currentValue.StartTime)) /
+          3600000
+      );
+      received += refundDuration * currentValue.Price;
+    }
+  });
+  return { pending, received };
 }
 
 export async function getOrderDetail(Id) {
   const apiUrl = baseUrl + `/${Id}`;
-  try {
-    const res = await axios.get(apiUrl);
-    return formatOrder(res);
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.get(apiUrl);
+  return formatOrder(res);
 }
 
 export async function checkIfPrepared(order, done) {
@@ -140,11 +127,7 @@ export async function signToken(ip, port, publicKey, deploy) {
     !deploy ? "/" + parseInt(Date.now() / 100000) : ""
   }/${publicKey}`;
   const encodeMsg = new TextEncoder().encode(msg);
-  try {
-    const sign = await provider.signMessage(encodeMsg, "utf8");
-    const signature = utils.bytes.bs58.encode(sign.signature);
-    return `http://${ip}:${port}/distri/workspace/debugToken/${signature}`;
-  } catch (error) {
-    throw error;
-  }
+  const sign = await provider.signMessage(encodeMsg, "utf8");
+  const signature = utils.bytes.bs58.encode(sign.signature);
+  return `http://${ip}:${port}/distri/workspace/debugToken/${signature}`;
 }

@@ -17,6 +17,7 @@ import Pager from "@/components/pager.jsx";
 import { capitalize } from "lodash";
 import Filter from "@/components/Filter.jsx";
 import { useClearCache } from "@/components/ClearCacheProvider.jsx";
+import { useSnackbar } from "notistack";
 
 function Contents({ className, type }) {
   document.title = capitalize(`${type}s`);
@@ -35,6 +36,7 @@ function Contents({ className, type }) {
   const wallet = useAnchorWallet();
   const inputTimer = useRef(null);
   const { clearCache } = useClearCache();
+  const { enqueueSnackbar } = useSnackbar();
   const chipStyle = {
     borderRadius: "8px",
     margin: "6px",
@@ -54,7 +56,9 @@ function Contents({ className, type }) {
       const res = await getItemList(type, current, 10, filterValue);
       setList(res.List);
       setTotal(res.Total);
-    } catch (error) {}
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
     setLoading(false);
   }
   useEffect(() => {

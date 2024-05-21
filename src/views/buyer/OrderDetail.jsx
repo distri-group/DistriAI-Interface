@@ -43,7 +43,9 @@ function OrderDetail({ className }) {
     try {
       const res = await getOrderDetail(id);
       setRecord(res);
-    } catch (error) {}
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
     setLoading(false);
   }
   useEffect(() => {

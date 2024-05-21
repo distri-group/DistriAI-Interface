@@ -13,12 +13,8 @@ export async function getRewardList(pageIndex, pageSize, publicKey) {
   const headers = {
     Account: publicKey,
   };
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.post(apiUrl, body, { headers });
+  return res;
 }
 
 export async function getRewardTotal(period, publicKey) {
@@ -31,22 +27,18 @@ export async function getRewardTotal(period, publicKey) {
   const headers = {
     Account: publicKey,
   };
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    let formattedRes = Object.fromEntries(
-      Object.entries(res).map(([key, value]) => [
-        key,
-        Number((value / LAMPORTS_PER_SOL).toFixed(2)),
-      ])
-    );
-    formattedRes.totalClaimable =
-      formattedRes.ClaimablePeriodicRewards + formattedRes.ClaimableTaskRewards;
-    formattedRes.totalClaimed =
-      formattedRes.ClaimedPeriodicRewards + formattedRes.ClaimedTaskRewards;
-    return formattedRes;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.post(apiUrl, body, { headers });
+  let formattedRes = Object.fromEntries(
+    Object.entries(res).map(([key, value]) => [
+      key,
+      Number((value / LAMPORTS_PER_SOL).toFixed(2)),
+    ])
+  );
+  formattedRes.totalClaimable =
+    formattedRes.ClaimablePeriodicRewards + formattedRes.ClaimableTaskRewards;
+  formattedRes.totalClaimed =
+    formattedRes.ClaimedPeriodicRewards + formattedRes.ClaimedTaskRewards;
+  return formattedRes;
 }
 
 export async function getClaimableReward(
@@ -69,12 +61,8 @@ export async function getClaimableReward(
   const headers = {
     Account: publicKey,
   };
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  const res = await axios.post(apiUrl, body, { headers });
+  return res;
 }
 
 export async function getPeriodMachine(period, pageIndex, pageSize, publicKey) {
@@ -87,13 +75,9 @@ export async function getPeriodMachine(period, pageIndex, pageSize, publicKey) {
   const headers = {
     Account: publicKey,
   };
-  try {
-    const res = await axios.post(apiUrl, body, { headers });
-    for (let machine of res.List) {
-      machine = formatMachine(machine);
-    }
-    return res;
-  } catch (error) {
-    throw error;
+  const res = await axios.post(apiUrl, body, { headers });
+  for (let machine of res.List) {
+    machine = formatMachine(machine);
   }
+  return res;
 }

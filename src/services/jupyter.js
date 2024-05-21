@@ -2,24 +2,19 @@ import axios from "axios";
 import * as anchor from "@project-serum/anchor";
 
 export async function getFileList(addr, path, token) {
-  try {
-    const res = await axios.get(
-      `${addr}/distri/proxy/api/contents${path ? `/${path}` : ""}`,
-      {
-        params: {
-          type: "directory",
-          _: Date.now(),
-        },
-        headers: {
-          Authorization: `token ${token}`,
-        },
-      }
-    );
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching file list:", error);
-    throw error;
-  }
+  const res = await axios.get(
+    `${addr}/distri/proxy/api/contents${path ? `/${path}` : ""}`,
+    {
+      params: {
+        type: "directory",
+        _: Date.now(),
+      },
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    }
+  );
+  return res.data;
 }
 
 export async function signToken(addr, publicKey) {

@@ -326,19 +326,15 @@ export default function useSolanaMethod() {
 
   // Get User's Associated-Token-Address
   const findAssociatedTokenAddress = (publicKey) => {
-    try {
-      const [associatedTokenAddress] = PublicKey.findProgramAddressSync(
-        [
-          publicKey.toBuffer(),
-          TOKEN_PROGRAM_ID.toBuffer(),
-          MINT_PROGRAM.toBuffer(),
-        ],
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-      return associatedTokenAddress;
-    } catch (error) {
-      throw error;
-    }
+    const [associatedTokenAddress] = PublicKey.findProgramAddressSync(
+      [
+        publicKey.toBuffer(),
+        TOKEN_PROGRAM_ID.toBuffer(),
+        MINT_PROGRAM.toBuffer(),
+      ],
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    return associatedTokenAddress;
   };
 
   // Get Machine's PublicKey
