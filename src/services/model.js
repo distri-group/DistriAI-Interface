@@ -25,11 +25,11 @@ export async function getItemList(type, pageIndex, pageSize, filter) {
   return res;
 }
 
-export async function getLikeList(type, pageIndex, pageSize, publicKey) {
+export async function getLikeList(type, pageIndex, pageSize, wallet) {
   const apiUrl = `/${type}/likes`;
   let headers = {};
-  if (publicKey) {
-    const token = await login(publicKey);
+  if (wallet) {
+    const token = await login(wallet);
     headers.Authorization = token;
   }
   const body = {
@@ -49,9 +49,9 @@ export async function getItemDetail(type, owner, name) {
   return formatItem(res);
 }
 
-export async function isItemLiked(type, owner, name, publicKey) {
+export async function isItemLiked(type, owner, name, wallet) {
   const apiUrl = `/${type}/islike`;
-  const token = await login(publicKey);
+  const token = await login(wallet);
   const headers = {
     Authorization: token,
   };
@@ -65,9 +65,9 @@ export async function isItemLiked(type, owner, name, publicKey) {
   return res;
 }
 
-export async function likeItem(type, owner, name, publicKey, isLiked) {
+export async function likeItem(type, owner, name, wallet, isLiked) {
   const apiUrl = `/${type}/like`;
-  const token = await login(publicKey);
+  const token = await login(wallet);
   const headers = {
     Authorization: token,
   };
@@ -92,28 +92,34 @@ export async function downloadItem(type, owner, name) {
   return res;
 }
 
-export async function login(publicKey) {
+export async function login(wallet) {
+  const { publicKey, signMessage } = wallet;
   if (localStorage.getItem("token")) {
     let token;
     try {
       token = JSON.parse(localStorage.getItem("token"));
-      if (token.expired > Date.now() && token.publicKey === publicKey) {
+      if (
+        token.expired > Date.now() &&
+        token.publicKey === publicKey.toString()
+      ) {
         return token.value;
       } else {
         localStorage.removeItem("token");
-        return login(publicKey);
+        return login(wallet);
       }
     } catch (error) {
       localStorage.removeItem("token");
-      return login(publicKey);
+      return login(wallet);
     }
   } else {
     const apiUrl = "/user/login";
-    const encodeMsg = new TextEncoder().encode(`${publicKey}@distri.ai`);
-    const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
-    const Signature = utils.bytes.bs58.encode(sign.signature);
+    const encodeMsg = new TextEncoder().encode(
+      `${publicKey.toString()}@distri.ai`
+    );
+    const sign = await signMessage(encodeMsg, "utf8");
+    const Signature = utils.bytes.bs58.encode(sign);
     const body = {
-      Account: publicKey,
+      Account: publicKey.toString(),
       Signature,
     };
     const res = await axios.post(apiUrl, body);

@@ -8,12 +8,12 @@ import {
   Stack,
   CircularProgress,
 } from "@mui/material";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import ItemCard from "@/views/model&dataset/ItemCard";
 import Pager from "@/components/pager.jsx";
 
 function MyLike({ className }) {
-  const wallet = useAnchorWallet();
+  const wallet = useWallet();
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
@@ -24,12 +24,7 @@ function MyLike({ className }) {
     setList([]);
     setTotal(0);
     try {
-      const res = await getLikeList(
-        type,
-        current,
-        10,
-        wallet?.publicKey.toString()
-      );
+      const res = await getLikeList(type, current, 10, wallet);
       setList(res.List);
       setTotal(res.Total);
     } catch (error) {

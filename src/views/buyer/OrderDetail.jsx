@@ -22,7 +22,8 @@ import DeviceCard from "@/components/DeviceCard.jsx";
 import * as anchor from "@project-serum/anchor";
 import { capitalize } from "lodash";
 import { getItemList } from "@/services/model";
-import ConnectToWallet from "../../components/ConnectToWallet";
+import ConnectToWallet from "@/components/ConnectToWallet";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 function OrderDetail({ className }) {
   const { id } = useParams();
@@ -35,6 +36,7 @@ function OrderDetail({ className }) {
   const [modelList, setModelList] = useState([]);
   const [connectModal, setConnectModal] = useState(false);
   const wallet = useAnchorWallet();
+  const { signMessage } = useWallet();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -92,7 +94,7 @@ function OrderDetail({ className }) {
         Date.now() / 1000000
       )}/${wallet?.publicKey.toString()}`;
       const encodeMsg = new TextEncoder().encode(msg);
-      const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
+      const sign = await signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
       const search = new URLSearchParams();
       search.append("s", signature);

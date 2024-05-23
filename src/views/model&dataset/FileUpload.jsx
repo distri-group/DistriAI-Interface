@@ -14,7 +14,7 @@ import { MuiChipsInput } from "mui-chips-input";
 import { useSnackbar } from "notistack";
 import { useEffect, useMemo, useState } from "react";
 import types from "@/services/types.json";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
 import { frameworks, licenses } from "@/services/model";
 import useSolanaMethod from "@/utils/useSolanaMethod";
@@ -53,6 +53,7 @@ function FileUpload({ className }) {
   const { methods: solanaMethods } = useSolanaMethod();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { signMessage } = useWallet();
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -162,7 +163,7 @@ function FileUpload({ className }) {
       )}/${wallet?.publicKey.toString()}`;
       const encodeMsg = new TextEncoder().encode(msg);
       setProgress(2);
-      const sign = await window.phantom.solana.signMessage(encodeMsg, "utf8");
+      const sign = await signMessage(encodeMsg, "utf8");
       const signature = anchor.utils.bytes.bs58.encode(sign.signature);
       const search = new URLSearchParams();
       search.append("s", signature);

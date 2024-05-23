@@ -29,7 +29,7 @@ import {
   isItemLiked,
 } from "@/services/model.js";
 import { getOrderList } from "@/services/order.js";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { AccountBalance } from "@mui/icons-material";
 import { capitalize } from "lodash";
 import useIpfs from "@/utils/useIpfs.js";
@@ -40,7 +40,7 @@ import { useClearCache } from "@/components/ClearCacheProvider";
 function Detail({ className, type }) {
   document.title = `${capitalize(type)} Detail`;
   const navigate = useNavigate();
-  const wallet = useAnchorWallet();
+  const wallet = useWallet();
   const { owner, name } = useParams();
   const [loading, setLoading] = useState(false);
   const [item, setItem] = useState({});
@@ -118,13 +118,7 @@ function Detail({ className, type }) {
   async function handleLiked() {
     try {
       clearCache();
-      await likeItem(
-        type,
-        item.Owner,
-        item.Name,
-        wallet.publicKey.toString(),
-        !liked
-      );
+      await likeItem(type, item.Owner, item.Name, wallet, !liked);
       if (liked) {
         setLikeCount((prev) => prev - 1);
       } else {
@@ -141,15 +135,10 @@ function Detail({ className, type }) {
   }, [type]);
   useEffect(() => {
     async function checkIsLiked() {
-      const isLike = await isItemLiked(
-        type,
-        owner,
-        name,
-        wallet.publicKey.toString()
-      );
+      const isLike = await isItemLiked(type, owner, name, wallet);
       setLiked(isLike);
     }
-    if (wallet?.publicKey) {
+    if (wallet?.publicKey && wallet?.signMessage) {
       checkIsLiked();
     }
   }, [type, owner, name, wallet]);

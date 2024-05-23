@@ -33,16 +33,11 @@ import KeepAliveLayout from "./KeepAliveLayout.jsx";
 import FileUpload from "./views/model&dataset/FileUpload.jsx";
 import Home from "./views/Home.jsx";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 function App() {
   window.Buffer = Buffer;
   const network = WalletAdapterNetwork.Devnet;
   const endPoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(
-    () => [new PhantomWalletAdapter({ clusterApiUrl: network })],
-    [network]
-  );
   const navigate = useNavigate();
   const Mtheme = createTheme({
     palette: {
@@ -206,7 +201,7 @@ function App() {
   }, []);
   return (
     <ConnectionProvider endpoint={endPoint}>
-      <WalletProvider wallets={wallets} autoConnect={true}>
+      <WalletProvider wallets={[]} autoConnect={true}>
         <WalletModalProvider>
           <ThemeProvider theme={Mtheme}>
             <SnackbarProvider

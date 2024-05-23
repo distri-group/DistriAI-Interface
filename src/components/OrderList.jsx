@@ -3,18 +3,18 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import Table from "./Table.jsx";
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Backdrop, Button, CircularProgress, Stack } from "@mui/material";
 import { getMachineDetail } from "@/services/machine.js";
-import { signToken } from "@/services/order.js";
 import Countdown from "./Countdown.jsx";
 import { useSnackbar } from "notistack";
 import { useClearCache } from "./ClearCacheProvider.jsx";
 import { checkIfPrepared } from "@/services/order.js";
+import { utils } from "@project-serum/anchor";
 
 function OrderList({ className, list, loading, reloadFunc }) {
   const navigate = useNavigate();
-  const wallet = useAnchorWallet();
+  const { publicKey, signMessage } = useWallet();
   const { enqueueSnackbar } = useSnackbar();
   const { clearCache } = useClearCache();
   const [isLoading, setIsLoading] = useState(loading);
@@ -31,13 +31,13 @@ function OrderList({ className, list, loading, reloadFunc }) {
         );
       }
       setSigning(true);
-      const href = await signToken(
-        machine.IP,
-        machine.Port,
-        wallet.publicKey.toString(),
-        deploy
-      );
-      console.log(href);
+      const msg = `${deploy ? "deploy" : "workspace"}/token${
+        !deploy ? `/${parseInt(Date.now() / 100000)}` : ""
+      }/${publicKey}`;
+      const encodeMsg = new TextEncoder().encode(msg);
+      const sign = await signMessage(encodeMsg, "utf8");
+      const signature = utils.bytes.bs58.encode(sign);
+      const href = `http://${machine.IP}:${machine.Port}/distri/workspace/debugToken/${signature}`;
       window.open(href);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
