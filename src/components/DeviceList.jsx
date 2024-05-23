@@ -302,13 +302,6 @@ function DeviceList({
 }
 
 export default styled(DeviceList)`
-  .spin-box {
-    width: 100%;
-    height: 150px;
-    padding-top: 50px;
-    display: block;
-    text-align: center;
-  }
   .no-price {
     font-weight: 700;
     font-style: normal;
@@ -427,10 +420,8 @@ export default styled(DeviceList)`
       height: 16px;
     }
   }
-  .empty-box {
-    .add-machine {
-      text-decoration: none;
-      color: #0aab50;
-    }
+  .add-machine {
+    text-decoration: none;
+    color: #0aab50;
   }
 `;

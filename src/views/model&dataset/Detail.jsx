@@ -131,9 +131,6 @@ function Detail({ className, type }) {
   }
 
   useEffect(() => {
-    loadItem();
-  }, [type]);
-  useEffect(() => {
     async function checkIsLiked() {
       const isLike = await isItemLiked(type, owner, name, wallet);
       setLiked(isLike);
