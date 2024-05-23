@@ -33,7 +33,7 @@ function MyLike({ className }) {
     setLoading(false);
   }, [current, type, wallet]);
   useEffect(() => {
-    if (wallet?.publicKey) {
+    if (wallet?.publicKey && wallet?.signMessage) {
       loadList();
     } else {
       setList([]);

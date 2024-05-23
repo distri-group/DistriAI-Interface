@@ -36,6 +36,7 @@ import useIpfs from "@/utils/useIpfs.js";
 import { copy } from "@/utils/index.js";
 import { useSnackbar } from "notistack";
 import { useClearCache } from "@/components/ClearCacheProvider";
+import { useCallback } from "react";
 
 function Detail({ className, type }) {
   document.title = `${capitalize(type)} Detail`;
@@ -90,7 +91,32 @@ function Detail({ className, type }) {
       loadDetail();
     }
   }, [wallet, item, type]);
-  async function loadItem() {
+  // async function loadItem() {
+  //   setLoading(true);
+  //   const res = await getItemDetail(type, owner, name);
+  //   if (type === "model") {
+  //     const isDeployable = await checkDeployable(res);
+  //     setDeployable(isDeployable);
+  //   }
+  //   try {
+  //     for await (const item of client.files.read(
+  //       `/distri.ai/${type}/${owner}/${name}/README.md`
+  //     )) {
+  //       const text = new TextDecoder().decode(item);
+  //       if (type === "model") {
+  //         const match = text.match(/^---\n([\s\S]+?)\n---/);
+  //         const result = metadataParser(text);
+  //         setMarkdown(result.content);
+  //         if (match) {
+  //           setMetadata(match[1]);
+  //         }
+  //       } else setMarkdown(text);
+  //     }
+  //   } catch (error) {}
+  //   setItem(res);
+  //   setLoading(false);
+  // }
+  const loadItem = useCallback(async () => {
     setLoading(true);
     const res = await getItemDetail(type, owner, name);
     if (type === "model") {
@@ -114,7 +140,8 @@ function Detail({ className, type }) {
     } catch (error) {}
     setItem(res);
     setLoading(false);
-  }
+    // eslint-disable-next-line
+  }, [type, name, owner]);
   async function handleLiked() {
     try {
       clearCache();
@@ -135,10 +162,14 @@ function Detail({ className, type }) {
       const isLike = await isItemLiked(type, owner, name, wallet);
       setLiked(isLike);
     }
+    console.log(type, owner, name, wallet?.publicKey, wallet?.signMessage);
     if (wallet?.publicKey && wallet?.signMessage) {
       checkIsLiked();
     }
-  }, [type, owner, name, wallet]);
+  }, [wallet?.publicKey, wallet?.signMessage]);
+  useEffect(() => {
+    loadItem();
+  }, [loadItem]);
   useEffect(() => {
     if (!orderDialog && filesForTraining.length > 0) {
       setTrainingFiles([]);

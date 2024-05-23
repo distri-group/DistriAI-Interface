@@ -95,7 +95,7 @@ function OrderDetail({ className }) {
       )}/${wallet?.publicKey.toString()}`;
       const encodeMsg = new TextEncoder().encode(msg);
       const sign = await signMessage(encodeMsg, "utf8");
-      const signature = anchor.utils.bytes.bs58.encode(sign.signature);
+      const signature = anchor.utils.bytes.bs58.encode(sign);
       const search = new URLSearchParams();
       search.append("s", signature);
       search.append("n", selectedModel);
