@@ -13,6 +13,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #00000b;
 }
+
+body::-webkit-scrollbar {
+  width: 4px
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #059d5e;
+  border-radius: 65654px;
+}
+
 @font-face {
   font-family: Avenir Next Bold;
   src: url(/public/font/AvenirNext-DemiBold.ttf);
