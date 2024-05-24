@@ -26,6 +26,7 @@ function Contents({ className, type }) {
     Name: "",
     OrderBy: "Updated Time",
   });
+  const [typeMap, setTypeMap] = useState([]);
   const [filterType, setType] = useState(0);
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
@@ -76,6 +77,25 @@ function Contents({ className, type }) {
     return () => clearTimeout(inputTimer.current);
     // eslint-disable-next-line
   }, [current, type, filterValue]);
+  useEffect(() => {
+    const getTypeMap = async () => {
+      const res = await getItemList(type, 1, 100, {});
+      const map = {};
+      res.List.forEach((item) => {
+        if (!map[item.Type1]) {
+          map[item.Type1] = new Set();
+        }
+        map[item.Type1].add(item.Type2);
+      });
+      const typeMap = Object.entries(map).map(([type1, items]) => ({
+        title: parseInt(type1),
+        items: Array.from(items),
+      }));
+      setTypeMap(typeMap);
+    };
+    getTypeMap();
+    // eslint-disable-next-line
+  }, []);
   return (
     <div className={className}>
       <h1>{capitalize(`${type}s`)}</h1>
@@ -85,59 +105,61 @@ function Contents({ className, type }) {
             sx={{
               width: "100%",
             }}
-            defaultValue={0}
             value={filterType}
+            disabled={!typeMap}
             onChange={onTypeFilter}>
-            <MenuItem value={0}>Any type</MenuItem>
-            {types.map((type, index) => (
-              <MenuItem key={type.title} value={index + 1}>
-                {type.title}
+            <MenuItem value={0}>All</MenuItem>
+            {typeMap.map((type) => (
+              <MenuItem value={type.title}>
+                {types[type.title - 1].title}
               </MenuItem>
             ))}
           </Select>
           {filterType ? (
-            <div className="types">
+            <div>
               <h2>{types[filterType - 1].title}</h2>
               <div>
-                {types[filterType - 1].items.map((item, index) => (
-                  <Chip
-                    variant="outlined"
-                    sx={chipStyle}
-                    label={item}
-                    key={item}
-                    onClick={() =>
-                      setFilterValue((prevState) => ({
-                        ...prevState,
-                        Type2: index + 1,
-                      }))
-                    }
-                  />
-                ))}
+                {typeMap
+                  .find((type) => type.title === filterType)
+                  .items.map((item) => (
+                    <Chip
+                      variant="outlined"
+                      sx={chipStyle}
+                      label={types[filterType - 1].items[item - 1]}
+                      key={item}
+                      onClick={() =>
+                        setFilterValue((prevState) => ({
+                          ...prevState,
+                          Type2: item,
+                        }))
+                      }
+                    />
+                  ))}
               </div>
             </div>
           ) : (
-            types.map((type, index) => (
-              <div className="types" key={type.title}>
-                <h2>{type.title}</h2>
+            typeMap.map((type) => (
+              <>
+                <h2>{types[type.title - 1].title}</h2>
                 <div>
-                  {type.items.map((item, itemIndex) => (
+                  {type.items.map((item) => (
                     <Chip
                       key={item}
-                      sx={chipStyle}
                       variant="outlined"
-                      label={item}
+                      sx={chipStyle}
+                      label={types[type.title - 1].items[item - 1]}
                       onClick={() => {
-                        setType(index + 1);
+                        setType(type.title);
                         setFilterValue((prevState) => ({
                           ...prevState,
-                          Type1: index + 1,
-                          Type2: itemIndex + 1,
+                          Type1: type.title,
+                          Type2: item,
                         }));
                       }}
                     />
                   ))}
                 </div>
-              </div>
+              </>
             ))
           )}
         </div>
