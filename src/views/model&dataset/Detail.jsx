@@ -162,10 +162,10 @@ function Detail({ className, type }) {
       const isLike = await isItemLiked(type, owner, name, wallet);
       setLiked(isLike);
     }
-    console.log(type, owner, name, wallet?.publicKey, wallet?.signMessage);
     if (wallet?.publicKey && wallet?.signMessage) {
       checkIsLiked();
     }
+    // eslint-disable-next-line
   }, [wallet?.publicKey, wallet?.signMessage]);
   useEffect(() => {
     loadItem();
