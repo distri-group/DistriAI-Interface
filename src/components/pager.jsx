@@ -7,6 +7,7 @@ function Pager({ className, current, total, pageSize, onChange }) {
   const onPagerChange = (c) => {
     setCurr(c);
     onChange(c);
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
   };
   useEffect(() => {
     setCurr(current);
