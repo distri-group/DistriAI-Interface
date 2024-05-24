@@ -9,10 +9,23 @@ export default function useIpfs() {
       path: file.name,
       content: file,
     };
-    const res = await client.add(file, { progress: onProgress });
+    const res = await client.add(file, {
+      progress: (bytes, path) => {
+        let item = { ...file };
+        item.progress = handleProgress(bytes, file.size);
+        const randomDecimal = parseFloat((Math.random() * 5 + 0.01).toFixed(2));
+        onProgress(
+          item.progress - randomDecimal <= 0
+            ? 0
+            : item.progress - randomDecimal,
+          path
+        );
+      },
+    });
     await client.files.cp(res.cid, `${path}/${res.path}`, {
       parents: true,
     });
+    onProgress(100, res.path);
     return res;
   };
 
@@ -23,22 +36,40 @@ export default function useIpfs() {
       path: file.webkitRelativePath,
       content: file,
     }));
-    const uploadResponse = [];
+    const uploadResponse = [...list];
+    uploadResponse.forEach((item) => {
+      item.progress = 0;
+    });
     try {
       for await (const res of client.addAll(list, {
         parents: true,
-        progress: onProgress,
+        progress: (bytes, path) => {
+          let currentItem = uploadResponse.find((item) => item.path === path);
+          const randomDecimal = parseFloat(
+            (Math.random() * 5 + 0.01).toFixed(2)
+          );
+          currentItem.progress = handleProgress(
+            bytes,
+            currentItem.content.size
+          );
+          onProgress(
+            currentItem.progress - randomDecimal <= 0
+              ? 0
+              : currentItem.progress - randomDecimal,
+            path
+          );
+        },
       })) {
         try {
           await client.files.cp(res.cid, `${path}/${res.path}`, {
             parents: true,
           });
+          onProgress(100, res.path);
         } catch (error) {
           if (!error.message.includes("already has")) {
             throw error;
           }
         }
-        uploadResponse.push(res);
       }
       return uploadResponse;
     } catch (error) {
@@ -86,6 +117,11 @@ export default function useIpfs() {
   const jsonUpload = async (object) => {
     const res = await client.add(JSON.stringify(object));
     return res;
+  };
+
+  const handleProgress = (bytes, total) => {
+    const progress = Math.floor((bytes / total) * 100 * 100) / 100;
+    return progress;
   };
 
   const methods = {

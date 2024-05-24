@@ -234,13 +234,13 @@ function FileList({
           await methods.folderUpload(
             currentPrefix,
             filesToUpload,
-            (bytes, path) => {
+            (progress, path) => {
               setProgress((prevState) => {
                 const newProgress = prevState.map((item) => {
                   if (item.path === path) {
                     return {
                       ...item,
-                      progress: handleUploadProgress(bytes, item.size),
+                      progress,
                     };
                   }
                   return item;
@@ -250,14 +250,17 @@ function FileList({
             }
           );
         } else {
-          await methods.fileUpload(currentPrefix, filesToUpload[0], (bytes) => {
-            const progress = handleUploadProgress(bytes, filesToUpload[0].size);
-            setProgress((prevState) => {
-              const newProgress = [...prevState];
-              newProgress[0].progress = progress;
-              return newProgress;
-            });
-          });
+          await methods.fileUpload(
+            currentPrefix,
+            filesToUpload[0],
+            (progress) => {
+              setProgress((prevState) => {
+                const newProgress = [...prevState];
+                newProgress[0].progress = progress;
+                return newProgress;
+              });
+            }
+          );
         }
         enqueueSnackbar("Upload success", { variant: "success" });
       } catch (error) {
@@ -563,6 +566,13 @@ function FileList({
             p: 4,
             zIndex: 300,
             borderRadius: "8px",
+            "&::-webkit-scrollbar": {
+              width: 4,
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#059d5e",
+              borderRadius: "65654px",
+            },
           }}>
           <h2 style={{ textAlign: "center" }}>File uploading...</h2>
           {Array.from(uploadProgress).map((item) => (
