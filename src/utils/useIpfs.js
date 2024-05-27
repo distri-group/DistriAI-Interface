@@ -5,27 +5,29 @@ export default function useIpfs() {
 
   // File upload
   const fileUpload = async (path, file, onProgress) => {
-    file = {
+    let fileItem = {
       path: file.name,
       content: file,
     };
-    const res = await client.add(file, {
-      progress: (bytes, path) => {
-        let item = { ...file };
-        item.progress = handleProgress(bytes, file.size);
-        const randomDecimal = parseFloat((Math.random() * 5 + 0.01).toFixed(2));
+    let item = {
+      size: file.size,
+      progress: 0,
+      random: parseFloat((Math.random() * 5 + 0.01).toFixed(2)),
+    };
+    const res = await client.add(fileItem, {
+      progress: (bytes) => {
+        item.progress = handleProgress(bytes, item.size);
         onProgress(
-          item.progress - randomDecimal <= 0
+          item.progress - item.random <= 0
             ? 0
-            : item.progress - randomDecimal,
-          path
+            : (item.progress - item.random).toFixed(2)
         );
       },
     });
     await client.files.cp(res.cid, `${path}/${res.path}`, {
       parents: true,
     });
-    onProgress(100, res.path);
+    onProgress(100);
     return res;
   };
 
@@ -39,23 +41,22 @@ export default function useIpfs() {
     const uploadResponse = [...list];
     uploadResponse.forEach((item) => {
       item.progress = 0;
+      item.random = parseFloat((Math.random() * 5 + 0.01).toFixed(2));
     });
     try {
       for await (const res of client.addAll(list, {
         parents: true,
         progress: (bytes, path) => {
           let currentItem = uploadResponse.find((item) => item.path === path);
-          const randomDecimal = parseFloat(
-            (Math.random() * 5 + 0.01).toFixed(2)
-          );
+
           currentItem.progress = handleProgress(
             bytes,
             currentItem.content.size
           );
           onProgress(
-            currentItem.progress - randomDecimal <= 0
+            currentItem.progress - currentItem.random <= 0
               ? 0
-              : currentItem.progress - randomDecimal,
+              : currentItem.progress - currentItem.random,
             path
           );
         },
