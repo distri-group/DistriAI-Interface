@@ -625,7 +625,7 @@ function FileList({
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={deleteFile} fullWidth maxWidth="sm">
+      <Dialog open={!!deleteFile} fullWidth maxWidth="sm">
         <DialogTitle>Are you sure you want to delete the file?</DialogTitle>
         <DialogActions>
           <Button
