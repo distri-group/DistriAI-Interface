@@ -167,9 +167,13 @@ function Buy({ className }) {
   useEffect(() => {
     async function init() {
       setLoading(true);
-      const models = await getItemList("model", 1, 10);
-      setModels(models.List);
       if (state?.model) {
+        let models = await getItemList("model", 1, 10);
+        if (models.Total > 10) {
+          const res = await getItemList("model", 1, models.Total);
+          models.List = [...res.List];
+          setModels(res.List);
+        }
         const selectedModel = models.List.find(
           (model) =>
             model.Name === state.model.name && model.Owner === state.model.owner
