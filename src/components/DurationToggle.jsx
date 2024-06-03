@@ -3,9 +3,9 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Button,
-  TextField,
   InputAdornment,
   Stack,
+  OutlinedInput,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Add, Remove } from "@mui/icons-material";
@@ -75,7 +75,7 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
     }
   }, [type, max]);
   return (
-    <div className={className}>
+    <Stack spacing={2} className={className}>
       <h3>{title}</h3>
       <Stack direction="row" justifyContent="space-between">
         <ToggleButtonGroup value={type} exclusive onChange={onSelect}>
@@ -102,15 +102,15 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
             }}>
             <Remove />
           </Button>
-          <TextField
-            style={{
-              width: 160,
-              height: 56,
-            }}
+          <OutlinedInput
+            style={{ width: 156 }}
             disabled={type === "max"}
             value={count}
             type="number"
-            inputProps={{ min: 0, style: { textAlign: "center" } }}
+            inputProps={{
+              min: 0,
+              style: { textAlign: "center" },
+            }}
             onChange={onCountInput}
           />
           <Button
@@ -123,7 +123,7 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
           </Button>
         </Stack>
       </Stack>
-      <TextField
+      <OutlinedInput
         data-name="duration"
         value={duration}
         placeholder="Hour"
@@ -137,7 +137,7 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
           ),
         }}
       />
-    </div>
+    </Stack>
   );
 }
 
