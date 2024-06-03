@@ -11,7 +11,6 @@ import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useNavigate } from "react-router-dom";
 import Pager from "@/components/pager.jsx";
-import { formatBalance } from "@/utils/index.js";
 import Filter from "@/components/Filter";
 
 function Earning({ className }) {
@@ -64,8 +63,8 @@ function Earning({ className }) {
         initialTotal,
         wallet.publicKey.toString()
       );
-      setPending(formatBalance(pending));
-      setReceived(formatBalance(received));
+      setPending(pending);
+      setReceived(received);
       setTotalLoading(false);
     };
     if (wallet?.publicKey && initialTotal > 0) {

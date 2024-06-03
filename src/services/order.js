@@ -31,10 +31,14 @@ export async function getOrderList(pageIndex, pageSize, filter, publicKey) {
 }
 
 export async function getTotalEarnings(total, publicKey) {
-  const res = await getOrderDetail(1, total, {
-    Direction: "sell",
-    publicKey,
-  });
+  const res = await getOrderList(
+    1,
+    total,
+    {
+      Direction: "sell",
+    },
+    publicKey
+  );
   let pending = 0;
   let received = 0;
   res.List.forEach((currentValue) => {
