@@ -151,6 +151,7 @@ function Buy({ className }) {
         MachineInfo,
         OrderInfo,
       });
+      await checkIfBought(MachineInfo);
       enqueueSnackbar("Purchase success.", { variant: "success" });
       setTimeout(() => {
         clearCache();
@@ -163,6 +164,42 @@ function Buy({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setSubmitting(false);
+  }
+  async function checkIfBought(machine) {
+    const timeout = 5000;
+    const intervalTime = 1000;
+    return new Promise((resolve) => {
+      let timer = null;
+      const interval = setInterval(async () => {
+        try {
+          const { List } = await getOrderList(
+            1,
+            10,
+            {},
+            wallet.publicKey.toString()
+          );
+          const foundOrder = List.find(
+            (item) =>
+              item.StatusName === "Preparing" &&
+              item.Metadata.MachineInfo.Uuid === machine.Uuid
+          );
+          if (foundOrder) {
+            clearInterval(interval);
+            clearTimeout(timer);
+            resolve(true);
+          }
+        } catch (error) {
+          console.error("Error while fetching order list:", error);
+          clearInterval(interval);
+          clearTimeout(timer);
+          throw error;
+        }
+      }, intervalTime);
+      timer = setTimeout(() => {
+        clearInterval(interval);
+        resolve(false);
+      }, timeout);
+    });
   }
   useEffect(() => {
     async function init() {

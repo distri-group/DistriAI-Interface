@@ -58,6 +58,7 @@ function EndDuration({ className }) {
         id,
         new PublicKey(detail.Seller)
       );
+      await checkIfEnded();
       enqueueSnackbar("Refund order success.", { variant: "success" });
       setTimeout(() => {
         clearCache();
@@ -67,6 +68,31 @@ function EndDuration({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setEnding(false);
+  }
+  async function checkIfEnded() {
+    const timeout = 5000;
+    const intervalTime = 1000;
+    return new Promise((resolve) => {
+      let timer = null;
+      const interval = setInterval(async () => {
+        try {
+          const res = await getOrderDetail(id);
+          if (res.StatusName === "Refunded") {
+            clearInterval(interval);
+            resolve(true);
+          }
+        } catch (error) {
+          console.error("Error while fetching order list:", error);
+          clearInterval(interval);
+          clearTimeout(timer);
+          throw error;
+        }
+      }, intervalTime);
+      timer = setTimeout(() => {
+        clearInterval(interval);
+        resolve(false);
+      }, timeout);
+    });
   }
   useEffect(() => {
     async function loadDetail() {

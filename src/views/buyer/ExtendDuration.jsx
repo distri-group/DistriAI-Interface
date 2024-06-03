@@ -49,12 +49,38 @@ function ExtendDuration({ className }) {
     setExtending(true);
     try {
       await methods.renewOrder(machinePublicKey, id, duration);
+      await checkIfExtended();
       enqueueSnackbar(`Order extended ${duration} h.`, { variant: "success" });
       navigate("/dashboard");
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setExtending(false);
+  }
+  async function checkIfExtended() {
+    const timeout = 5000;
+    const intervalTime = 1000;
+    return new Promise((resolve) => {
+      let timer = null;
+      const interval = setInterval(async () => {
+        try {
+          const res = await getOrderDetail(id);
+          if (res.Duration === duration + orderDetail.Duration) {
+            clearInterval(interval);
+            resolve(true);
+          }
+        } catch (error) {
+          console.error("Error while fetching order list:", error);
+          clearInterval(interval);
+          clearTimeout(timer);
+          throw error;
+        }
+      }, intervalTime);
+      timer = setTimeout(() => {
+        clearInterval(interval);
+        resolve(false);
+      }, timeout);
+    });
   }
   useEffect(() => {
     async function init() {
