@@ -1,10 +1,5 @@
 import axios from "@/utils/axios.js";
-import {
-  Connection,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  clusterApiUrl,
-} from "@solana/web3.js";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 // Get DIST Faucet
 export async function DISTFaucet(publicKey) {
@@ -14,8 +9,10 @@ export async function DISTFaucet(publicKey) {
 
 // Get SOL Faucet
 export async function SOLFaucet(publicKey) {
+  const heliusRpc =
+    "https://devnet.helius-rpc.com/?api-key=663fd2e3-a4d6-4578-8f48-97bee5b5eef3";
   try {
-    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+    const connection = new Connection(heliusRpc, "confirmed");
     const signature = await connection.requestAirdrop(
       new PublicKey(publicKey),
       LAMPORTS_PER_SOL
