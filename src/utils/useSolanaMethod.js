@@ -374,17 +374,22 @@ export default function useSolanaMethod() {
         "Solana program not initialized. Please check your network connection and refresh the page."
       );
     }
-    if (error.message.includes("found no record of a prior credit.")) {
-      const error = new Error(
-        "Token account not initialized. Please go to Faucet and claim DIST before operating."
+    if (error.message.includes("Error Code: AccountNotInitialized")) {
+      return new Error(
+        "Token account not initialized. Please go to Faucet to get DIST."
       );
-      error.insufficient = true;
-      return error;
+    }
+    if (error.message.includes("found no record of a prior credit.")) {
+      return new Error(
+        "SOL balance insufficient. Please go to Faucet to get SOL"
+      );
     } else if (error.message.includes("custom program error: 0x1")) {
+      console.log("Insufficient token balance.");
       const error = new Error("Insufficient token balance.");
       error.insufficient = true;
       return error;
     } else if (error.message.includes("custom program error: 0xbc4")) {
+      console.log("Insufficient reward pool balance.");
       return new Error("Insufficient reward pool balance.");
     }
     return error;
