@@ -34,10 +34,25 @@ export default function useIpfs() {
   // Folder upload
   const folderUpload = async (path, files, onProgress) => {
     let list = Array.from(files);
-    list = list.map((file) => ({
-      path: file.webkitRelativePath,
-      content: file,
-    }));
+    let isSameFolder = false;
+    let folderName = "";
+    list = list.map((file) => {
+      if (
+        file.webkitRelativePath.split("/")[0] === path.split("/").slice(-1)[0]
+      ) {
+        isSameFolder = true;
+        folderName = file.webkitRelativePath.split("/")[0];
+        return {
+          path: file.webkitRelativePath.replace(/^[^/]*\//, ""),
+          content: file,
+        };
+      } else {
+        return {
+          path: file.webkitRelativePath,
+          content: file,
+        };
+      }
+    });
     const uploadResponse = [...list];
     uploadResponse.forEach((item) => {
       item.progress = 0;
@@ -57,7 +72,7 @@ export default function useIpfs() {
             currentItem.progress - currentItem.random <= 0
               ? 0
               : currentItem.progress - currentItem.random,
-            path
+            isSameFolder ? `${folderName}/${path}` : path
           );
         },
       })) {
@@ -65,7 +80,10 @@ export default function useIpfs() {
           await client.files.cp(res.cid, `${path}/${res.path}`, {
             parents: true,
           });
-          onProgress(100, res.path);
+          onProgress(
+            100,
+            isSameFolder ? `${folderName}/${res.path}` : res.path
+          );
         } catch (error) {
           if (!error.message.includes("already has")) {
             throw error;
