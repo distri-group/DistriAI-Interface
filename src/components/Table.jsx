@@ -136,7 +136,7 @@ export default styled(Table)`
     align-items: center;
     span {
       color: #6e6e6e;
-      font-size: 14px;
+      font-size: 20px;
     }
   }
 `;

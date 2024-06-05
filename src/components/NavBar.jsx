@@ -117,7 +117,12 @@ function NavBar({ className }) {
             anchorEl={anchorEl}
             open={open}
             disableScrollLock
-            onClose={() => setAnchorEl(null)}>
+            onClose={() => setAnchorEl(null)}
+            sx={{
+              "@media(max-width: 1920px) and (max-height: 1080px)": {
+                zoom: "75%",
+              },
+            }}>
             <MenuItem
               onClick={() => {
                 navigate("/market");
