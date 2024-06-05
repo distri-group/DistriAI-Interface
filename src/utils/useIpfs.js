@@ -5,18 +5,23 @@ export default function useIpfs() {
 
   // File upload
   const fileUpload = async (path, file, onProgress) => {
+     // Create a file item object, including the file name and content
     let fileItem = {
       path: file.name,
       content: file,
     };
+    // Create an upload item object to record file size, progress, and a random number for progress adjustment
     let item = {
       size: file.size,
       progress: 0,
       random: parseFloat((Math.random() * 5 + 0.01).toFixed(2)),
     };
+    // Call the client's add file method to upload the file with a progress callback
     const res = await client.add(fileItem, {
       progress: (bytes) => {
+        // Update the upload progress
         item.progress = handleProgress(bytes, item.size);
+        // Invoke the progress callback, subtracting the random number to adjust the display of progress
         onProgress(
           item.progress - item.random <= 0
             ? 0
@@ -24,15 +29,19 @@ export default function useIpfs() {
         );
       },
     });
+    // Move the uploaded file to the specified path
     await client.files.cp(res.cid, `${path}/${res.path}`, {
       parents: true,
     });
+// Upload completed, callback to set progress to 100
     onProgress(100);
+    // Return the upload result
     return res;
   };
 
   // Folder upload
   const folderUpload = async (path, files, onProgress) => {
+    // Converts FileList to an array and constructs a list of objects with file paths and content
     let list = Array.from(files);
     list = list.map((file) => ({
       path: file.webkitRelativePath,
