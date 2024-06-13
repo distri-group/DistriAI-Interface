@@ -33,7 +33,7 @@ import KeepAliveLayout from "./KeepAliveLayout.jsx";
 import FileUpload from "./views/model&dataset/FileUpload.jsx";
 import Home from "./views/Home.jsx";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-
+import { SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
 function App() {
   window.Buffer = Buffer;
   const network = WalletAdapterNetwork.Devnet;
@@ -211,7 +211,9 @@ function App() {
   }, []);
   return (
     <ConnectionProvider endpoint={endPoint}>
-      <WalletProvider wallets={[]} autoConnect={true}>
+      <WalletProvider
+        wallets={[new SolflareWalletAdapter()]}
+        autoConnect={true}>
         <WalletModalProvider>
           <ThemeProvider theme={Mtheme}>
             <SnackbarProvider

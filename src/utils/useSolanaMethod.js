@@ -62,7 +62,12 @@ export default function useSolanaMethod() {
   };
 
   // Rent Device On Market
-  const placeOrder = async (machinePublicKey, duration, metadata) => {
+  const placeOrder = async (
+    machinePublicKey,
+    duration,
+    metadata,
+    selectedModel
+  ) => {
     duration = new BN(duration);
     metadata = JSON.stringify(metadata);
     const orderUuid = utils.bytes.utf8.encode(new Date().valueOf().toString());
@@ -76,19 +81,43 @@ export default function useSolanaMethod() {
       ],
       PROGRAM
     );
+    const accounts = {
+      machine: machinePublicKey,
+      order: orderPublicKey,
+      model1: null,
+      model2: null,
+      model3: null,
+      model4: null,
+      model5: null,
+      buyer: wallet.publicKey,
+      buyerAta: findAssociatedTokenAddress(wallet.publicKey),
+      vault,
+      mint: MINT_PROGRAM,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    };
+    if (selectedModel.length > 0) {
+      await Promise.all(
+        selectedModel.map(async (model, index) => {
+          const hashedName = await getItemName(model.Name);
+          const [modelPublicKey] = PublicKey.findProgramAddressSync(
+            [
+              utils.bytes.utf8.encode("ai_model"),
+              new PublicKey(model.Owner).toBytes(),
+              hashedName,
+            ],
+            PROGRAM
+          );
+          accounts[`model${index + 1}`] = modelPublicKey;
+          console.log(modelPublicKey.toString());
+        })
+      );
+    }
+    console.log(accounts);
     try {
       const transaction = await program.methods
         .placeOrder(orderUuid, duration, metadata)
-        .accounts({
-          machine: machinePublicKey,
-          order: orderPublicKey,
-          buyer: wallet.publicKey,
-          buyerAta: findAssociatedTokenAddress(wallet.publicKey),
-          vault,
-          mint: MINT_PROGRAM,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        })
+        .accounts(accounts)
         .rpc();
       const res = await checkConfirmation(transaction);
       return res;
@@ -130,7 +159,12 @@ export default function useSolanaMethod() {
   };
 
   // Refund Order
-  const refundOrder = async (machinePublicKey, orderUuid, sellerPublicKey) => {
+  const refundOrder = async (
+    machinePublicKey,
+    orderUuid,
+    sellerPublicKey,
+    modelDetail
+  ) => {
     const [orderPublicKey] = web3.PublicKey.findProgramAddressSync(
       [
         utils.bytes.utf8.encode("order"),
@@ -139,25 +173,46 @@ export default function useSolanaMethod() {
       ],
       PROGRAM
     );
+    const accounts = {
+      machine: machinePublicKey,
+      order: orderPublicKey,
+      buyer: wallet.publicKey,
+      buyerAta: findAssociatedTokenAddress(wallet.publicKey),
+      sellerAta: findAssociatedTokenAddress(sellerPublicKey),
+      model1OwnerAta: null,
+      model2OwnerAta: null,
+      model3OwnerAta: null,
+      model4OwnerAta: null,
+      model5OwnerAta: null,
+      vault,
+      mint: MINT_PROGRAM,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram,
+    };
+    console.log(modelDetail);
+    for (let i = 1; i <= 5; i++) {
+      if (
+        modelDetail[`Model${i}Owner`] === "11111111111111111111111111111111" &&
+        modelDetail[`Model${i}Name`] === ""
+      ) {
+        accounts[`model${i}OwnerAta`] = null;
+      } else {
+        accounts[`model${i}OwnerAta`] = findAssociatedTokenAddress(
+          new PublicKey(modelDetail[`Model${i}Owner`])
+        );
+      }
+    }
+    console.log(accounts);
     try {
       const transaction = await program.methods
         .refundOrder()
-        .accounts({
-          machine: machinePublicKey,
-          order: orderPublicKey,
-          buyer: wallet.publicKey,
-          buyerAta: findAssociatedTokenAddress(wallet.publicKey),
-          sellerAta: findAssociatedTokenAddress(sellerPublicKey),
-          vault,
-          mint: MINT_PROGRAM,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram,
-        })
+        .accounts(accounts)
         .rpc();
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
+      console.log(error);
       throw handleError(error);
     }
   };
@@ -413,6 +468,7 @@ export default function useSolanaMethod() {
     createDataset,
     getTokenBalance,
     getMachinePublicKey,
+    getItemName,
   };
 
   return { wallet, methods };

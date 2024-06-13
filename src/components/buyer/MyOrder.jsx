@@ -7,6 +7,8 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import Filter from "@/components/Filter";
 import { ToggleButton, ToggleButtonGroup, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
+import * as anchor from "@project-serum/anchor";
+import webconfig from "@/webconfig.js";
 
 function MyOrder({ className }) {
   const [list, setList] = useState([]);
@@ -50,6 +52,15 @@ function MyOrder({ className }) {
     for (const item of list) {
       if (item.StatusName === "Preparing") {
         const timer = setInterval(async () => {
+          const [orderPublicKey] = anchor.web3.PublicKey.findProgramAddressSync(
+            [
+              anchor.utils.bytes.utf8.encode("order"),
+              wallet.publicKey.toBytes(),
+              anchor.utils.bytes.hex.decode(item.Uuid),
+            ],
+            webconfig.PROGRAM
+          );
+          console.log(orderPublicKey.toString());
           const prepared = await checkIfPrepared(item);
           if (prepared) {
             clearInterval(timer);

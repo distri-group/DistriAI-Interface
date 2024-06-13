@@ -24,6 +24,7 @@ import { capitalize } from "lodash";
 import { getItemList } from "@/services/model";
 import ConnectToWallet from "@/components/ConnectToWallet";
 import { useWallet } from "@solana/wallet-adapter-react";
+import webconfig from "@/webconfig.js";
 
 function OrderDetail({ className }) {
   const { id } = useParams();

@@ -26,27 +26,30 @@ export default function KeepAliveLayout() {
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     const programInit = async () => {
-      try {
-        const provider = new AnchorProvider(
-          new Connection(clusterApiUrl("devnet"), "confirmed"),
-          wallet,
-          {}
-        );
-        const idl = await Program.fetchIdl(webconfig.PROGRAM, provider);
-        const program = new Program(idl, webconfig.PROGRAM, provider);
-        setProgram(program);
-      } catch (error) {
-        enqueueSnackbar(
-          "Solana program not initialized. Please check your network connection and refresh the page.",
-          { variant: "error" }
-        );
+      if (!program) {
+        try {
+          const provider = new AnchorProvider(
+            new Connection(clusterApiUrl("devnet"), "confirmed"),
+            wallet,
+            {}
+          );
+          const idl = await Program.fetchIdl(webconfig.PROGRAM, provider);
+          console.log(idl);
+          const program = new Program(idl, webconfig.PROGRAM, provider);
+          setProgram(program);
+        } catch (error) {
+          enqueueSnackbar(
+            "Solana program not initialized. Please check your network connection and refresh the page.",
+            { variant: "error" }
+          );
+        }
       }
     };
     if (wallet?.publicKey) {
       programInit();
     }
     // eslint-disable-next-line
-  }, [wallet]);
+  }, [wallet, program]);
 
   return (
     <ProgramContext.Provider value={program}>

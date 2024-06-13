@@ -47,7 +47,7 @@ function Buy({ className }) {
   const [filesToUpload, setFiles] = useState([]);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
-  const [selectedModel, setSelectedModel] = useState({});
+  const [selectedModel, setSelectedModel] = useState([]);
   const [deployable, setDeployable] = useState(false);
   const [insufficientDialog, setInsufficientDialog] = useState(false);
   const [connectModal, setConnectModal] = useState(false);
@@ -85,18 +85,10 @@ function Buy({ className }) {
     }
   }
   function handleModelChange(e) {
-    const selectedModel = models.find(
-      (model) =>
-        `${model.Owner.slice(0, 4)}..${model.Owner.slice(-4)}/${model.Name}` ===
-        e.target.value
-    );
-    setFormValue((prevState) => ({
-      ...prevState,
-      model: `${selectedModel.Owner.slice(0, 4)}..${selectedModel.Owner.slice(
-        -4
-      )}/${selectedModel.Name}`,
-    }));
-    setSelectedModel(selectedModel);
+    const value = e.target.value;
+    if (value.length <= 5) {
+      setSelectedModel(value);
+    }
   }
 
   async function onSubmit(e) {
@@ -143,14 +135,19 @@ function Buy({ className }) {
     });
     setSubmitting(true);
     try {
-      await methods.placeOrder(machinePublicKey, formValue.duration, {
-        formData: {
-          duration: formValue.duration,
-          taskName: formValue.taskName,
+      await methods.placeOrder(
+        machinePublicKey,
+        formValue.duration,
+        {
+          formData: {
+            duration: formValue.duration,
+            taskName: formValue.taskName,
+          },
+          MachineInfo,
+          OrderInfo,
         },
-        MachineInfo,
-        OrderInfo,
-      });
+        selectedModel
+      );
       await checkIfBought(MachineInfo);
       enqueueSnackbar("Purchase success.", { variant: "success" });
       setTimeout(() => {
@@ -204,26 +201,11 @@ function Buy({ className }) {
   useEffect(() => {
     async function init() {
       setLoading(true);
-      if (state?.model) {
-        let models = await getItemList("model", 1, 10);
-        if (models.Total > 10) {
-          const res = await getItemList("model", 1, models.Total);
-          models.List = [...res.List];
-          setModels(res.List);
-        }
-        const selectedModel = models.List.find(
-          (model) =>
-            model.Name === state.model.name && model.Owner === state.model.owner
-        );
-        setFormValue((prevState) => ({
-          ...prevState,
-          usage: state.model.intent,
-          model: `${selectedModel.Owner.slice(
-            0,
-            4
-          )}..${selectedModel.Owner.slice(-4)}/${selectedModel.Name}`,
-        }));
-        setSelectedModel(selectedModel);
+      let models = await getItemList("model", 1, 10);
+      if (models.Total > 10) {
+        const res = await getItemList("model", 1, models.Total);
+        models.List = [...res.List];
+        setModels(res.List);
       }
       const device = await getMachineDetail(owner, id);
       setDeviceDetail(device);
@@ -234,27 +216,27 @@ function Buy({ className }) {
     // eslint-disable-next-line
   }, []);
   useEffect(() => {
-    const handleModelChange = async () => {
-      if (JSON.stringify(selectedModel) !== "{}") {
-        const deployable = await checkDeployable(selectedModel);
-        setDeployable(deployable);
-        if (!deployable) {
-          setFormValue((prevState) => ({ ...prevState, usage: "train" }));
-        }
-        if (formValue.usage === "deploy" && deployable) {
-          const { files } = await ipfsMethods.getFolderList(
-            `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
-          );
-          setFiles([
-            {
-              name: files[0].name,
-              cid: files[0].cid.toString(),
-            },
-          ]);
-        }
-      }
-    };
-    handleModelChange();
+    // const handleModelChange = async () => {
+    //   if (JSON.stringify(selectedModel) !== "{}") {
+    //     const deployable = await checkDeployable(selectedModel);
+    //     setDeployable(deployable);
+    //     if (!deployable) {
+    //       setFormValue((prevState) => ({ ...prevState, usage: "train" }));
+    //     }
+    //     if (formValue.usage === "deploy" && deployable) {
+    //       const { files } = await ipfsMethods.getFolderList(
+    //         `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
+    //       );
+    //       setFiles([
+    //         {
+    //           name: files[0].name,
+    //           cid: files[0].cid.toString(),
+    //         },
+    //       ]);
+    //     }
+    //   }
+    // };
+    // handleModelChange();
     // eslint-disable-next-line
   }, [selectedModel]);
   useEffect(() => {
@@ -405,16 +387,14 @@ function Buy({ className }) {
                       placeholder="Must be 4-45 characters"
                     />
                   </Grid>
-                  {state?.model && (
-                    <>
-                      <Grid item md={6}>
-                        <label>Model</label>
-                      </Grid>
-                      <Grid item md={6}>
-                        <label>Usage</label>
-                      </Grid>
-                      <Grid item md={6}>
-                        <Select
+                  <Grid item md={6}>
+                    <label>Model</label>
+                  </Grid>
+                  <Grid item md={6}>
+                    <label>Usage</label>
+                  </Grid>
+                  <Grid item md={6}>
+                    {/* <Select
                           fullWidth
                           onChange={(e) => {
                             handleModelChange(e);
@@ -444,25 +424,40 @@ function Buy({ className }) {
                               )}/${model.Name}`}
                             </MenuItem>
                           ))}
-                        </Select>
-                      </Grid>
-                      <Grid item md={6}>
-                        <Select
-                          disabled={!formValue.model}
-                          required={Boolean(formValue.model)}
-                          fullWidth
-                          value={formValue.usage}
-                          name="usage"
-                          onChange={handleChange}>
-                          <MenuItem value="train">Training</MenuItem>
-                          <MenuItem disabled={!deployable} value="deploy">
-                            Deploy
-                          </MenuItem>
-                        </Select>
-                      </Grid>
-                    </>
-                  )}
-                  {formValue.usage === "train" && formValue.model && (
+                        </Select> */}
+                    <Select
+                      onChange={handleModelChange}
+                      fullWidth
+                      multiple
+                      value={selectedModel}>
+                      {models.map((model) => (
+                        <MenuItem
+                          value={model}
+                          key={`${model.Owner.slice(0, 4)}..${model.Owner.slice(
+                            -4
+                          )}/${model.Name}`}>
+                          {`${model.Owner.slice(0, 4)}..${model.Owner.slice(
+                            -4
+                          )}/${model.Name}`}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
+                  <Grid item md={6}>
+                    <Select
+                      disabled={!formValue.model}
+                      required={Boolean(formValue.model)}
+                      fullWidth
+                      value={formValue.usage}
+                      name="usage"
+                      onChange={handleChange}>
+                      <MenuItem value="train">Training</MenuItem>
+                      <MenuItem disabled={!deployable} value="deploy">
+                        Deploy
+                      </MenuItem>
+                    </Select>
+                  </Grid>
+                  {/* {formValue.usage === "train" && formValue.model && (
                     <>
                       <Grid item md={12}>
                         <label>Data for trainning</label>
@@ -477,7 +472,7 @@ function Buy({ className }) {
                         )}
                       </Grid>
                     </>
-                  )}
+                  )} */}
                   <Grid item md={8} />
                   <Grid item md={4}>
                     <span className="balance">Balance: {balance} DIST</span>

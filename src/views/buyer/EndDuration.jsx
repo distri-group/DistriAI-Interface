@@ -11,6 +11,7 @@ import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { useClearCache } from "@/components/ClearCacheProvider";
 import ConnectToWallet from "@/components/ConnectToWallet";
+import { Mode } from "@mui/icons-material";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
@@ -56,7 +57,19 @@ function EndDuration({ className }) {
       await methods.refundOrder(
         machinePublicKey,
         id,
-        new PublicKey(detail.Seller)
+        new PublicKey(detail.Seller),
+        {
+          Model1Name: detail.Model1Name,
+          Model1Owner: detail.Model1Owner,
+          Model2Name: detail.Model2Name,
+          Model2Owner: detail.Model2Owner,
+          Model3Name: detail.Model3Name,
+          Model3Owner: detail.Model3Owner,
+          Model4Name: detail.Model4Name,
+          Model4Owner: detail.Model4Owner,
+          Model5Name: detail.Model5Name,
+          Model5Owner: detail.Model5Owner,
+        }
       );
       await checkIfEnded();
       enqueueSnackbar("Refund order success.", { variant: "success" });
