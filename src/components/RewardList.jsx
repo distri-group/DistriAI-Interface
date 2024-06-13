@@ -5,7 +5,7 @@ import Table from "@/components/Table.jsx";
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
-import Pager from "@/components/pager.jsx";
+import Pager from "./Pager";
 import {
   getRewardList,
   getRewardTotal,
@@ -14,10 +14,9 @@ import {
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
-import ConnectToWallet from "@/components/ConnectToWallet.jsx";
+import ConnectToWallet from "./ConnectToWallet";
 
-function Reward({ className }) {
-  document.title = "My Rewards";
+function RewardList({ className }) {
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -172,7 +171,7 @@ function Reward({ className }) {
   }, [wallet?.publicKey]);
   return (
     <div className={className}>
-      <h1>My DAO Rewards</h1>
+      {/* <h1>My DAO Rewards</h1>
       <Stack direction="row" spacing={5}>
         <div className="box">
           <Stack
@@ -265,7 +264,7 @@ function Reward({ className }) {
             </Grid>
           </Grid>
         </div>
-      </Stack>
+      </Stack> */}
       <Table
         className="reward-list"
         columns={columns}
@@ -289,7 +288,7 @@ function Reward({ className }) {
   );
 }
 
-export default styled(Reward)`
+export default styled(RewardList)`
   h1 {
     font-weight: 700;
     font-style: normal;
@@ -345,7 +344,6 @@ export default styled(Reward)`
     }
   }
   .reward-list {
-    margin-top: 20px;
     span {
       font-size: 18px;
       line-height: 26px;

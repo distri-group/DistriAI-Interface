@@ -39,14 +39,6 @@ a{
   text-align: center;
   margin-bottom: 0;
 }
-.con-title {
-  font-weight: 400;
-  font-style: normal;
-  font-size: 16px;
-  color: #FFFFFF;
-  text-align: center;
-  margin-bottom: 100px;
-}
 .login-box {
   padding: 60px 30px;
   background-color: #00000b;
@@ -73,6 +65,22 @@ a{
 }
 .markdown-body{
   padding: 24px;
+}
+.tab-item {
+  width: 240px;
+  height: 64px;
+  border-radius: 12px 12px 0px 0px!important;
+  color: white!important;
+}
+.Mui-selected.tab-item {
+  background: rgba(149, 157, 165, 0.16)!important;
+}
+.trans-box {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 40px;
+  background: rgba(149, 157, 165, 0.16);
+  border-radius: 12px;
 }
 .dist {
   margin: 0;

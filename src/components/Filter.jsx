@@ -29,7 +29,9 @@ export default function Filter({
       style={
         style ?? {
           height: 48,
-          margin: "24px 0",
+          padding: "24px 40px",
+          background: "rgba(149, 157, 165, 0.16)",
+          borderTopRightRadius: 12,
         }
       }>
       <span

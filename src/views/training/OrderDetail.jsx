@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { getOrderDetail } from "@/services/order.js";
 import { useSnackbar } from "notistack";
@@ -24,7 +24,6 @@ import { capitalize } from "lodash";
 import { getItemList } from "@/services/model";
 import ConnectToWallet from "@/components/ConnectToWallet";
 import { useWallet } from "@solana/wallet-adapter-react";
-import webconfig from "@/webconfig.js";
 
 function OrderDetail({ className }) {
   const { id } = useParams();
@@ -40,7 +39,7 @@ function OrderDetail({ className }) {
   const { signMessage } = useWallet();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-
+  const timer = useRef(null);
   async function loadDetail() {
     setLoading(true);
     try {
@@ -72,18 +71,23 @@ function OrderDetail({ className }) {
     }
   }
   async function checkIfEnd(id) {
-    const timer = setInterval(async () => {
+    timer.current = setInterval(async () => {
       const res = await getOrderDetail(id);
       if (
         res.StatusName === "Completed" ||
         res.StatusName === "Failed" ||
         res.StatusName === "Refunded"
       ) {
-        clearInterval(timer);
+        clearInterval(timer.current);
         loadDetail();
       }
     }, 3000);
   }
+  useEffect(() => {
+    return () => {
+      clearInterval(timer.current);
+    };
+  }, []);
   async function handleFileSelect() {
     if (selectedModel === "default") {
       return enqueueSnackbar("Please select model to upload files", {
@@ -204,7 +208,7 @@ function OrderDetail({ className }) {
                                   deadlineTime={new Date(
                                     record.EndTime
                                   ).getTime()}
-                                  onEnd={checkIfEnd}
+                                  onEnd={() => checkIfEnd(record.Uuid)}
                                 />
                               </span>
                             </>

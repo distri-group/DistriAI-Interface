@@ -97,6 +97,7 @@ export default function useSolanaMethod() {
       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
     };
     if (selectedModel.length > 0) {
+      console.log(selectedModel);
       await Promise.all(
         selectedModel.map(async (model, index) => {
           const hashedName = await getItemName(model.Name);
@@ -109,11 +110,18 @@ export default function useSolanaMethod() {
             PROGRAM
           );
           accounts[`model${index + 1}`] = modelPublicKey;
-          console.log(modelPublicKey.toString());
         })
       );
     }
-    console.log(accounts);
+    let output = {};
+    for (let item in accounts) {
+      if (accounts[item]) {
+        output[item] = accounts[item].toString();
+      } else {
+        output[item] = null;
+      }
+    }
+    console.log(output);
     try {
       const transaction = await program.methods
         .placeOrder(orderUuid, duration, metadata)
@@ -190,7 +198,7 @@ export default function useSolanaMethod() {
       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram,
     };
-    console.log(modelDetail);
+
     for (let i = 1; i <= 5; i++) {
       if (
         modelDetail[`Model${i}Owner`] === "11111111111111111111111111111111" &&
@@ -203,7 +211,6 @@ export default function useSolanaMethod() {
         );
       }
     }
-    console.log(accounts);
     try {
       const transaction = await program.methods
         .refundOrder()

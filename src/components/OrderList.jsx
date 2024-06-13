@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Table from "./Table.jsx";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Backdrop, Button, CircularProgress, Stack } from "@mui/material";
@@ -19,6 +19,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
   const { clearCache } = useClearCache();
   const [isLoading, setIsLoading] = useState(loading);
   const [signing, setSigning] = useState(false);
+  const timer = useRef(null);
   const handleConsole = async (order, deploy) => {
     let machine;
     try {
@@ -45,14 +46,17 @@ function OrderList({ className, list, loading, reloadFunc }) {
     setSigning(false);
   };
   const checkIfDone = async (order) => {
-    const timer = setInterval(async () => {
+    timer.current = setInterval(async () => {
       const completed = await checkIfPrepared(order, true);
       if (completed) {
-        clearInterval(timer);
+        clearInterval(timer.current);
         reloadFunc();
       }
     }, 2000);
   };
+  useEffect(() => {
+    return clearInterval(timer.current);
+  }, []);
   let columns = [
     {
       title: "Time",
@@ -100,7 +104,7 @@ function OrderList({ className, list, loading, reloadFunc }) {
           return (
             <Countdown
               deadlineTime={new Date(record.EndTime).getTime()}
-              onEnd={(record) => checkIfDone(record)}
+              onEnd={() => checkIfDone(record)}
             />
           );
         } else if (record.StatusName !== "Preparing") {

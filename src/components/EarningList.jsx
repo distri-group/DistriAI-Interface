@@ -6,15 +6,14 @@ import {
   getTotalEarnings,
 } from "@/services/order.js";
 import styled from "styled-components";
-import Table from "@/components/Table.jsx";
 import moment from "moment";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useNavigate } from "react-router-dom";
-import Pager from "@/components/pager.jsx";
-import Filter from "@/components/Filter";
+import Pager from "./Pager";
+import Filter from "./Filter";
+import Table from "./Table";
 
-function Earning({ className }) {
-  document.title = "My Earnings";
+function EarningList({ className }) {
   const wallet = useAnchorWallet();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -215,7 +214,7 @@ function Earning({ className }) {
   );
 }
 
-export default styled(Earning)`
+export default styled(EarningList)`
   h1 {
     font-size: 32px;
     line-height: 44px;

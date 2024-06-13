@@ -2,14 +2,13 @@ import styled from "styled-components";
 import { useState, useEffect, useCallback } from "react";
 import { getMachineList } from "@/services/machine.js";
 import DeviceList from "@/components/DeviceList.jsx";
-import Pager from "@/components/pager.jsx";
+import Pager from "@/components/Pager.jsx";
 import { useSnackbar } from "notistack";
 import { Modal, Box } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 
 function MyDevice({ className }) {
-  document.title = "Market";
   const { wallet, methods } = useSolanaMethod();
   const [list, setList] = useState([]);
   const [current, setCurrent] = useState(1);
@@ -65,25 +64,20 @@ function MyDevice({ className }) {
 
   return (
     <div className={className}>
-      <div className="con">
-        <h1 className="title">Share My Device</h1>
-        <div className="con-table">
-          <DeviceList
-            list={list}
-            loading={loading}
-            onCancel={(device) => setDeviceToCancel(device)}
-          />
-          {total > 10 && (
-            <Pager
-              current={current}
-              total={total}
-              pageSize={10}
-              onChange={(page) => setCurrent(page)}
-              className="pager"
-            />
-          )}
-        </div>
-      </div>
+      <DeviceList
+        list={list}
+        loading={loading}
+        onCancel={(device) => setDeviceToCancel(device)}
+      />
+      {total > 10 && (
+        <Pager
+          current={current}
+          total={total}
+          pageSize={10}
+          onChange={(page) => setCurrent(page)}
+          className="Pager"
+        />
+      )}
       <Modal
         open={Boolean(deviceToCancel)}
         onClose={() => {

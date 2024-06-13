@@ -11,7 +11,6 @@ import { getOrderDetail } from "@/services/order.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import { useClearCache } from "@/components/ClearCacheProvider";
 import ConnectToWallet from "@/components/ConnectToWallet";
-import { Mode } from "@mui/icons-material";
 
 function EndDuration({ className }) {
   document.title = "End Duration";
@@ -78,6 +77,7 @@ function EndDuration({ className }) {
         navigate("/dashboard");
       }, 500);
     } catch (error) {
+      console.log(error);
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setEnding(false);

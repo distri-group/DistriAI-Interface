@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Stack,
 } from "@mui/material";
 import { KeyboardDoubleArrowDown } from "@mui/icons-material";
 import { getOrderList } from "@/services/order.js";
@@ -106,77 +105,13 @@ function NavBar({ className }) {
             onClick={() => navigate("/home")}
             alt="Distri.AI"
           />
-          <Button
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}>
-            <KeyboardDoubleArrowDown style={{ color: "white" }} />
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            disableScrollLock
-            onClose={() => setAnchorEl(null)}
-            sx={{
-              "@media(max-width: 1920px) and (max-height: 1080px)": {
-                zoom: "75%",
-              },
-            }}>
-            <MenuItem
-              onClick={() => {
-                navigate("/market");
-                setAnchorEl(null);
-              }}>
-              Need
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                navigate("/device");
-                setAnchorEl(null);
-              }}>
-              Share
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                window.open("https://docs.distri.ai/core/getting-started");
-                setAnchorEl(null);
-              }}>
-              Getting Started
-            </MenuItem>
-          </Menu>
         </div>
         <div className="content-nav">
-          {user === "buyer" && (
-            <>
-              <span onClick={() => navigate("/market")}>Market</span>
-              <span onClick={() => navigate("/model")}>Models</span>
-              <span onClick={() => navigate("/dataset")}>Datasets</span>
-              <span onClick={() => navigate("/dashboard")}>
-                {ordersUnderOneHour > 0 ? (
-                  <Stack direction="row">
-                    <img
-                      src="/img/clock.png"
-                      alt="alarm"
-                      style={{
-                        marginRight: 8,
-                      }}
-                    />
-                    <span style={{ margin: 0 }}>Dashboard</span>
-                  </Stack>
-                ) : (
-                  "Dashboard"
-                )}
-              </span>
-            </>
-          )}
-          {user === "seller" && (
-            <>
-              <span onClick={() => navigate("/device")}>Share Device</span>
-              <span onClick={() => navigate("/earning")}>Earnings</span>
-              <span onClick={() => navigate("/reward")}>Rewards</span>
-            </>
-          )}
+          <span onClick={() => navigate("/market")}>Market</span>
+          <span onClick={() => navigate("/resource")}>Resources</span>
+          <span onClick={() => navigate("/training")}>Trainings</span>
+          <span onClick={() => navigate("/token")}>Tokens</span>
+          <a href="https://docs.distri.ai/">Docs</a>
           <span onClick={() => navigate("/faucet")}>Faucet</span>
         </div>
         <div className="right-btn">
@@ -264,7 +199,9 @@ export default styled(NavBar)`
       justify-content: center;
       align-items: center;
       flex-direction: row;
-      span {
+      span,
+      a {
+        color: white;
         font-weight: 500;
         font-size: 20px;
         line-height: 28px;

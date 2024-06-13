@@ -66,6 +66,7 @@ export default styled(Table)`
     border-radius: 10px;
     border-collapse: separate;
     border-spacing: 0 24px;
+    margin-top: -24px;
     width: 100%;
     overflow: hidden;
     .link {

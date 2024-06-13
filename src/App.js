@@ -10,30 +10,29 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { SnackbarProvider } from "notistack";
 import { ThemeProvider, createTheme } from "@mui/material/styles/index.js";
 import { Buffer } from "buffer";
-import Faucet from "@/views/Faucet.jsx";
-import Market from "@/views/buyer/Market.jsx";
-import Buy from "@/views/buyer/Buy.jsx";
-import OrderDetail from "@/views/buyer/OrderDetail.jsx";
-import ExtendDuration from "@/views/buyer/ExtendDuration.jsx";
-import EndDuration from "@/views/buyer/EndDuration.jsx";
-import MyDevice from "@/views/seller/MyDevice.jsx";
-import MakeOffer from "@/views/seller/MakeOffer.jsx";
-import Reward from "@/views/seller/Reward.jsx";
-import RewardDetail from "@/views/seller/RewardDetail.jsx";
-import Earning from "@/views/seller/Earning.jsx";
-import EarningDetail from "@/views/seller/EarningDetail.jsx";
-import Contents from "@/views/model&dataset/Contents.jsx";
-import Create from "@/views/model&dataset/Create.jsx";
-import Detail from "@/views/model&dataset/Detail.jsx";
 import { useNavigate, Navigate } from "react-router-dom";
-import Test from "@/views/Test.jsx";
 import { clusterApiUrl } from "@solana/web3.js";
-import Dashboard from "@/views/buyer/Dashboard.jsx";
-import KeepAliveLayout from "./KeepAliveLayout.jsx";
-import FileUpload from "./views/model&dataset/FileUpload.jsx";
-import Home from "./views/Home.jsx";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+import KeepAliveLayout from "./KeepAliveLayout.jsx";
+import Faucet from "@/views/Faucet.jsx";
+import Home from "@/views/Home.jsx";
+import Test from "@/views/Test.jsx";
+import Buy from "@/views/market/Buy.jsx";
+import Market from "@/views/market/Market.jsx";
+import Resource from "@/views/resource/Resource.jsx";
+import MakeOffer from "@/views/resource/MakeOffer.jsx";
+import Create from "@/views/resource/model&dataset/Create.jsx";
+import Detail from "@/views/resource/model&dataset/Detail.jsx";
+import FileUpload from "@/views/resource/model&dataset/FileUpload.jsx";
+import Token from "@/views/token/Token.jsx";
+import EarningDetail from "@/views/token/EarningDetail.jsx";
+import RewardDetail from "@/views/token/RewardDetail.jsx";
+import Training from "@/views/training/Training.jsx";
+import EndDuration from "@/views/training/EndDuration.jsx";
+import ExtendDuration from "@/views/training/ExtendDuration.jsx";
+import OrderDetail from "@/views/training/OrderDetail.jsx";
+
 function App() {
   window.Buffer = Buffer;
   const network = WalletAdapterNetwork.Devnet;
@@ -224,13 +223,28 @@ function App() {
                 <Route path="home" element={<Home />} />
                 <Route path="/*" element={<KeepAliveLayout />}>
                   <Route path="market" element={<Market />} />
+                  <Route path="resource" element={<Resource />} />
                   <Route path="device">
-                    <Route index element={<MyDevice />} />
                     <Route path=":id">
                       <Route path="buy" element={<Buy />} />
                       <Route path="list" element={<MakeOffer />} />
                     </Route>
                   </Route>
+                  <Route path="model">
+                    <Route
+                      path=":owner/:name"
+                      element={<Detail type="model" />}
+                    />
+                    <Route path="add" element={<Create type="model" />} />
+                  </Route>
+                  <Route path="dataset">
+                    <Route
+                      path=":owner/:name"
+                      element={<Detail type="dataset" />}
+                    />
+                    <Route path="add" element={<Create type="dataset" />} />
+                  </Route>
+                  <Route path="training" element={<Training />} />
                   <Route path="order">
                     <Route path=":id">
                       <Route index element={<OrderDetail />} />
@@ -239,31 +253,13 @@ function App() {
                       <Route path="create-model" element={<FileUpload />} />
                     </Route>
                   </Route>
+                  <Route path="token" element={<Token />} />
                   <Route path="reward">
-                    <Route index element={<Reward />} />
                     <Route path=":period" element={<RewardDetail />} />
                   </Route>
                   <Route path="earning">
-                    <Route index element={<Earning />} />
                     <Route path=":id" element={<EarningDetail />} />
                   </Route>
-                  <Route path="model">
-                    <Route index element={<Contents type="model" />} />
-                    <Route
-                      path=":owner/:name"
-                      element={<Detail type="model" />}
-                    />
-                    <Route path="add" element={<Create type="model" />} />
-                  </Route>
-                  <Route path="dataset">
-                    <Route index element={<Contents type="dataset" />} />
-                    <Route
-                      path=":owner/:name"
-                      element={<Detail type="dataset" />}
-                    />
-                    <Route path="add" element={<Create type="dataset" />} />
-                  </Route>
-                  <Route path="dashboard" element={<Dashboard />} />
                   <Route path="faucet" element={<Faucet />} />
                   <Route path="test" element={<Test />} />
                 </Route>

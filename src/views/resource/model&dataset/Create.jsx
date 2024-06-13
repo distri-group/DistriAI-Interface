@@ -192,7 +192,7 @@ function Create({ className, type }) {
       enqueueSnackbar(`Create ${type} success.`, { variant: "success" });
       setTimeout(() => {
         clearCache();
-        navigate(`/${type}`);
+        navigate("/resource");
       }, 300);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
