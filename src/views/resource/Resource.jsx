@@ -7,6 +7,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import MyDevice from "@/components/MyDevice";
 import MyCreation from "@/components/MyCreation";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
 function Resource({ className }) {
   const [type, setType] = useState("computing-power");
@@ -18,11 +19,13 @@ function Resource({ className }) {
   );
   const navigate = useNavigate();
   const wallet = useWallet();
+  const { enqueueSnackbar } = useSnackbar();
   const getSize = async () => {
     try {
-      await getTotalSize(wallet);
+      const total = await getTotalSize(wallet);
+      setStorage(total);
     } catch (error) {
-      console.error(error);
+      enqueueSnackbar(error.message, { variant: "error" });
     }
   };
   const handleNavigate = () => {
