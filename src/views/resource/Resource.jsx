@@ -27,6 +27,13 @@ function Resource({ className }) {
       console.error(error);
     }
   };
+  const handleNavigate = () => {
+    if (type === "dataset") {
+      navigate("/dataset/add");
+    } else {
+      navigate("/model/add");
+    }
+  };
   useEffect(() => {
     if (wallet?.publicKey) {
       getTotalSize();
@@ -36,24 +43,22 @@ function Resource({ className }) {
   return (
     <Stack className={className} spacing={3}>
       <h1>My resources sharing space</h1>
-      <label>Manage all my shared resources</label>
+      <label className="subtitle">Manage all my shared resources</label>
       <Stack className="trans-box" justifyContent="space-between">
-        <Stack direction="row" spacing={3} alignItems="end">
+        <Stack direction="row" spacing={2} alignItems="end">
           <h2>Storage</h2>
           <label>Used</label>
-          <span>
-            <b>{usedStorage}</b>GB
-          </span>
+          <b>{usedStorage}</b>
+          <span>GB</span>
         </Stack>
         <Stack
           direction="row"
-          spacing={3}
+          spacing={2}
           alignItems="end"
           style={{ marginLeft: 24 }}>
           <label>Remain</label>
-          <span>
-            <b>{remainStorage}</b>GB
-          </span>
+          <b>{remainStorage}</b>
+          <span>GB</span>
           <Button className="cbtn" style={{ width: 200 }}>
             Buy
           </Button>
@@ -61,41 +66,27 @@ function Resource({ className }) {
       </Stack>
       <div>
         <TabContext value={type}>
-          <TabList
-            onChange={(e, value) => setType(value)}
-            TabIndicatorProps={{
-              style: { display: "none" },
-            }}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              style={{ width: "100%" }}>
-              <div>
-                <Tab
-                  className="tab-item"
-                  label="Computing Power"
-                  value="computing-power"
-                />
-                <Tab className="tab-item" label="Models" value="model" />
-                <Tab className="tab-item" label="Datasets" value="dataset" />
-              </div>
-              <Button
-                onClick={() => {
-                  if (type === "dataset") {
-                    navigate("/dataset/add");
-                  } else {
-                    navigate("/model/add");
-                  }
-                }}
-                className="cbtn"
-                style={{
-                  width: 200,
-                }}>
-                Share
-              </Button>
-            </Stack>
-          </TabList>
+          <Stack direction="row" justifyContent="space-between">
+            <TabList
+              onChange={(e, value) => setType(value)}
+              TabIndicatorProps={{
+                style: { display: "none" },
+              }}>
+              <Tab
+                className="tab-item"
+                label="Computing Power"
+                value="computing-power"
+              />
+              <Tab className="tab-item" label="Models" value="model" />
+              <Tab className="tab-item" label="Datasets" value="dataset" />
+            </TabList>
+            <Button
+              className="cbtn"
+              style={{ width: 160 }}
+              onClick={handleNavigate}>
+              Share
+            </Button>
+          </Stack>
           <div>
             <TabPanel value="computing-power">
               <MyDevice />
@@ -116,5 +107,13 @@ function Resource({ className }) {
 export default styled(Resource)`
   .trans-box {
     height: 200px;
+    b {
+      font-size: 32px;
+      line-height: 44px;
+    }
+    span {
+      font-size: 18px;
+      line-height: 32px;
+    }
   }
 `;

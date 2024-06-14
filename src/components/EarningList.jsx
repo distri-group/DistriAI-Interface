@@ -148,7 +148,7 @@ function EarningList({ className }) {
   ];
   return (
     <div className={className}>
-      <h1>My Order Earnings</h1>
+      {/* <h1>My Order Earnings</h1>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -180,7 +180,7 @@ function EarningList({ className }) {
           </Stack>
           <span>Pending</span>
         </Stack>
-      </Stack>
+      </Stack> */}
       <Filter
         data={filterData}
         defaultValue={{

@@ -8,7 +8,7 @@ import { getMachineList, getFilterData } from "@/services/machine";
 import Filter from "@/components/Filter";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Stack, Tab } from "@mui/material";
-import MyCreation from "@/components/MyCreation";
+import ItemList from "@/components/ItemList";
 
 function Market({ className }) {
   document.title = "Market";
@@ -57,9 +57,9 @@ function Market({ className }) {
   }, [current, filterValue]);
 
   return (
-    <Stack className={className} spacing={5}>
+    <Stack className={className} spacing={3}>
       <h1>Resource Market</h1>
-      <label>
+      <label className="subtitle">
         Select the resources you need before starting the model training task
       </label>
       <div>
@@ -112,10 +112,10 @@ function Market({ className }) {
               )}
             </TabPanel>
             <TabPanel value="model">
-              <MyCreation type="model" />
+              <ItemList type="model" />
             </TabPanel>
             <TabPanel value="dataset">
-              <MyCreation type="dataset" />
+              <ItemList type="dataset" />
             </TabPanel>
           </div>
         </TabContext>

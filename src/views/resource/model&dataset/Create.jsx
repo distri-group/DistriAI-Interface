@@ -412,7 +412,7 @@ function Create({ className, type }) {
             onClick={() => {
               setFormValue({});
               clearCache();
-              navigate(`/${type}`);
+              navigate("/resource");
             }}>
             Cancel
           </Button>

@@ -34,6 +34,7 @@ body::-webkit-scrollbar-thumb {
 }
 h1, h2, h3, h4, h5, h6{
   font-family: Avenir Next Bold;
+  margin: 0;
 }
 .wallet-adapter-button:disabled{
   background-color: #10141f!important;

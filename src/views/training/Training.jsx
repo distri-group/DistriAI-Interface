@@ -63,9 +63,9 @@ function Training({ className }) {
     };
   }, [list, loadList]);
   return (
-    <Stack className={className}>
+    <Stack className={className} spacing={3}>
       <h1>My model training and deployment task center</h1>
-      <label style={{ margin: "24px 0" }}>
+      <label className="subtitle">
         Select the resources you need before starting the model training task
       </label>
       <Filter
