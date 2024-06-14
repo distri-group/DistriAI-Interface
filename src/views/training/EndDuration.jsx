@@ -74,7 +74,7 @@ function EndDuration({ className }) {
       enqueueSnackbar("Refund order success.", { variant: "success" });
       setTimeout(() => {
         clearCache();
-        navigate("/dashboard");
+        navigate("/training");
       }, 500);
     } catch (error) {
       console.log(error);

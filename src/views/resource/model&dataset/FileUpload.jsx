@@ -172,7 +172,7 @@ function FileUpload({ className }) {
       search.append("t", Date.now());
       window.open(`${addr}/uploadfiles?${search.toString()}`);
       setProgress(0);
-      navigate("/dashboard");
+      navigate("/training");
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }

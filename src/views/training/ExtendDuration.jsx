@@ -51,7 +51,7 @@ function ExtendDuration({ className }) {
       await methods.renewOrder(machinePublicKey, id, duration);
       await checkIfExtended();
       enqueueSnackbar(`Order extended ${duration} h.`, { variant: "success" });
-      navigate("/dashboard");
+      navigate("/training");
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }

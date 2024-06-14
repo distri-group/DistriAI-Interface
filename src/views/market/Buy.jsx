@@ -152,7 +152,7 @@ function Buy({ className }) {
       enqueueSnackbar("Purchase success.", { variant: "success" });
       setTimeout(() => {
         clearCache();
-        navigate("/dashboard");
+        navigate("/training");
       }, 500);
     } catch (error) {
       if (error.insufficient) {

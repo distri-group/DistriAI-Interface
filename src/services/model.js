@@ -49,14 +49,16 @@ export async function getItemDetail(type, owner, name) {
   return formatItem(res);
 }
 
-export async function getTypeTotalSize(type, wallet) {
-  const apiUrl = `/${type}/size/total`;
+export async function getTotalSize(wallet) {
   const token = await login(wallet);
   const headers = {
     Authorization: token,
   };
-  const res = await axios.get(apiUrl, { headers });
-  return res;
+  const [modelSize, datasetSize] = await Promise.all([
+    axios.get(`/model/size/total`, { headers }),
+    axios.get(`/dataset/size/total`, { headers }),
+  ]);
+  return modelSize + datasetSize;
 }
 
 export async function isItemLiked(type, owner, name, wallet) {

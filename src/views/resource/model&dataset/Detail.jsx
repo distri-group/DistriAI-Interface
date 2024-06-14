@@ -430,7 +430,7 @@ function Detail({ className, type }) {
               <Button
                 className="default-btn"
                 onClick={() => {
-                  navigate("/dashboard");
+                  navigate("/training");
                   setOrderDialog(false);
                 }}>
                 Go to GPUs

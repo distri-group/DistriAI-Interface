@@ -1,7 +1,7 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Stack, Tab } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { getTypeTotalSize } from "@/services/model";
+import { getTotalSize } from "@/services/model";
 import styled from "styled-components";
 import { useWallet } from "@solana/wallet-adapter-react";
 import MyDevice from "@/components/MyDevice";
@@ -18,11 +18,9 @@ function Resource({ className }) {
   );
   const navigate = useNavigate();
   const wallet = useWallet();
-  const getTotalSize = async () => {
+  const getSize = async () => {
     try {
-      const modelTotal = await getTypeTotalSize("model", wallet);
-      const datasetTotal = await getTypeTotalSize("dataset", wallet);
-      setStorage(modelTotal + datasetTotal);
+      await getTotalSize(wallet);
     } catch (error) {
       console.error(error);
     }
@@ -36,7 +34,7 @@ function Resource({ className }) {
   };
   useEffect(() => {
     if (wallet?.publicKey) {
-      getTotalSize();
+      getSize();
     }
     // eslint-disable-next-line
   }, [wallet]);

@@ -72,24 +72,6 @@ function NavBar({ className }) {
       loadOrderList();
     }
   }, [wallet]);
-  useEffect(() => {
-    if (
-      location.pathname === "/market" ||
-      location.pathname.includes("buy") ||
-      location.pathname.includes("order") ||
-      location.pathname.includes("dashboard") ||
-      location.pathname.includes("model")
-    ) {
-      setUser("buyer");
-    } else if (
-      location.pathname === "/device" ||
-      location.pathname.includes("reward") ||
-      location.pathname.includes("earning") ||
-      location.pathname.includes("list")
-    ) {
-      setUser("seller");
-    }
-  }, [location.pathname, user]);
   return (
     <div className={className}>
       <div className="con">
@@ -130,7 +112,7 @@ function NavBar({ className }) {
             <Button onClick={handleOrderDialogClose}>Got it</Button>
             <Button
               onClick={() => {
-                navigate("/dashboard");
+                navigate("/training");
                 handleOrderDialogClose();
               }}>
               View Orders
@@ -152,7 +134,7 @@ function NavBar({ className }) {
             <Button onClick={handleHalfOrderDialogClose}>Got it</Button>
             <Button
               onClick={() => {
-                navigate("/dashboard");
+                navigate("/training");
                 handleHalfOrderDialogClose();
               }}>
               View Orders

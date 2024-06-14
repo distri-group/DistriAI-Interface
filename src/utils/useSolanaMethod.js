@@ -211,6 +211,15 @@ export default function useSolanaMethod() {
         );
       }
     }
+    let output = {};
+    for (let item in accounts) {
+      if (accounts[item] === null) {
+        output[item] = "11111111111111111111111111111111";
+      } else {
+        output[item] = accounts[item].toString();
+      }
+    }
+    console.log(output);
     try {
       const transaction = await program.methods
         .refundOrder()

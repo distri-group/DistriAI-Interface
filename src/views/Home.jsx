@@ -59,22 +59,22 @@ export default function Home() {
               Market
             </Button>
             <Button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/resource")}
               className="cbtn"
               style={{ width: 160 }}>
-              Dashboard
+              Resources
             </Button>
             <Button
-              onClick={() => navigate("/model")}
+              onClick={() => navigate("/training")}
               className="cbtn"
               style={{ width: 160 }}>
-              Model
+              Trainings
             </Button>
             <Button
-              onClick={() => navigate("/device")}
+              onClick={() => navigate("/token")}
               className="cbtn"
               style={{ width: 160 }}>
-              My Device
+              Tokens
             </Button>
           </Stack>
         </Stack>
