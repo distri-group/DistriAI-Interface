@@ -1,6 +1,6 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Stack, Tab } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getTotalSize } from "@/services/model";
 import styled from "styled-components";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -8,6 +8,7 @@ import MyDevice from "@/components/MyDevice";
 import MyCreation from "@/components/MyCreation";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
+import prettyBytes from "pretty-bytes";
 
 function Resource({ className }) {
   const [type, setType] = useState("computing-power");
@@ -25,31 +26,20 @@ function Resource({ className }) {
     }
   };
   useEffect(() => {
-    console.log(wallet);
-    if (wallet?.connected) {
+    if (wallet.publicKey) {
       getSize();
     }
     // eslint-disable-next-line
-  }, [wallet]);
+  }, [wallet?.publicKey]);
   return (
     <Stack className={className} spacing={3}>
       <h1>My resources sharing space</h1>
       <label className="subtitle">Manage all my shared resources</label>
       <Stack className="trans-box" justifyContent="space-between">
-        <Stack direction="row" spacing={2} alignItems="end">
-          <h2>Storage</h2>
+        <h2>Storage</h2>
+        <Stack direction="row" spacing={2} alignItems="center">
           <label>Used</label>
-          <b>{usedStorage}</b>
-          <span>GB</span>
-        </Stack>
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="end"
-          style={{ marginLeft: 24 }}>
-          <label>Remain</label>
-          <b>100</b>
-          <span>GB</span>
+          <b>{prettyBytes(usedStorage)}</b>
         </Stack>
       </Stack>
       <div>

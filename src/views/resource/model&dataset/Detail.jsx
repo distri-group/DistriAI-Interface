@@ -93,27 +93,31 @@ function Detail({ className, type }) {
   }, [wallet, item, type]);
   const loadItem = useCallback(async () => {
     setLoading(true);
-    const res = await getItemDetail(type, owner, name);
-    if (type === "model") {
-      const isDeployable = await checkDeployable(res);
-      setDeployable(isDeployable);
-    }
     try {
-      for await (const item of client.files.read(
-        `/distri.ai/${type}/${owner}/${name}/README.md`
-      )) {
-        const text = new TextDecoder().decode(item);
-        if (type === "model") {
-          const match = text.match(/^---\n([\s\S]+?)\n---/);
-          const result = metadataParser(text);
-          setMarkdown(result.content);
-          if (match) {
-            setMetadata(match[1]);
-          }
-        } else setMarkdown(text);
+      const res = await getItemDetail(type, owner, name);
+      if (type === "model") {
+        const isDeployable = await checkDeployable(res);
+        setDeployable(isDeployable);
       }
-    } catch (error) {}
-    setItem(res);
+      try {
+        for await (const item of client.files.read(
+          `/distri.ai/${type}/${owner}/${name}/README.md`
+        )) {
+          const text = new TextDecoder().decode(item);
+          if (type === "model") {
+            const match = text.match(/^---\n([\s\S]+?)\n---/);
+            const result = metadataParser(text);
+            setMarkdown(result.content);
+            if (match) {
+              setMetadata(match[1]);
+            }
+          } else setMarkdown(text);
+        }
+      } catch (error) {}
+      setItem(res);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
     setLoading(false);
     // eslint-disable-next-line
   }, [type, name, owner]);
