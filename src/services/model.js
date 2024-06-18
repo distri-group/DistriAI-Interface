@@ -104,6 +104,23 @@ export async function downloadItem(type, owner, name) {
   return res;
 }
 
+export async function itemSize(type, Name, Size, wallet) {
+  const apiUrl = `/${type}/size`;
+  const token = await login(wallet);
+  const headers = {
+    Authorization: token,
+  };
+  const res = await axios.post(
+    apiUrl,
+    {
+      Name,
+      Size: Number(Size),
+    },
+    { headers }
+  );
+  return res;
+}
+
 export async function login(wallet) {
   const { publicKey, signMessage } = wallet;
   if (localStorage.getItem("token")) {
