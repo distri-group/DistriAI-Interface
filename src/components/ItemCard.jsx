@@ -1,72 +1,65 @@
-import {
-  AccessTimeFilled,
-  AccountBalance,
-  ArrowDownward,
-  Favorite,
-  FavoriteBorder,
-} from "@mui/icons-material";
+import { AccountBalance } from "@mui/icons-material";
 import { Chip, Stack } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-function ItemCard({ item, className, type }) {
+function ItemCard({ item, className, type, isMyCreation }) {
   const navigate = useNavigate();
   return (
-    <div
-      className={className}
-      onClick={() => {
-        navigate(`/${type}/${item.Owner}/${item.Name}`);
-      }}>
-      <h3>{item.Name}</h3>
-      <div style={{ padding: 24 }}>
-        <Stack direction="row" spacing={2}>
-          <Chip color="warning" label={item.framework || item.scale} />
-          <Chip color="success" label={item.type1} />
-          {item.type1 !== "Others" && (
-            <Chip variant="outlined" color="success" label={item.type2} />
-          )}
-          {item.Tags &&
-            item.Tags.map((tag) => (
-              <Chip
-                color="primary"
-                label={tag}
-                key={tag}
-                style={{ minWidth: 50 }}
-              />
-            ))}
-          <Chip
-            avatar={
-              <AccountBalance
-                style={{ background: "transparent", color: "white" }}
-              />
-            }
-            color="info"
-            label={item.license}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          spacing={2}
-          justifyContent="end"
-          style={{ padding: 10, color: "#898989" }}>
-          <Stack direction="row" alignItems="end" spacing={1}>
-            <AccessTimeFilled />
-            <span>{new Date(item.CreateTime).toLocaleString()}</span>
-          </Stack>
-          <Stack direction="row" alignItems="end" spacing={1}>
-            {item.Islike ? (
-              <Favorite sx={{ width: 20, height: 20 }} />
-            ) : (
-              <FavoriteBorder sx={{ width: 20, height: 20 }} />
+    <div className={className}>
+      <h3>
+        <span
+          onClick={() => {
+            navigate(`/${type}/${item.Owner}/${item.Name}`);
+          }}>
+          {item.Name}
+        </span>
+      </h3>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        style={{ padding: 24 }}>
+        <Stack spacing={2} style={{ width: "30%" }}>
+          <Stack direction="row" spacing={2}>
+            <Chip color="warning" label={item.framework || item.scale} />
+            <Chip color="success" label={item.type1} />
+            {item.type1 !== "Others" && (
+              <Chip variant="outlined" color="success" label={item.type2} />
             )}
-            <span>{item.Likes}</span>
+            {item.Tags &&
+              item.Tags.map((tag) => (
+                <Chip
+                  color="primary"
+                  label={tag}
+                  key={tag}
+                  style={{ minWidth: 50 }}
+                />
+              ))}
+            <Chip
+              avatar={
+                <AccountBalance
+                  style={{ background: "transparent", color: "white" }}
+                />
+              }
+              color="info"
+              label={item.license}
+            />
           </Stack>
-          <Stack direction="row" alignItems="end" spacing={1}>
-            <ArrowDownward sx={{ width: 20, height: 20 }} />
-            <span>{item.Downloads}</span>
+          <Stack direction="row" spacing={2} style={{ color: "#898989" }}>
+            <span>Created at {new Date(item.CreateTime).toLocaleString()}</span>
           </Stack>
         </Stack>
-      </div>
+        {isMyCreation && (
+          <>
+            <span className="item-status">In draft</span>
+            <LoadingButton className="cbtn" style={{ width: 100 }}>
+              Publish
+            </LoadingButton>
+          </>
+        )}
+      </Stack>
     </div>
   );
 }
@@ -78,7 +71,6 @@ export default styled(ItemCard)`
   border-radius: 8px 8px 0 0;
   border-bottom: 1px solid #898989;
   overflow: hidden;
-  cursor: pointer;
   h3 {
     background: rgba(149, 157, 165, 0.16);
     margin: 0;
@@ -88,5 +80,14 @@ export default styled(ItemCard)`
     font-size: 20px;
     color: #ffffff;
     line-height: 64px;
+    span {
+      cursor: pointer;
+    }
+  }
+  .item-status {
+    display: block;
+    padding: 6px 36px;
+    box-sizing: border-box;
+    border: 1px solid #898989;
   }
 `;
