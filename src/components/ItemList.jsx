@@ -11,7 +11,7 @@ function ItemList({ className, type }) {
   const [list, setList] = useState([]);
   const [filterValue, setFilterValue] = useState({
     Name: "",
-    OrderBy: "Updated Time",
+    OrderBy: "update_time DESC",
   });
   const [current, setCurrent] = useState(1);
   const [total, setTotal] = useState(0);
@@ -36,7 +36,7 @@ function ItemList({ className, type }) {
         data={filterData}
         defaultValue={{
           Name: "",
-          OrderBy: "all",
+          OrderBy: "update_time DESC",
         }}
         onFilter={(value) => {
           setFilterValue(value);

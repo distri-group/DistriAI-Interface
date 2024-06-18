@@ -11,12 +11,8 @@ import { useSnackbar } from "notistack";
 
 function Resource({ className }) {
   const [type, setType] = useState("computing-power");
-  const availableStorage = 100;
+  const toBeNavigated = type === "dataset" ? "dataset" : "model";
   const [usedStorage, setStorage] = useState(0);
-  const remainStorage = useMemo(
-    () => availableStorage - usedStorage,
-    [usedStorage]
-  );
   const navigate = useNavigate();
   const wallet = useWallet();
   const { enqueueSnackbar } = useSnackbar();
@@ -28,15 +24,9 @@ function Resource({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
   };
-  const handleNavigate = () => {
-    if (type === "dataset") {
-      navigate("/dataset/add");
-    } else {
-      navigate("/model/add");
-    }
-  };
   useEffect(() => {
-    if (wallet?.publicKey) {
+    console.log(wallet);
+    if (wallet?.connected) {
       getSize();
     }
     // eslint-disable-next-line
@@ -58,11 +48,8 @@ function Resource({ className }) {
           alignItems="end"
           style={{ marginLeft: 24 }}>
           <label>Remain</label>
-          <b>{remainStorage}</b>
+          <b>100</b>
           <span>GB</span>
-          <Button className="cbtn" style={{ width: 200 }}>
-            Buy
-          </Button>
         </Stack>
       </Stack>
       <div>
@@ -84,8 +71,8 @@ function Resource({ className }) {
             <Button
               className="cbtn"
               style={{ width: 160 }}
-              onClick={handleNavigate}>
-              Share
+              onClick={() => navigate(`${toBeNavigated}/add`)}>
+              Share {toBeNavigated}
             </Button>
           </Stack>
           <div>

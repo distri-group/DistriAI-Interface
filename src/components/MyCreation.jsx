@@ -13,7 +13,7 @@ function MyCreation({ className, type }) {
   const [list, setList] = useState([]);
   const [filterValue, setFilterValue] = useState({
     Name: "",
-    OrderBy: "Updated Time",
+    OrderBy: "update_time DESC",
     Owner: wallet?.publicKey.toString(),
   });
   const [current, setCurrent] = useState(1);
@@ -44,7 +44,7 @@ function MyCreation({ className, type }) {
         data={filterData}
         defaultValue={{
           Name: "",
-          OrderBy: "all",
+          OrderBy: "update_time DESC",
           Owner: wallet?.publicKey.toString(),
         }}
         onFilter={(value) => {
@@ -66,6 +66,7 @@ function MyCreation({ className, type }) {
                 className="item"
                 key={item.Id}
                 type={type}
+                isMyCreation
               />
             ))}
             {total > 10 && (
