@@ -1,6 +1,6 @@
 import { Select, Stack, MenuItem, TextField } from "@mui/material";
 import { debounce } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Filter({
   data,
@@ -11,6 +11,7 @@ export default function Filter({
   style,
 }) {
   const [filterValue, setFilterValue] = useState(defaultValue);
+  const initialRender = useRef(true);
   const resetFilter = () => {
     setFilterValue(defaultValue);
   };
@@ -18,7 +19,11 @@ export default function Filter({
     setFilterValue((prev) => ({ ...prev, [key]: value }));
   }, 500);
   useEffect(() => {
-    onFilter(filterValue);
+    if (!initialRender.current) {
+      onFilter(filterValue);
+    } else {
+      initialRender.current = false;
+    }
     // eslint-disable-next-line
   }, [filterValue]);
   return (
