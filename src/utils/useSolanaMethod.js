@@ -15,6 +15,10 @@ const [vault] = web3.PublicKey.findProgramAddressSync(
   [utils.bytes.utf8.encode("vault"), MINT_PROGRAM.toBytes()],
   PROGRAM
 );
+const [rewardPool] = web3.PublicKey.findProgramAddressSync(
+  [utils.bytes.utf8.encode("reward-pool"), MINT_PROGRAM.toBytes()],
+  PROGRAM
+);
 const systemProgram = new PublicKey("11111111111111111111111111111111");
 
 export default function useSolanaMethod() {
@@ -192,6 +196,12 @@ export default function useSolanaMethod() {
       model3OwnerAta: null,
       model4OwnerAta: null,
       model5OwnerAta: null,
+      statisticsSeller: getStatisticsPublicKey(sellerPublicKey),
+      statisticsModel1Owner: null,
+      statisticsModel2Owner: null,
+      statisticsModel3Owner: null,
+      statisticsModel4Owner: null,
+      statisticsModel5Owner: null,
       vault,
       mint: MINT_PROGRAM,
       tokenProgram: TOKEN_PROGRAM_ID,
@@ -205,8 +215,12 @@ export default function useSolanaMethod() {
         modelDetail[`Model${i}Name`] === ""
       ) {
         accounts[`model${i}OwnerAta`] = null;
+        accounts[`statisticsModel${i}Owner`] = null;
       } else {
         accounts[`model${i}OwnerAta`] = findAssociatedTokenAddress(
+          new PublicKey(modelDetail[`Model${i}Owner`])
+        );
+        accounts[`statisticsModel${i}Owner`] = getStatisticsPublicKey(
           new PublicKey(modelDetail[`Model${i}Owner`])
         );
       }
@@ -279,10 +293,6 @@ export default function useSolanaMethod() {
       ],
       PROGRAM
     );
-    const [rewardPool] = web3.PublicKey.findProgramAddressSync(
-      [utils.bytes.utf8.encode("reward-pool"), MINT_PROGRAM.toBytes()],
-      PROGRAM
-    );
     try {
       const instruction = await program.methods
         .claim(period)
@@ -292,6 +302,7 @@ export default function useSolanaMethod() {
           rewardMachine: rewardMachinePublicKey,
           owner: ownerPublicKey,
           ownerAta: findAssociatedTokenAddress(ownerPublicKey),
+          statisticsOwner: getStatisticsPublicKey(ownerPublicKey),
           rewardPool,
           mint: MINT_PROGRAM,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -329,6 +340,7 @@ export default function useSolanaMethod() {
         .accounts({
           aiModel: modelPublicKey,
           owner: ownerPublicKey,
+          statisticsOwner: getStatisticsPublicKey(ownerPublicKey),
           systemProgram,
         })
         .rpc();
@@ -363,6 +375,30 @@ export default function useSolanaMethod() {
         .accounts({
           dataset: datasetPublicKey,
           owner: ownerPublicKey,
+          statisticsOwner: getStatisticsPublicKey(ownerPublicKey),
+          systemProgram,
+        })
+        .rpc();
+      const res = await checkConfirmation(transaction);
+      return res;
+    } catch (error) {
+      throw handleError(error);
+    }
+  };
+
+  // Claim Model & Dataset Rewards
+  const claimModelDatasetRewards = async (ownerPublicKey) => {
+    try {
+      const transaction = await program.methods
+        .claimAiModelDatasetReward()
+        .accounts({
+          owner: ownerPublicKey,
+          ownerAta: findAssociatedTokenAddress(ownerPublicKey),
+          statisticsOwner: getStatisticsPublicKey(ownerPublicKey),
+          rewardPool,
+          mint: MINT_PROGRAM,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram,
         })
         .rpc();
@@ -419,6 +455,15 @@ export default function useSolanaMethod() {
       PROGRAM
     );
     return machinePublicKey;
+  };
+
+  // Get Statistics PublicKey
+  const getStatisticsPublicKey = (publicKey) => {
+    const [statisticsPublicKey] = PublicKey.findProgramAddressSync(
+      [utils.bytes.utf8.encode("statistics"), publicKey.toBytes()],
+      PROGRAM
+    );
+    return statisticsPublicKey;
   };
 
   // Get User's DIST Balance
@@ -482,6 +527,7 @@ export default function useSolanaMethod() {
     claimButchRewards,
     createModel,
     createDataset,
+    claimModelDatasetRewards,
     getTokenBalance,
     getMachinePublicKey,
     getItemName,
