@@ -123,7 +123,7 @@ export default function useIpfs() {
         return 0;
       }
     });
-    return { files, cid: res.cid.toString() };
+    return { files, cid: res.cid.toString(), size: res.size };
   };
 
   // Delete file from folder

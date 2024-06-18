@@ -28,6 +28,7 @@ import useIpfs from "@/utils/useIpfs.js";
 import { useSnackbar } from "notistack";
 import { checkDeployable, downloadItem } from "@/services/model.js";
 import { useClearCache } from "./ClearCacheProvider";
+import { itemSize } from "../services/model";
 
 function FileList({
   className,
@@ -78,11 +79,15 @@ function FileList({
   const loadFiles = async (prefix) => {
     setLoading(true);
     try {
-      let { files: list, cid } = await methods.getFolderList(prefix);
-      if (wallet?.publicKey && wallet.publicKey.toString() !== item.Owner) {
-        list = list.filter(
-          (file) => !(file.type === "directory" && file.name === "deployment")
-        );
+      let { files: list, cid, size } = await methods.getFolderList(prefix);
+      if (wallet?.publicKey) {
+        if (wallet.publicKey.toString() !== item.Owner) {
+          list = list.filter(
+            (file) => !(file.type === "directory" && file.name === "deployment")
+          );
+        } else if (prefix === initialPrefix) {
+          await itemSize(type, item.Name, size, wallet);
+        }
       }
       setList(list);
       setFolderCid(cid);
