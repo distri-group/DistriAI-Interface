@@ -3,9 +3,21 @@ import { Chip, Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { itemPublish } from "../services/model";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useSnackbar } from "notistack";
 
-function ItemCard({ item, className, type, isMyCreation }) {
+function ItemCard({ item, className, type, onReload }) {
   const navigate = useNavigate();
+  const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
+  const handlePublish = async () => {
+    try {
+      await itemPublish(type, item.Name, !item.Public, wallet);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+  };
   return (
     <div className={className}>
       <h3>
@@ -51,10 +63,13 @@ function ItemCard({ item, className, type, isMyCreation }) {
             <span>Created at {new Date(item.CreateTime).toLocaleString()}</span>
           </Stack>
         </Stack>
-        {isMyCreation && (
+        {onReload && (
           <>
             <span className="item-status">In draft</span>
-            <LoadingButton className="cbtn" style={{ width: 100 }}>
+            <LoadingButton
+              onClick={handlePublish}
+              className="cbtn"
+              style={{ width: 100 }}>
               Publish
             </LoadingButton>
           </>

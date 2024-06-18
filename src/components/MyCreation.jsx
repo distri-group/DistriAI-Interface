@@ -66,7 +66,7 @@ function MyCreation({ className, type }) {
                 className="item"
                 key={item.Id}
                 type={type}
-                isMyCreation
+                onReload={loadList}
               />
             ))}
             {total > 10 && (
