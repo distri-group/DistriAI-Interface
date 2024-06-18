@@ -37,6 +37,7 @@ export default function Test() {
   };
   useEffect(() => {
     getList();
+    // eslint-disable-next-line
   }, [type]);
   return (
     <Stack spacing={2}>
