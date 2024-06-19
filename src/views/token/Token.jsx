@@ -17,7 +17,7 @@ import RewardList from "@/components/RewardList.jsx";
 import Round from "@/components/Round";
 import { useProgram } from "@/KeepAliveLayout";
 import { BN } from "@project-serum/anchor";
-import { formatAddress } from "@/utils";
+import { formatAddress, getOrdinal } from "@/utils";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
 
@@ -33,6 +33,18 @@ function Token({ className }) {
     total: 0,
   });
   const [rankLoading, setRankLoading] = useState(false);
+  const [totalRewards, setTotalRewards] = useState({
+    mine: {
+      total: 0,
+      unclaimed: 0,
+    },
+    period: {
+      number: 0,
+      date: new Date(),
+      pool: 0,
+      reward: 0,
+    },
+  });
   const getStaticUserList = async () => {
     setRankLoading(true);
     try {
@@ -55,6 +67,9 @@ function Token({ className }) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setRankLoading(false);
+  };
+  const handleRewardInfoChange = (info) => {
+    setTotalRewards(info);
   };
   useEffect(() => {
     if (wallet?.publicKey && list.length > 0) {
@@ -109,11 +124,11 @@ function Token({ className }) {
               <label style={{ color: "white" }}>Total output</label>
             </Stack>
             <Stack justifyContent="end">
-              <span>499.44</span>
+              <span>{totalRewards.mine.total}</span>
               <label>My rewards</label>
             </Stack>
             <Stack justifyContent="end">
-              <span>499.4</span>
+              <span>{totalRewards.mine.unclaimed}</span>
               <label>My unclaimed rewards</label>
             </Stack>
           </Stack>
@@ -147,12 +162,40 @@ function Token({ className }) {
           marginTop: 40,
         }}>
         <div className="border-box">
-          <h2>The 3rd period</h2>
-          <label>2024/06/06</label>
-          <Stack direction="row" spacing={8} style={{ marginTop: 40 }}>
+          <h2>The {getOrdinal(totalRewards.period.number)} period</h2>
+          <label>{totalRewards.period.date.toLocaleDateString()}</label>
+          <h3>Machine Rewards</h3>
+          <Stack direction="row" spacing={8} style={{ marginTop: 24 }}>
             <Round
               left={{
-                total: 400,
+                total: totalRewards.period.reward,
+                title: "My rewards",
+              }}
+              right={{
+                title: "My Ranking",
+                total: totalRewards.period.pool,
+                desc: "Contribution reward pool",
+              }}
+            />
+            <Stack justifyContent="space-around">
+              <span>
+                <b>300</b>resources were shared
+              </span>
+              <span>
+                <b>{totalRewards.period.pool}</b>DIST were found
+              </span>
+              <span>
+                My rewards
+                <b style={{ marginLeft: 12 }}>{totalRewards.period.reward}</b>
+                DIST
+              </span>
+            </Stack>
+          </Stack>
+          <h3 style={{ margin: "24px 0" }}>Model & Dataset Rewards</h3>
+          <Stack direction="row" spacing={8}>
+            <Round
+              left={{
+                total: 100,
                 title: "My rewards",
               }}
               right={{
@@ -170,30 +213,6 @@ function Token({ className }) {
               </span>
               <span>
                 My rewards<b style={{ marginLeft: 12 }}>400</b>DIST
-              </span>
-            </Stack>
-          </Stack>
-          <Stack direction="row" style={{ marginTop: 64 }} spacing={8}>
-            <Round
-              left={{
-                total: 100,
-                title: "My earnings",
-              }}
-              right={{
-                title: "Earnings",
-                total: 40000,
-                desc: "Contribution of tokens",
-              }}
-            />
-            <Stack justifyContent="space-around">
-              <span>
-                <b>300</b>deals closed
-              </span>
-              <span>
-                <b>1000</b>DIST were circulated
-              </span>
-              <span>
-                My earnings<b style={{ marginLeft: 12 }}>400</b>DIST
               </span>
             </Stack>
           </Stack>
@@ -271,7 +290,7 @@ function Token({ className }) {
           </TabList>
           <div>
             <TabPanel value="reward">
-              <RewardList />
+              <RewardList onRewardInfoChange={handleRewardInfoChange} />
             </TabPanel>
             <TabPanel value="earning">
               <EarningList />
@@ -288,6 +307,11 @@ export default styled(Token)`
     margin-bottom: 16px;
     font-size: 28px;
     line-height: 38px;
+  }
+  h3 {
+    text-align: center;
+    font-size: 24px;
+    line-height: 32px;
   }
   label {
     color: #959d9a;

@@ -15,8 +15,9 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import ConnectToWallet from "./ConnectToWallet";
+import { formatBalance } from "@/utils";
 
-function RewardList({ className }) {
+function RewardList({ className, onRewardInfoChange }) {
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -25,8 +26,44 @@ function RewardList({ className }) {
   const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [rewards, setRewards] = useState(null);
+  const [rewards, setRewards] = useState({
+    ClaimablePeriodicRewards: 0,
+    ClaimableTaskRewards: 0,
+    ClaimedPeriodicRewards: 0,
+    ClaimedTaskRewards: 0,
+  });
   const [connectModal, setConnectModal] = useState(false);
+  const rewardInfo = useMemo(() => {
+    if (list.length > 0) {
+      return {
+        mine: {
+          total:
+            rewards.ClaimablePeriodicRewards + rewards.ClaimedPeriodicRewards,
+          unclaimed: rewards.ClaimablePeriodicRewards,
+        },
+        period: {
+          number: list[0].Period,
+          date: new Date(list[0].StartTime),
+          pool: formatBalance(list[0].Pool),
+          reward: formatBalance(list[0].PeriodicRewards),
+        },
+      };
+    } else {
+      return {
+        mine: {
+          total:
+            rewards.ClaimablePeriodicRewards + rewards.ClaimedPeriodicRewards,
+          unclaimed: rewards.ClaimablePeriodicRewards,
+        },
+        period: {
+          number: 0,
+          date: new Date(),
+          pool: 0,
+          reward: 0,
+        },
+      };
+    }
+  }, [rewards, list]);
   const claimed = useMemo(() => {
     if (rewards?.totalClaimable) {
       return rewards.totalClaimable <= 0;
@@ -169,6 +206,9 @@ function RewardList({ className }) {
     }
     // eslint-disable-next-line
   }, [wallet?.publicKey]);
+  useEffect(() => {
+    onRewardInfoChange(rewardInfo);
+  }, [rewardInfo]);
   return (
     <div className={className}>
       {/* <h1>My DAO Rewards</h1>

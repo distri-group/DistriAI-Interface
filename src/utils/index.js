@@ -1,6 +1,6 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-export { formatBalance, formatAddress, getTotal, copy };
+export { formatBalance, formatAddress, getTotal, getOrdinal, copy };
 
 function formatBalance(balance) {
   return Math.floor((balance / LAMPORTS_PER_SOL) * 100) / 100;
@@ -24,6 +24,17 @@ function getTotal(price, duration) {
     (Number(s1.replace(".", "")) * Number(s2.replace(".", ""))) /
     Math.pow(10, m)
   );
+}
+function getOrdinal(n) {
+  let ord = "th";
+  if (n % 10 === 1 && n % 100 !== 11) {
+    ord = "st";
+  } else if (n % 10 === 2 && n % 100 !== 12) {
+    ord = "nd";
+  } else if (n % 10 === 3 && n % 100 !== 13) {
+    ord = "rd";
+  }
+  return ord;
 }
 function copy(text) {
   navigator.clipboard
