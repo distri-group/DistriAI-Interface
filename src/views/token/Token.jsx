@@ -1,5 +1,6 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
+  CircularProgress,
   Stack,
   Tab,
   Table,
@@ -9,56 +10,75 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import EarningList from "@/components/EarningList.jsx";
 import RewardList from "@/components/RewardList.jsx";
 import Round from "@/components/Round";
+import { useProgram } from "@/KeepAliveLayout";
+import { BN } from "@project-serum/anchor";
+import { formatAddress } from "@/utils";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useSnackbar } from "notistack";
 
 function Token({ className }) {
   const [type, setType] = useState("reward");
-  const list = [
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-    {
-      addr: "cXfg2SYcq85nyZ1U4ccx6…hXY",
-      token: 1000.23,
-    },
-  ];
+  const [list, setList] = useState([]);
+  const program = useProgram();
+  const wallet = useAnchorWallet();
+  const { enqueueSnackbar } = useSnackbar();
+  const [myRank, setMyRank] = useState({
+    rank: 0,
+    owner: "",
+    total: 0,
+  });
+  const [rankLoading, setRankLoading] = useState(false);
+  const getStaticUserList = async () => {
+    setRankLoading(true);
+    try {
+      const res = await program.account.statistics.all();
+      let list = res.map((item) => {
+        let total = 0;
+        Object.keys(item.account).forEach((key) => {
+          if (item.account[key] instanceof BN) {
+            total += item.account[key].toNumber();
+          }
+        });
+        return {
+          owner: formatAddress(item.account.owner.toString()),
+          total,
+        };
+      });
+      list = list.sort((a, b) => b.total - a.total);
+      setList(list);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    setRankLoading(false);
+  };
+  useEffect(() => {
+    if (wallet?.publicKey && list.length > 0) {
+      let myRankInfo = {
+        rank: 0,
+        owner: wallet.publicKey.toString(),
+        total: 0,
+      };
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].owner === formatAddress(wallet.publicKey.toString())) {
+          myRankInfo.rank = i <= 9 ? i + 1 : 0;
+          myRankInfo.total = list[i].total;
+          break;
+        }
+      }
+      setMyRank(myRankInfo);
+    }
+  }, [list, wallet?.publicKey]);
+  useEffect(() => {
+    if (program) {
+      getStaticUserList();
+    }
+    // eslint-disable-next-line
+  }, [program]);
   return (
     <Stack className={className}>
       <h1>Token</h1>
@@ -179,34 +199,47 @@ function Token({ className }) {
           </Stack>
         </div>
         <div className="border-box">
-          <h2>Top 100 tokens acquired</h2>
+          <h2>Top 10 tokens acquired</h2>
           <label>
-            Show the top 100 people with the most tokens, and the data is
-            updated daily
+            Show the top 10 people with the most tokens, and the data is updated
+            daily
           </label>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell style={{ width: 187, boxSizing: "border-box" }}>
-                    Ranking
-                  </TableCell>
-                  <TableCell>Address</TableCell>
-                  <TableCell>Tokens</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {list.map((item, index) => (
-                  <TableRow key={index}>
+          <TableContainer style={{ height: 550 }}>
+            {rankLoading ? (
+              <Stack
+                style={{ width: "100%", height: "100%" }}
+                justifyContent="center"
+                alignItems="center">
+                <CircularProgress />
+              </Stack>
+            ) : (
+              <Table>
+                <TableHead>
+                  <TableRow>
                     <TableCell style={{ width: 187, boxSizing: "border-box" }}>
-                      NO.{index + 1}
+                      Ranking
                     </TableCell>
-                    <TableCell>{item.addr}</TableCell>
-                    <TableCell>{item.token}</TableCell>
+                    <TableCell>Address</TableCell>
+                    <TableCell>Tokens</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {list.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell
+                        style={{ width: 187, boxSizing: "border-box" }}>
+                        NO.{index + 1}
+                      </TableCell>
+                      <TableCell
+                        style={{ width: 370, boxSizing: "border-box" }}>
+                        {item.owner}
+                      </TableCell>
+                      <TableCell>{item.total}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </TableContainer>
           <h2 style={{ marginTop: 56 }}>My Ranking</h2>
           <TableContainer>
@@ -214,10 +247,12 @@ function Token({ className }) {
               <TableBody>
                 <TableRow>
                   <TableCell style={{ width: 187, boxSizing: "border-box" }}>
-                    Unranked
+                    {myRank.rank === 0 ? "Unranked" : `NO.${myRank.rank}`}
                   </TableCell>
-                  <TableCell>cXfg2SYcq85nyZ1U4ccx6…hXY</TableCell>
-                  <TableCell>1000.23</TableCell>
+                  <TableCell style={{ width: 370, boxSizing: "border-box" }}>
+                    {formatAddress(myRank.owner)}
+                  </TableCell>
+                  <TableCell>{myRank.total}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
