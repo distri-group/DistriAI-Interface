@@ -18,7 +18,7 @@ import ConnectToWallet from "@/components/ConnectToWallet.jsx";
 
 function RewardDetail({ className }) {
   const { period } = useParams();
-  document.title = "Order detail";
+  document.title = "Reward detail";
   const [periodInfo, setPeriodInfo] = useState({});
   const [machineList, setMachineList] = useState([]);
   const [total, setTotal] = useState({

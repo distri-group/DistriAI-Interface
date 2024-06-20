@@ -106,7 +106,7 @@ function MakeOffer({ className }) {
       });
       enqueueSnackbar("Make offer success.", { variant: "success" });
       setTimeout(() => {
-        navigate("/device");
+        navigate("/resource");
       }, 300);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });

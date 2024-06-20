@@ -1,6 +1,6 @@
 import axios from "@/utils/axios.js";
 import { formatMachine } from "./machine.js";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { formatBalance } from "@/utils";
 
 const baseUrl = "/reward";
 
@@ -29,10 +29,7 @@ export async function getRewardTotal(period, publicKey) {
   };
   const res = await axios.post(apiUrl, body, { headers });
   let formattedRes = Object.fromEntries(
-    Object.entries(res).map(([key, value]) => [
-      key,
-      Number((value / LAMPORTS_PER_SOL).toFixed(2)),
-    ])
+    Object.entries(res).map(([key, value]) => [key, formatBalance(value)])
   );
   formattedRes.totalClaimable =
     formattedRes.ClaimablePeriodicRewards + formattedRes.ClaimableTaskRewards;
@@ -65,15 +62,15 @@ export async function getClaimableReward(
   return res;
 }
 
-export async function getPeriodMachine(period, pageIndex, pageSize, publicKey) {
+export async function getPeriodMachine(Period, PageIndex, PageSize, Account) {
   const apiUrl = baseUrl + "/machine/list";
   const body = {
-    Page: pageIndex,
-    PageSize: pageSize,
-    Period: period,
+    Page: PageIndex,
+    PageSize,
+    Period,
   };
   const headers = {
-    Account: publicKey,
+    Account,
   };
   const res = await axios.post(apiUrl, body, { headers });
   for (let machine of res.List) {

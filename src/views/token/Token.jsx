@@ -1,6 +1,7 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
   CircularProgress,
+  Skeleton,
   Stack,
   Tab,
   Table,
@@ -16,10 +17,11 @@ import EarningList from "@/components/EarningList.jsx";
 import RewardList from "@/components/RewardList.jsx";
 import Round from "@/components/Round";
 import { useProgram } from "@/KeepAliveLayout";
-import { BN } from "@project-serum/anchor";
-import { formatAddress, getOrdinal } from "@/utils";
+import { formatAddress, getOrdinal, formatBalance } from "@/utils";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
+import { getModelRewardDetail } from "@/services/model-reward";
+import { getModelRewardPeriodDetail } from "../../services/model-reward";
 
 function Token({ className }) {
   const [type, setType] = useState("reward");
@@ -27,49 +29,104 @@ function Token({ className }) {
   const program = useProgram();
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
+  const [rankLoading, setRankLoading] = useState(false);
+  const [boardLoading, setBoardLoading] = useState(true);
   const [myRank, setMyRank] = useState({
     rank: 0,
     owner: "",
     total: 0,
   });
-  const [rankLoading, setRankLoading] = useState(false);
-  const [totalRewards, setTotalRewards] = useState({
-    mine: {
-      total: 0,
-      unclaimed: 0,
-    },
-    period: {
-      number: 0,
-      date: new Date(),
-      pool: 0,
-      reward: 0,
-    },
+  const [rewardTotal, setRewardTotal] = useState({
+    mine: 0,
+    total: 0,
+    unclaimed: 0,
   });
+  const [earningTotal, setEarningTotal] = useState({
+    mine: 0,
+    total: 0,
+  });
+  const [machineReward, setMachineReward] = useState({
+    Period: 0,
+    PeriodicRewards: 0,
+    Pool: 0,
+    StartTime: new Date(),
+  });
+  const [modelReward, setModelReward] = useState({
+    Period: 0,
+    PeriodicRewards: 0,
+    Pool: 0,
+    StartTime: 0,
+    ResourceNum: 0,
+  });
+  const handleMachineRewardChange = (info) => setMachineReward(info);
   const getStaticUserList = async () => {
     setRankLoading(true);
     try {
       const res = await program.account.statistics.all();
       let list = res.map((item) => {
-        let total = 0;
-        Object.keys(item.account).forEach((key) => {
-          if (item.account[key] instanceof BN) {
-            total += item.account[key].toNumber();
-          }
-        });
+        const {
+          aiModelDatasetEarning,
+          aiModelDatasetRewardClaimable,
+          aiModelDatasetRewardClaimed,
+          machineEarning,
+          machineRewardClaimable,
+          machineRewardClaimed,
+        } = item.account;
+        const claimableReward = formatBalance(
+          aiModelDatasetRewardClaimable.toNumber() +
+            machineRewardClaimable.toNumber()
+        );
+        const rewardTotal =
+          claimableReward +
+          formatBalance(
+            aiModelDatasetRewardClaimed.toNumber() +
+              machineRewardClaimed.toNumber()
+          );
+        const earningTotal = formatBalance(
+          aiModelDatasetEarning.toNumber() + machineEarning.toNumber()
+        );
         return {
           owner: formatAddress(item.account.owner.toString()),
-          total,
+          claimableReward,
+          rewardTotal,
+          earningTotal,
+          total: rewardTotal + earningTotal,
         };
       });
       list = list.sort((a, b) => b.total - a.total);
+      setRewardTotal((prev) => ({
+        ...prev,
+        total: list.reduce((acc, cur) => acc + cur.rewardTotal, 0),
+      }));
+      setEarningTotal((prev) => ({
+        ...prev,
+        total: list.reduce((acc, cur) => acc + cur.earningTotal, 0),
+      }));
       setList(list);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setRankLoading(false);
   };
-  const handleRewardInfoChange = (info) => {
-    setTotalRewards(info);
+  const getModelPeriodicReward = async () => {
+    setBoardLoading(true);
+    try {
+      const res = await getModelRewardPeriodDetail();
+      const myModelReward = await getModelRewardDetail(
+        res.Period,
+        wallet.publicKey.toString()
+      );
+      setModelReward((prev) => ({
+        ...res,
+        PeriodicRewards: formatBalance(myModelReward.PeriodicReward),
+        Pool: formatBalance(myModelReward.Pool),
+        ResourceNum:
+          myModelReward.AiModelTotalNum + myModelReward.DatasetTotalNum,
+      }));
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+    setBoardLoading(false);
   };
   useEffect(() => {
     if (wallet?.publicKey && list.length > 0) {
@@ -82,6 +139,12 @@ function Token({ className }) {
         if (list[i].owner === formatAddress(wallet.publicKey.toString())) {
           myRankInfo.rank = i <= 9 ? i + 1 : 0;
           myRankInfo.total = list[i].total;
+          setRewardTotal((prev) => ({
+            ...prev,
+            mine: list[i].rewardTotal,
+            unclaimed: list[i].claimableReward,
+          }));
+          setEarningTotal((prev) => ({ ...prev, mine: list[i].earningTotal }));
           break;
         }
       }
@@ -91,6 +154,7 @@ function Token({ className }) {
   useEffect(() => {
     if (program) {
       getStaticUserList();
+      getModelPeriodicReward();
     }
     // eslint-disable-next-line
   }, [program]);
@@ -118,17 +182,17 @@ function Token({ className }) {
                 direction="row"
                 spacing={1}
                 alignItems="end">
-                <span>50000</span>
+                <span>{rewardTotal.total.toFixed(2)}</span>
                 <label>DIST</label>
               </Stack>
               <label style={{ color: "white" }}>Total output</label>
             </Stack>
             <Stack justifyContent="end">
-              <span>{totalRewards.mine.total}</span>
+              <span>{rewardTotal.mine}</span>
               <label>My rewards</label>
             </Stack>
             <Stack justifyContent="end">
-              <span>{totalRewards.mine.unclaimed}</span>
+              <span>{rewardTotal.unclaimed}</span>
               <label>My unclaimed rewards</label>
             </Stack>
           </Stack>
@@ -139,18 +203,14 @@ function Token({ className }) {
                 direction="row"
                 spacing={1}
                 alignItems="end">
-                <span>499.44</span>
+                <span>{earningTotal.total}</span>
                 <label>DIST</label>
               </Stack>
               <label style={{ color: "white" }}>Total circulation</label>
             </Stack>
             <Stack justifyContent="end">
-              <span>499.44</span>
+              <span>{earningTotal.mine}</span>
               <label>My earnings</label>
-            </Stack>
-            <Stack justifyContent="end">
-              <span>342</span>
-              <label>My locked earnings</label>
             </Stack>
           </Stack>
         </Stack>
@@ -162,60 +222,97 @@ function Token({ className }) {
           marginTop: 40,
         }}>
         <div className="border-box">
-          <h2>The {getOrdinal(totalRewards.period.number)} period</h2>
-          <label>{totalRewards.period.date.toLocaleDateString()}</label>
-          <h3>Machine Rewards</h3>
-          <Stack direction="row" spacing={8} style={{ marginTop: 24 }}>
-            <Round
-              left={{
-                total: totalRewards.period.reward,
-                title: "My rewards",
-              }}
-              right={{
-                title: "My Ranking",
-                total: totalRewards.period.pool,
-                desc: "Contribution reward pool",
-              }}
-            />
-            <Stack justifyContent="space-around">
-              <span>
-                <b>300</b>resources were shared
-              </span>
-              <span>
-                <b>{totalRewards.period.pool}</b>DIST were found
-              </span>
-              <span>
-                My rewards
-                <b style={{ marginLeft: 12 }}>{totalRewards.period.reward}</b>
-                DIST
-              </span>
-            </Stack>
-          </Stack>
-          <h3 style={{ margin: "24px 0" }}>Model & Dataset Rewards</h3>
-          <Stack direction="row" spacing={8}>
-            <Round
-              left={{
-                total: 100,
-                title: "My rewards",
-              }}
-              right={{
-                title: "My Ranking",
-                total: 40000,
-                desc: "Contribution reward pool",
-              }}
-            />
-            <Stack justifyContent="space-around">
-              <span>
-                <b>300</b>resources were shared
-              </span>
-              <span>
-                <b>40000</b>DIST were found
-              </span>
-              <span>
-                My rewards<b style={{ marginLeft: 12 }}>400</b>DIST
-              </span>
-            </Stack>
-          </Stack>
+          {boardLoading ? (
+            <>
+              <Skeleton
+                variant="text"
+                sx={{ fontSize: "28px", lineHeight: "38px" }}
+              />
+              <Skeleton
+                variant="rectangular"
+                sx={{
+                  width: 100,
+                  height: 28,
+                  margin: "16px 0",
+                }}
+              />
+              <Stack spacing={2}>
+                <Skeleton
+                  variant="rounded"
+                  sx={{ width: "100%", height: 320 }}
+                />
+                <Skeleton
+                  variant="rounded"
+                  sx={{ width: "100%", height: 320 }}
+                />
+              </Stack>
+            </>
+          ) : (
+            <>
+              <h2>The {getOrdinal(modelReward.Period)} period</h2>
+              <label>
+                {new Date(modelReward.StartTime).toLocaleDateString()}
+              </label>
+              <h3>Machine Rewards</h3>
+              <Stack direction="row" spacing={8} style={{ marginTop: 24 }}>
+                <Round
+                  left={{
+                    total: machineReward.PeriodicRewards,
+                    title: "My rewards",
+                  }}
+                  right={{
+                    title: "My Ranking",
+                    total: machineReward.Pool,
+                    desc: "Contribution reward pool",
+                  }}
+                />
+                <Stack justifyContent="space-around">
+                  <span>
+                    <b>{0}</b>nodes were shared
+                  </span>
+                  <span>
+                    <b>{machineReward.Pool}</b>DIST were found
+                  </span>
+                  <span>
+                    My rewards
+                    <b style={{ marginLeft: 12 }}>
+                      {machineReward.PeriodicRewards}
+                    </b>
+                    DIST
+                  </span>
+                </Stack>
+              </Stack>
+              <h3 style={{ margin: "24px 0" }}>Model & Dataset Rewards</h3>
+              <Stack direction="row" spacing={8}>
+                <Round
+                  left={{
+                    total: modelReward.PeriodicRewards,
+                    title: "My rewards",
+                  }}
+                  right={{
+                    title: "My Ranking",
+                    total: modelReward.Pool,
+                    desc: "Contribution reward pool",
+                  }}
+                />
+                <Stack justifyContent="space-around">
+                  <span>
+                    <b>{modelReward.ResourceNum}</b>resources were shared
+                  </span>
+                  <span>
+                    <b>{modelReward.Pool}</b>DIST were found
+                  </span>
+                  <span>
+                    My rewards
+                    <b style={{ marginLeft: 12 }}>
+                      {modelReward.PeriodicRewards}
+                    </b>
+                    DIST
+                  </span>
+                </Stack>
+              </Stack>
+            </>
+          )}
         </div>
         <div className="border-box">
           <h2>Top 10 tokens acquired</h2>
@@ -290,7 +387,7 @@ function Token({ className }) {
           </TabList>
           <div>
             <TabPanel value="reward">
-              <RewardList onRewardInfoChange={handleRewardInfoChange} />
+              <RewardList onMachineRewardChange={handleMachineRewardChange} />
             </TabPanel>
             <TabPanel value="earning">
               <EarningList />

@@ -1,4 +1,10 @@
-import { Button, Stack, Grid } from "@mui/material";
+import {
+  Button,
+  Stack,
+  Grid,
+  ToggleButtonGroup,
+  ToggleButton,
+} from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import Table from "@/components/Table.jsx";
@@ -11,128 +17,115 @@ import {
   getRewardTotal,
   getClaimableReward,
 } from "@/services/reward.js";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import ConnectToWallet from "./ConnectToWallet";
 import { formatBalance } from "@/utils";
+import { getModelRewardList } from "../services/model-reward";
 
-function RewardList({ className, onRewardInfoChange }) {
+function RewardList({ className, onMachineRewardChange }) {
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const [list, setList] = useState([]);
+  const [type, setType] = useState("machine");
+  const [machineRewardList, setMachineRewardList] = useState([]);
+  const [modelRewardList, setModelRewardList] = useState([]);
+  const list = useMemo(
+    () => (type === "model" ? modelRewardList : machineRewardList),
+    [type, modelRewardList, machineRewardList]
+  );
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [rewards, setRewards] = useState({
-    ClaimablePeriodicRewards: 0,
-    ClaimableTaskRewards: 0,
-    ClaimedPeriodicRewards: 0,
-    ClaimedTaskRewards: 0,
-  });
   const [connectModal, setConnectModal] = useState(false);
-  const rewardInfo = useMemo(() => {
-    if (list.length > 0) {
+  const machineRewardInfo = useMemo(() => {
+    if (
+      machineRewardList.length > 0 &&
+      modelRewardList.length > 0 &&
+      machineRewardList[0].Period === modelRewardList[0].Period
+    ) {
       return {
-        mine: {
-          total:
-            rewards.ClaimablePeriodicRewards + rewards.ClaimedPeriodicRewards,
-          unclaimed: rewards.ClaimablePeriodicRewards,
-        },
-        period: {
-          number: list[0].Period,
-          date: new Date(list[0].StartTime),
-          pool: formatBalance(list[0].Pool),
-          reward: formatBalance(list[0].PeriodicRewards),
-        },
-      };
-    } else {
-      return {
-        mine: {
-          total:
-            rewards.ClaimablePeriodicRewards + rewards.ClaimedPeriodicRewards,
-          unclaimed: rewards.ClaimablePeriodicRewards,
-        },
-        period: {
-          number: 0,
-          date: new Date(),
-          pool: 0,
-          reward: 0,
-        },
+        ...machineRewardList[0],
       };
     }
-  }, [rewards, list]);
-  const claimed = useMemo(() => {
-    if (rewards?.totalClaimable) {
-      return rewards.totalClaimable <= 0;
-    }
-  }, [rewards]);
-
-  async function loadList(curr) {
+    return {
+      Period: 0,
+      PeriodicRewards: 0,
+      Pool: 0,
+      StartTime: new Date(),
+    };
+  }, [machineRewardList, modelRewardList]);
+  useEffect(() => {
+    onMachineRewardChange(machineRewardInfo);
+  }, [machineRewardInfo]);
+  async function loadList() {
     setLoading(true);
     try {
-      const res = await getRewardList(curr, 10, wallet.publicKey.toString());
-      setLoading(false);
-      if (!res) {
-        return enqueueSnackbar("Reward List Not Found", { variant: "error" });
-      }
-      setList(res.List);
+      const res = await getRewardList(current, 10, wallet.publicKey.toString());
+      setMachineRewardList(res.List);
       setTotal(res.Total);
     } catch (e) {
-      return enqueueSnackbar(e.message, { variant: "error" });
+      enqueueSnackbar(e.message, { variant: "error" });
     }
+    setLoading(false);
   }
-  async function getClaimableList() {
-    const res = await getClaimableReward(
-      null,
-      1,
-      10,
-      wallet.publicKey.toString()
-    );
-    if (res) {
-      let claimableList = [];
-      let total = 0;
-      for (let item of res.List) {
-        if (item.Period) {
-          claimableList.push(item);
-          total += item.PeriodicRewards;
-        }
-      }
-      return { claimableList, total };
-    }
-  }
-  async function claimButchRewards() {
-    if (!wallet?.publicKey) return setConnectModal(true);
-    setClaiming(true);
-    const { claimableList, total } = await getClaimableList();
-    if (claimableList.length === 0) {
-      enqueueSnackbar("No claimable node.", { variant: "info" });
-    } else {
-      try {
-        await methods.claimButchRewards(claimableList);
-        enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
-          variant: "success",
-        });
-      } catch (error) {
-        enqueueSnackbar(error.message, { variant: "error" });
-      }
-    }
-    setClaiming(false);
-  }
-  async function getTotal() {
+  async function loadModelRewardList() {
+    setLoading(true);
     try {
-      const res = await getRewardTotal(null, wallet.publicKey.toString());
-      setRewards(res);
+      const res = await getModelRewardList(
+        current,
+        10,
+        wallet.publicKey.toString()
+      );
+      setModelRewardList(res.List);
+      setTotal(res.Total);
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
+    setLoading(false);
   }
-  function onPageChange(curr) {
-    setCurrent(curr);
-    loadList(curr);
-  }
+  // async function getClaimableList() {
+  //   const res = await getClaimableReward(
+  //     null,
+  //     1,
+  //     10,
+  //     wallet.publicKey.toString()
+  //   );
+  //   if (res) {
+  //     let claimableList = [];
+  //     let total = 0;
+  //     for (let item of res.List) {
+  //       if (item.Period) {
+  //         claimableList.push(item);
+  //         total += item.PeriodicRewards;
+  //       }
+  //     }
+  //     return { claimableList, total };
+  //   }
+  // }
+  // async function claimButchRewards() {
+  //   if (!wallet?.publicKey) return setConnectModal(true);
+  //   setClaiming(true);
+  //   const { claimableList, total } = await getClaimableList();
+  //   if (claimableList.length === 0) {
+  //     enqueueSnackbar("No claimable node.", { variant: "info" });
+  //   } else {
+  //     try {
+  //       await methods.claimButchRewards(claimableList);
+  //       enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
+  //         variant: "success",
+  //       });
+  //     } catch (error) {
+  //       enqueueSnackbar(error.message, { variant: "error" });
+  //     }
+  //   }
+  //   setClaiming(false);
+  // }
+  const handleNavigate = (period) => {
+    if (type === "model") navigate(`/reward/model/${period}`);
+    else navigate(`/reward/${period}`);
+  };
   const columns = [
     {
       title: "Period",
@@ -163,7 +156,7 @@ function RewardList({ className, onRewardInfoChange }) {
       render: (text) => (
         <Stack direction="row" spacing={2} alignItems="center">
           <span className="dist" />
-          <span>{(text / LAMPORTS_PER_SOL).toFixed(2)}</span>
+          <span>{formatBalance(text)}</span>
         </Stack>
       ),
     },
@@ -171,10 +164,14 @@ function RewardList({ className, onRewardInfoChange }) {
       title: "Rewards",
       width: "15%",
       key: "PeriodicRewards",
-      render: (text) => (
+      render: (text, record) => (
         <Stack direction="row" spacing={2} alignItems="center">
           <span className="dist" />
-          <span>{(text / LAMPORTS_PER_SOL).toFixed(2)}</span>
+          <span>
+            {type === "machine"
+              ? formatBalance(text)
+              : formatBalance(record.PeriodicReward)}
+          </span>
         </Stack>
       ),
     },
@@ -186,7 +183,7 @@ function RewardList({ className, onRewardInfoChange }) {
         <Button
           className="cbtn"
           style={{ width: 100, height: 32 }}
-          onClick={() => navigate(`/reward/${record.Period}`)}>
+          onClick={() => handleNavigate(record.Period)}>
           <span
             style={{
               fontWeight: 500,
@@ -201,110 +198,31 @@ function RewardList({ className, onRewardInfoChange }) {
   ];
   useEffect(() => {
     if (wallet?.publicKey) {
-      loadList(1);
-      getTotal();
+      if (type === "model") {
+        loadModelRewardList();
+      } else {
+        loadList();
+      }
     }
     // eslint-disable-next-line
-  }, [wallet?.publicKey]);
+  }, [wallet?.publicKey, current, type]);
   useEffect(() => {
-    onRewardInfoChange(rewardInfo);
-  }, [rewardInfo]);
+    if (current !== 1) {
+      setCurrent(1);
+    }
+  }, [type]);
   return (
     <div className={className}>
-      {/* <h1>My DAO Rewards</h1>
-      <Stack direction="row" spacing={5}>
-        <div className="box">
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            className="describe">
-            <label>All periodic & task rewards you can currently claim</label>
-            <LoadingButton
-              loading={claiming}
-              disabled={claimed}
-              onClick={claimButchRewards}
-              className="cbtn"
-              style={{ width: 140 }}>
-              <span
-                style={{
-                  fontWeight: 500,
-                  fontSize: 16,
-                  lineHeight: "22px",
-                }}>
-                {claiming ? (
-                  <span></span>
-                ) : claimed ? (
-                  <span>All Claimed</span>
-                ) : (
-                  <span>Claim Rewards</span>
-                )}
-              </span>
-            </LoadingButton>
-          </Stack>
-          <Grid container className="rewards">
-            <Grid item md={4}>
-              <Stack spacing={1}>
-                <span className="total">
-                  {rewards?.totalClaimable || 0}
-                  <span className="union">DIST</span>
-                </span>
-                <label style={{ color: "white" }}>Received</label>
-              </Stack>
-            </Grid>
-            <Grid item md={3}>
-              <Stack spacing={1}>
-                <span className="part">
-                  {rewards?.ClaimablePeriodicRewards || 0}
-                </span>
-                <label>Periodic Rewards</label>
-              </Stack>
-            </Grid>
-            <Grid item md={3}>
-              <Stack spacing={1}>
-                <span className="part">
-                  {rewards?.ClaimableTaskRewards || 0}
-                </span>
-                <label>Task Rewards</label>
-              </Stack>
-            </Grid>
-          </Grid>
-        </div>
-        <div className="box">
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            className="describe">
-            <label>All periodic & task rewards you have already claimed</label>
-          </Stack>
-          <Grid container className="rewards">
-            <Grid item md={4}>
-              <Stack spacing={1}>
-                <span className="total">
-                  {rewards?.totalClaimed || 0}
-                  <span className="union">DIST</span>
-                </span>
-                <label style={{ color: "white" }}>Total Claimed</label>
-              </Stack>
-            </Grid>
-            <Grid item md={3}>
-              <Stack spacing={1}>
-                <span className="part">
-                  {rewards?.ClaimedPeriodicRewards || 0}
-                </span>
-                <label>Periodic Rewards</label>
-              </Stack>
-            </Grid>
-            <Grid item md={3}>
-              <Stack spacing={1}>
-                <span className="part">{rewards?.ClaimedTaskRewards || 0}</span>
-                <label>Task Rewards</label>
-              </Stack>
-            </Grid>
-          </Grid>
-        </div>
-      </Stack> */}
+      <div className="type-toggle">
+        <ToggleButtonGroup
+          disabled={loading}
+          value={type}
+          exclusive
+          onChange={(e, value) => setType(value)}>
+          <ToggleButton value="machine">Machine</ToggleButton>
+          <ToggleButton value="model">Model & Dataset</ToggleButton>
+        </ToggleButtonGroup>
+      </div>
       <Table
         className="reward-list"
         columns={columns}
@@ -317,7 +235,7 @@ function RewardList({ className, onRewardInfoChange }) {
           current={current}
           total={total}
           pageSize={10}
-          onChange={onPageChange}
+          onChange={(page) => setCurrent(page)}
         />
       )}
       <ConnectToWallet
@@ -388,5 +306,10 @@ export default styled(RewardList)`
       font-size: 18px;
       line-height: 26px;
     }
+  }
+  .type-toggle {
+    background: rgba(149, 157, 165, 0.16);
+    padding: 24px 40px;
+    border-top-right-radius: 12px;
   }
 `;

@@ -34,7 +34,7 @@ function getOrdinal(n) {
   } else if (n % 10 === 3 && n % 100 !== 13) {
     ord = "rd";
   }
-  return ord;
+  return n + ord;
 }
 function copy(text) {
   navigator.clipboard

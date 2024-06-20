@@ -242,7 +242,6 @@ export default function useSolanaMethod() {
       const res = await checkConfirmation(transaction);
       return res;
     } catch (error) {
-      console.log(error);
       throw handleError(error);
     }
   };

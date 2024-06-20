@@ -28,6 +28,7 @@ import FileUpload from "@/views/resource/model&dataset/FileUpload.jsx";
 import Token from "@/views/token/Token.jsx";
 import EarningDetail from "@/views/token/EarningDetail.jsx";
 import RewardDetail from "@/views/token/RewardDetail.jsx";
+import ModelRewardDetail from "@/views/token/ModelRewardDetail.jsx";
 import Training from "@/views/training/Training.jsx";
 import EndDuration from "@/views/training/EndDuration.jsx";
 import ExtendDuration from "@/views/training/ExtendDuration.jsx";
@@ -143,6 +144,13 @@ function App() {
           },
         },
       },
+      MuiSkeleton: {
+        styleOverrides: {
+          root: {
+            background: "rgba(149, 157, 165, 0.16)",
+          },
+        },
+      },
       MuiToggleButton: {
         styleOverrides: {
           root: {
@@ -255,6 +263,10 @@ function App() {
                   </Route>
                   <Route path="token" element={<Token />} />
                   <Route path="reward">
+                    <Route
+                      path="model/:period"
+                      element={<ModelRewardDetail />}
+                    />
                     <Route path=":period" element={<RewardDetail />} />
                   </Route>
                   <Route path="earning">
