@@ -1,10 +1,4 @@
-import {
-  Button,
-  Stack,
-  Grid,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@mui/material";
+import { Button, Stack, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import Table from "@/components/Table.jsx";
@@ -22,6 +16,7 @@ import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import ConnectToWallet from "./ConnectToWallet";
 import { formatBalance } from "@/utils";
 import { getModelRewardList } from "../services/model-reward";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 function RewardList({ className, onMachineRewardChange }) {
   const { wallet, methods } = useSolanaMethod();
@@ -85,43 +80,53 @@ function RewardList({ className, onMachineRewardChange }) {
     }
     setLoading(false);
   }
-  // async function getClaimableList() {
-  //   const res = await getClaimableReward(
-  //     null,
-  //     1,
-  //     10,
-  //     wallet.publicKey.toString()
-  //   );
-  //   if (res) {
-  //     let claimableList = [];
-  //     let total = 0;
-  //     for (let item of res.List) {
-  //       if (item.Period) {
-  //         claimableList.push(item);
-  //         total += item.PeriodicRewards;
-  //       }
-  //     }
-  //     return { claimableList, total };
-  //   }
-  // }
-  // async function claimButchRewards() {
-  //   if (!wallet?.publicKey) return setConnectModal(true);
-  //   setClaiming(true);
-  //   const { claimableList, total } = await getClaimableList();
-  //   if (claimableList.length === 0) {
-  //     enqueueSnackbar("No claimable node.", { variant: "info" });
-  //   } else {
-  //     try {
-  //       await methods.claimButchRewards(claimableList);
-  //       enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
-  //         variant: "success",
-  //       });
-  //     } catch (error) {
-  //       enqueueSnackbar(error.message, { variant: "error" });
-  //     }
-  //   }
-  //   setClaiming(false);
-  // }
+  async function getClaimableList() {
+    const res = await getClaimableReward(
+      null,
+      1,
+      10,
+      wallet.publicKey.toString()
+    );
+    if (res) {
+      let claimableList = [];
+      let total = 0;
+      for (let item of res.List) {
+        if (item.Period) {
+          claimableList.push(item);
+          total += item.PeriodicRewards;
+        }
+      }
+      return { claimableList, total };
+    }
+  }
+  async function claimButchRewards() {
+    if (!wallet?.publicKey) return setConnectModal(true);
+    setClaiming(true);
+    const { claimableList, total } = await getClaimableList();
+    if (claimableList.length === 0) {
+      enqueueSnackbar("No claimable node.", { variant: "info" });
+    } else {
+      try {
+        await methods.claimButchRewards(claimableList);
+        enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
+          variant: "success",
+        });
+      } catch (error) {
+        enqueueSnackbar(error.message, { variant: "error" });
+      }
+    }
+    setClaiming(false);
+  }
+  const claimModelRewards = async () => {
+    if (!wallet?.publicKey) return setConnectModal(true);
+    setClaiming(true);
+    try {
+      await methods.claimModelDatasetRewards(wallet.publicKey);
+      enqueueSnackbar("Claim model rewards success.", { variant: "success" });
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: "error" });
+    }
+  };
   const handleNavigate = (period) => {
     if (type === "model") navigate(`/reward/model/${period}`);
     else navigate(`/reward/${period}`);
@@ -210,10 +215,14 @@ function RewardList({ className, onMachineRewardChange }) {
     if (current !== 1) {
       setCurrent(1);
     }
+    // eslint-disable-next-line
   }, [type]);
   return (
     <div className={className}>
-      <div className="type-toggle">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        className="type-toggle">
         <ToggleButtonGroup
           disabled={loading}
           value={type}
@@ -222,7 +231,16 @@ function RewardList({ className, onMachineRewardChange }) {
           <ToggleButton value="machine">Machine</ToggleButton>
           <ToggleButton value="model">Model & Dataset</ToggleButton>
         </ToggleButtonGroup>
-      </div>
+        <LoadingButton
+          loading={claiming}
+          onClick={() =>
+            type === "model" ? claimModelRewards() : claimButchRewards()
+          }
+          className="cbtn"
+          style={{ width: 100 }}>
+          {!claiming && <span>Claim All</span>}
+        </LoadingButton>
+      </Stack>
       <Table
         className="reward-list"
         columns={columns}
