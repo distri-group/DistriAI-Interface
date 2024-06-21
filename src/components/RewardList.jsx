@@ -17,6 +17,7 @@ import ConnectToWallet from "./ConnectToWallet";
 import { formatBalance } from "@/utils";
 import { getModelRewardList } from "../services/model-reward";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { getRewardDetail } from "../services/reward";
 
 function RewardList({ className, onMachineRewardChange }) {
   const { wallet, methods } = useSolanaMethod();
@@ -49,10 +50,25 @@ function RewardList({ className, onMachineRewardChange }) {
       PeriodicRewards: 0,
       Pool: 0,
       StartTime: new Date(),
+      MachineNum: 0,
     };
   }, [machineRewardList, modelRewardList]);
+
   useEffect(() => {
-    onMachineRewardChange(machineRewardInfo);
+    const handleNewInfo = async () => {
+      let newInfo = { ...machineRewardInfo };
+      if (machineRewardInfo.Period > 0) {
+        try {
+          const res = await getRewardDetail(machineRewardInfo.Period);
+          newInfo.MachineNum = res.MachineNum;
+        } catch (error) {
+          enqueueSnackbar(error.message, { variant: "error" });
+        }
+      }
+      onMachineRewardChange(newInfo);
+    };
+    handleNewInfo();
+    // eslint-disable-next-line
   }, [machineRewardInfo]);
   async function loadList() {
     setLoading(true);
@@ -84,7 +100,7 @@ function RewardList({ className, onMachineRewardChange }) {
     const res = await getClaimableReward(
       null,
       1,
-      10,
+      5,
       wallet.publicKey.toString()
     );
     if (res) {
@@ -217,6 +233,12 @@ function RewardList({ className, onMachineRewardChange }) {
     }
     // eslint-disable-next-line
   }, [type]);
+  useEffect(() => {
+    if (wallet?.publicKey) {
+      loadModelRewardList();
+      loadList();
+    }
+  }, [wallet?.publicKey]);
   return (
     <div className={className}>
       <Stack

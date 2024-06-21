@@ -14,7 +14,7 @@ export async function getModelRewardList(Page, PageSize, Account, Period) {
     Page,
     PageSize,
   };
-  if (Account) body.Account = Account;
+  if (Account) body.Owner = Account;
   if (Period) body.Period = parseInt(Period);
   const headers = Account ? { Account } : {};
   const res = await axios.post(apiUrl, body, { headers });

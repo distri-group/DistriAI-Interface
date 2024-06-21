@@ -50,6 +50,7 @@ function Token({ className }) {
     PeriodicRewards: 0,
     Pool: 0,
     StartTime: new Date(),
+    MachineNum: 0,
   });
   const [modelReward, setModelReward] = useState({
     Period: 0,
@@ -257,26 +258,26 @@ function Token({ className }) {
               <Stack direction="row" spacing={8} style={{ marginTop: 24 }}>
                 <Round
                   left={{
-                    total: machineReward.PeriodicRewards,
+                    total: formatBalance(machineReward.PeriodicRewards),
                     title: "My rewards",
                   }}
                   right={{
                     title: "My Ranking",
-                    total: machineReward.Pool,
+                    total: formatBalance(machineReward.Pool),
                     desc: "Contribution reward pool",
                   }}
                 />
                 <Stack justifyContent="space-around">
                   <span>
-                    <b>{0}</b>nodes were shared
+                    <b>{machineReward.MachineNum}</b>nodes were shared
                   </span>
                   <span>
-                    <b>{machineReward.Pool}</b>DIST were found
+                    <b>{formatBalance(machineReward.Pool)}</b>DIST were found
                   </span>
                   <span>
                     My rewards
                     <b style={{ marginLeft: 12 }}>
-                      {machineReward.PeriodicRewards}
+                      {formatBalance(machineReward.PeriodicRewards)}
                     </b>
                     DIST
                   </span>

@@ -309,6 +309,7 @@ export default function useSolanaMethod() {
           systemProgram,
         })
         .instruction();
+      console.log(period, instruction);
       return instruction;
     } catch (error) {
       throw handleError(error);
@@ -484,6 +485,7 @@ export default function useSolanaMethod() {
   };
 
   const handleError = (error) => {
+    console.log(error);
     if (!program) {
       return new Error(
         "Solana program not initialized. Please check your network connection and refresh the page."

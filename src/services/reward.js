@@ -17,6 +17,12 @@ export async function getRewardList(pageIndex, pageSize, publicKey) {
   return res;
 }
 
+export async function getRewardDetail(Period) {
+  const apiUrl = `${baseUrl}/period/detail`;
+  const res = await axios.post(apiUrl, { Period });
+  return res;
+}
+
 export async function getRewardTotal(period, publicKey) {
   const apiUrl = baseUrl + "/total";
   const body = !isNaN(period)

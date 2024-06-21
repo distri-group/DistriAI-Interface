@@ -27,13 +27,13 @@ function RewardDetail({ className }) {
     ClaimedPeriodicRewards: 0,
     ClaimedTaskRewards: 0,
   });
+  const periodicTotal = useMemo(
+    () => total.ClaimablePeriodicRewards + total.ClaimedPeriodicRewards,
+    [total]
+  );
+  const claimed = useMemo(() => total.ClaimablePeriodicRewards === 0, [total]);
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const claimed = useMemo(() => {
-    if (total?.totalClaimable) {
-      return total.totalClaimable <= 0;
-    }
-  }, [total]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [connectModal, setConnectModal] = useState(false);
   const open = Boolean(anchorEl);
@@ -71,38 +71,39 @@ function RewardDetail({ className }) {
         enqueueSnackbar(`Claim ${total / LAMPORTS_PER_SOL} DIST success.`, {
           variant: "success",
         });
+        loadDetail();
       } catch (error) {
         enqueueSnackbar(error.message, { variant: "error" });
       }
     }
     setClaiming(false);
   }
-  useEffect(() => {
-    async function loadDetail() {
-      setLoading(true);
-      const machines = await getPeriodMachine(
-        Number(period),
-        1,
-        10,
-        wallet.publicKey.toString()
-      );
-      if (machines && machines.List.length > 0) {
-        setMachineList(machines.List);
-        setPeriodInfo({
-          StartTime: machines.List[0].StartTime,
-          Pool: machines.List[0].Pool,
-          ParticipatingNodes: machines.List[0].MachineNum,
-        });
-      }
-      const total = await getRewardTotal(
-        Number(period),
-        wallet.publicKey.toString()
-      );
-      if (total) {
-        setTotal(total);
-      }
-      setLoading(false);
+  async function loadDetail() {
+    setLoading(true);
+    const machines = await getPeriodMachine(
+      Number(period),
+      1,
+      10,
+      wallet.publicKey.toString()
+    );
+    if (machines && machines.List.length > 0) {
+      setMachineList(machines.List);
+      setPeriodInfo({
+        StartTime: machines.List[0].StartTime,
+        Pool: machines.List[0].Pool,
+        ParticipatingNodes: machines.List[0].MachineNum,
+      });
     }
+    const total = await getRewardTotal(
+      Number(period),
+      wallet.publicKey.toString()
+    );
+    if (total) {
+      setTotal(total);
+    }
+    setLoading(false);
+  }
+  useEffect(() => {
     if (wallet?.publicKey) {
       loadDetail();
     } else {
@@ -131,7 +132,7 @@ function RewardDetail({ className }) {
             className="total">
             <Stack spacing={1}>
               <Stack direction="row" spacing={1} alignItems="end">
-                <span>{total.totalClaimable || 0}</span>
+                <span>{periodicTotal}</span>
                 <label>DIST</label>
               </Stack>
               <Stack direction="row" spacing={1}>
@@ -197,9 +198,10 @@ function RewardDetail({ className }) {
             </Stack>
             <div>
               <LoadingButton
-                className="cbtn"
+                className={"cbtn" + claimed ? " disabled" : ""}
                 style={{ width: 140 }}
                 loading={claiming}
+                disabled={claimed}
                 onClick={claimButchRewards}>
                 {claiming ? (
                   <label></label>
@@ -337,5 +339,8 @@ export default styled(RewardDetail)`
     span {
       color: #898989;
     }
+  }
+  .disabled {
+    background-color: rgba(70, 70, 70, 1);
   }
 `;

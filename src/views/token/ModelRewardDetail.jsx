@@ -24,6 +24,7 @@ function ModelRewardDetail({ className }) {
   const [myInfo, setMyInfo] = useState({
     Owner: "",
     PeriodicReward: 0,
+    TxHash: "",
   });
   const [current, setCurrent] = useState(1);
   const [list, setList] = useState([]);
@@ -58,12 +59,12 @@ function ModelRewardDetail({ className }) {
   }, []);
   useEffect(() => {
     if (wallet?.publicKey && list.length > 0) {
-      const { PeriodicReward } = list.find(
+      const { PeriodicReward, TxHash } = list.find(
         (item) => item.Owner === wallet.publicKey.toString()
       );
-      setMyInfo({ Owner: wallet.publicKey.toString(), PeriodicReward });
+      setMyInfo({ Owner: wallet.publicKey.toString(), PeriodicReward, TxHash });
     }
-  }, [wallet?.publicKey]);
+  }, [wallet?.publicKey, list]);
   const columns = [
     {
       title: "Provider",
@@ -77,6 +78,20 @@ function ModelRewardDetail({ className }) {
       key: "PeriodicReward",
       render: (text) => formatBalance(text),
     },
+    {
+      title: "TxHash",
+      width: "30%",
+      key: "TxHash",
+      render: (text) => (
+        <a
+          className="addr"
+          href={`https://explorer.solana.com/tx/${text}?cluster=devnet`}
+          target="_blank"
+          rel="noreferrer">
+          {formatAddress(text)}
+        </a>
+      ),
+    },
   ];
   useEffect(() => {
     loadPeriodList();
@@ -84,22 +99,22 @@ function ModelRewardDetail({ className }) {
   return (
     <Stack spacing={3} className={className}>
       <h2>Reward Info</h2>
-      <Stack spacing={1}>
-        <Stack direction="row">
-          <label>Duration</label>
+      <Stack direction="row" spacing={30} className="trans-box">
+        <Stack>
           <span>24h {new Date(periodInfo.StartTime).toLocaleDateString()}</span>
+          <label>Duration</label>
         </Stack>
-        <Stack direction="row">
-          <label>Total resources</label>
+        <Stack>
           <span>{periodInfo.TotalResource}</span>
+          <label>Total resources</label>
         </Stack>
-        <Stack direction="row">
-          <label>Total Reward</label>
+        <Stack>
           <span>{formatBalance(periodInfo.Pool)}</span>
+          <label>Total Reward</label>
         </Stack>
-        <Stack direction="row">
-          <label>Total Provider</label>
+        <Stack>
           <span>{total}</span>
+          <label>Total Provider</label>
         </Stack>
       </Stack>
       <h2>My Reward Info</h2>
@@ -132,15 +147,28 @@ function ModelRewardDetail({ className }) {
   );
 }
 export default styled(ModelRewardDetail)`
-  label {
-    display: block;
-    width: 320px;
-    color: #898989;
+  .trans-box {
+    span {
+      font-size: 24px;
+      line-height: 34px;
+      font-weight: 600;
+    }
+    label {
+      color: #898989;
+    }
   }
   .reward-table {
     td {
       font-size: 18px;
       line-height: 28px;
+    }
+    .addr {
+      display: block;
+      font-size: 16px;
+      color: #94d6e2;
+      line-height: 24px;
+      margin: 12px 0 8px 0;
+      text-decoration: none;
     }
   }
 `;
