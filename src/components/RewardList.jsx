@@ -57,22 +57,6 @@ function RewardList({
       MachineNum: 0,
     };
   }, [machineRewardList, modelRewardList]);
-  useEffect(() => {
-    const handleNewInfo = async () => {
-      let newInfo = { ...machineRewardInfo };
-      if (machineRewardInfo.Period > 0) {
-        try {
-          const res = await getRewardDetail(machineRewardInfo.Period);
-          newInfo.MachineNum = res.MachineNum;
-        } catch (error) {
-          enqueueSnackbar(error.message, { variant: "error" });
-        }
-      }
-      onMachineRewardChange(newInfo);
-    };
-    handleNewInfo();
-    // eslint-disable-next-line
-  }, [machineRewardInfo]);
   async function loadList() {
     setLoading(true);
     try {
@@ -243,6 +227,22 @@ function RewardList({
     }
     // eslint-disable-next-line
   }, [wallet?.publicKey]);
+  useEffect(() => {
+    const handleNewInfo = async () => {
+      let newInfo = { ...machineRewardInfo };
+      if (machineRewardInfo.Period > 0) {
+        try {
+          const res = await getRewardDetail(machineRewardInfo.Period);
+          newInfo.MachineNum = res.MachineNum;
+        } catch (error) {
+          enqueueSnackbar(error.message, { variant: "error" });
+        }
+      }
+      onMachineRewardChange(newInfo);
+    };
+    handleNewInfo();
+    // eslint-disable-next-line
+  }, [machineRewardInfo]);
   return (
     <div className={className}>
       <Stack

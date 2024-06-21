@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { getItemList, checkDeployable } from "@/services/model.js";
 import DurationToggle from "@/components/DurationToggle.jsx";
-import FileList from "@/components/FileList.jsx";
 import { getMachineDetail } from "@/services/machine.js";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import useIpfs from "@/utils/useIpfs.js";
@@ -28,7 +27,7 @@ function Buy({ className }) {
   document.title = "Edit model";
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state, search } = useLocation();
+  const { search } = useLocation();
   const owner = new URLSearchParams(search).get("own");
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
@@ -44,14 +43,12 @@ function Buy({ className }) {
   const [validateError, setValidateError] = useState({
     taskName: null,
   });
-  const [filesToUpload, setFiles] = useState([]);
+  // const [filesToUpload, setFiles] = useState([]);
   const [deviceDetail, setDeviceDetail] = useState({});
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState([]);
-  const [deployable, setDeployable] = useState(false);
   const [insufficientDialog, setInsufficientDialog] = useState(false);
   const [connectModal, setConnectModal] = useState(false);
-  const { methods: ipfsMethods } = useIpfs();
   const { clearCache } = useClearCache();
   const amount = useMemo(() => {
     if (deviceDetail.Price) {
@@ -115,12 +112,8 @@ function Buy({ className }) {
     const OrderInfo = {
       Model: formValue.model,
       Intent: formValue.usage || "train",
-      DownloadURL: [],
+      DownloadURL: ``,
     };
-    if (filesToUpload.length > 0) {
-      const res = await ipfsMethods.jsonUpload(filesToUpload);
-      OrderInfo.DownloadURL.push(res.cid.toString());
-    }
     const machinePublicKey = methods.getMachinePublicKey(
       deviceDetail.Uuid,
       new PublicKey(deviceDetail.Metadata.Addr)
@@ -132,6 +125,7 @@ function Buy({ className }) {
       },
       MachineInfo,
       OrderInfo,
+      selectedModel,
     });
     setSubmitting(true);
     try {
@@ -212,33 +206,8 @@ function Buy({ className }) {
       setLoading(false);
     }
     init();
-
     // eslint-disable-next-line
   }, []);
-  useEffect(() => {
-    // const handleModelChange = async () => {
-    //   if (JSON.stringify(selectedModel) !== "{}") {
-    //     const deployable = await checkDeployable(selectedModel);
-    //     setDeployable(deployable);
-    //     if (!deployable) {
-    //       setFormValue((prevState) => ({ ...prevState, usage: "train" }));
-    //     }
-    //     if (formValue.usage === "deploy" && deployable) {
-    //       const { files } = await ipfsMethods.getFolderList(
-    //         `/distri.ai/model/${selectedModel.Owner}/${selectedModel.Name}/deployment`
-    //       );
-    //       setFiles([
-    //         {
-    //           name: files[0].name,
-    //           cid: files[0].cid.toString(),
-    //         },
-    //       ]);
-    //     }
-    //   }
-    // };
-    // handleModelChange();
-    // eslint-disable-next-line
-  }, [selectedModel]);
   useEffect(() => {
     const getInfo = async () => {
       const balance = await methods.getTokenBalance(wallet.publicKey);
@@ -394,37 +363,6 @@ function Buy({ className }) {
                     <label>Usage</label>
                   </Grid>
                   <Grid item md={6}>
-                    {/* <Select
-                          fullWidth
-                          onChange={(e) => {
-                            handleModelChange(e);
-                            setFormValue((prevState) => ({
-                              ...prevState,
-                              downloadLinks: [],
-                            }));
-                          }}
-                          value={`${selectedModel.Owner.slice(
-                            0,
-                            4
-                          )}..${selectedModel.Owner.slice(-4)}/${
-                            selectedModel.Name
-                          }`}>
-                          {models.map((model) => (
-                            <MenuItem
-                              value={`${model.Owner.slice(
-                                0,
-                                4
-                              )}..${model.Owner.slice(-4)}/${model.Name}`}
-                              key={`${model.Owner.slice(
-                                0,
-                                4
-                              )}..${model.Owner.slice(-4)}/${model.Name}`}>
-                              {`${model.Owner.slice(0, 4)}..${model.Owner.slice(
-                                -4
-                              )}/${model.Name}`}
-                            </MenuItem>
-                          ))}
-                        </Select> */}
                     <Select
                       onChange={handleModelChange}
                       fullWidth
@@ -452,27 +390,8 @@ function Buy({ className }) {
                       name="usage"
                       onChange={handleChange}>
                       <MenuItem value="train">Training</MenuItem>
-                      <MenuItem disabled={!deployable} value="deploy">
-                        Deploy
-                      </MenuItem>
                     </Select>
                   </Grid>
-                  {/* {formValue.usage === "train" && formValue.model && (
-                    <>
-                      <Grid item md={12}>
-                        <label>Data for trainning</label>
-                      </Grid>
-                      <Grid item md={12}>
-                        {selectedModel && (
-                          <FileList
-                            item={selectedModel}
-                            type="model"
-                            onSelect={(files) => setFiles(files)}
-                          />
-                        )}
-                      </Grid>
-                    </>
-                  )} */}
                   <Grid item md={8} />
                   <Grid item md={4}>
                     <span className="balance">Balance: {balance} DIST</span>

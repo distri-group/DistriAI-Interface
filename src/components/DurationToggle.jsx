@@ -107,7 +107,7 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
             disabled={type === "max"}
             value={count}
             type="number"
-            inputProps={{
+            inputProp={{
               min: 0,
               style: { textAlign: "center" },
             }}
@@ -129,13 +129,11 @@ function DurationToggle({ className, duration, setDuration, max, title }) {
         placeholder="Hour"
         onChange={onDurationInput}
         fullWidth
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <span style={{ color: "white" }}>Hour</span>
-            </InputAdornment>
-          ),
-        }}
+        endAdornment={
+          <InputAdornment position="end">
+            <span style={{ color: "white" }}>Hour</span>
+          </InputAdornment>
+        }
       />
     </Stack>
   );
