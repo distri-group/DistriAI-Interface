@@ -358,6 +358,6 @@ export default styled(RewardList)`
     border-top-right-radius: 12px;
   }
   .disabled {
-    background-color: rgba(70, 70, 70, 1);
+    background: rgba(70, 70, 70, 1);
   }
 `;
