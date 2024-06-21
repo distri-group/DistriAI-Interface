@@ -20,8 +20,10 @@ import { useProgram } from "@/KeepAliveLayout";
 import { formatAddress, getOrdinal, formatBalance } from "@/utils";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useSnackbar } from "notistack";
-import { getModelRewardDetail } from "@/services/model-reward";
-import { getModelRewardPeriodDetail } from "../../services/model-reward";
+import {
+  getModelRewardDetail,
+  getModelRewardPeriodDetail,
+} from "@/services/model-reward";
 
 function Token({ className }) {
   const [type, setType] = useState("reward");
@@ -30,7 +32,7 @@ function Token({ className }) {
   const wallet = useAnchorWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [rankLoading, setRankLoading] = useState(false);
-  const [boardLoading, setBoardLoading] = useState(true);
+  const [boardLoading, setBoardLoading] = useState(false);
   const [myRank, setMyRank] = useState({
     rank: 0,
     owner: "",
@@ -59,11 +61,19 @@ function Token({ className }) {
     StartTime: 0,
     ResourceNum: 0,
   });
+  const [myModelRewardClaimable, setMyModelRewardClaimable] = useState(false);
   const handleMachineRewardChange = (info) => setMachineReward(info);
   const getStaticUserList = async () => {
     setRankLoading(true);
     try {
       const res = await program.account.statistics.all();
+      if (wallet?.publicKey) {
+        const { account } = res.find(
+          (item) =>
+            item.account.owner.toString() === wallet.publicKey.toString()
+        );
+        setMyModelRewardClaimable(account.aiModelDatasetRewardClaimable > 0);
+      }
       let list = res.map((item) => {
         const {
           aiModelDatasetEarning,
@@ -105,6 +115,7 @@ function Token({ className }) {
       }));
       setList(list);
     } catch (error) {
+      console.log(error);
       enqueueSnackbar(error.message, { variant: "error" });
     }
     setRankLoading(false);
@@ -388,7 +399,10 @@ function Token({ className }) {
           </TabList>
           <div>
             <TabPanel value="reward">
-              <RewardList onMachineRewardChange={handleMachineRewardChange} />
+              <RewardList
+                onMachineRewardChange={handleMachineRewardChange}
+                modelRewardClaimable={myModelRewardClaimable}
+              />
             </TabPanel>
             <TabPanel value="earning">
               <EarningList />

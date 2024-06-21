@@ -6,11 +6,7 @@ import moment from "moment";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import Pager from "./Pager";
-import {
-  getRewardList,
-  getRewardTotal,
-  getClaimableReward,
-} from "@/services/reward.js";
+import { getRewardList, getClaimableReward } from "@/services/reward.js";
 import { LoadingButton } from "@mui/lab";
 import useSolanaMethod from "@/utils/useSolanaMethod.js";
 import ConnectToWallet from "./ConnectToWallet";
@@ -19,7 +15,11 @@ import { getModelRewardList } from "../services/model-reward";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { getRewardDetail } from "../services/reward";
 
-function RewardList({ className, onMachineRewardChange }) {
+function RewardList({
+  className,
+  onMachineRewardChange,
+  modelRewardClaimable,
+}) {
   const { wallet, methods } = useSolanaMethod();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -35,6 +35,10 @@ function RewardList({ className, onMachineRewardChange }) {
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [connectModal, setConnectModal] = useState(false);
+  const unclaimable = useMemo(
+    () => (type === "model" && !modelRewardClaimable) || !wallet?.publicKey,
+    [type, wallet, modelRewardClaimable]
+  );
   const machineRewardInfo = useMemo(() => {
     if (
       machineRewardList.length > 0 &&
@@ -53,7 +57,6 @@ function RewardList({ className, onMachineRewardChange }) {
       MachineNum: 0,
     };
   }, [machineRewardList, modelRewardList]);
-
   useEffect(() => {
     const handleNewInfo = async () => {
       let newInfo = { ...machineRewardInfo };
@@ -238,6 +241,7 @@ function RewardList({ className, onMachineRewardChange }) {
       loadModelRewardList();
       loadList();
     }
+    // eslint-disable-next-line
   }, [wallet?.publicKey]);
   return (
     <div className={className}>
@@ -255,10 +259,11 @@ function RewardList({ className, onMachineRewardChange }) {
         </ToggleButtonGroup>
         <LoadingButton
           loading={claiming}
+          disabled={unclaimable}
           onClick={() =>
             type === "model" ? claimModelRewards() : claimButchRewards()
           }
-          className="cbtn"
+          className={`cbtn${unclaimable ? " disabled" : ""}`}
           style={{ width: 100 }}>
           {!claiming && <span>Claim All</span>}
         </LoadingButton>
@@ -351,5 +356,8 @@ export default styled(RewardList)`
     background: rgba(149, 157, 165, 0.16);
     padding: 24px 40px;
     border-top-right-radius: 12px;
+  }
+  .disabled {
+    background-color: rgba(70, 70, 70, 1);
   }
 `;
