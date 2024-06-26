@@ -3,6 +3,20 @@ import types from "@/services/types.json";
 import { utils } from "@project-serum/anchor";
 import { create } from "kubo-rpc-client";
 
+/**
+ * Asynchronously retrieves a list of items based on specified type, page index, page size, and optional filters.
+ *
+ * This function sends a POST request to the server API endpoint corresponding to the item type, including pagination
+ * details and filter criteria. If filters are provided, they are applied to the query; otherwise, all items are fetched.
+ * The response data's items are processed by the `formatItem` function before being returned.
+ *
+ * @param {string} type - The category or type of items to fetch.
+ * @param {number} pageIndex - The index of the page to retrieve (used for pagination).
+ * @param {number} pageSize - The number of items per page.
+ * @param {Object} [filter] - Optional object containing filter key-value pairs to refine the query.
+ * 
+ * @returns {Promise<Object>} A promise resolving to the server's response object which includes the formatted list of items.
+ */
 export async function getItemList(type, pageIndex, pageSize, filter) {
   const apiUrl = `/${type}/list`;
   let headers = {};
@@ -42,6 +56,7 @@ export async function getLikeList(type, pageIndex, pageSize, wallet) {
   }
   return res;
 }
+
 
 export async function getItemDetail(type, owner, name) {
   const apiUrl = `/${type}/${owner}/${name}`;
